@@ -1,0 +1,10 @@
+4.3.2012 - mcr70
+	- SimpleCDRInputStream -> RTPSByteBuffer
+	- Handling of endianess
+	
+1.3.2012 - mcr70
+	- write messages (using java.nio.ByteBuffer)
+	
+14.2.2012 - mcr70
+	- Count the size of Data::SerializedPayload, instead of assuming the rest of input stream
+	- InfoReply, InfoReplyIp4, InfoSource

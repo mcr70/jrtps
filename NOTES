@@ -1,0 +1,17 @@
+o Domain ID & participant ID
+	- Domain ID is encoded in GuidPrefix	
+o types
+	- octet -> byte
+	- long -> int
+o SequenceNumber_t -> java long	
+o Should we utilize DDS types like DDS.Duration_t
+o Optional RTPS stuff, 8.4.14
+	- DataFrag, HeartbeatFrag, NackFrag
+o each submessage is aligned on 32 bit boundary
+o ByteBuffer (java.nio) could replace SimpleCDR(In/Out)putStream
+	- Using ByteBuffer on write. Alignment is not handled. Should we wrap ByteBuffer
+	  so that we can handle alignment. Like RPTSByteBuffer: write_short, write_long, align(n)
+o writeTo needs to be reconsidered. Maybe BytesBuffer will help
+  SubMessageHeader needs to write submessage length into stream.
+  It is not necessary easy to calculate. the same is true for parameters.
+  

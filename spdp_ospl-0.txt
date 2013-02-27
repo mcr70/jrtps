@@ -1,0 +1,22 @@
+RTPS, version 2.1, vendor 1,2(PrismTech), GuidPrefix[17,0,27,69,0,0,0,10,0,0,0,1]
+  InfoDestination, header[0x0e,0x01,12]
+    GuidPrefix[0,0,0,0,0,0,0,0,0,0,0,0]
+  InfoTimestamp, header[0x09,0x01,8]
+    Time_t[1329899189:-1406987426]
+  Data, header[0x15,0x07,220]
+    extra flags: 0x00
+    readerID: UnknownEntity
+    writerID: SPDPbuiltinParticipantWriter
+    writerSN: 1
+    parameters: [PID_KEY_HASH, length 16, PID_SENTINEL]
+    serialized payload, length: 176, encapsulation scheme: 3
+      PID_PARTICIPANT_GUID: GuidPrefix[17,0,27,69,0,0,0,10,0,0,0,1], Participant
+      PID_BUILTIN_ENDPOINT_SET: 0x0c3f: [ ParticipantAnnouncer ParticipantDetector PublicationsAnnouncer PublicationsDetector SubscriptionsAnnouncer SubscriptionsDetector ParticipantMessageDataReader ParticipantMessageDataWriter ]
+      PID_PROTOCOL_VERSION: version 2.1
+      PID_VENDORID: vendor 1,2(PrismTech)
+      PID_DEFAULT_UNICAST_LOCATOR: /192.168.1.104:52841
+      PID_METATRAFFIC_UNICAST_LOCATOR: /192.168.1.104:52841
+      PID_DEFAULT_MULTICAST_LOCATOR: /239.255.0.1:7401
+      PID_METATRAFFIC_MULTICAST_LOCATOR: /239.255.0.1:7400
+      PID_PARTICIPANT_LEASE_DURATION: [11:0]
+      PID_SENTINEL
