@@ -5,11 +5,9 @@ import java.util.List;
 
 import alt.rtps.message.Data;
 import alt.rtps.message.parameter.Parameter;
-import alt.rtps.message.parameter.ProtocolVersion;
 import alt.rtps.message.parameter.Sentinel;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
-import alt.rtps.message.parameter.VendorId;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 
