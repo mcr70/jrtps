@@ -19,7 +19,6 @@ import alt.rtps.message.parameter.VendorId;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
-import alt.rtps.types.GUID_t;
 import alt.rtps.types.Locator_t;
 
 /**
