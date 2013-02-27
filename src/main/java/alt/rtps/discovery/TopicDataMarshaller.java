@@ -3,8 +3,6 @@ package alt.rtps.discovery;
 import alt.rtps.message.Data;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
-import alt.rtps.types.GUID_t;
-import alt.rtps.types.GuidPrefix_t;
 
 public class TopicDataMarshaller extends Marshaller {
 

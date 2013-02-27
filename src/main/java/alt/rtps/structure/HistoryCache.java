@@ -2,7 +2,6 @@ package alt.rtps.structure;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 
 public class HistoryCache {
 	private List<CacheChange> changes = new LinkedList<CacheChange>();

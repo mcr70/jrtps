@@ -1,7 +1,5 @@
 package alt.rtps.message;
 
-import org.omg.CORBA.VersionSpecHelper;
-
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.ProtocolVersion_t;
