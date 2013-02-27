@@ -9,7 +9,6 @@ import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.BuiltinTopicKey_t;
-import alt.rtps.types.Locator_t;
 
 public class WriterData extends DiscoveredData {
 	private static final Logger log = Logger.getLogger(WriterData.class);
