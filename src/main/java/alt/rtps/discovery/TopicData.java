@@ -32,7 +32,7 @@ public class TopicData extends DiscoveredData {
 					addQualityOfService((QualityOfService) param);
 				}
 				else {
-					log.warn("Parameter " + param.getParameterId() + " not handled");
+					log.warn("Parameter {} not handled", param.getParameterId());
 				}
 			}
 

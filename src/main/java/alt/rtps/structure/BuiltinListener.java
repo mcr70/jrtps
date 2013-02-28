@@ -40,7 +40,7 @@ class BuiltinListener implements DataListener {
 		if (data instanceof ParticipantData) {	
 			
 			ParticipantData pd = (ParticipantData) data;
-			log.debug("Considering Participant " + pd.getGuid());
+			log.debug("Considering Participant {}", pd.getGuid());
 			
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
@@ -48,7 +48,7 @@ class BuiltinListener implements DataListener {
 					log.trace("Ignoring self");
 				}
 				else {
-					log.debug("A new Participant detected: " + pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
+					log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 				}
 			}

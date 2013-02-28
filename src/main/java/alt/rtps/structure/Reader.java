@@ -51,7 +51,7 @@ public abstract class Reader extends Endpoint {
 	protected HistoryCache getHistoryCache(GuidPrefix_t writerPrefix) {
 		HistoryCache historyCache = readerCaches.get(writerPrefix);
 		if (historyCache == null) {
-			log.debug("Creating new HistoryCache for writer " + writerPrefix);
+			log.debug("Creating new HistoryCache for writer {}", writerPrefix);
 			historyCache = new HistoryCache();
 			readerCaches.put(writerPrefix, historyCache);
 		}
@@ -62,7 +62,7 @@ public abstract class Reader extends Endpoint {
 	
 	public void addMatchedWriter(WriterData writerData) {
 		
-		log.debug("Adding matched writer for " + writerData.getWriterGuid());
+		log.debug("Adding matched writer for {}", writerData.getWriterGuid());
 		matchedWriters.add(writerData);
 	}
 

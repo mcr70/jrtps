@@ -68,7 +68,7 @@ public class RTPSWriter extends Writer {
 			}
 		};
 	
-		log.debug("Starting resend thread for " + getGuid().entityId + " with period " + period);
+		log.debug("Starting resend thread for {} with period {}", getGuid().entityId, period);
 		statelessResenderThread.start();
 	}
 
@@ -91,8 +91,6 @@ public class RTPSWriter extends Writer {
 			Data d = createData(cc);
 			m.addSubMessage(d);
 		}
-		
-		log.debug("******* " + m);
 	}
 
 	private Data createData(CacheChange cc) {

@@ -36,7 +36,7 @@ public class UDPReceiver implements Runnable {
 		this.locator = locator;
 		broker = new RTPSMessageBroker(p);
 		
-		log.debug("Listening on " + locator);
+		log.debug("Listening on {}", locator);
 	}
 	
 	public void run() {

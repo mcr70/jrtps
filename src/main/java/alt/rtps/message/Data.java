@@ -243,7 +243,7 @@ public class Data extends SubMessage {
 		// Check encapsulation header. @see table 10.1
 		if (serializedPayload[0] == 0 && serializedPayload[1] <= 3) { // known encapsulation header
 			boolean littleEndian = (serializedPayload[1] & 0x01) == 0x01;
-			//System.out.println("Setting endianess to " + endianess + ", " + serializedPayload[1]);
+			
 			bb = new RTPSByteBuffer(serializedPayload);
 			if (littleEndian) {
 				bb.getBuffer().order(ByteOrder.LITTLE_ENDIAN);

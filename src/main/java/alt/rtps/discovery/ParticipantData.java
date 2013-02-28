@@ -177,7 +177,7 @@ public class ParticipantData {
 				moreParameters = false;
 				break;
 			default:
-				log.warn("Parameter " + param.getParameterId() + " not handled");
+				log.warn("Parameter {} not handled", param.getParameterId());
 			}
 		}
 	}
