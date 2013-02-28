@@ -82,7 +82,7 @@ public class Participant {
 	public Participant(int domainId) {
 		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, participantId++), EntityId_t.PARTICIPANT);
 
-		log.info("Creating participant " + participantId + " for domain " + domainId);
+		log.info("Creating participant {} for domain {}", participantId, domainId);
 		this.domainId = domainId;
 
 		meta_mcLoc = Locator_t.defaultDiscoveryMulticastLocator(domainId);
@@ -266,7 +266,7 @@ public class Participant {
 			return getReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
 		}
 
-		log.warn("Failed to find Reader for reader " + readerId + " or matching writer " + writerId);
+		log.warn("Failed to find Reader for reader {} or matching writer {}", readerId, writerId);
 		return null;
 	}
 
@@ -309,7 +309,7 @@ public class Participant {
 			return getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
 		}
 
-		log.warn("Failed to find Writer for writer " + writerId + " or matching reader " + readerId);
+		log.warn("Failed to find Writer for writer {} or matching reader {}",  writerId, readerId);
 		return null;
 	}
 
@@ -321,7 +321,7 @@ public class Participant {
 			//Thread t = new Thread(w);
 			//t.start();
 		}
-		log.info(writerEndpoints.size() + " writers started");
+		log.info("{} writers started", writerEndpoints.size());
 	}
 
 
@@ -348,7 +348,7 @@ public class Participant {
 
 		pd = new ParticipantData(guid.prefix, epSet, ucLoc,  mcLoc,  meta_ucLoc, meta_mcLoc);
 
-		log.debug("Created ParticipantData: " + pd);
+		log.debug("Created ParticipantData: {}", pd);
 
 		return pd;
 	}

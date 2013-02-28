@@ -45,7 +45,7 @@ public class RTPSReader extends Reader {
 			matchedEntity = EntityId_t.SEDP_BUILTIN_TOPIC_WRITER;
 		}
 		else {
-			log.warn("Setting matched entity for " + prefix + ":" + entityId + " to UNKNOWN_ENTITY");
+			log.warn("Setting matched entity for {}:{} to UNKNOWN_ENTITY", prefix, entityId);
 			matchedEntity = EntityId_t.UNKNOWN_ENTITY;
 		}
 	}

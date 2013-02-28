@@ -67,7 +67,7 @@ public class Endpoint {
 	 * @return
 	 */
 	protected Set<Locator_t> getParticipantLocators(GuidPrefix_t prefix) {
-		log.debug("getParticipantLocators() for " + prefix + ": " + discoveredParticipants.keySet());
+		log.debug("getParticipantLocators() for {}: {}", prefix, discoveredParticipants.keySet());
 		
 		ParticipantData pd = discoveredParticipants.get(prefix);
 		if (pd != null) {
@@ -90,7 +90,7 @@ public class Endpoint {
 		Set<Locator_t> locators = getParticipantLocators(targetPrefix);
 
 		if (locators.size() > 0) {
-			log.debug("Sending message " + m + " to " + locators);
+			log.debug("Sending message {} to {}", m, locators);
 		}
 
 		for (Locator_t locator : locators) {

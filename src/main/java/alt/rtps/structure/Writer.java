@@ -99,14 +99,14 @@ public abstract class Writer extends Endpoint {
 
 
 	public void sendToLocator(Message m, Locator_t locator) {
-		log.debug("Sending " + m + " to " + locator.getSocketAddress());
+		log.debug("Sending {} to {}", m, locator.getSocketAddress());
 		
 		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(512));
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		m.writeTo(buffer);
 		buffer.getBuffer().flip();
 		
-		writeToFile(buffer.getBuffer(), "tmp/my-spdp-message.bin");
+		//writeToFile(buffer.getBuffer(), "tmp/my-spdp-message.bin");
 		
 		try {
 			DatagramChannel channel = DatagramChannel.open();	

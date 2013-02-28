@@ -55,7 +55,7 @@ public class RTPSMessageBroker {
 				timestamp = ((InfoTimestamp)subMsg).getTimeStamp(); 
 				break;
 			default: 
-				log.warn("SubMessage not handled: " + subMsg);
+				log.warn("SubMessage not handled: {}", subMsg);
 			}
 		}
 		
@@ -74,7 +74,7 @@ public class RTPSMessageBroker {
 		Reader reader = participant.getReader(data.getReaderId());
 		
 		if (reader != null) {
-			log.debug("Got Data for " + reader.getGuid().entityId);
+			log.debug("Got Data for {}", reader.getGuid().entityId);
 			reader.onData(prefix, data, timestamp);
 		}
 	}
@@ -83,11 +83,11 @@ public class RTPSMessageBroker {
 		Reader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
 		
 		if (reader != null) {
-			log.debug("Got Heartbeat for " + reader.getGuid().entityId);
+			log.debug("Got Heartbeat for {}", reader.getGuid().entityId);
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {
-			log.warn("No Reader to handle heartbeat from " + hb.getWriterId());
+			log.warn("No Reader to handle heartbeat from {}", hb.getWriterId());
 		}
 	}
 }
