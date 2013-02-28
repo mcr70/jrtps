@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
+import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
@@ -17,7 +18,7 @@ public class TopicData extends DiscoveredData {
 	public TopicData(KeyHash keyHash, RTPSByteBuffer buffer) {
 		boolean moreParameters = buffer.getBuffer().remaining() > 0; //true;
 		while (moreParameters) {
-			Parameter param = Parameter.readParameter(buffer);
+			Parameter param = ParameterFactory.readParameter(buffer);
 
 			log.debug("{}", param);
 			switch(param.getParameterId()) {
