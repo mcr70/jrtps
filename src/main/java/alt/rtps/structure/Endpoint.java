@@ -7,7 +7,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.discovery.ParticipantData;
 import alt.rtps.message.Message;
@@ -18,7 +19,7 @@ import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 
 public class Endpoint {
-	private static final Logger log = Logger.getLogger(Endpoint.class);
+	private static final Logger log = LoggerFactory.getLogger(Endpoint.class);
 	
 	private final String topicName;
 	private final GUID_t guid;

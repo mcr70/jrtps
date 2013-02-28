@@ -6,7 +6,8 @@ import java.nio.ByteOrder;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
@@ -27,7 +28,7 @@ import alt.rtps.types.SequenceNumber_t;
 public class Data extends SubMessage {
 	public static final int KIND = 0x15;
 	
-	private static final Logger log = Logger.getLogger(Data.class);
+	private static final Logger log = LoggerFactory.getLogger(Data.class);
 	
 	private short extraFlags = 0;
 	/**

@@ -3,7 +3,8 @@ package alt.rtps.structure;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.discovery.DiscoveredData;
 import alt.rtps.message.AckNack;
@@ -18,7 +19,7 @@ import alt.rtps.types.SequenceNumberSet;
 import alt.rtps.types.Time_t;
 
 public class RTPSReader extends Reader {
-	private static final Logger log = Logger.getLogger(RTPSReader.class);
+	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
 	private List<DataListener> listeners = new LinkedList<DataListener>();
 	private int ackNackCount = 0;
@@ -56,7 +57,7 @@ public class RTPSReader extends Reader {
 	
 	@Override
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		log.debug(hb);
+		log.debug("{}", hb);
 		sendAckNack(senderGuidPrefix, hb.getFirstSequenceNumber().getAsLong(), 
 				hb.getLastSequenceNumber().getAsLong(), hb.finalFlag());
 	}

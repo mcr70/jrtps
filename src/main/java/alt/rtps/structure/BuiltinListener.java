@@ -2,7 +2,8 @@ package alt.rtps.structure;
 
 import java.util.HashMap;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.discovery.ParticipantData;
 import alt.rtps.discovery.ReaderData;
@@ -20,7 +21,7 @@ import alt.rtps.types.Time_t;
  *
  */
 class BuiltinListener implements DataListener {
-	private static final Logger log = Logger.getLogger(BuiltinListener.class);
+	private static final Logger log = LoggerFactory.getLogger(BuiltinListener.class);
 	private Participant participant;
 
 	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;

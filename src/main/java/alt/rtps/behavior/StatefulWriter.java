@@ -2,7 +2,10 @@ package alt.rtps.behavior;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
 
 import alt.rtps.message.AckNack;
 import alt.rtps.structure.CacheChange;
@@ -18,7 +21,7 @@ import alt.rtps.types.GuidPrefix_t;
  * @see 8.4.7.4 RTPS StatefulWriter
  */
 public class StatefulWriter extends Writer {
-	private static final Logger log = Logger.getLogger(StatefulWriter.class);
+	private static final Logger log = LoggerFactory.getLogger(StatefulWriter.class);
 	private List<ReaderProxy> matched_readers;
 	
 	public StatefulWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName) {

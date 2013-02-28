@@ -1,6 +1,7 @@
 package alt.rtps.discovery;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
@@ -11,14 +12,14 @@ import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.BuiltinTopicKey_t;
 
 public class TopicData extends DiscoveredData {
-	private static final Logger log = Logger.getLogger(TopicData.class);
+	private static final Logger log = LoggerFactory.getLogger(TopicData.class);
 
 	public TopicData(KeyHash keyHash, RTPSByteBuffer buffer) {
 		boolean moreParameters = buffer.getBuffer().remaining() > 0; //true;
 		while (moreParameters) {
 			Parameter param = Parameter.readParameter(buffer);
 
-			log.debug(param);
+			log.debug("{}", param);
 			switch(param.getParameterId()) {
 			case PID_TOPIC_NAME:
 				super.topicName = ((TopicName)param).getName();

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration>
+	<!-- Errors were reported during translation. -->
+	<!-- No root logger configuration was found -->
+	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%d{HH:mm:ss.SSS} %-5p %c - %m%n</pattern>
+		</encoder>
+	</appender>
+
+	<logger name="alt" level="DEBUG">
+		<appender-ref ref="console" />
+	</logger>
+</configuration>

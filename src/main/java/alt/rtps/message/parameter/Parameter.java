@@ -1,6 +1,7 @@
 package alt.rtps.message.parameter;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.transport.RTPSByteBuffer;
 
@@ -10,7 +11,7 @@ import alt.rtps.transport.RTPSByteBuffer;
  *
  */
 public abstract class Parameter {
-	private static final Logger log = Logger.getLogger(Parameter.class);
+	private static final Logger log = LoggerFactory.getLogger(Parameter.class);
 	
 	private ParameterEnum parameterId;
 	private byte[] value;

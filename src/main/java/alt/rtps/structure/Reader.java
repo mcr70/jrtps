@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.discovery.WriterData;
 import alt.rtps.message.Data;
@@ -15,7 +16,7 @@ import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 
 public abstract class Reader extends Endpoint {
-	static final Logger log = Logger.getLogger(Reader.class);
+	static final Logger log = LoggerFactory.getLogger(Reader.class);
 
 	private List<WriterData> matchedWriters = new LinkedList<WriterData>();
 	
