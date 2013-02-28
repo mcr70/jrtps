@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.log4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.message.parameter.DefaultMulticastLocator;
@@ -33,7 +33,7 @@ import alt.rtps.types.VendorId_t;
  * @see 8.5.3.2 SPDPdiscoveredParticipantData
  */
 public class ParticipantData {
-	private static final Logger log = Logger.getLogger(ParticipantData.class);
+	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
 	
 	private ProtocolVersion_t protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
 	private VendorId_t vendorId = VendorId_t.VENDORID_JRTPS;
@@ -140,7 +140,7 @@ public class ParticipantData {
 		while (moreParameters) {
 			Parameter param = Parameter.readParameter(bb);
 
-			log.trace(param);
+			log.trace("{}", param);
 			switch(param.getParameterId()) {
 			case PID_PARTICIPANT_GUID:
 				this.guidPrefix = ((ParticipantGuid)param).getParticipantGuid().prefix;

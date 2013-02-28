@@ -8,7 +8,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
 import java.net.SocketException;
-import org.apache.log4j.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.Message;
 import alt.rtps.structure.Participant;
@@ -23,7 +25,7 @@ import alt.rtps.types.Locator_t;
  * @see 8.3.4 The RTPS Message Receiver
  */
 public class UDPReceiver implements Runnable {
-	private static final Logger log = Logger.getLogger(UDPReceiver.class);
+	private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
 	
 	private final RTPSMessageBroker broker;
 	private final Locator_t locator;

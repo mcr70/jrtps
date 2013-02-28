@@ -2,7 +2,8 @@ package alt.rtps.transport;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
@@ -19,7 +20,7 @@ import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 
 public class RTPSMessageBroker {
-	private static final Logger log = Logger.getLogger(RTPSMessageBroker.class);
+	private static final Logger log = LoggerFactory.getLogger(RTPSMessageBroker.class);
 
 	private final Participant participant;
 	

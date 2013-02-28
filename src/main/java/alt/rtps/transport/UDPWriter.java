@@ -5,13 +5,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.Message;
 import alt.rtps.types.Locator_t;
 
 public class UDPWriter {
-	private static final Logger log = Logger.getLogger(UDPWriter.class);
+	private static final Logger log = LoggerFactory.getLogger(UDPWriter.class);
 	private final Locator_t locator;
 	private DatagramChannel channel;
 	

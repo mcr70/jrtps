@@ -1,6 +1,7 @@
 package alt.rtps.discovery;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
@@ -14,7 +15,7 @@ import alt.rtps.types.ContentFilterProperty_t;
 import alt.rtps.types.GUID_t;
 
 public class ReaderData extends DiscoveredData {
-	private static final Logger log = Logger.getLogger(ReaderData.class);
+	private static final Logger log = LoggerFactory.getLogger(ReaderData.class);
 
 	private GUID_t readerGuid;
 	private boolean expectsInlineQos = false;
@@ -26,7 +27,7 @@ public class ReaderData extends DiscoveredData {
 		while (moreParameters) {
 			Parameter param = Parameter.readParameter(buffer);
 
-			log.trace(param);
+			log.trace("{}", param);
 			switch(param.getParameterId()) {
 			case PID_PROTOCOL_VERSION:
 			case PID_VENDORID:

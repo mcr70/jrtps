@@ -2,7 +2,8 @@ package alt.rtps.structure;
 
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
@@ -19,7 +20,7 @@ import alt.rtps.types.GuidPrefix_t;
  *
  */
 public class RTPSWriter extends Writer {
-	private static final Logger log = Logger.getLogger(RTPSWriter.class);
+	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private Thread statelessResenderThread;
 	private boolean running;
 	
@@ -72,7 +73,7 @@ public class RTPSWriter extends Writer {
 	}
 
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
-		log.debug(ackNack);
+		log.debug("{}", ackNack);
 		
 		HistoryCache hc = getHistoryCache();
 		if (hc.size() > 0) {

@@ -8,7 +8,8 @@ import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.discovery.ReaderData;
 import alt.rtps.message.Message;
@@ -23,7 +24,7 @@ import alt.rtps.types.Locator_t;
  * @see 8.4.7.1
  */
 public abstract class Writer extends Endpoint {
-	private static final Logger log = Logger.getLogger(Writer.class);
+	private static final Logger log = LoggerFactory.getLogger(Writer.class);
 
 	private List<ReaderData> matchedReaders = new LinkedList<ReaderData>();
 	

@@ -10,7 +10,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.discovery.ParticipantData;
 import alt.rtps.discovery.ParticipantDataMarshaller;
@@ -30,7 +31,7 @@ import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 
 public class Participant {
-	private static final Logger log = Logger.getLogger(Participant.class);
+	private static final Logger log = LoggerFactory.getLogger(Participant.class);
 
 	private static final String BUILTIN_TOPICNAME_PARTICIPANT = "DCPSParticipant";
 	private static final String BUILTIN_TOPICNAME_PUBLICATION = "DCPSPublication";

@@ -5,7 +5,8 @@ import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.GuidPrefix_t;
@@ -18,7 +19,7 @@ import alt.rtps.types.GuidPrefix_t;
  *
  */
 public class Message implements Externalizable {
-	private static final Logger log = Logger.getLogger(Message.class);
+	private static final Logger log = LoggerFactory.getLogger(Message.class);
 	
 	private Header header;
 	private List<SubMessage> submessages = new LinkedList<SubMessage>();
@@ -81,7 +82,7 @@ public class Message implements Externalizable {
 				sm = new UnknownSubMessage(smh, bb);
 			}
 			
-			log.trace(sm);
+			log.trace("{}", sm);
 			submessages.add(sm);
 		}
 	}
