@@ -13,6 +13,7 @@ import alt.rtps.message.parameter.EndpointSet;
 import alt.rtps.message.parameter.MetatrafficMulticastLocator;
 import alt.rtps.message.parameter.MetatrafficUnicastLocator;
 import alt.rtps.message.parameter.Parameter;
+import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.message.parameter.ParticipantGuid;
 import alt.rtps.message.parameter.ParticipantLeaseDuration;
 import alt.rtps.message.parameter.ParticipantManualLivelinessCount;
@@ -138,7 +139,7 @@ public class ParticipantData {
 	public ParticipantData(RTPSByteBuffer bb) {
 		boolean moreParameters = bb.getBuffer().remaining() > 0; //true;
 		while (moreParameters) {
-			Parameter param = Parameter.readParameter(bb);
+			Parameter param = ParameterFactory.readParameter(bb);
 
 			log.trace("{}", param);
 			switch(param.getParameterId()) {

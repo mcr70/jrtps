@@ -125,7 +125,7 @@ public abstract class Writer extends Endpoint {
 		m.writeTo(buffer);
 		buffer.getBuffer().flip();
 		
-		writeToFile(buffer.getBuffer(), "tmp/my-spdp-message.bin");
+		//writeToFile(buffer.getBuffer(), "tmp/my-spdp-message.bin");
 		
 		for (Locator_t locator : locators) {
 			log.debug("Sending to " + locator.getSocketAddress() + ": " + m);

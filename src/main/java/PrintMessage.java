@@ -11,6 +11,7 @@ import alt.rtps.message.InfoDestination;
 import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
 import alt.rtps.message.parameter.Parameter;
+import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.message.SubMessage;
 import alt.rtps.message.parameter.ParameterEnum;
 import alt.rtps.transport.RTPSByteBuffer;
@@ -104,7 +105,7 @@ public class PrintMessage {
 			RTPSByteBuffer is = data.getSerializedPayloadInputStream();
 
 			while (true) {
-				Parameter param = Parameter.readParameter(is);
+				Parameter param = ParameterFactory.readParameter(is);
 				System.out.println("      " + param);
 				if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
 					break; // TODO: Add some control token to CDRInputStream that counts bytes read and 

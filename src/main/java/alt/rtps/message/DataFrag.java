@@ -6,6 +6,7 @@ import java.util.List;
 
 import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterEnum;
+import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.SequenceNumber_t;
@@ -129,7 +130,7 @@ public class DataFrag extends SubMessage {
 	private void readParameterList(RTPSByteBuffer bb) {
 		while (true) {
 			bb.align(4);
-			Parameter param = Parameter.readParameter(bb);
+			Parameter param = ParameterFactory.readParameter(bb);
 			parameterList.add(param);
 			if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
 				break; // TODO: Add some control token to CDRInputStream that counts bytes read and 

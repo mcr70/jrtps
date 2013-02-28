@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterEnum;
+import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
@@ -182,7 +183,7 @@ public class Data extends SubMessage {
 		
 		while (true) {
 			bb.align(4);
-			Parameter param = Parameter.readParameter(bb);
+			Parameter param = ParameterFactory.readParameter(bb);
 			//System.out.println("Read param " + param + ", endianess " + header.endianessFlag());
 			inlineQosParams.add(param);
 			if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
