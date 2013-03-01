@@ -22,6 +22,6 @@ public class KeyHash extends Parameter {
 	}
 
 	public String toString() {
-		return super.toString()  + Arrays.toString(getKeyHash());
+		return super.toString() + Arrays.toString(getKeyHash());
 	}	
 }
