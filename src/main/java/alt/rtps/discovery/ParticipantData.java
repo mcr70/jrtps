@@ -109,11 +109,8 @@ public class ParticipantData {
 			Locator_t m_ucLocator, Locator_t m_mcLocator) {
 		guidPrefix = prefix;
 		availableBuiltinEndpoints = endpoints;
-		//new BuiltinEndpointSet(0x03cf); // TODO: hardcoded, OpenDDS
-		//new BuiltinEndpointSet(0x415); // TODO: hardcoded, OSPL
 
-		// TODO: So far, we have only one locator in list.
-		
+		// TODO: So far, we have only one locator in list.		
 		if (u_ucLocator != null) { 
 			defaultUnicastLocatorList.add(u_ucLocator);
 		}

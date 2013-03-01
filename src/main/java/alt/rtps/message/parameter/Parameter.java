@@ -50,6 +50,16 @@ public abstract class Parameter {
 		bb.read(value);		
 	}
 
+	/**
+	 * This method can be used by implementing classes to write bytes of this parameter to RTPSByteBuffer.
+	 * This method must be paired with readBytes(RTPSByteBuffer, int).
+	 * 
+	 * @param bb
+	 */
+	protected final void writeBytes(RTPSByteBuffer bb) {
+		bb.write(getBytes());
+	}
+	
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_short(getParameterId().kind());
 		byte[] bytes = getBytes(); //  TODO: make abstract
