@@ -2,6 +2,8 @@ package alt.rtps.message.parameter;
 
 import java.util.Arrays;
 
+import alt.rtps.transport.RTPSByteBuffer;
+
 
 /**
  * 
@@ -21,7 +23,12 @@ public class KeyHash extends Parameter {
 		return getBytes();
 	}
 
+	@Override
+	public void read(RTPSByteBuffer bb, int length) {
+		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+	}	
+
 	public String toString() {
 		return super.toString() + Arrays.toString(getKeyHash());
-	}	
+	}
 }

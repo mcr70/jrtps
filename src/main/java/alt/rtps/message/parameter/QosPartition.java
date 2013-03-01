@@ -2,10 +2,17 @@ package alt.rtps.message.parameter;
 
 import java.util.Arrays;
 
+import alt.rtps.transport.RTPSByteBuffer;
+
 
 public class QosPartition extends Parameter implements QualityOfService {
 	QosPartition() {
 		super(ParameterEnum.PID_PARTITION);
+	}
+
+	@Override
+	public void read(RTPSByteBuffer bb, int length) {
+		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
 	}
 	
 	public String toString() {
