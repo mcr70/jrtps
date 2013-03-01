@@ -2,11 +2,10 @@ package alt.rtps.message.parameter;
 
 import alt.rtps.types.Locator_t;
 
-public class MetatrafficMulticastLocator extends Locator {
+public class MetatrafficMulticastLocator extends LocatorParameter {
 
 	public MetatrafficMulticastLocator(Locator_t locator) {
-		this();
-		this.locator = locator;
+		super(ParameterEnum.PID_METATRAFFIC_MULTICAST_LOCATOR, locator);
 	}
 
 	MetatrafficMulticastLocator() {
