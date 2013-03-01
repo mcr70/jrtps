@@ -14,7 +14,13 @@ public class TypeName extends Parameter {
 		super(ParameterEnum.PID_TYPE_NAME);
 		this.typeName = typeName;
 	}
-	
+
+
+	@Override
+	public void read(RTPSByteBuffer bb, int length) {
+		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+	}
+		
 	public String getTypeName() {
 		if (typeName == null) {
 			byte[] bytes = getBytes();

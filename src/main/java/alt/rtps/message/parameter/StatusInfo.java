@@ -19,9 +19,11 @@ public class StatusInfo extends Parameter {
 		super(ParameterEnum.PID_STATUS_INFO);
 	}
 
+
 	@Override
-	public void read(RTPSByteBuffer bb, int length)  {
-		this.flags = new byte[4];
+	public void read(RTPSByteBuffer bb, int length) {
+		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+		this.flags = getBytes();
 	}
 
 	@Override

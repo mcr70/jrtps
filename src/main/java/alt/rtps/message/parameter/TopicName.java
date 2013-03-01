@@ -16,6 +16,11 @@ public class TopicName extends Parameter {
 		super(ParameterEnum.PID_TOPIC_NAME);
 	}
 
+	@Override
+	public void read(RTPSByteBuffer bb, int length) {
+		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+	}
+
 
 	public String getName() {
 		if (name == null) {

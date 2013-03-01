@@ -11,7 +11,7 @@ import alt.rtps.transport.RTPSByteBuffer;
 public abstract class Parameter {
 	private ParameterEnum parameterId;
 	private byte[] value;
-	
+
 	protected Parameter(ParameterEnum id) {
 		this.parameterId = id;
 	}
@@ -24,7 +24,7 @@ public abstract class Parameter {
 	public ParameterEnum getParameterId() {
 		return parameterId;
 	}
-	
+
 	/**
 	 * Parameter value
 	 * @return
@@ -33,11 +33,11 @@ public abstract class Parameter {
 		return value;
 	}
 
-	//public abstract void read(RTPSByteBuffer bb, int length);
-	public void read(RTPSByteBuffer bb, int length) {
-		this.value = new byte[length];
-		bb.read(value);
-	}
+	public abstract void read(RTPSByteBuffer bb, int length);
+	//	public void read(RTPSByteBuffer bb, int length) {
+	//		this.value = new byte[length];
+	//		bb.read(value);
+	//	}
 
 	/**
 	 * This method can be used by implementing classes to read bytes of this parameter to byte array.
@@ -49,22 +49,20 @@ public abstract class Parameter {
 		this.value = new byte[length];
 		bb.read(value);		
 	}
-	
-	
-	public String toString() {
-		return getClass().getSimpleName();
-	}
-	
 
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_short(getParameterId().kind());
 		byte[] bytes = getBytes(); //  TODO: make abstract
 		buffer.write_short((short) bytes.length);
 		buffer.write(bytes);
-		
+
 		// NOT called at the moment. paramterid.kind & length is calculated outside of this method
 		// @see Data.writeParameterList()
 		throw new RuntimeException("******************");
-		
+
+	}
+
+	public String toString() {
+		return getClass().getSimpleName();
 	}
 }
