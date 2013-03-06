@@ -10,10 +10,10 @@ import alt.rtps.message.Data;
 import alt.rtps.message.InfoDestination;
 import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
-import alt.rtps.message.parameter.Parameter;
-import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.message.SubMessage;
+import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterEnum;
+import alt.rtps.message.parameter.ParameterFactory;
 import alt.rtps.transport.RTPSByteBuffer;
 
 
