@@ -1,4 +1,6 @@
 Built-in Subscriber QoS (DDS spec 1.2, ch. 7.1.5 & defaults: ch. 7.1.3)
+In general, QoS is compatible, if offered.kind >= requested.kind
+
 USER_DATA:
 	<unspecified>
 TOPIC_DATA:
@@ -6,29 +8,29 @@ TOPIC_DATA:
 GROUP_DATA:
 	<unspecified>
 DURABILITY: 
-	TRANSIENT_LOCAL								default: VOLATILE	(TR-Local: for late-joining)
+	TRANSIENT_LOCAL (default VOLATILE)			compatible, if offered >= requested (TR-Local: for late-joining)
 PRESENTATION: 
-	access_scope = TOPIC						default: INSTANCE
+	access_scope = TOPIC (default INSTANCE)		compatible, if offered >= requested		
 	coherent_access = FALSE
 	ordered_access = FALSE
 DEADLINE:
-	Period = infinite
+	Period = infinite							compatible, if offered <= requested
 LATENCY_BUDGET:
-	duration = <unspecified>
+	duration = <unspecified>					compatible, if offered <= requested, a hint to service
 OWNERSHIP:
-	SHARED
+	SHARED										compatible, if equal
 LIVELINESS:
-	kind = AUTOMATIC
+	kind = AUTOMATIC							compatible, if offered >= requested
 	lease_duration = <unspecified>
-TIME_BASED_FILTER:
+TIME_BASED_FILTER:								????
 	minimum_separation = 0
-PARTITION:
+PARTITION:										compatible, if equal
 	<unspecified>
-RELIABILITY:
-	kind = RELIABLE								default: BEST_EFFORT for readers
+RELIABILITY:									
+	kind = RELIABLE (def for reader: BEST_EFFORT )	compatible, if offered >= requested
 	max_blocking_time = 100 milliseconds
 DESTINATION_ORDER:
-	BY_RECEPTION_TIMESTAMP
+	BY_RECEPTION_TIMESTAMP						compatible, if offered >= requested
 HISTORY:
 	kind = KEEP_LAST
 	depth = 1
