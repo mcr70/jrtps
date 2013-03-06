@@ -4,17 +4,17 @@ import alt.rtps.message.Data;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 
-public class ReaderDataMarshaller extends Marshaller {
+public class ReaderDataMarshaller extends Marshaller<ReaderData> {
 
 	@Override
-	public Object unmarshall(RTPSByteBuffer bb) {
+	public ReaderData unmarshall(RTPSByteBuffer bb) {
 		ReaderData rd = new ReaderData(bb);
 		
 		return rd;
 	}
 
 	@Override
-	public Data marshall(Object data) {
+	public Data marshall(ReaderData data) {
 		System.out.println("ReaderDaraMarshaller.toData() NOT implemented");
 		return null;
 	}

@@ -11,27 +11,27 @@ import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 
-public class WriterDataMarshaller extends Marshaller {
+public class WriterDataMarshaller extends Marshaller<WriterData> {
 
 	@Override
-	public Object unmarshall(RTPSByteBuffer bb) {
-		DiscoveredData wd = new WriterData(null, bb);
+	public WriterData unmarshall(RTPSByteBuffer bb) {
+		WriterData wd = new WriterData(null, bb);
 		
 		return wd;
 	}
 
 	@Override
-	public Data marshall(Object data) {
+	public Data marshall(WriterData wd) {
 		// TODO: ...
-		WriterData wd = (WriterData) data;
 		
 		List<Parameter> payloadParams = new LinkedList<Parameter>(); 
 		payloadParams.add(new TopicName(wd.getTopicName()));
 		payloadParams.add(new TypeName(wd.getTypeName()));
+		
 		// payloadParams.add wd.getKey();
 		// addQos(wd, payLoadParams);
 		payloadParams.add(new Sentinel());
-		//payloadParams.add(new VendorId(pd.getVendorId()));
+		//payloadParams.add(new VendorId(wd.getVendorId()));
 
 		
 		//Data d = new D
