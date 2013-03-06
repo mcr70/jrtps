@@ -60,7 +60,9 @@ public abstract class Parameter {
 		bb.write(getBytes());
 	}
 	
-	public void writeTo(RTPSByteBuffer buffer) {
+	public abstract void writeTo(RTPSByteBuffer bb);
+	
+	private void writeTo_NOT_USED(RTPSByteBuffer buffer) {
 		buffer.write_short(getParameterId().kind());
 		byte[] bytes = getBytes(); //  TODO: make abstract
 		buffer.write_short((short) bytes.length);
