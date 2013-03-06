@@ -1,4 +1,4 @@
-package alt.rtps.discovery;
+package alt.rtps.builtin;
 
 import java.io.IOException;
 import java.util.HashSet;

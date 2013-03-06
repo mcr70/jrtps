@@ -1,4 +1,4 @@
-package alt.rtps.discovery;
+package alt.rtps.builtin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -6,16 +6,24 @@ import org.slf4j.LoggerFactory;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterFactory;
+import alt.rtps.message.parameter.ParticipantGuid;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.BuiltinTopicKey_t;
+import alt.rtps.types.ContentFilterProperty_t;
+import alt.rtps.types.GUID_t;
 
-public class WriterData extends DiscoveredData {
-	private static final Logger log = LoggerFactory.getLogger(WriterData.class);
+public class ReaderData extends DiscoveredData {
+	private static final Logger log = LoggerFactory.getLogger(ReaderData.class);
+
+	private GUID_t readerGuid;
+	private boolean expectsInlineQos = false;
 	
-	public WriterData(KeyHash keyHash, RTPSByteBuffer buffer) {
+	private ContentFilterProperty_t contentFilter;
+	
+	public ReaderData(RTPSByteBuffer buffer) {
 		boolean moreParameters = buffer.getBuffer().remaining() > 0; //true;
 		while (moreParameters) {
 			Parameter param = ParameterFactory.readParameter(buffer);
@@ -24,21 +32,25 @@ public class WriterData extends DiscoveredData {
 			switch(param.getParameterId()) {
 			case PID_PROTOCOL_VERSION:
 			case PID_VENDORID:
-			case PID_VENDOR_SPECIFIC:
 				// These parameters get sent by OSPL 5.5. We can ignore these
 				break;
 			case PID_TOPIC_NAME:
-				super.topicName = ((TopicName)param).getName(); break;
+				super.topicName = ((TopicName)param).getName();
+				break;
+			case PID_PARTICIPANT_GUID:
+				readerGuid = ((ParticipantGuid)param).getParticipantGuid();
+				break;
 			case PID_TYPE_NAME:
-				super.typeName = ((TypeName)param).getTypeName(); break;
+				super.typeName = ((TypeName)param).getTypeName();
+				break;
 			case PID_KEY_HASH:
-				super.keyHash = (KeyHash) param; break;
+				keyHash = (KeyHash) param; break;
 			case PID_SENTINEL:
 				moreParameters = false; break;
 			case PID_PAD:
 				// Ignore
 				break;
-
+				
 			default:
 				if (param instanceof QualityOfService) {
 					addQualityOfService((QualityOfService) param);
@@ -48,11 +60,21 @@ public class WriterData extends DiscoveredData {
 				}
 			}
 		}
-		
-		super.keyHash = keyHash;
+	}
+
+	public ReaderData(String topicName, String typeName, BuiltinTopicKey_t key) {
+		super(typeName, topicName, key);
 	}
 	
-	public WriterData(String topicName, String typeName, BuiltinTopicKey_t key) {
-		super(typeName, topicName, key);
+	public GUID_t getReaderGuid() {
+		return readerGuid;
+	}
+	
+	public boolean expectsInlineQos() {
+		return expectsInlineQos;
+	}
+	
+	public ContentFilterProperty_t getContentFilter() {
+		return contentFilter;
 	}
 }

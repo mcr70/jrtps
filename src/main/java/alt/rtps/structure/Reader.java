@@ -7,7 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.discovery.WriterData;
+import alt.rtps.builtin.WriterData;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
 import alt.rtps.types.Duration_t;

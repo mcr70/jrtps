@@ -1,4 +1,4 @@
-package alt.rtps.discovery;
+package alt.rtps.builtin;
 
 import java.util.LinkedList;
 import java.util.List;

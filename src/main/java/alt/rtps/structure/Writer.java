@@ -11,7 +11,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.discovery.ReaderData;
+import alt.rtps.builtin.ReaderData;
 import alt.rtps.message.Message;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.Duration_t;
