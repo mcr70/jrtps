@@ -5,6 +5,9 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import alt.rtps.Participant;
+import alt.rtps.RTPSWriter;
+import alt.rtps.Reader;
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
@@ -13,9 +16,6 @@ import alt.rtps.message.InfoSource;
 import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
 import alt.rtps.message.SubMessage;
-import alt.rtps.structure.Participant;
-import alt.rtps.structure.RTPSWriter;
-import alt.rtps.structure.Reader;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 

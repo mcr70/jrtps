@@ -1,4 +1,4 @@
-package alt.rtps.structure;
+package alt.rtps;
 
 import java.util.LinkedList;
 import java.util.List;

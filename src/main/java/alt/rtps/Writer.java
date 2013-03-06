@@ -1,4 +1,4 @@
-package alt.rtps.structure;
+package alt.rtps;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
