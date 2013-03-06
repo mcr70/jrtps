@@ -1,4 +1,4 @@
-package alt.rtps.structure;
+package alt.rtps;
 
 import java.net.SocketException;
 import java.util.HashMap;

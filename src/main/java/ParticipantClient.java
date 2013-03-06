@@ -1,6 +1,6 @@
 import java.io.IOException;
 
-import alt.rtps.structure.Participant;
+import alt.rtps.Participant;
 
 
 public class ParticipantClient {

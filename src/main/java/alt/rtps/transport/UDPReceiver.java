@@ -12,8 +12,8 @@ import java.net.SocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import alt.rtps.Participant;
 import alt.rtps.message.Message;
-import alt.rtps.structure.Participant;
 import alt.rtps.types.Locator_t;
 
 
