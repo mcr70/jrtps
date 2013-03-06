@@ -1,0 +1,41 @@
+Built-in Subscriber QoS (DDS spec 1.2, ch. 7.1.5 & defaults: ch. 7.1.3)
+USER_DATA:
+	<unspecified>
+TOPIC_DATA:
+	<unspecified>
+GROUP_DATA:
+	<unspecified>
+DURABILITY: 
+	TRANSIENT_LOCAL								default: VOLATILE	(TR-Local: for late-joining)
+PRESENTATION: 
+	access_scope = TOPIC						default: INSTANCE
+	coherent_access = FALSE
+	ordered_access = FALSE
+DEADLINE:
+	Period = infinite
+LATENCY_BUDGET:
+	duration = <unspecified>
+OWNERSHIP:
+	SHARED
+LIVELINESS:
+	kind = AUTOMATIC
+	lease_duration = <unspecified>
+TIME_BASED_FILTER:
+	minimum_separation = 0
+PARTITION:
+	<unspecified>
+RELIABILITY:
+	kind = RELIABLE								default: BEST_EFFORT for readers
+	max_blocking_time = 100 milliseconds
+DESTINATION_ORDER:
+	BY_RECEPTION_TIMESTAMP
+HISTORY:
+	kind = KEEP_LAST
+	depth = 1
+RESOURCE_LIMITS:
+	All LENGTH_UNLIMITED.
+READER_DATA_LIFECYCLE:
+	autopurge_nowriter_samples_delay = infinite
+	autopurge_disposed_samples_delay = infinite
+ENTITY_FACTORY:
+	autoenable_created_entities = TRUE
