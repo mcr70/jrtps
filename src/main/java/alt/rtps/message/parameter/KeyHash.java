@@ -28,6 +28,11 @@ public class KeyHash extends Parameter {
 		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
 	}	
 
+	@Override
+	public void writeTo(RTPSByteBuffer bb) {
+		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+	}
+
 	public String toString() {
 		return super.toString() + Arrays.toString(getKeyHash());
 	}
