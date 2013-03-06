@@ -27,10 +27,10 @@ import alt.rtps.types.Locator_t;
  * 
  * @author mcr70
  */
-public class ParticipantDataMarshaller extends Marshaller {
+public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
-	public Object unmarshall(RTPSByteBuffer bb) {
+	public ParticipantData unmarshall(RTPSByteBuffer bb) {
 		ParticipantData pd = new ParticipantData(bb);
 		
 		return pd;
@@ -38,8 +38,7 @@ public class ParticipantDataMarshaller extends Marshaller {
 
 	
 	@Override
-	public Data marshall(Object o) {
-		ParticipantData pd = (ParticipantData) o;
+	public Data marshall(ParticipantData pd) {
 		List<Parameter> inlineQosParams = new LinkedList<Parameter>();
 		inlineQosParams.add(new Sentinel());
 

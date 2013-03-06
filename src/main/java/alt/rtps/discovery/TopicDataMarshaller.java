@@ -4,17 +4,17 @@ import alt.rtps.message.Data;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 
-public class TopicDataMarshaller extends Marshaller {
+public class TopicDataMarshaller extends Marshaller<TopicData> {
 
 	@Override
-	public Object unmarshall(RTPSByteBuffer bb) {
+	public TopicData unmarshall(RTPSByteBuffer bb) {
 		TopicData wd = new TopicData(null, bb);
 		
 		return wd;
 	}
 
 	@Override
-	public Data marshall(Object data) {
+	public Data marshall(TopicData td) {
 		System.out.println("WriterDataMarshaller.toData() NOT implemented");
 		return null;
 	}
