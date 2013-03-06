@@ -14,6 +14,7 @@ public class DiscoveredData {
 	protected BuiltinTopicKey_t key;
 	protected KeyHash keyHash;
 	protected List<QualityOfService> qosList = new LinkedList<>();
+	
 	private GUID_t writerGuid;
 	
 	/**
