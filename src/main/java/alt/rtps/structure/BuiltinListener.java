@@ -30,7 +30,7 @@ class BuiltinListener implements DataListener {
 	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
 
 	
-	public BuiltinListener(Participant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
+	BuiltinListener(Participant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
 		this.participant = p;
 		this.discoveredParticipants = discoveredParticipants;
 	}
