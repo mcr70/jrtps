@@ -14,5 +14,12 @@ o ByteBuffer (java.nio) could replace SimpleCDR(In/Out)putStream
 o writeTo needs to be reconsidered. Maybe BytesBuffer will help
   SubMessageHeader needs to write submessage length into stream.
   It is not necessary easy to calculate. the same is true for parameters.
-o there is no need to support deprecated parameters, see 9.6.4 ParameterIds Deprecated by Version 2.1 of the Protocol  
+o There is no need to support deprecated parameters, see 9.6.4 ParameterIds Deprecated by Version 2.1 of the Protocol  
 o PID_STATUS_INFO contains isUnregisterd, isDisposed info.
+
+OSPL (5.5) Specific Notes
+===================
+	- TimeBasedFilter is received as two bytes: [0, 0]. It should have been 
+	  received as two longs: [0,0,0,0, 0,0,0,0] for Duration_t
+	- Reliability QoS (kind) seems to have an offset of 1 (starting from 1)
+	 
