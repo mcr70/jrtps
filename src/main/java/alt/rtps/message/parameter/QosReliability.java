@@ -17,6 +17,12 @@ public class QosReliability extends Parameter implements QualityOfService {
 		}
 	}
 
+	public QosReliability(Kind kind, Duration_t max_blocking_time) {
+		super(ParameterEnum.PID_RELIABILITY);
+		this.max_blocking_time = max_blocking_time;
+		this.kind = kind.ordinal() + 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
+	}
+	
 	QosReliability() {
 		super(ParameterEnum.PID_RELIABILITY);
 	}
@@ -32,14 +38,13 @@ public class QosReliability extends Parameter implements QualityOfService {
 		case 1: return Kind.RELIABLE; 
 		}
 
-		// TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
 		return Kind.UNKNOWN_RELIABILITY_KIND;
 	}
 
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.kind = bb.read_long();
+		this.kind = bb.read_long() - 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE 
 		max_blocking_time = new Duration_t(bb);
 	}
 	
@@ -50,6 +55,6 @@ public class QosReliability extends Parameter implements QualityOfService {
 	}
 
 	public String toString() {	
-		return super.toString() + "(" + getKind()  + "[" + kind + "]," + max_blocking_time + ")";
+		return super.toString() + "(" + getKind() + max_blocking_time + ")";
 	}
 }

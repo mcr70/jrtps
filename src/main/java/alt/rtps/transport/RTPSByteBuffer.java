@@ -66,12 +66,21 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 		buffer.putInt(a_long);
 	}
 
-	public boolean read_boolean() throws IOException {
+	public boolean read_boolean() {
 		int b = read_octet();
 		
 		// '1' should represent true, but it is known fact that some ORBs 
 		// do not honor this, representing true value for anything other than '0'
 		return b != 0;  
+	}
+
+	public void write_boolean(boolean b) {
+		if (b) {
+			write_octet((byte) 1);
+		}
+		else {
+			write_octet((byte) 0);
+		}
 	}
 	
 	public void write_string(String s) {

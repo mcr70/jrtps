@@ -50,6 +50,6 @@ public class QosLiveliness extends Parameter implements QualityOfService {
 	}
 
 	public String toString() {	
-		return super.toString() + "(" + getKind()  + "[" + kind + "]," + lease_duration + ")";
+		return super.toString() + "(" + getKind() + lease_duration + ")";
 	}
 }
