@@ -3,17 +3,17 @@ package alt.rtps.structure;
 import java.util.LinkedList;
 import java.util.List;
 
-public class HistoryCache {
+class HistoryCache {
 	private List<CacheChange> changes = new LinkedList<CacheChange>();
 	private long seqNumMax = 0;
 	private long seqNumMin = 0;
 	
 
-	public List<CacheChange> getChanges() {
+	List<CacheChange> getChanges() {
 		return changes;
 	}
 
-	public boolean containsSeqNum(long seqNumToCheck) {
+	boolean containsSeqNum(long seqNumToCheck) {
 		if (seqNumToCheck >= seqNumMin && seqNumToCheck <= seqNumMax) {
 			for (CacheChange change : changes) {		
 				if (change.getSequenceNumber() == seqNumToCheck) {
@@ -26,7 +26,7 @@ public class HistoryCache {
 		return false;
 	}
 
-	public long getSeqNumMax() {
+	long getSeqNumMax() {
 		return seqNumMax;
 	}
 	
@@ -36,7 +36,7 @@ public class HistoryCache {
 	 * @param sequenceNumber
 	 * @return true, if data was added to cache
 	 */
-	public boolean createChange(Object data, long sequenceNumber) {
+	boolean createChange(Object data, long sequenceNumber) {
 		// Data must come in order. If not, drop it. Manage out-of-order data with 
 		// HeartBeat & AckNack messages
 		if (sequenceNumber == seqNumMax + 1) { 
@@ -49,14 +49,14 @@ public class HistoryCache {
 		return false;
 	}
 	
-	public long createChange(Object data) {
+	long createChange(Object data) {
 		seqNumMax++;
 		changes.add(new CacheChange(seqNumMax, data));
 		
 		return seqNumMax;
 	}
 
-	public long getSeqNumMin() {
+	long getSeqNumMin() {
 		if (seqNumMin == 0) { // 0 means not set. 
 			CacheChange cc = changes.get(0); // Get first one. TODO: IndexOutOfBounds
 			seqNumMin = cc.getSequenceNumber();
@@ -65,7 +65,7 @@ public class HistoryCache {
 		return seqNumMin;
 	}
 
-	public int size() {
+	int size() {
 		return changes.size();
 	}
 }
