@@ -6,8 +6,8 @@ import alt.rtps.message.Message;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 
-public abstract class Marshaller {
-	public Message toMessage(GuidPrefix_t prefix, Object data) {
+public abstract class Marshaller<T> {
+	public Message toMessage(GuidPrefix_t prefix, T data) {
 		Message m = new Message(prefix);
 
 		InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
@@ -17,6 +17,6 @@ public abstract class Marshaller {
 		return m;
 	}
 
-	public abstract Object unmarshall(RTPSByteBuffer bb);
-	public abstract Data marshall(Object data);
+	public abstract T unmarshall(RTPSByteBuffer bb);
+	public abstract Data marshall(T data);
 }

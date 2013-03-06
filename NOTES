@@ -22,4 +22,10 @@ OSPL (5.5) Specific Notes
 	- TimeBasedFilter is received as two bytes: [0, 0]. It should have been 
 	  received as two longs: [0,0,0,0, 0,0,0,0] for Duration_t
 	- Reliability QoS (kind) seems to have an offset of 1 (starting from 1)
-	 
+	- Partition for built-in in topics is set to "__BUILT-IN PARTITION__", spec says 
+	  default value for Partition is zero length array, and for built-in topics, it is unspecified.
+	  And communication should not be established if both entities does not belong to same partition.
+	  Should we set the partition for built-in stuff to "*", which would match any partition.
+	  
+	
+	
