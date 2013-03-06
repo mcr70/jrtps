@@ -1,4 +1,4 @@
-package alt.rtps.discovery;
+package alt.rtps.builtin;
 
 import alt.rtps.message.Data;
 import alt.rtps.transport.Marshaller;

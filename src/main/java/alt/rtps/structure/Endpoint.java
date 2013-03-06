@@ -10,7 +10,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.discovery.ParticipantData;
+import alt.rtps.builtin.ParticipantData;
 import alt.rtps.message.Message;
 import alt.rtps.transport.UDPWriter;
 import alt.rtps.types.EntityId_t;

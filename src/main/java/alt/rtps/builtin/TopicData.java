@@ -1,4 +1,4 @@
-package alt.rtps.discovery;
+package alt.rtps.builtin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

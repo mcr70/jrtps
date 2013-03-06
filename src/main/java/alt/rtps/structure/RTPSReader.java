@@ -6,7 +6,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.discovery.DiscoveredData;
+import alt.rtps.builtin.DiscoveredData;
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;

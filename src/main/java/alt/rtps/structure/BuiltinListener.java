@@ -5,10 +5,10 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.discovery.ParticipantData;
-import alt.rtps.discovery.ReaderData;
-import alt.rtps.discovery.TopicData;
-import alt.rtps.discovery.WriterData;
+import alt.rtps.builtin.ParticipantData;
+import alt.rtps.builtin.ReaderData;
+import alt.rtps.builtin.TopicData;
+import alt.rtps.builtin.WriterData;
 import alt.rtps.types.BuiltinTopicKey_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;

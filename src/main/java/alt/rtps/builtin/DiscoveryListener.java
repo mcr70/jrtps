@@ -1,4 +1,4 @@
-package alt.rtps.discovery;
+package alt.rtps.builtin;
 
 
 public interface DiscoveryListener {
