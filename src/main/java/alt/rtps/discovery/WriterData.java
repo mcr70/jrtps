@@ -35,6 +35,9 @@ public class WriterData extends DiscoveredData {
 				super.keyHash = (KeyHash) param; break;
 			case PID_SENTINEL:
 				moreParameters = false; break;
+			case PID_PAD:
+				// Ignore
+				break;
 
 			default:
 				if (param instanceof QualityOfService) {

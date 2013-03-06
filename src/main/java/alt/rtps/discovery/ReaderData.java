@@ -47,7 +47,10 @@ public class ReaderData extends DiscoveredData {
 				keyHash = (KeyHash) param; break;
 			case PID_SENTINEL:
 				moreParameters = false; break;
-
+			case PID_PAD:
+				// Ignore
+				break;
+				
 			default:
 				if (param instanceof QualityOfService) {
 					addQualityOfService((QualityOfService) param);
