@@ -5,7 +5,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.Participant;
+import alt.rtps.RTPSParticipant;
 import alt.rtps.RTPSWriter;
 import alt.rtps.Reader;
 import alt.rtps.message.AckNack;
@@ -22,9 +22,9 @@ import alt.rtps.types.Time_t;
 public class RTPSMessageBroker {
 	private static final Logger log = LoggerFactory.getLogger(RTPSMessageBroker.class);
 
-	private final Participant participant;
+	private final RTPSParticipant participant;
 	
-	public RTPSMessageBroker(Participant p) {
+	public RTPSMessageBroker(RTPSParticipant p) {
 		this.participant = p;
 	}
 	

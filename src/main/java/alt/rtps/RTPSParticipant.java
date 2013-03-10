@@ -30,8 +30,8 @@ import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 
-public class Participant {
-	private static final Logger log = LoggerFactory.getLogger(Participant.class);
+public class RTPSParticipant {
+	private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
 	private static final String BUILTIN_TOPICNAME_PARTICIPANT = "DCPSParticipant";
 	private static final String BUILTIN_TOPICNAME_PUBLICATION = "DCPSPublication";
@@ -79,7 +79,7 @@ public class Participant {
 	 * @param domainId Domain ID of the participant
 	 * @see EntityId_t
 	 */
-	public Participant(int domainId) {
+	public RTPSParticipant(int domainId) {
 		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, participantId++), EntityId_t.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
@@ -89,6 +89,8 @@ public class Participant {
 		meta_ucLoc = Locator_t.defaultMetatrafficUnicastLocator(domainId, participantId);
 		mcLoc = Locator_t.defaultUserMulticastLocator(domainId);
 		ucLoc = Locator_t.defaultUserUnicastLocator(domainId, participantId);
+
+		// TODO: Consider moving builtin stuff to uDDS project
 		
 		BuiltinListener builtinListener = new BuiltinListener(this, discoveredParticipants);
 
