@@ -12,7 +12,7 @@ import java.net.SocketException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.Participant;
+import alt.rtps.RTPSParticipant;
 import alt.rtps.message.Message;
 import alt.rtps.types.Locator_t;
 
@@ -32,7 +32,7 @@ public class UDPReceiver implements Runnable {
 	
 	private boolean running = true;
 
-	public UDPReceiver(Locator_t locator, Participant p) throws SocketException {
+	public UDPReceiver(Locator_t locator, RTPSParticipant p) throws SocketException {
 		this.locator = locator;
 		broker = new RTPSMessageBroker(p);
 		

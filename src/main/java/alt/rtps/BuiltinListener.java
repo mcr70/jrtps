@@ -22,7 +22,7 @@ import alt.rtps.types.Time_t;
  */
 class BuiltinListener implements DataListener {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinListener.class);
-	private Participant participant;
+	private RTPSParticipant participant;
 
 	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
 	private final HashMap<BuiltinTopicKey_t, TopicData> discoveredTopics = new HashMap<>();
@@ -30,7 +30,7 @@ class BuiltinListener implements DataListener {
 	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
 
 	
-	BuiltinListener(Participant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
+	BuiltinListener(RTPSParticipant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
 		this.participant = p;
 		this.discoveredParticipants = discoveredParticipants;
 	}
