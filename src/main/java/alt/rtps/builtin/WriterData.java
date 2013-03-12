@@ -10,12 +10,12 @@ import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.RTPSByteBuffer;
-import alt.rtps.types.BuiltinTopicKey_t;
+import alt.rtps.types.GUID_t;
 
 public class WriterData extends DiscoveredData {
 	private static final Logger log = LoggerFactory.getLogger(WriterData.class);
 	
-	public WriterData(KeyHash keyHash, RTPSByteBuffer buffer) {
+	public WriterData(RTPSByteBuffer buffer) {
 		boolean moreParameters = buffer.getBuffer().remaining() > 0; //true;
 		while (moreParameters) {
 			Parameter param = ParameterFactory.readParameter(buffer);
@@ -44,15 +44,13 @@ public class WriterData extends DiscoveredData {
 					addQualityOfService((QualityOfService) param);
 				}
 				else {
-					log.warn("Parameter {} not handled", param.getParameterId());
+					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
 				}
 			}
 		}
-		
-		super.keyHash = keyHash;
 	}
 	
-	public WriterData(String topicName, String typeName, BuiltinTopicKey_t key) {
+	public WriterData(String topicName, String typeName, GUID_t key) {
 		super(typeName, topicName, key);
 	}
 }

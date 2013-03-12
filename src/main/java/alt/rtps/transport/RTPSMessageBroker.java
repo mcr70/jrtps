@@ -58,15 +58,17 @@ public class RTPSMessageBroker {
 				log.warn("SubMessage not handled: {}", subMsg);
 			}
 		}
-		
 	}
 
 	private void handleAckNack(GuidPrefix_t sourceGuidPrefix, AckNack ackNack) {
 		RTPSWriter writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
 
 		if (writer != null) {
-			log.debug("Got Heartbeat for " + writer.getGuid().entityId);
+			log.debug("Got AckNack for {}", writer.getGuid().entityId);
 			writer.onAckNack(sourceGuidPrefix, ackNack);
+		}
+		else {
+			log.debug("No Writer to handle AckNack from {}", ackNack.getReaderId());
 		}
 	}
 
@@ -76,6 +78,9 @@ public class RTPSMessageBroker {
 		if (reader != null) {
 			log.debug("Got Data for {}", reader.getGuid().entityId);
 			reader.onData(prefix, data, timestamp);
+		}
+		else {
+			log.debug("No Reader to handle Data from {}", data.getWriterId());
 		}
 	}
 
@@ -87,7 +92,7 @@ public class RTPSMessageBroker {
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {
-			log.warn("No Reader to handle heartbeat from {}", hb.getWriterId());
+			log.debug("No Reader to handle Heartbeat from {}", hb.getWriterId());
 		}
 	}
 }

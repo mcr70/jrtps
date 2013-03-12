@@ -60,14 +60,13 @@ public class UDPReceiver implements Runnable {
 				// TODO: We could put msg into BlockingQueue and go immediately back to receiving
 				try {
 					Message msg = parseMessage(p.getData(), p.getLength());
-					log.debug("Parsed RTPS message from " + locator + ": " + msg);
+					log.debug("Parsed RTPS message from {}: {}", locator, msg);
 					broker.handleMessage(msg);
 				}
 				catch(Exception e) {
-					log.error("Failed to parse message of length " + p.getLength(), e);
+					log.warn("Failed to parse message of length " + p.getLength(), e);
 					//dumpMessage(i++, p.getData(), p.getLength()); // TODO: remove this
 				}
-				
 			}
 						
 //			ch.setOption(StandardSocketOptions.SO_REUSEADDR, true);

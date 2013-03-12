@@ -15,7 +15,7 @@ public class WriterDataMarshaller extends Marshaller<WriterData> {
 
 	@Override
 	public WriterData unmarshall(RTPSByteBuffer bb) {
-		WriterData wd = new WriterData(null, bb);
+		WriterData wd = new WriterData(bb);
 		
 		return wd;
 	}
