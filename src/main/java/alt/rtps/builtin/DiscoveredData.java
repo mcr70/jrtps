@@ -11,7 +11,11 @@ import alt.rtps.types.GUID_t;
 public class DiscoveredData {
 	protected String typeName;
 	protected String topicName;
-	protected BuiltinTopicKey_t key;
+	// On spec, key is BuiltinTopicKey_t (4 bytes), but KeyHash Parameter is 16 bytes.
+	// @see table 9.10, 9.6.3.3 KeyHash.
+	// interpretation is, for builtin topics, key is 
+	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
+	protected GUID_t key;  
 	protected KeyHash keyHash;
 	protected List<QualityOfService> qosList = new LinkedList<>();
 	
@@ -29,12 +33,12 @@ public class DiscoveredData {
 	 * 
 	 * @param typeName
 	 * @param topicName
-	 * @param topicKey
+	 * @param key
 	 */
-	protected DiscoveredData(String typeName, String topicName, BuiltinTopicKey_t topicKey) {
+	protected DiscoveredData(String typeName, String topicName, GUID_t key) {
 		this.typeName = typeName;
 		this.topicName = topicName;
-		this.key = topicKey;
+		this.key = key;
 	}
 	
 	public String getTypeName() {
@@ -45,7 +49,9 @@ public class DiscoveredData {
 		return topicName;
 	}
 	
-	public BuiltinTopicKey_t getKey() {
+	public GUID_t getKey() {
+		// TODO: Should we have getKey()  -> BuiltinTopicKey_t and
+		//                      getGuid() -> key
 		return key;
 	}
 	

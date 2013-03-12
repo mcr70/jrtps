@@ -62,7 +62,7 @@ public class ReaderData extends DiscoveredData {
 		}
 	}
 
-	public ReaderData(String topicName, String typeName, BuiltinTopicKey_t key) {
+	public ReaderData(String topicName, String typeName, GUID_t key) {
 		super(typeName, topicName, key);
 	}
 	

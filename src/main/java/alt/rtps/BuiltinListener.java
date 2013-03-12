@@ -25,7 +25,7 @@ class BuiltinListener implements DataListener {
 	private RTPSParticipant participant;
 
 	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
-	private final HashMap<BuiltinTopicKey_t, TopicData> discoveredTopics = new HashMap<>();
+	private final HashMap<GUID_t, TopicData> discoveredTopics = new HashMap<>();
 	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
 	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
 

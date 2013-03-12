@@ -11,6 +11,7 @@ import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.BuiltinTopicKey_t;
+import alt.rtps.types.GUID_t;
 
 public class TopicData extends DiscoveredData {
 	private static final Logger log = LoggerFactory.getLogger(TopicData.class);
@@ -40,7 +41,7 @@ public class TopicData extends DiscoveredData {
 		}
 	}
 
-	public TopicData(String typeName, String topicName, BuiltinTopicKey_t key) {
+	public TopicData(String typeName, String topicName, GUID_t key) {
 		super(typeName, topicName, key);
 	}
 }

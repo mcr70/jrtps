@@ -146,8 +146,7 @@ public class RTPSParticipant {
 	private void createDataForSubscriptionWriter(RTPSWriter sw) {
 		int i = 0;
 		for (Endpoint r : readerEndpoints) {
-			ReaderData rd = new ReaderData(r.getTopicName(), ReaderData.class.getName(), 
-					new BuiltinTopicKey_t(new int[]{ 0, 0, i++ }));
+			ReaderData rd = new ReaderData(r.getTopicName(), ReaderData.class.getName(), sw.getGuid());
 		}
 	}
 
@@ -155,8 +154,7 @@ public class RTPSParticipant {
 	private void createDataForPublicationsWriter(RTPSWriter pw) {
 		int i = 0;
 		for (Writer w : writerEndpoints) {
-			WriterData wd = new WriterData(w.getTopicName(), WriterData.class.getName(), 
-					new BuiltinTopicKey_t(new int[]{ 0, 0, i++ }));
+			WriterData wd = new WriterData(w.getTopicName(), WriterData.class.getName(), pw.getGuid());
 		}
 	}
 
@@ -176,8 +174,7 @@ public class RTPSParticipant {
 
 		Writer pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
 		long seqNum = pw.lastChangeSequenceNumber(); // TODO: Not thread safe: seqNum
-		WriterData wd = new WriterData(writer.getTopicName(), WriterData.class.getName(), 
-				new BuiltinTopicKey_t(new int[]{ 0, 0, (int) seqNum }));
+		WriterData wd = new WriterData(writer.getTopicName(), WriterData.class.getName(), pw.getGuid());
 		pw.writer_cache.createChange(wd);
 		
 		return writer;
@@ -191,8 +188,7 @@ public class RTPSParticipant {
 
 		Writer sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
 		long seqNum = sw.lastChangeSequenceNumber(); // TODO: Not thread safe: seqNum
-		ReaderData rd = new ReaderData(reader.getTopicName(), ReaderData.class.getName(), 
-				new BuiltinTopicKey_t(new int[]{ 0, 0, (int) seqNum }));
+		ReaderData rd = new ReaderData(reader.getTopicName(), ReaderData.class.getName(), sw.getGuid());
 		sw.writer_cache.createChange(rd);
 		
 		return reader;
