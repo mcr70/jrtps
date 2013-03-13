@@ -8,6 +8,9 @@ import alt.rtps.transport.RTPSByteBuffer;
 public class ParameterList {
 	private List<Parameter> params = new LinkedList<Parameter>(); 
 
+	public ParameterList() {
+	}
+	
 	public ParameterList(RTPSByteBuffer bb) {
 		while (true) {
 			bb.align(4);

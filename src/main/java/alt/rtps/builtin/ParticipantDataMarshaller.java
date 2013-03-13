@@ -11,6 +11,7 @@ import alt.rtps.message.parameter.DefaultUnicastLocator;
 import alt.rtps.message.parameter.MetatrafficMulticastLocator;
 import alt.rtps.message.parameter.MetatrafficUnicastLocator;
 import alt.rtps.message.parameter.Parameter;
+import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.message.parameter.ParticipantGuid;
 import alt.rtps.message.parameter.ParticipantLeaseDuration;
 import alt.rtps.message.parameter.ProtocolVersion;
@@ -42,7 +43,8 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 //		List<Parameter> inlineQosParams = new LinkedList<Parameter>();
 //		inlineQosParams.add(new Sentinel());
 
-		List<Parameter> payloadParams = new LinkedList<Parameter>(); 
+		//List<Parameter> payloadParams = new LinkedList<Parameter>();
+		ParameterList payloadParams = new ParameterList();
 		// ---  Start of ParameterList
 
 		payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
@@ -74,6 +76,7 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 		payloadParams.add(new Sentinel());
 		// ---  End of ParameterList
 
+		
 		//Data data = new Data(EntityId_t.UNKNOWN_ENTITY, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
 		Data data = new Data(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
 				1, pd.getGuid(), null, payloadParams);
