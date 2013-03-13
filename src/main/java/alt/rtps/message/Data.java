@@ -2,12 +2,10 @@ package alt.rtps.message;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
@@ -63,7 +61,7 @@ public class Data extends SubMessage {
 	 * @param leaseDuration
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
-			GUID_t participantGuid, ParameterList inlineQosParams, List<Parameter> payloadParams) {
+			GUID_t participantGuid, ParameterList inlineQosParams, ParameterList payloadParams) {
 		
 		super(new SubMessageHeader(0x15));
 		
@@ -87,7 +85,8 @@ public class Data extends SubMessage {
 		payload.write_octet((byte) 3); // 0x0002 = PL_CDR_LE (little endian parameterlist)
 		payload.write_short(0); // u_short options, not recognized
 		
-		writeParameterList(payloadParams, payload);
+		payloadParams.writeTo(payload);
+		//writeParameterList(payloadParams, payload);
 			
 		payload.align(4);
 		
@@ -247,31 +246,10 @@ public class Data extends SubMessage {
 		if (inlineQosFlag()) {
 			inlineQosParams.writeTo(buffer);
 		}		
+
 		if (dataFlag() || keyFlag()) { 
 			buffer.align(4);
 			buffer.write(serializedPayload); // TODO: check this
 		}
-	}
-
-	private void writeParameterList(List<Parameter> params, RTPSByteBuffer buffer) {
-		for (Parameter param: params) {
-			buffer.align(4); // @see 9.4.2.11
-			//System.out.println("Data: writeParamList: " + param.getParameterId());
-			buffer.write_short(param.getParameterId().kind());
-			
-			//if (param.getParameterId() != ParameterEnum.PID_SENTINEL) {
-			if (true) { // TODO: Sentinel handling
-				buffer.write_short(0); // length will be calculated
-			
-				int pos = buffer.position();
-				param.writeTo(buffer); 
-				int paramLength = buffer.position() - pos;
-				paramLength += (paramLength % 4); // Make sure length is multiple of 4
-				
-				buffer.getBuffer().putShort(pos - 2, (short) paramLength);
-			}
-		}
-		
-		// TODO: last Parameter must be PID_SENTINEL
 	}
 }
