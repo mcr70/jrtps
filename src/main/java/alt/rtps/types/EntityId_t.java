@@ -216,4 +216,17 @@ public class EntityId_t  {
 		buffer.write(entityKey);
 		buffer.write_octet(entityKind);
 	}
+
+	/**
+	 * Gets this EntityId as a byte array. First 3 bytes are key, and last byte is entity kind.
+	 *  
+	 * @return a byte array of length 4
+	 */
+	public byte[] getBytes() {
+		byte[] bytes = new byte[4];
+		System.arraycopy(this.entityKey, 0, bytes, 0, 3);
+		bytes[3] = entityKind;
+		
+		return bytes;
+	}
 }
