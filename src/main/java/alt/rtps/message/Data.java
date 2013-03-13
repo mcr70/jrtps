@@ -167,15 +167,6 @@ public class Data extends SubMessage {
 	}
 
 	
-	/**
-	 * Return the serialized payload attached to this Data message.
-	 * first two bytes of the serialized payload contains Encapsulation identifier of the data.
-	 * 
-	 * @return
-	 */
-	public byte[] getSerializedPayload() {
-		return serializedPayload;
-	}
 	
 	public RTPSByteBuffer getSerializedPayloadInputStream() {
 		RTPSByteBuffer bb = null;
