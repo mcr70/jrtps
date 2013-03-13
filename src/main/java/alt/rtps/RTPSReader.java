@@ -65,7 +65,7 @@ public class RTPSReader extends Reader {
 	@Override
 	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) {
 		
-		Object obj = marshaller.unmarshall(data.getSerializedPayloadInputStream());
+		Object obj = marshaller.unmarshall(data);
 		
 		if (obj instanceof DiscoveredData) {
 			GUID_t writerGuid = new GUID_t(prefix, data.getWriterId()); // TODO: Do we need this info on discovered data

@@ -32,7 +32,8 @@ import alt.rtps.types.Locator_t;
 public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
-	public ParticipantData unmarshall(RTPSByteBuffer bb) {
+	public ParticipantData unmarshall(Data data) {
+		RTPSByteBuffer bb = data.getSerializedPayloadInputStream();
 		ParticipantData pd = new ParticipantData(bb);
 		
 		return pd;
