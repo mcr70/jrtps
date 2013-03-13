@@ -106,18 +106,17 @@ public class ParameterFactory {
 			if ((paramId & 0x8000) == 0x8000) {
 				param = new VendorSpecificParameter(paramId);
 			}
-			else if ((paramId & 0x4000) == 0) { // 9.6.2.2.1 ParameterId space
-				log.error("Ignorin unknown Parameter {}, length {}", paramId, paramLength );
-				// Ignore
-				param = new UnknownParameter(paramId);
-			}
-			else {	
+			else if ((paramId & 0x4000) == 0x4000) { // 9.6.2.2.1 ParameterId space
 				// Incompatible QoS
 				log.error("Found unknown Parameter -> Mark it as incompatible QoS");
-				// TODO: what is a clean way of rejecting message
-				return null;
+				// TODO: what is a clean way of rejecting
+				return null; // throw new IncompatibleQosException(...);
 			}
-			
+			else {	
+				// Ignore
+				param = new UnknownParameter(paramId);
+				log.error("Ignoring unknown Parameter {}", param);
+			}
 		}
 		
 		param.read(bb, paramLength);
