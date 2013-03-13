@@ -8,6 +8,19 @@ import alt.rtps.transport.RTPSByteBuffer;
 public class ParameterList {
 	private List<Parameter> params = new LinkedList<Parameter>(); 
 
+	public ParameterList(RTPSByteBuffer bb) {
+		while (true) {
+			bb.align(4);
+			Parameter param = ParameterFactory.readParameter(bb);		
+			params.add(param);
+			
+			if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
+				break; // TODO: Add some control token to CDRInputStream that counts bytes read and 
+				       //       fails if expected_read_count+1 is reached 
+			}
+		}
+	}
+	
 	public ParameterList(List<Parameter> params) {
 		this.params = params;
 	}
@@ -36,6 +49,10 @@ public class ParameterList {
 		// TODO: last Parameter must be PID_SENTINEL
 	}
 
+	public List<Parameter> getParameters() {
+		return params;
+	}
+	
 	public int size() {
 		return params.size();
 	}

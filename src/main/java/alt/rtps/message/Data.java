@@ -1,18 +1,14 @@
 package alt.rtps.message;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
-import alt.rtps.message.parameter.ParameterEnum;
-import alt.rtps.message.parameter.ParameterFactory;
+import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
@@ -47,7 +43,8 @@ public class Data extends SubMessage {
 	 */
 	private SequenceNumber_t writerSN;
 
-	private List<Parameter> inlineQosParams = new LinkedList<Parameter>();
+	//private List<Parameter> inlineQosParams = new LinkedList<Parameter>();
+	private ParameterList inlineQosParams;
 	private byte[] serializedPayload;
 
 	/**
@@ -66,7 +63,7 @@ public class Data extends SubMessage {
 	 * @param leaseDuration
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
-			GUID_t participantGuid, List<Parameter> inlineQosParams, List<Parameter> payloadParams) {
+			GUID_t participantGuid, ParameterList inlineQosParams, List<Parameter> payloadParams) {
 		
 		super(new SubMessageHeader(0x15));
 		
@@ -151,7 +148,8 @@ public class Data extends SubMessage {
 		}
 		
 		if (inlineQosFlag()) {
-			readParameterList(bb);
+			//readParameterList(bb);
+			this.inlineQosParams = new ParameterList(bb);
 		}
 		
 		if (dataFlag() || keyFlag()) { 
@@ -171,29 +169,6 @@ public class Data extends SubMessage {
 		}
 	}
 	
-
-
-	/**
-	 * 
-	 * @param bb
-	 * @throws IOException 
-	 * @see 9.4.2.11 ParameterList
-	 */
-	private void readParameterList(RTPSByteBuffer bb) {
-		
-		while (true) {
-			bb.align(4);
-			Parameter param = ParameterFactory.readParameter(bb);
-			//System.out.println("Read param " + param + ", endianess " + header.endianessFlag());
-			inlineQosParams.add(param);
-			if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
-				break; // TODO: Add some control token to CDRInputStream that counts bytes read and 
-				       //       fails if expected_read_count+1 is reached 
-			}
-		}
-	}
-
-	
 	public EntityId_t getReaderId() {
 		return readerId;
 	}
@@ -206,23 +181,6 @@ public class Data extends SubMessage {
 		return writerSN;
 	}
 
-	public List<Parameter> getParameters() {
-		return inlineQosParams;
-	}
-	
-	/**
-	 * Get the KeyHash parameter if it is present.
-	 * @return return KeyHash or null, if it not found from inline params
-	 */
-	public KeyHash getKeyHashParameter() {
-		for (Parameter param: getParameters()) {
-			if (param.getParameterId() == ParameterEnum.PID_KEY_HASH) {
-				return (KeyHash) param; 
-			}
-		}
-		
-		return null;
-	}
 	
 	/**
 	 * Return the serialized payload attached to this Data message.
@@ -287,7 +245,7 @@ public class Data extends SubMessage {
 		writerSN.writeTo(buffer);
 		
 		if (inlineQosFlag()) {
-			writeParameterList(inlineQosParams, buffer);
+			inlineQosParams.writeTo(buffer);
 		}		
 		if (dataFlag() || keyFlag()) { 
 			buffer.align(4);
@@ -316,19 +274,4 @@ public class Data extends SubMessage {
 		
 		// TODO: last Parameter must be PID_SENTINEL
 	}
-
-
-	private void printPayload() {
-		System.out.print("      ");
-		for (int i = 0; i < serializedPayload.length; i++) {
-			
-			System.out.print("0x" + String.format("%02x", serializedPayload[i]) + " ");
-			if(i % 16 == 15) {
-				System.out.println();
-				System.out.print("      ");
-			}
-		}
-		System.out.println();
-	}
-
 }
