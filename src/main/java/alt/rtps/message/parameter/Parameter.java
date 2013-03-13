@@ -12,8 +12,26 @@ public abstract class Parameter {
 	private ParameterEnum parameterId;
 	private byte[] value;
 
+	/**
+	 * Constructs Parameter with null bytes. Bytes are expected to be read by
+	 * read(RTPSByteBuffer, int) 
+	 * 
+	 * @param id
+	 * @see read(RTPSByteBuffer, int)
+	 */
 	protected Parameter(ParameterEnum id) {
+		this(id, null);
+	}
+
+	/**
+	 * Constructs Parameter with given bytes.
+	 * 
+	 * @param id
+	 * @param bytes
+	 */
+	protected Parameter(ParameterEnum id, byte[] bytes) {
 		this.parameterId = id;
+		value = bytes;
 	}
 
 	/**
@@ -32,12 +50,8 @@ public abstract class Parameter {
 	public byte[] getBytes() {
 		return value;
 	}
-
+	
 	public abstract void read(RTPSByteBuffer bb, int length);
-	//	public void read(RTPSByteBuffer bb, int length) {
-	//		this.value = new byte[length];
-	//		bb.read(value);
-	//	}
 
 	/**
 	 * This method can be used by implementing classes to read bytes of this parameter to byte array.
