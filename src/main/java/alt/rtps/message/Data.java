@@ -45,6 +45,9 @@ public class Data extends SubMessage {
 	private ParameterList inlineQosParams;
 	private byte[] serializedPayload;
 
+	
+	
+	
 	/**
 	 * Constructor for creating a Data message used by SPDPbuiltinParticipantData.
 	 * 
@@ -52,16 +55,11 @@ public class Data extends SubMessage {
 	 * @param writerId
 	 * @param seqNum
 	 * @param participantGuid
-	 * @param endpointset
-	 * @param payloadParams2 
-	 * @param defaultUnicastLocator
-	 * @param metatrafficUnicastLocator
-	 * @param defaultMulticastLocator
-	 * @param metatrafficMulticastLocator
-	 * @param leaseDuration
+	 * @param inlineQosParams Inline QoS parameters. May be null.
+	 * @param payloadParams
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
-			GUID_t participantGuid, ParameterList inlineQosParams, ParameterList payloadParams) {
+			GUID_t participantGuid, ParameterList inlineQosParams, DataEncapsulation dataEncapsulation) {
 		
 		super(new SubMessageHeader(0x15));
 		
@@ -73,31 +71,23 @@ public class Data extends SubMessage {
 			header.flags |= 0x2;
 			this.inlineQosParams = inlineQosParams;
 		}
-		
-		header.flags |= 0x4; // dataFlag
-				
-		ByteBuffer buffer = ByteBuffer.allocate(1024);
-		buffer.order(ByteOrder.LITTLE_ENDIAN);
 
-		RTPSByteBuffer payload = new RTPSByteBuffer(buffer);
-		
-		payload.write_octet((byte) 0); // encapsulation header
-		payload.write_octet((byte) 3); // 0x0002 = PL_CDR_LE (little endian parameterlist)
-		payload.write_short(0); // u_short options, not recognized
-		
-		payloadParams.writeTo(payload);
-		//writeParameterList(payloadParams, payload);
-			
-		payload.align(4);
-		
-		serializedPayload = new byte[payload.position()];
-		System.arraycopy(payload.getBuffer().array(), 0, serializedPayload, 0, serializedPayload.length);
-		//printPayload();
-		
-		RTPSByteBuffer bb = new RTPSByteBuffer(serializedPayload);
-		bb.read_octet(); bb.read_octet();		
+		if (dataEncapsulation.containsData()) {
+			header.flags |= 0x4; // dataFlag	
+		}
+		else {
+			header.flags |= 0x8; // keyFlag
+		}
+
+		serializedPayload = dataEncapsulation.getSerializedPayload();
 	}
 	
+	/**
+	 * Constructor to read Data sub-message from RTPSByteBuffer.
+	 * 
+	 * @param smh
+	 * @param bb
+	 */
 	public Data(SubMessageHeader smh, RTPSByteBuffer bb) {
 		super(smh);
 		
@@ -135,19 +125,16 @@ public class Data extends SubMessage {
 
 		this.readerId = EntityId_t.readEntityId(bb);
 		this.writerId = EntityId_t.readEntityId(bb);
-		
 		this.writerSN = new SequenceNumber_t(bb);
 				
 		int bytesRead = bb.position() - currentCount;
 		int unknownOctets = octetsToInlineQos - bytesRead;
 		
 		for (int i = 0; i < unknownOctets; i++) {
-			//System.out.println("Data: skip unknown octets");
 			bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3 octetsToInlineQos
 		}
 		
 		if (inlineQosFlag()) {
-			//readParameterList(bb);
 			this.inlineQosParams = new ParameterList(bb);
 		}
 		
@@ -160,7 +147,6 @@ public class Data extends SubMessage {
 			}
 			else { // SubMessage is the last one. Rest of the bytes are read. @see 8.3.3.2.3
 				ByteBuffer buffer = bb.getBuffer();
-				//log.debug(buffer.limit() + ", " + buffer.capacity() + ", " + buffer.position());
 				this.serializedPayload = new byte[buffer.capacity() - buffer.position()];
 			}
 			
@@ -219,15 +205,6 @@ public class Data extends SubMessage {
 		return bb;
 	}
 	
-	public String toString() {
-		StringBuffer sb = new StringBuffer(super.toString());
-		sb.append(", readerId: " + getReaderId());
-		sb.append(", writerId: " + getWriterId());
-		sb.append(", writerSN: " + writerSN);
-		
-		return sb.toString();
-	}
-
 	public  short getExtraFlags() {
 		return extraFlags;
 	}
@@ -251,5 +228,15 @@ public class Data extends SubMessage {
 			buffer.align(4);
 			buffer.write(serializedPayload); // TODO: check this
 		}
+	}
+
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer(super.toString());
+		sb.append(", readerId: " + getReaderId());
+		sb.append(", writerId: " + getWriterId());
+		sb.append(", writerSN: " + writerSN);
+		
+		return sb.toString();
 	}
 }

@@ -24,9 +24,6 @@ public class ParameterList {
 		}
 	}
 	
-	public ParameterList(List<Parameter> params) {
-		this.params = params;
-	}
 	
 	public void add(Parameter param) {
 		params.add(param);

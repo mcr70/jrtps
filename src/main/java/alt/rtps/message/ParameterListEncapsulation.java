@@ -2,17 +2,21 @@ package alt.rtps.message;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.List;
 
-import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 
 public class ParameterListEncapsulation extends DataEncapsulation {
 	private ParameterList parameters;
+	private final boolean littleEndian;
 
 	public ParameterListEncapsulation(ParameterList parameters) {
+		this(parameters, true);
+	}
+	
+	public ParameterListEncapsulation(ParameterList parameters, boolean littleEndian) {
 		this.parameters = parameters;
+		this.littleEndian = littleEndian;
 	}
 
 
@@ -25,18 +29,24 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 	public byte[] getSerializedPayload() {
 
 		ByteBuffer buffer = ByteBuffer.allocate(1024); // TODO: hardcoded
-		buffer.order(ByteOrder.LITTLE_ENDIAN); // TODO: hardcoded
-
 		RTPSByteBuffer bb = new RTPSByteBuffer(buffer);
-		bb.write(PL_CDR_LE_HEADER);
+		
+		if (littleEndian) {
+			buffer.order(ByteOrder.LITTLE_ENDIAN); 
+			bb.write(PL_CDR_LE_HEADER);
+		}
+		else {
+			buffer.order(ByteOrder.BIG_ENDIAN);
+			bb.write(PL_CDR_BE_HEADER);
+		}
 
 		parameters.writeTo(bb);
 
-		bb.align(4);
-	
-//		serializedPayload = new byte[buffer.position()];
-//		System.arraycopy(buffer.getBuffer().array(), 0, serializedPayload, 0, serializedPayload.length);
-		return bb.getBuffer().array();
+		//bb.align(4); // TODO: is this needed????
+		
+		byte[] serializedPayload = new byte[buffer.position()];
+		System.arraycopy(bb.getBuffer().array(), 0, serializedPayload, 0, serializedPayload.length);
+		
+		return serializedPayload;
 	}
-
 }
