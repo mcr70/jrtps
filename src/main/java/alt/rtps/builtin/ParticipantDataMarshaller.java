@@ -74,8 +74,9 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 		payloadParams.add(new Sentinel());
 		// ---  End of ParameterList
 
-		Data data = new Data(EntityId_t.UNKNOWN_ENTITY, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-				1, pd.getGuid(), 0x03cf, inlineQosParams, payloadParams);
+		//Data data = new Data(EntityId_t.UNKNOWN_ENTITY, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
+		Data data = new Data(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
+				1, pd.getGuid(), inlineQosParams, payloadParams);
 		
 		return data;
 	}

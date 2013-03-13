@@ -66,7 +66,7 @@ public class Data extends SubMessage {
 	 * @param leaseDuration
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
-			GUID_t participantGuid, int endpointset, List<Parameter> inlineQosParams, List<Parameter> payloadParams) {
+			GUID_t participantGuid, List<Parameter> inlineQosParams, List<Parameter> payloadParams) {
 		
 		super(new SubMessageHeader(0x15));
 		
