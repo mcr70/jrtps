@@ -95,12 +95,12 @@ public class PrintMessage {
 			System.out.println("    writerID: " + data.getWriterId());
 			System.out.println("    writerSN: " + data.getWriterSequenceNumber());
 			//System.out.println("    parameters: " + data.getParameters());
-			System.out.println("    serialized payload, length: " + data.getSerializedPayload().length + 
-					", encapsulation scheme: " + (data.getSerializedPayload()[0] << 8 | data.getSerializedPayload()[1]));
+			//System.out.println("    serialized payload, length: " + data.getSerializedPayload().length + 
+			//		", encapsulation scheme: " + (data.getSerializedPayload()[0] << 8 | data.getSerializedPayload()[1]));
 			
 			//printPayload(data.getSerializedPayload());
 			
-			byte[] serializedPayload = data.getSerializedPayload();
+			//byte[] serializedPayload = data.getSerializedPayload();
 			
 			RTPSByteBuffer is = data.getSerializedPayloadInputStream();
 
