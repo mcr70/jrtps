@@ -7,7 +7,8 @@ import alt.rtps.transport.RTPSByteBuffer;
 public class TopicDataMarshaller extends Marshaller<TopicData> {
 
 	@Override
-	public TopicData unmarshall(RTPSByteBuffer bb) {
+	public TopicData unmarshall(Data data) {
+		RTPSByteBuffer bb = data.getSerializedPayloadInputStream();
 		TopicData wd = new TopicData(null, bb);
 		
 		return wd;

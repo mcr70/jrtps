@@ -17,6 +17,6 @@ public abstract class Marshaller<T> {
 		return m;
 	}
 
-	public abstract T unmarshall(RTPSByteBuffer bb);
+	public abstract T unmarshall(Data data);
 	public abstract Data marshall(T data);
 }

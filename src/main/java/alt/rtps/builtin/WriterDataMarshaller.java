@@ -11,12 +11,12 @@ import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
-import alt.rtps.types.EntityId_t;
 
 public class WriterDataMarshaller extends Marshaller<WriterData> {
 
 	@Override
-	public WriterData unmarshall(RTPSByteBuffer bb) {
+	public WriterData unmarshall(Data data) {
+		RTPSByteBuffer bb = data.getSerializedPayloadInputStream();
 		WriterData wd = new WriterData(bb);
 		
 		return wd;
