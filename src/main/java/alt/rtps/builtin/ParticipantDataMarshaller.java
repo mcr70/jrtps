@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import alt.rtps.message.Data;
+import alt.rtps.message.ParameterListEncapsulation;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.message.parameter.DefaultMulticastLocator;
 import alt.rtps.message.parameter.DefaultUnicastLocator;
@@ -78,8 +79,9 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 		
 		//Data data = new Data(EntityId_t.UNKNOWN_ENTITY, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
+		// 1, pd.getGuid(), null, payloadParams);
 		Data data = new Data(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
-				1, pd.getGuid(), null, payloadParams);
+				1, pd.getGuid(), null, new ParameterListEncapsulation(payloadParams));
 		
 		return data;
 	}
