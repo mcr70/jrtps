@@ -39,8 +39,8 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 	
 	@Override
 	public Data marshall(ParticipantData pd) {
-		List<Parameter> inlineQosParams = new LinkedList<Parameter>();
-		inlineQosParams.add(new Sentinel());
+//		List<Parameter> inlineQosParams = new LinkedList<Parameter>();
+//		inlineQosParams.add(new Sentinel());
 
 		List<Parameter> payloadParams = new LinkedList<Parameter>(); 
 		// ---  Start of ParameterList
@@ -76,7 +76,7 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 		//Data data = new Data(EntityId_t.UNKNOWN_ENTITY, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
 		Data data = new Data(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
-				1, pd.getGuid(), inlineQosParams, payloadParams);
+				1, pd.getGuid(), null, payloadParams);
 		
 		return data;
 	}
