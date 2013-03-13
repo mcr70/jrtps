@@ -30,12 +30,30 @@ public class GUID_t {
 		return other != null && prefix.equals(other.prefix) && entityId.equals(other.entityId);
 	}
 	
-	public String toString() {
-		return prefix.toString() + ", " + entityId.toString();
-	}
-
 	public void writeTo(RTPSByteBuffer buffer) {
 		prefix.writeTo(buffer);
 		entityId.writeTo(buffer);
+	}
+
+	/**
+	 * Gets this GUID as a byte array. 
+	 * @return a copy of the byte array representing this GUID
+	 */
+	public byte[] getBytes() {
+		byte[] guid_bytes = new byte[16];
+//		byte[] prefix_bytes = prefix.getBytes();
+//		byte[] entity_bytes = entityId.getBytes();
+//		
+//		System.arraycopy(prefix_bytes, 0, guid_bytes, 0, prefix_bytes.length);
+//		System.arraycopy(entity_bytes, 0, guid_bytes, 12, 4);
+		RTPSByteBuffer bb = new RTPSByteBuffer(guid_bytes);
+		writeTo(bb);
+		
+		return guid_bytes;
+	}
+
+
+	public String toString() {
+		return prefix.toString() + ", " + entityId.toString();
 	}
 }
