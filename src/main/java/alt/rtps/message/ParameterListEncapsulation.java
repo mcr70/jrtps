@@ -20,6 +20,10 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 	}
 
 
+	public ParameterList getParameterList() {
+		return parameters;
+	}
+	
 	@Override
 	public boolean containsData() {
 		return true; // TODO: how do we represent key in serialized payload

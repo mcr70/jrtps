@@ -43,7 +43,7 @@ public class Data extends SubMessage {
 
 	//private List<Parameter> inlineQosParams = new LinkedList<Parameter>();
 	private ParameterList inlineQosParams;
-	private byte[] serializedPayload;
+	private DataEncapsulation dataEncapsulation;
 
 	
 	
@@ -59,7 +59,7 @@ public class Data extends SubMessage {
 	 * @param payloadParams
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
-			GUID_t participantGuid, ParameterList inlineQosParams, DataEncapsulation dataEncapsulation) {
+			GUID_t participantGuid, ParameterList inlineQosParams, DataEncapsulation dEnc) {
 		
 		super(new SubMessageHeader(0x15));
 		
@@ -72,14 +72,14 @@ public class Data extends SubMessage {
 			this.inlineQosParams = inlineQosParams;
 		}
 
-		if (dataEncapsulation.containsData()) {
+		if (dEnc.containsData()) {
 			header.flags |= 0x4; // dataFlag	
 		}
 		else {
 			header.flags |= 0x8; // keyFlag
 		}
 
-		serializedPayload = dataEncapsulation.getSerializedPayload();
+		this.dataEncapsulation = dEnc;
 	}
 	
 	/**
@@ -141,16 +141,18 @@ public class Data extends SubMessage {
 		if (dataFlag() || keyFlag()) { 
 			bb.align(4); // Each submessage is aligned on 32-bit boundary, @see 9.4.1 Overall Structure
 			int end_count = bb.position(); // end of bytes read so far from the beginning
-
+			
+			byte[] serializedPayload = null;
 			if (header.submessageLength != 0) {
-				this.serializedPayload = new byte[header.submessageLength - (end_count-start_count)];
+				serializedPayload = new byte[header.submessageLength - (end_count-start_count)];
 			}
 			else { // SubMessage is the last one. Rest of the bytes are read. @see 8.3.3.2.3
 				ByteBuffer buffer = bb.getBuffer();
-				this.serializedPayload = new byte[buffer.capacity() - buffer.position()];
+				serializedPayload = new byte[buffer.capacity() - buffer.position()];
 			}
 			
 			bb.read(serializedPayload);
+			dataEncapsulation = DataEncapsulation.createInstance(serializedPayload);
 		}
 	}
 	
@@ -167,34 +169,7 @@ public class Data extends SubMessage {
 	}
 
 	
-	
-	public RTPSByteBuffer getSerializedPayloadInputStream() {
-		RTPSByteBuffer bb = null;
-		
-		if (serializedPayload == null) {
-			return new RTPSByteBuffer(new byte[0]);
-		}
-		
-		// Check encapsulation header. @see table 10.1
-		if (serializedPayload[0] == 0 && serializedPayload[1] <= 3) { // known encapsulation header
-			boolean littleEndian = (serializedPayload[1] & 0x01) == 0x01;
-			
-			bb = new RTPSByteBuffer(serializedPayload);
-			if (littleEndian) {
-				bb.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-			}
-			else {
-				bb.getBuffer().order(ByteOrder.BIG_ENDIAN);
-			}
-		}
-		else {
-			bb = new RTPSByteBuffer(serializedPayload);
-		}
-		
-		bb.read_octet(); bb.read_octet(); // u_short options, not recognized
-		
-		return bb;
-	}
+
 	
 	public  short getExtraFlags() {
 		return extraFlags;
@@ -217,11 +192,15 @@ public class Data extends SubMessage {
 
 		if (dataFlag() || keyFlag()) { 
 			buffer.align(4);
-			buffer.write(serializedPayload); // TODO: check this
+			buffer.write(dataEncapsulation.getSerializedPayload()); // TODO: check this
 		}
 	}
 
 
+	public DataEncapsulation getDataEncapsulation() {
+		return dataEncapsulation;
+	}
+	
 	public String toString() {
 		StringBuffer sb = new StringBuffer(super.toString());
 		sb.append(", readerId: " + getReaderId());

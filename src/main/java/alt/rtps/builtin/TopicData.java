@@ -1,25 +1,25 @@
 package alt.rtps.builtin;
 
+import java.util.Iterator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
-import alt.rtps.message.parameter.ParameterFactory;
+import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
-import alt.rtps.transport.RTPSByteBuffer;
-import alt.rtps.types.BuiltinTopicKey_t;
 import alt.rtps.types.GUID_t;
 
 public class TopicData extends DiscoveredData {
 	private static final Logger log = LoggerFactory.getLogger(TopicData.class);
+	
 
-	public TopicData(KeyHash keyHash, RTPSByteBuffer buffer) {
-		boolean moreParameters = buffer.getBuffer().remaining() > 0; //true;
-		while (moreParameters) {
-			Parameter param = ParameterFactory.readParameter(buffer);
+	public TopicData(ParameterList paramterList) {
+		Iterator<Parameter> iter = paramterList.getParameters().iterator();
+		while (iter.hasNext()) {
+			Parameter param = iter.next();
 
 			log.debug("{}", param);
 			switch(param.getParameterId()) {
@@ -44,4 +44,5 @@ public class TopicData extends DiscoveredData {
 	public TopicData(String typeName, String topicName, GUID_t key) {
 		super(typeName, topicName, key);
 	}
+
 }

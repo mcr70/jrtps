@@ -23,7 +23,6 @@ public class QosPartition extends Parameter implements QualityOfService {
 	
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		//readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
 		int len = bb.read_long();
 		this.partitions = new String[len];
 		for (int i = 0; i < len; i++) {

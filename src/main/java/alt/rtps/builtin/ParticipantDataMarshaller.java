@@ -1,7 +1,5 @@
 package alt.rtps.builtin;
 
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import alt.rtps.message.Data;
@@ -11,7 +9,6 @@ import alt.rtps.message.parameter.DefaultMulticastLocator;
 import alt.rtps.message.parameter.DefaultUnicastLocator;
 import alt.rtps.message.parameter.MetatrafficMulticastLocator;
 import alt.rtps.message.parameter.MetatrafficUnicastLocator;
-import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.message.parameter.ParticipantGuid;
 import alt.rtps.message.parameter.ParticipantLeaseDuration;
@@ -19,7 +16,6 @@ import alt.rtps.message.parameter.ProtocolVersion;
 import alt.rtps.message.parameter.Sentinel;
 import alt.rtps.message.parameter.VendorId;
 import alt.rtps.transport.Marshaller;
-import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.Locator_t;
 
@@ -33,8 +29,8 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
 	public ParticipantData unmarshall(Data data) {
-		RTPSByteBuffer bb = data.getSerializedPayloadInputStream();
-		ParticipantData pd = new ParticipantData(bb);
+		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data.getDataEncapsulation();
+		ParticipantData pd = new ParticipantData(plEnc.getParameterList());
 		
 		return pd;
 	}
@@ -42,12 +38,7 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 	
 	@Override
 	public Data marshall(ParticipantData pd) {
-//		List<Parameter> inlineQosParams = new LinkedList<Parameter>();
-//		inlineQosParams.add(new Sentinel());
-
-		//List<Parameter> payloadParams = new LinkedList<Parameter>();
 		ParameterList payloadParams = new ParameterList();
-		// ---  Start of ParameterList
 
 		payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
 		payloadParams.add(new VendorId(pd.getVendorId()));
@@ -76,11 +67,8 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 		payloadParams.add(new ParticipantGuid(pd.getGuid()));
 		payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
 		payloadParams.add(new Sentinel());
-		// ---  End of ParameterList
 
 		
-		//Data data = new Data(EntityId_t.UNKNOWN_ENTITY, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
-		// 1, pd.getGuid(), null, payloadParams);
 		Data data = new Data(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
 				1, pd.getGuid(), null, new ParameterListEncapsulation(payloadParams));
 		

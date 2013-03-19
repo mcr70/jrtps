@@ -94,6 +94,7 @@ public class PrintMessage {
 			System.out.println("    readerID: " + data.getReaderId());
 			System.out.println("    writerID: " + data.getWriterId());
 			System.out.println("    writerSN: " + data.getWriterSequenceNumber());
+		}
 			//System.out.println("    parameters: " + data.getParameters());
 			//System.out.println("    serialized payload, length: " + data.getSerializedPayload().length + 
 			//		", encapsulation scheme: " + (data.getSerializedPayload()[0] << 8 | data.getSerializedPayload()[1]));
@@ -102,18 +103,18 @@ public class PrintMessage {
 			
 			//byte[] serializedPayload = data.getSerializedPayload();
 			
-			RTPSByteBuffer is = data.getSerializedPayloadInputStream();
-
-			while (true) {
-				Parameter param = ParameterFactory.readParameter(is);
-				System.out.println("      " + param);
-				if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
-					break; // TODO: Add some control token to CDRInputStream that counts bytes read and 
-					       //       fails if expected_read_count+1 is reached 
-				}
-			}
-			
-		}
+//			data.getDataEncapsulation();
+//
+//			while (true) {
+//				Parameter param = ParameterFactory.readParameter(is);
+//				System.out.println("      " + param);
+//				if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
+//					break; // TODO: Add some control token to CDRInputStream that counts bytes read and 
+//					       //       fails if expected_read_count+1 is reached 
+//				}
+//			}
+//			
+//		}
 	}
 
 	private static void printPayload(byte[] serializedPayload) {
