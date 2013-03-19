@@ -5,7 +5,6 @@ import java.util.List;
 
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.QualityOfService;
-import alt.rtps.types.BuiltinTopicKey_t;
 import alt.rtps.types.GUID_t;
 
 public class DiscoveredData {

@@ -1,15 +1,15 @@
 package alt.rtps.builtin;
 
 import alt.rtps.message.Data;
+import alt.rtps.message.ParameterListEncapsulation;
 import alt.rtps.transport.Marshaller;
-import alt.rtps.transport.RTPSByteBuffer;
 
 public class ReaderDataMarshaller extends Marshaller<ReaderData> {
 
 	@Override
 	public ReaderData unmarshall(Data data) {
-		RTPSByteBuffer bb = data.getSerializedPayloadInputStream();
-		ReaderData rd = new ReaderData(bb);
+		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data.getDataEncapsulation();
+		ReaderData rd = new ReaderData(plEnc.getParameterList());
 		
 		return rd;
 	}

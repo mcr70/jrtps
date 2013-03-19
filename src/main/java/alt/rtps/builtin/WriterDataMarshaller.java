@@ -4,20 +4,20 @@ import java.util.LinkedList;
 import java.util.List;
 
 import alt.rtps.message.Data;
+import alt.rtps.message.ParameterListEncapsulation;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.Sentinel;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.Marshaller;
-import alt.rtps.transport.RTPSByteBuffer;
 
 public class WriterDataMarshaller extends Marshaller<WriterData> {
 
 	@Override
 	public WriterData unmarshall(Data data) {
-		RTPSByteBuffer bb = data.getSerializedPayloadInputStream();
-		WriterData wd = new WriterData(bb);
+		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data.getDataEncapsulation();
+		WriterData wd = new WriterData(plEnc.getParameterList());
 		
 		return wd;
 	}

@@ -1,24 +1,25 @@
 package alt.rtps.builtin;
 
+import java.util.Iterator;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
-import alt.rtps.message.parameter.ParameterFactory;
+import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
-import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.GUID_t;
 
 public class WriterData extends DiscoveredData {
 	private static final Logger log = LoggerFactory.getLogger(WriterData.class);
 	
-	public WriterData(RTPSByteBuffer buffer) {
-		boolean moreParameters = buffer.getBuffer().remaining() > 0; //true;
-		while (moreParameters) {
-			Parameter param = ParameterFactory.readParameter(buffer);
+	public WriterData(ParameterList parameterList) {
+		Iterator<Parameter> iter = parameterList.getParameters().iterator();
+		while (iter.hasNext()) {
+			Parameter param = iter.next();
 
 			log.trace("{}", param);
 			switch(param.getParameterId()) {
@@ -34,7 +35,7 @@ public class WriterData extends DiscoveredData {
 			case PID_KEY_HASH:
 				super.keyHash = (KeyHash) param; break;
 			case PID_SENTINEL:
-				moreParameters = false; break;
+				break;
 			case PID_PAD:
 				// Ignore
 				break;

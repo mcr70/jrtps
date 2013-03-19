@@ -13,12 +13,6 @@
 			<artifactId>logback-classic</artifactId>
 			<version>1.0.9</version>
 		</dependency>
-
-		<dependency>                         <!-- TODO: Get rid of this dependency -->
-			<groupId>org.omg</groupId>
-			<artifactId>org.omg.dds</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
 	</dependencies>
 
 	<build>

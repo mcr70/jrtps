@@ -2,6 +2,7 @@ package alt.rtps.builtin;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.slf4j.LoggerFactory;
@@ -13,13 +14,12 @@ import alt.rtps.message.parameter.EndpointSet;
 import alt.rtps.message.parameter.MetatrafficMulticastLocator;
 import alt.rtps.message.parameter.MetatrafficUnicastLocator;
 import alt.rtps.message.parameter.Parameter;
-import alt.rtps.message.parameter.ParameterFactory;
+import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.message.parameter.ParticipantGuid;
 import alt.rtps.message.parameter.ParticipantLeaseDuration;
 import alt.rtps.message.parameter.ParticipantManualLivelinessCount;
 import alt.rtps.message.parameter.ProtocolVersion;
 import alt.rtps.message.parameter.VendorId;
-import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
@@ -133,10 +133,11 @@ public class ParticipantData {
 	 * @param is
 	 * @throws IOException
 	 */
-	public ParticipantData(RTPSByteBuffer bb) {
-		boolean moreParameters = bb.getBuffer().remaining() > 0; //true;
-		while (moreParameters) {
-			Parameter param = ParameterFactory.readParameter(bb);
+	public ParticipantData(ParameterList parameterList) {
+		Iterator<Parameter> iterator = parameterList.getParameters().iterator();
+		
+		while (iterator.hasNext()) {
+			Parameter param = iterator.next();
 
 			log.trace("{}", param);
 			switch(param.getParameterId()) {
@@ -172,7 +173,6 @@ public class ParticipantData {
 				this.manualLivelinessCount = ((ParticipantManualLivelinessCount)param).getCount();
 				break;
 			case PID_SENTINEL:
-				moreParameters = false;
 				break;
 			default:
 				log.warn("Parameter {} not handled", param.getParameterId());

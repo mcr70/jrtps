@@ -23,7 +23,9 @@ public class ParameterFactory {
 		if (paramId != 0x0001 && paramId != 0x0000) { // SENTINEL & PAD
 			paramLength = bb.read_short();
 		}
-				
+			
+		log.trace("Parameter {}, length {}", paramId, paramLength);
+		
 		Parameter param = null;
 		
 		switch(paramId) {
