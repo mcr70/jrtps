@@ -121,8 +121,14 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 
 	public void align(int byteBoundary) {
 		int position = buffer.position();
-		int adv = position % byteBoundary;
-		buffer.position(position + adv);
+		int adv = (position % byteBoundary);
+		
+		if (adv != 0 && true) {
+			buffer.position(position + (byteBoundary - adv));
+		}
+		else {
+			buffer.position(position + adv);
+		}
 	}
 	
 	public ByteBuffer getBuffer() {
