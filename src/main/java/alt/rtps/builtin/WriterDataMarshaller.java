@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import alt.rtps.message.Data;
-import alt.rtps.message.ParameterListEncapsulation;
+import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.Parameter;
 import alt.rtps.message.parameter.Sentinel;
