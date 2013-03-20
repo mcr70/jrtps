@@ -29,6 +29,6 @@ public class RTPSByteBufferTest {
 		bb.align(4);
 		pos2 = bb.getBuffer().position();
 		
-		assertTrue(pos2 == 4);
+		assertTrue("pos 4!="+pos2, pos2 == 4);
 	}
 }
