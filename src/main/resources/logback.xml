@@ -5,7 +5,7 @@
 	<!-- No root logger configuration was found -->
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5p %c - %m%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5p %20.20c{10} %16.16t - %m%n</pattern>
 		</encoder>
 	</appender>
 
