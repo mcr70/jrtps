@@ -45,8 +45,6 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 		}
 
 		parameters.writeTo(bb);
-
-		//bb.align(4); // TODO: is this needed????
 		
 		byte[] serializedPayload = new byte[buffer.position()];
 		System.arraycopy(bb.getBuffer().array(), 0, serializedPayload, 0, serializedPayload.length);

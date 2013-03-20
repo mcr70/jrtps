@@ -37,9 +37,7 @@ public class Message implements Externalizable {
 	 */
 	public Message(RTPSByteBuffer bb) {
 		header = new Header(bb); 
-		
-		ReceiverState rs = new ReceiverState();
-		
+			
 		while(bb.getBuffer().hasRemaining()) {
 			bb.align(4);
 			SubMessageHeader smh = new SubMessageHeader(bb);
@@ -54,30 +52,16 @@ public class Message implements Externalizable {
 			case AckNack.KIND: sm = new AckNack(smh, bb); break;
 			case Heartbeat.KIND: sm = new Heartbeat(smh, bb); break;
 			case Gap.KIND: sm = new Gap(smh, bb); break;
-			case InfoTimestamp.KIND: sm = new InfoTimestamp(smh, bb); 
-				rs.setTimestamp(((InfoTimestamp)sm).getTimeStamp());
-				break;
-			case InfoSource.KIND: sm = new InfoSource(smh, bb); 
-				InfoSource infoSource = (InfoSource) sm;
-				rs.setSourceGuidPrefix(infoSource.getGuidPrefix());
-				rs.setSourceVersion(infoSource.getProtocolVersion());
-				rs.setSourceVendorId(infoSource.getVendorId());
-				break;
-			case InfoReplyIp4.KIND: sm = new InfoReplyIp4(smh, bb); 
-				rs.setInfoReplyIp4((InfoReplyIp4)sm);
-				break;
-			case InfoDestination.KIND: sm = new InfoDestination(smh, bb); 
-				rs.setDestinationGuidPrefix(((InfoDestination)sm).getGuidPrefix());
-				break;
-			case InfoReply.KIND: sm = new InfoReply(smh, bb); 
-				InfoReply ir = (InfoReply) sm;
-				rs.setUnicastReplyLocatorList(ir.getUnicastLocatorList());
-				rs.setMulticastReplyLocatorList(ir.getMulticastLocatorList());
-				break;
+			case InfoTimestamp.KIND: sm = new InfoTimestamp(smh, bb); break;
+			case InfoSource.KIND: sm = new InfoSource(smh, bb); break;
+			case InfoReplyIp4.KIND: sm = new InfoReplyIp4(smh, bb); break;
+			case InfoDestination.KIND: sm = new InfoDestination(smh, bb); break;
+			case InfoReply.KIND: sm = new InfoReply(smh, bb); break;
 			case NackFrag.KIND: sm = new NackFrag(smh, bb); break;
 			case HeartbeatFrag.KIND: sm = new HeartbeatFrag(smh, bb); break;
 			case Data.KIND: sm = new Data(smh, bb); break;
 			case DataFrag.KIND: sm = new DataFrag(smh, bb); break;
+			
 			default:
 				sm = new UnknownSubMessage(smh, bb);
 			}
