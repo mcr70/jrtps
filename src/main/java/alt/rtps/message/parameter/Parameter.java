@@ -1,5 +1,7 @@
 package alt.rtps.message.parameter;
 
+import java.util.Arrays;
+
 import alt.rtps.transport.RTPSByteBuffer;
 
 /**
@@ -10,7 +12,7 @@ import alt.rtps.transport.RTPSByteBuffer;
  */
 public abstract class Parameter {
 	private ParameterEnum parameterId;
-	private byte[] value;
+	private byte[] bytes;
 
 	/**
 	 * Constructs Parameter with null bytes. Bytes are expected to be read by
@@ -31,7 +33,7 @@ public abstract class Parameter {
 	 */
 	protected Parameter(ParameterEnum id, byte[] bytes) {
 		this.parameterId = id;
-		value = bytes;
+		bytes = bytes;
 	}
 
 	/**
@@ -48,7 +50,7 @@ public abstract class Parameter {
 	 * @return
 	 */
 	public byte[] getBytes() {
-		return value;
+		return bytes;
 	}
 	
 	public abstract void read(RTPSByteBuffer bb, int length);
@@ -60,8 +62,8 @@ public abstract class Parameter {
 	 * @param length
 	 */
 	protected final void readBytes(RTPSByteBuffer bb, int length) {
-		this.value = new byte[length];
-		bb.read(value);		
+		this.bytes = new byte[length];
+		bb.read(bytes);		
 	}
 
 	/**
@@ -76,19 +78,11 @@ public abstract class Parameter {
 	
 	public abstract void writeTo(RTPSByteBuffer bb);
 	
-	private void writeTo_NOT_USED(RTPSByteBuffer buffer) {
-		buffer.write_short(getParameterId().kind());
-		byte[] bytes = getBytes(); //  TODO: make abstract
-		buffer.write_short((short) bytes.length);
-		buffer.write(bytes);
-
-		// NOT called at the moment. paramterid.kind & length is calculated outside of this method
-		// @see Data.writeParameterList()
-		throw new RuntimeException("******************");
-
-	}
-
 	public String toString() {
+		if (bytes != null) {
+			return getClass().getSimpleName() + Arrays.toString(bytes);
+		}
+		
 		return getClass().getSimpleName();
 	}
 }
