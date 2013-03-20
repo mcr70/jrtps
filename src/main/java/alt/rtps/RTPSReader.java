@@ -57,7 +57,7 @@ public class RTPSReader extends Reader {
 	
 	@Override
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		log.debug("{}", hb);
+		log.debug("Got {}", hb);
 		sendAckNack(senderGuidPrefix, hb.getFirstSequenceNumber().getAsLong(), 
 				hb.getLastSequenceNumber().getAsLong(), hb.finalFlag());
 	}
@@ -89,7 +89,7 @@ public class RTPSReader extends Reader {
 		Message m = new Message(getGuid().prefix);
 		AckNack an = createAckNack(writerPrefix, firstSeqNum, lastSeqNum);
 		m.addSubMessage(an);
-
+		log.debug("Sending {}", an);
 		sendMessage(m, writerPrefix);
 	}
 

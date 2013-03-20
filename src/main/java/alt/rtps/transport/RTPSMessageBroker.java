@@ -64,7 +64,7 @@ public class RTPSMessageBroker {
 		RTPSWriter writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
 
 		if (writer != null) {
-			log.debug("Got AckNack for {}", writer.getGuid().entityId);
+			//log.debug("Got AckNack for {}", writer.getGuid().entityId);
 			writer.onAckNack(sourceGuidPrefix, ackNack);
 		}
 		else {
@@ -76,7 +76,7 @@ public class RTPSMessageBroker {
 		Reader reader = participant.getReader(data.getReaderId());
 		
 		if (reader != null) {
-			log.debug("Got Data for {}", reader.getGuid().entityId);
+			//log.debug("Got Data for {}", reader.getGuid().entityId);
 			reader.onData(prefix, data, timestamp);
 		}
 		else {
@@ -88,7 +88,7 @@ public class RTPSMessageBroker {
 		Reader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
 		
 		if (reader != null) {
-			log.debug("Got Heartbeat for {}", reader.getGuid().entityId);
+			//log.debug("Got Heartbeat for {}", reader.getGuid().entityId);
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {

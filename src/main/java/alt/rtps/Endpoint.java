@@ -67,14 +67,14 @@ public class Endpoint {
 	 * @return
 	 */
 	protected Set<Locator_t> getParticipantLocators(GuidPrefix_t prefix) {
-		log.debug("getParticipantLocators() for {}: {}", prefix, discoveredParticipants.keySet());
+		log.trace("getParticipantLocators() for {}: {}", prefix, discoveredParticipants.keySet());
 		
 		ParticipantData pd = discoveredParticipants.get(prefix);
 		if (pd != null) {
 			return pd.getAllLocators();
 		}
 		else {
-			log.debug("Unknown participant. Returning an empty list of locators");
+			log.trace("Unknown participant. Returning an empty list of locators");
 			// TODO: Should we return default MC address, or default participant UC address
 			return new HashSet<Locator_t>();
 		}
@@ -90,7 +90,7 @@ public class Endpoint {
 		Set<Locator_t> locators = getParticipantLocators(targetPrefix);
 
 		if (locators.size() > 0) {
-			log.debug("Sending message {} to {}", m, locators);
+			log.trace("Sending message {} to {}", m, locators);
 		}
 
 		for (Locator_t locator : locators) {
