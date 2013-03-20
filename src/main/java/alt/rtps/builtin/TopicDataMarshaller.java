@@ -1,7 +1,7 @@
 package alt.rtps.builtin;
 
 import alt.rtps.message.Data;
-import alt.rtps.message.ParameterListEncapsulation;
+import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.transport.Marshaller;
 
 public class TopicDataMarshaller extends Marshaller<TopicData> {
