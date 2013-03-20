@@ -20,8 +20,6 @@ public class ParameterList {
 	public ParameterList(RTPSByteBuffer bb) {
 		log.trace("Reading ParameterList from buffer");
 		while (true) {
-			
-			bb.align(4);
 			int pos1 = bb.getBuffer().position();
 			
 			Parameter param = ParameterFactory.readParameter(bb);		
