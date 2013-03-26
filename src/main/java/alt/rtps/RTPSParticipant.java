@@ -110,9 +110,9 @@ public class RTPSParticipant {
 		
 		// ----  Create a Writers for SEDP  ---------
 		RTPSWriter pw = createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, BUILTIN_TOPICNAME_PUBLICATION, wdm);
-		createDataForPublicationsWriter(pw);
+		//createDataForPublicationsWriter(pw);
 		RTPSWriter sw = createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, BUILTIN_TOPICNAME_SUBSCRIPTION, rdm);
-		createDataForSubscriptionWriter(sw);
+		//createDataForSubscriptionWriter(sw);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
 		
@@ -146,24 +146,6 @@ public class RTPSParticipant {
 		participantId++;
 	}
 
-
-
-
-
-	private void createDataForSubscriptionWriter(RTPSWriter sw) {
-		int i = 0;
-		for (Endpoint r : readerEndpoints) {
-			ReaderData rd = new ReaderData(r.getTopicName(), ReaderData.class.getName(), sw.getGuid());
-		}
-	}
-
-
-	private void createDataForPublicationsWriter(RTPSWriter pw) {
-		int i = 0;
-		for (Writer w : writerEndpoints) {
-			WriterData wd = new WriterData(w.getTopicName(), WriterData.class.getName(), pw.getGuid());
-		}
-	}
 
 
 	public void start() throws SocketException {
@@ -363,11 +345,8 @@ public class RTPSParticipant {
 	}
 
 	private ParticipantData createSPDPParticipantData() {
-		ParticipantData pd = null;
-
 		int epSet = createEndpointSet();
-
-		pd = new ParticipantData(guid.prefix, epSet, ucLoc,  mcLoc,  meta_ucLoc, meta_mcLoc);
+		ParticipantData pd = new ParticipantData(guid.prefix, epSet, ucLoc,  mcLoc,  meta_ucLoc, meta_mcLoc);
 
 		log.debug("Created ParticipantData: {}", pd);
 
@@ -381,19 +360,22 @@ public class RTPSParticipant {
 			eps |= r.endpointId();
 		}
 
-		System.out.println("EPS: " + new BuiltinEndpointSet(0x3cf));
-		System.out.println("EPS: " + new BuiltinEndpointSet(0x415));
+		//System.out.println("EPS: " + new BuiltinEndpointSet(0x3cf));
+		//System.out.println("EPS: " + new BuiltinEndpointSet(0x415));
 		eps = 0x0; // 0x3cf, 0x415
 
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
+		// Endpointset: Writers
 		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR;
 		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
 		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
 		
+		// Endpointset: Readers
+		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
 		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
+		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
 		
 
-		System.out.println("EPS: " + new BuiltinEndpointSet(eps));
+		log.debug("{}", new BuiltinEndpointSet(eps));
 
 		return eps;
 	}
