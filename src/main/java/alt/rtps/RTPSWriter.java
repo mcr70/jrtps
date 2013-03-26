@@ -87,7 +87,7 @@ public class RTPSWriter extends Writer {
 	}
 
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
-		log.debug("{}", ackNack);
+		log.debug("Got {}", ackNack);
 		
 		HistoryCache hc = getHistoryCache();
 		if (hc.size() > 0) {
@@ -108,13 +108,17 @@ public class RTPSWriter extends Writer {
 			
 			m.addSubMessage(data);
 		}
+		
+		log.debug("Sending {}", m);
+		sendMessage(m, senderPrefix);
 	}
 
 	private void sendHeartBeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat();
 		m.addSubMessage(hb);
-
+		
+		log.debug("Sending {}", m);
 		sendMessage(m, senderPrefix);
 	}
 

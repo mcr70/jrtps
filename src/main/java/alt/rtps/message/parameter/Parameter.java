@@ -33,7 +33,7 @@ public abstract class Parameter {
 	 */
 	protected Parameter(ParameterEnum id, byte[] bytes) {
 		this.parameterId = id;
-		bytes = bytes;
+		this.bytes = bytes;
 	}
 
 	/**

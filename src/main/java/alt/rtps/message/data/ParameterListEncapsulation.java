@@ -51,7 +51,7 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 			buffer.order(ByteOrder.BIG_ENDIAN);
 			bb.write(PL_CDR_BE_HEADER);
 		}
-
+		
 		parameters.writeTo(bb);
 		
 		byte[] serializedPayload = new byte[buffer.position()];
