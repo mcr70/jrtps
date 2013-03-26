@@ -12,10 +12,7 @@ import alt.rtps.types.GuidPrefix_t;
  */
 public class InfoDestination extends SubMessage {
 	public static final int KIND = 0x0e;
-	/**
-	 * Provides the GuidPrefix that should be used to reconstruct the
-	 * GUIDs of all the RTPS Reader entities whose EntityIds appears in the Submessages that follow.
-	 */
+
 	private GuidPrefix_t guidPrefix;
 
 	/**
@@ -40,28 +37,27 @@ public class InfoDestination extends SubMessage {
 	 * @param smh
 	 * @param bb
 	 */
-	public InfoDestination(SubMessageHeader smh, RTPSByteBuffer bb) {
+	InfoDestination(SubMessageHeader smh, RTPSByteBuffer bb) {
 		super(smh);
 		
-		readMessage(bb);
+		this.guidPrefix = new GuidPrefix_t(bb);
 	}
 	
 
-	private void readMessage(RTPSByteBuffer bb) {
-		this.guidPrefix = new GuidPrefix_t(bb);
-	}
-
+	/**
+	 * Provides the GuidPrefix that should be used to reconstruct the
+	 * GUIDs of all the RTPS Reader entities whose EntityIds appears in the Submessages that follow.
+	 */
 	public GuidPrefix_t getGuidPrefix() {
 		return guidPrefix;
 	}
 
-	public String toString() {
-		return super.toString() + ", " + guidPrefix;
-	}
-
-
 	@Override
 	public void writeTo(RTPSByteBuffer buffer) {
 		guidPrefix.writeTo(buffer);
+	}
+
+	public String toString() {
+		return super.toString() + ", " + guidPrefix;
 	}
 }

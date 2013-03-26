@@ -1,22 +1,26 @@
 package alt.rtps.transport;
 
-import alt.rtps.message.Data;
-import alt.rtps.message.InfoTimestamp;
-import alt.rtps.message.Message;
-import alt.rtps.types.GuidPrefix_t;
-import alt.rtps.types.Time_t;
+import alt.rtps.message.DataEncapsulation;
 
+/**
+ * Marshaller is used to transform Object to/from different data encodings.  
+ * 
+ * @author mcr70
+ *
+ * @param <T> Type of this Marshaller
+ */
 public abstract class Marshaller<T> {
-	public Message toMessage(GuidPrefix_t prefix, T data) {
-		Message m = new Message(prefix);
+	/**
+	 * Unmarshalls given DataEncapsulation to Object.
+	 * @param dEnc
+	 * @return
+	 */
+	public abstract T unmarshall(DataEncapsulation dEnc);
 
-		InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
-		m.addSubMessage(iTime);
-		m.addSubMessage(marshall(data));
-
-		return m;
-	}
-
-	public abstract T unmarshall(Data data);
-	public abstract Data marshall(T data);
+	/**
+	 * Marshalls given Object to DataEncapsulation
+	 * @param data 
+	 * @return
+	 */
+	public abstract DataEncapsulation marshall(T data);
 }

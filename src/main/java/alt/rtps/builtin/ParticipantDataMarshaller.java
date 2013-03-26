@@ -2,7 +2,7 @@ package alt.rtps.builtin;
 
 import java.util.Set;
 
-import alt.rtps.message.Data;
+import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.message.parameter.DefaultMulticastLocator;
@@ -16,7 +16,6 @@ import alt.rtps.message.parameter.ProtocolVersion;
 import alt.rtps.message.parameter.Sentinel;
 import alt.rtps.message.parameter.VendorId;
 import alt.rtps.transport.Marshaller;
-import alt.rtps.types.EntityId_t;
 import alt.rtps.types.Locator_t;
 
 /**
@@ -28,8 +27,8 @@ import alt.rtps.types.Locator_t;
 public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
-	public ParticipantData unmarshall(Data data) {
-		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data.getDataEncapsulation();
+	public ParticipantData unmarshall(DataEncapsulation data) {
+		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
 		ParticipantData pd = new ParticipantData(plEnc.getParameterList());
 		
 		return pd;
@@ -37,7 +36,7 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	
 	@Override
-	public Data marshall(ParticipantData pd) {
+	public DataEncapsulation marshall(ParticipantData pd) {
 		ParameterList payloadParams = new ParameterList();
 
 		payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
@@ -67,11 +66,7 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 		payloadParams.add(new ParticipantGuid(pd.getGuid()));
 		payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
 		payloadParams.add(new Sentinel());
-
 		
-		Data data = new Data(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER,
-				1, pd.getGuid(), null, new ParameterListEncapsulation(payloadParams));
-		
-		return data;
+		return new ParameterListEncapsulation(payloadParams);
 	}
 }

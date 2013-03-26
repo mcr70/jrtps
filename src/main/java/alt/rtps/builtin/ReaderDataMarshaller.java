@@ -1,23 +1,35 @@
 package alt.rtps.builtin;
 
-import alt.rtps.message.Data;
+import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
+import alt.rtps.message.parameter.KeyHash;
+import alt.rtps.message.parameter.ParameterList;
+import alt.rtps.message.parameter.Sentinel;
+import alt.rtps.message.parameter.TopicName;
+import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.Marshaller;
 
 public class ReaderDataMarshaller extends Marshaller<ReaderData> {
 
 	@Override
-	public ReaderData unmarshall(Data data) {
-		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data.getDataEncapsulation();
+	public ReaderData unmarshall(DataEncapsulation data) {
+		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
 		ReaderData rd = new ReaderData(plEnc.getParameterList());
 		
 		return rd;
 	}
 
 	@Override
-	public Data marshall(ReaderData data) {
-		System.out.println("ReaderDaraMarshaller.toData() NOT implemented");
-		return null;
-	}
+	public DataEncapsulation marshall(ReaderData rd) {
+		ParameterList payloadParams = new ParameterList();
+		 
+		payloadParams.add(new TopicName(rd.getTopicName()));
+		payloadParams.add(new TypeName(rd.getTypeName()));
+		payloadParams.add(new KeyHash(rd.getKey().getBytes()));
+		
+		// addQos(wd, payLoadParams);
+		payloadParams.add(new Sentinel());
 
+		return new ParameterListEncapsulation(payloadParams);
+	}
 }

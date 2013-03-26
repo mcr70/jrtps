@@ -54,25 +54,19 @@ public class RTPSReader extends Reader {
 	public void addListener(DataListener listener) {
 		listeners.add(listener);
 	}
-	
-	@Override
-	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		log.debug("Got {}", hb);
-		sendAckNack(senderGuidPrefix, hb.getFirstSequenceNumber().getAsLong(), 
-				hb.getLastSequenceNumber().getAsLong(), hb.finalFlag());
-	}
 
 	@Override
 	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) {
 		
-		Object obj = marshaller.unmarshall(data);
+		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
+		GUID_t writerGuid = new GUID_t(prefix, data.getWriterId()); 
 		
 		if (obj instanceof DiscoveredData) {
-			GUID_t writerGuid = new GUID_t(prefix, data.getWriterId()); // TODO: Do we need this info on discovered data
 			((DiscoveredData) obj).setWriterGuid(writerGuid); 
 		}
 		
-		HistoryCache hc = getHistoryCache(prefix);
+		//HistoryCache hc = getHistoryCache(prefix);
+		HistoryCache hc = getHistoryCache(writerGuid);
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 		
 		if (dataAdded) {
@@ -83,21 +77,24 @@ public class RTPSReader extends Reader {
 		}
 	}
 
-
-
-	private void sendAckNack(GuidPrefix_t writerPrefix, long firstSeqNum, long lastSeqNum, boolean finalFlag) {
+	
+	@Override
+	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
+		log.debug("Got {}", hb); 
 		Message m = new Message(getGuid().prefix);
-		AckNack an = createAckNack(writerPrefix, firstSeqNum, lastSeqNum);
+		AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
 		m.addSubMessage(an);
 		log.debug("Sending {}", an);
-		sendMessage(m, writerPrefix);
+		sendMessage(m, senderGuidPrefix);
 	}
 
-	private AckNack createAckNack(GuidPrefix_t writerPrefix, long seqNumFirst, long seqNumLast) {
+
+
+	private AckNack createAckNack(GUID_t writerGuid, long seqNumFirst, long seqNumLast) {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 		
-		HistoryCache hc = getHistoryCache(writerPrefix);
+		HistoryCache hc = getHistoryCache(writerGuid);
 		seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 

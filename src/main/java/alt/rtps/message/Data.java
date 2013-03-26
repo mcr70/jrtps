@@ -25,30 +25,15 @@ public class Data extends SubMessage {
 	private static final Logger log = LoggerFactory.getLogger(Data.class);
 	
 	private short extraFlags = 0;
-	/**
-	 * Identifies the RTPS Reader entity that is being informed of the change to the data-object.
-	 */
 	private EntityId_t readerId;
-	/**
-	 * Identifies the RTPS Writer entity that made the change to the data-object.
-	 */
 	private EntityId_t writerId;
-	/**
-	 * Uniquely identifies the change and the relative order for all changes made by the RTPS Writer 
-	 * identified by the writerGuid. Each change gets a consecutive sequence number. Each RTPS
-	 * Writer maintains is own sequence number.
-	 */
 	private SequenceNumber_t writerSN;
-
-	//private List<Parameter> inlineQosParams = new LinkedList<Parameter>();
 	private ParameterList inlineQosParams;
 	private DataEncapsulation dataEncapsulation;
-
-	
 	
 	
 	/**
-	 * Constructor for creating a Data message used by SPDPbuiltinParticipantData.
+	 * Constructor for creating a Data message.
 	 * 
 	 * @param readerId
 	 * @param writerId
@@ -58,7 +43,7 @@ public class Data extends SubMessage {
 	 * @param payloadParams
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
-			GUID_t participantGuid, ParameterList inlineQosParams, DataEncapsulation dEnc) {
+			ParameterList inlineQosParams, DataEncapsulation dEnc) {
 		
 		super(new SubMessageHeader(0x15));
 		
@@ -87,7 +72,7 @@ public class Data extends SubMessage {
 	 * @param smh
 	 * @param bb
 	 */
-	public Data(SubMessageHeader smh, RTPSByteBuffer bb) {
+	Data(SubMessageHeader smh, RTPSByteBuffer bb) {
 		super(smh);
 		
 		if (dataFlag() && keyFlag()) {
@@ -95,33 +80,13 @@ public class Data extends SubMessage {
 			throw new IllegalStateException("This version of protocol does not allow Data submessage to contain both serialized data and serialized key (9.4.5.3.1)");
 		}
 		
-		readMessage(bb);
-	}
-	
-	public boolean inlineQosFlag() {
-		return (header.flags & 0x2) != 0;
-	}
-
-	public boolean dataFlag() {
-		return (header.flags & 0x4) != 0;
-	}
-
-	public boolean keyFlag() {
-		return (header.flags & 0x8) != 0;
-	}
-	
-	
-	/**
-	 * @see 9.4.5.3
-	 */
-	private void readMessage(RTPSByteBuffer bb) {
 		int start_count = bb.position(); // start of bytes read so far from the beginning
 		
 		this.extraFlags = (short) bb.read_short();
 		int octetsToInlineQos = bb.read_short() & 0xffff;
 		
 		int currentCount = bb.position(); // count bytes to inline qos
-
+		
 		this.readerId = EntityId_t.readEntityId(bb);
 		this.writerId = EntityId_t.readEntityId(bb);
 		this.writerSN = new SequenceNumber_t(bb);
@@ -130,6 +95,8 @@ public class Data extends SubMessage {
 		int unknownOctets = octetsToInlineQos - bytesRead;
 		
 		for (int i = 0; i < unknownOctets; i++) {
+			// TODO: Instead of looping, we should do just
+			// newPos = bb.getBuffer.position() + unknownOctets or something like that
 			bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3 octetsToInlineQos
 		}
 		
@@ -155,14 +122,54 @@ public class Data extends SubMessage {
 		}
 	}
 	
+	/**
+	 * Indicates to the Reader the presence of a ParameterList
+	 * containing QoS parameters that should be used to interpret the message.
+	 * @return
+	 */
+	public boolean inlineQosFlag() {
+		return (header.flags & 0x2) != 0;
+	}
+	
+	/**
+	 * Indicates to the Reader that the dataPayload submessage element
+	 * contains the serialized value of the data-object.
+	 * @return
+	 */
+	public boolean dataFlag() {
+		return (header.flags & 0x4) != 0;
+	}
+
+	/**
+	 * Indicates to the Reader that the dataPayload submessage element
+	 * contains the serialized value of the key of the data-object.
+	 * @return
+	 */
+	public boolean keyFlag() {
+		return (header.flags & 0x8) != 0;
+	}
+	
+	
+	/**
+	 * Identifies the RTPS Reader entity that is being informed of the change to the data-object.
+	 */
 	public EntityId_t getReaderId() {
 		return readerId;
 	}
 
+	/**
+	 * Identifies the RTPS Writer entity that made the change to the data-object.
+	 */
 	public EntityId_t getWriterId() {
 		return writerId;
 	}
-	
+
+	/**
+	 * Uniquely identifies the change and the relative order for all
+	 * changes made by the RTPS Writer identified by the writerGuid.
+	 * Each change gets a consecutive sequence number. Each RTPS
+	 * Writer maintains is own sequence number.
+	 */
 	public SequenceNumber_t getWriterSequenceNumber() {
 		return writerSN;
 	}

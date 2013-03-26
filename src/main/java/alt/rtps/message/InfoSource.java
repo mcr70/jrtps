@@ -6,6 +6,7 @@ import alt.rtps.types.ProtocolVersion_t;
 import alt.rtps.types.VendorId_t;
 
 /**
+ * This message modifies the logical source of the Submessages that follow.
  * 
  * @author mcr70
  * @see 9.4.5.10 InfoSource Submessage, 8.3.7.9 InfoSource
@@ -13,41 +14,46 @@ import alt.rtps.types.VendorId_t;
 public class InfoSource extends SubMessage {
 	public static final int KIND = 0x0c;
 	
-	/**
-	 * Indicates the protocol used to encapsulate subsequent Submessages.
-	 */
 	private ProtocolVersion_t protocolVersion;
-	/**
-	 * Indicates the VendorId of the vendor that encapsulated subsequent Submessages.
-	 */
 	private VendorId_t vendorId;
-	/**
-	 * Identifies the Participant that is the container of the RTPS Writer
-	 * entities that are the source of the Submessages that follow.
-	 */
 	private GuidPrefix_t guidPrefix;
 
-	public InfoSource(SubMessageHeader smh, RTPSByteBuffer is) {
+	public InfoSource(GuidPrefix_t guidPrefix) {
+		super(new SubMessageHeader(KIND));
+		
+		this.protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
+		this.vendorId = VendorId_t.VENDORID_JRTPS;
+		this.guidPrefix = guidPrefix;
+	}
+	
+	InfoSource(SubMessageHeader smh, RTPSByteBuffer is) {
 		super(smh);
 		
 		readMessage(is);
 	}
 
+	/**
+	 * Indicates the protocol used to encapsulate subsequent Submessages.
+	 */
 	public ProtocolVersion_t getProtocolVersion() {
 		return protocolVersion;
 	}
 	
+	/**
+	 * Indicates the VendorId of the vendor that encapsulated subsequent Submessages.
+	 */
 	public VendorId_t getVendorId() {
 		return vendorId;
 	}
 	
+	/**
+	 * Identifies the Participant that is the container of the RTPS Writer
+	 * entities that are the source of the Submessages that follow.
+	 */
 	public GuidPrefix_t getGuidPrefix() {
 		return guidPrefix;
 	}
 	
-	public String toString() {
-		return super.toString() + ", " + guidPrefix;
-	}
 	
 	private void readMessage(RTPSByteBuffer bb) {
 		bb.read_long(); // unused
@@ -63,5 +69,9 @@ public class InfoSource extends SubMessage {
 		protocolVersion.writeTo(buffer);
 		vendorId.writeTo(buffer);
 		guidPrefix.writeTo(buffer);
+	}
+	
+	public String toString() {
+		return super.toString() + ", " + guidPrefix;
 	}
 }

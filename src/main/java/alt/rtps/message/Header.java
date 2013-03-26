@@ -6,7 +6,8 @@ import alt.rtps.types.ProtocolVersion_t;
 import alt.rtps.types.VendorId_t;
 
 /**
- * 
+ * The Header identifies the message as belonging to the RTPS protocol. The Header identifies the version of the protocol
+ * and the vendor that sent the message.
  * @author mcr70
  *
  */
@@ -36,7 +37,6 @@ public class Header {
 	}
 
 
-
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write(hdrStart);
 		version.writeTo(buffer);
@@ -44,6 +44,27 @@ public class Header {
 		guidPrefix.writeTo(buffer);
 	}	
 	
+	/**
+	 * Defines a default prefix to use for all GUIDs that appear in the message.
+	 */
+	public GuidPrefix_t getGuidPrefix() {
+		return guidPrefix;
+	}
+
+	/**
+	 * Indicates the vendor that provides the implementation of the RTPS protocol.
+	 */
+	public VendorId_t getVendorId() {
+		return vendorId;
+	}
+	
+	/**
+	 * Identifies the version of the RTPS protocol.
+	 */
+	public ProtocolVersion_t getVersion() {
+		return version;
+	}
+
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(new String(hdrStart));
@@ -55,17 +76,5 @@ public class Header {
 		sb.append(guidPrefix.toString());
 
 		return sb.toString();
-	}
-
-	public GuidPrefix_t getGuidPrefix() {
-		return guidPrefix;
-	}
-
-	public VendorId_t getVendorId() {
-		return vendorId;
-	}
-	
-	public ProtocolVersion_t getVersion() {
-		return version;
 	}
 }

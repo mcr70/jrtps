@@ -7,6 +7,13 @@ import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 
+/**
+ * ParameterListEncapsulation is a specialization of DataEncapsulation which is used 
+ * by discovery.
+ * 
+ * @author mcr70
+ *
+ */
 public class ParameterListEncapsulation extends DataEncapsulation {
 	private ParameterList parameters;
 	private final boolean littleEndian;

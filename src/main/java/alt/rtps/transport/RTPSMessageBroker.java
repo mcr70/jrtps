@@ -76,11 +76,10 @@ public class RTPSMessageBroker {
 		Reader reader = participant.getReader(data.getReaderId());
 		
 		if (reader != null) {
-			//log.debug("Got Data for {}", reader.getGuid().entityId);
 			reader.onData(prefix, data, timestamp);
 		}
 		else {
-			log.debug("No Reader to handle Data from {}", data.getWriterId());
+			log.debug("No Reader ({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
 		}
 	}
 
@@ -88,7 +87,6 @@ public class RTPSMessageBroker {
 		Reader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
 		
 		if (reader != null) {
-			//log.debug("Got Heartbeat for {}", reader.getGuid().entityId);
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {

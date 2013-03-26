@@ -1,5 +1,7 @@
 package alt.rtps.types;
 
+import java.util.Arrays;
+
 import alt.rtps.transport.RTPSByteBuffer;
 
 /**
@@ -46,6 +48,10 @@ public class EntityId_t  {
 				entityKind == other.entityKind;
 	}
 
+	public int hashCode() {
+		return Arrays.hashCode(entityKey) + entityKind;
+	}
+	
 	/**
 	 * Checks whether this entity is a builtin entity or not
 	 * @return

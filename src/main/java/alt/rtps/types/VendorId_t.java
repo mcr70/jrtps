@@ -55,6 +55,9 @@ public class VendorId_t {
 			}
 			sb.append(')');
 		}
+		else if (bytes[0] == (byte)0xca && bytes[1] == (byte)0xfe) {
+			sb.append("(jRTPS)");
+		}
 		
 		return sb.toString();
 	}
