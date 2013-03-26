@@ -15,32 +15,9 @@ import alt.rtps.types.SequenceNumberSet;
 public class AckNack extends SubMessage {
 	public static final int KIND = 0x06;
 	
-	/**
-	 * Identifies the Reader entity that acknowledges receipt of certain
-	 * sequence numbers and/or requests to receive certain sequence numbers.
-	 */
 	private EntityId_t readerId;
-	/**
-	 * Identifies the Writer entity that is the target of the AckNack
-	 * message. This is the Writer Entity that is being asked to re-send
-	 * some sequence numbers or is being informed of the reception of
-	 * certain sequence numbers.
-	 */
 	private EntityId_t writerId;
-	/**
-	 * Communicates the state of the reader to the writer.
-	 * All sequence numbers up to the one prior to readerSNState.base
-	 * are confirmed as received by the reader.
-	 * The sequence numbers that appear in the set indicate missing
-	 * sequence numbers on the reader side. The ones that do not
-	 * appear in the set are undetermined (could be received or not).
-	 */
 	private SequenceNumberSet readerSNState;
-	/**
-	 * A counter that is incremented each time a new AckNack message is sent.
-	 * Provides the means for a Writer to detect duplicate AckNack messages that can result from 
-	 * the presence of redundant communication paths.
-	 */
 	private int count;
 	
 	public AckNack(EntityId_t readerId, EntityId_t writerId, SequenceNumberSet readerSnSet, int count) {
@@ -53,7 +30,7 @@ public class AckNack extends SubMessage {
 	}
 	
 	
-	public AckNack(SubMessageHeader smh, RTPSByteBuffer bb) {
+	AckNack(SubMessageHeader smh, RTPSByteBuffer bb) {
 		super(smh);
 		readMessage(bb);
 	}
@@ -62,18 +39,41 @@ public class AckNack extends SubMessage {
 		return (header.flags & 0x2) != 0;
 	}
 	
+	/**
+	 * Identifies the Reader entity that acknowledges receipt of certain
+	 * sequence numbers and/or requests to receive certain sequence numbers.
+	 */
 	public EntityId_t getReaderId() {
 		return readerId;
 	}
 	
+	/**
+	 * Identifies the Writer entity that is the target of the AckNack
+	 * message. This is the Writer Entity that is being asked to re-send
+	 * some sequence numbers or is being informed of the reception of
+	 * certain sequence numbers.
+	 */
 	public EntityId_t getWriterId() {
 		return writerId;
 	}
 	
+	/**
+	 * Communicates the state of the reader to the writer.
+	 * All sequence numbers up to the one prior to readerSNState.base
+	 * are confirmed as received by the reader.
+	 * The sequence numbers that appear in the set indicate missing
+	 * sequence numbers on the reader side. The ones that do not
+	 * appear in the set are undetermined (could be received or not).
+	 */
 	public SequenceNumberSet getReaderSNState() {
 		return readerSNState;
 	}
 	
+	/**
+	 * A counter that is incremented each time a new AckNack message is sent.
+	 * Provides the means for a Writer to detect duplicate AckNack messages that can result from 
+	 * the presence of redundant communication paths.
+	 */
 	public int getCount() {
 		return count;
 	}

@@ -3,16 +3,31 @@ package alt.rtps;
 import java.util.LinkedList;
 import java.util.List;
 
+import alt.rtps.types.GUID_t;
+
 class HistoryCache {
 	private List<CacheChange> changes = new LinkedList<CacheChange>();
 	private long seqNumMax = 0;
 	private long seqNumMin = 0;
+	private GUID_t guid; // HistoryCache belongs to a specific GUID_t
 	
+	
+	public HistoryCache(GUID_t guid) {
+		this.guid = guid;
+	}
 
 	List<CacheChange> getChanges() {
 		return changes;
 	}
 
+	/**
+	 * Get the Guid_t that this history cache belongs to
+	 * @return
+	 */
+	GUID_t getGuid() {
+		return guid;
+	}
+	
 	boolean containsSeqNum(long seqNumToCheck) {
 		if (seqNumToCheck >= seqNumMin && seqNumToCheck <= seqNumMax) {
 			for (CacheChange change : changes) {		

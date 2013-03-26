@@ -7,6 +7,12 @@ import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 
+/**
+ * This abstract class is a base class for different encapsulation schemes.
+ * 
+ * @author mcr70
+ *
+ */
 public abstract class DataEncapsulation {
 	public static final byte[] CDR_BE_HEADER = new byte[] {0,0, 0,0};
 	public static final byte[] CDR_LE_HEADER = new byte[] {0,1, 0,0};
@@ -18,8 +24,10 @@ public abstract class DataEncapsulation {
 		// TODO: implement me
 	}
 	
-
-	//public abstract byte[] getEncapsulationHeader();
+	/**
+	 * Checks whether this encapsulation holds data or key as serialized payload.
+	 * @return true, if this encapsulation holds data
+	 */
 	public abstract boolean containsData(); // as opposed to key 
 	
 	/**
@@ -31,6 +39,13 @@ public abstract class DataEncapsulation {
 	public abstract byte[] getSerializedPayload();
 
 
+	/**
+	 * Creates an instance of DataEncapsulation. Encapsulation identified by reading 
+	 * first 2 bytes of serializedPayload.
+	 * 
+	 * @param serializedPayload
+	 * @return
+	 */
 	public static DataEncapsulation createInstance(byte[] serializedPayload) {
 		RTPSByteBuffer bb = new RTPSByteBuffer(serializedPayload);
 		byte[] encapsulationHeader = new byte[2];

@@ -7,12 +7,15 @@ import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
+import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.Heartbeat;
+import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GuidPrefix_t;
+import alt.rtps.types.Time_t;
 
 /**
  * 
@@ -23,6 +26,7 @@ public class RTPSWriter extends Writer {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private Thread statelessResenderThread;
 	private boolean running;
+	private long seqNum = 0;
 	
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
@@ -52,7 +56,17 @@ public class RTPSWriter extends Writer {
 					List<CacheChange> changes = writer_cache.getChanges();
 					log.debug("Sending " + changes.size() + " changes");
 					for (CacheChange change : changes) { // TODO: ConcurrentModification
-						Message m = marshaller.toMessage(getGuid().prefix, change.getData());
+						Message m1 = new Message(getGuid().prefix);
+						
+						InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
+						m1.addSubMessage(iTime);
+						
+						DataEncapsulation dEnc = marshaller.marshall(change.getData());
+						Data data = new Data(EntityId_t.UNKNOWN_ENTITY, getGuid().entityId, seqNum++, null, dEnc);
+						
+						m1.addSubMessage(data);
+						
+						Message m = m1;
 						
 						sendToLocators(m, getMatchedEndpointLocators());
 					}
@@ -87,16 +101,13 @@ public class RTPSWriter extends Writer {
 	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = getHistoryCache().getChanges();
-		for (CacheChange cc : changes) {
-			Data d = createData(cc);
-			m.addSubMessage(d);
-		}
-	}
-
-	private Data createData(CacheChange cc) {
-		Data d = marshaller.marshall(cc.getData());
 		
-		return d;
+		for (CacheChange cc : changes) {
+			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
+			Data data = new Data(ackNack.getReaderId(), getGuid().entityId, seqNum++, null, dEnc);
+			
+			m.addSubMessage(data);
+		}
 	}
 
 	private void sendHeartBeat(GuidPrefix_t senderPrefix, AckNack ackNack) {

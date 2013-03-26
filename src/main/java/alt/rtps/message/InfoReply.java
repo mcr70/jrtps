@@ -16,42 +16,23 @@ import alt.rtps.types.Locator_t;
 public class InfoReply extends SubMessage {
 	public static final int KIND = 0x0f;
 	
-	/**
-	 * Indicates an alternative set of unicast addresses that the Writer
-	 * should use to reach the Readers when replying to the Submessages that follow.
-	 */
 	private List<Locator_t> unicastLocatorList = new LinkedList<Locator_t>();
-	/**
-	 * Indicates an alternative set of multicast addresses that the Writer
-	 * should use to reach the Readers when replying to the Submessages that follow.
-	 * Only present when the MulticastFlag is set.
-	 */
 	private List<Locator_t> multicastLocatorList = new LinkedList<Locator_t>();
+
+	public InfoReply(List<Locator_t> unicastLocators, List<Locator_t>multicastLocators) {
+		super(new SubMessageHeader(KIND));
+		
+		this.unicastLocatorList = unicastLocators;
+		this.multicastLocatorList = multicastLocators;
+		
+		if (multicastLocatorList != null || multicastLocatorList.size() > 0) {
+			header.flags |= 0x2;
+		}
+	}
 	
-	public InfoReply(SubMessageHeader smh, RTPSByteBuffer bb) {
+	InfoReply(SubMessageHeader smh, RTPSByteBuffer bb) {
 		super(smh);
 		
-		readMessage(bb);
-	}
-
-	/**
-	 * Returns the MulticastFlag. If true, message contains MulticastLocatorList
-	 * @return
-	 */
-	public boolean multicastFlag() {
-		return (header.flags & 0x2) != 0;
-	}
-
-	public List<Locator_t> getUnicastLocatorList() {
-		return unicastLocatorList;
-	}
-	
-	public List<Locator_t> getMulticastLocatorList() {
-		return multicastLocatorList;
-	}
-
-	
-	private void readMessage(RTPSByteBuffer bb) {
 		long numLocators = bb.read_long(); // ulong
 		for (int i = 0; i < numLocators; i++) {
 			Locator_t loc = new Locator_t(bb);
@@ -69,7 +50,32 @@ public class InfoReply extends SubMessage {
 		}
 	}
 
+	/**
+	 * Returns the MulticastFlag. If true, message contains MulticastLocatorList
+	 * @return
+	 */
+	public boolean multicastFlag() {
+		return (header.flags & 0x2) != 0;
+	}
 
+	/**
+	 * Indicates an alternative set of unicast addresses that the Writer
+	 * should use to reach the Readers when replying to the Submessages that follow.
+	 */
+	public List<Locator_t> getUnicastLocatorList() {
+		return unicastLocatorList;
+	}
+	
+	/**
+	 * Indicates an alternative set of multicast addresses that the Writer
+	 * should use to reach the Readers when replying to the Submessages that follow.
+	 * Only present when the MulticastFlag is set.
+	 */
+	public List<Locator_t> getMulticastLocatorList() {
+		return multicastLocatorList;
+	}
+
+	
 	@Override
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_long(unicastLocatorList.size());
@@ -83,5 +89,9 @@ public class InfoReply extends SubMessage {
 				loc.writeTo(buffer);
 			}			
 		}
+	}
+	
+	public String toString() {
+		return super.toString() + ", " + unicastLocatorList + ", " + multicastLocatorList;
 	}
 }

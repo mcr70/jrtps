@@ -12,6 +12,7 @@ import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
+import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 
@@ -23,7 +24,7 @@ public abstract class Reader extends Endpoint {
 	/**
 	 * Contains the history caches of matching writers. Each Reader may be matched with multiple writers.
 	 */
-	private HashMap<GuidPrefix_t, HistoryCache> readerCaches = new HashMap<>();
+	private HashMap<GUID_t, HistoryCache> readerCaches = new HashMap<>();
 	
 	
 	/**
@@ -44,16 +45,16 @@ public abstract class Reader extends Endpoint {
 	 * @param entityId
 	 * @param topicName 
 	 */
-	public Reader(GuidPrefix_t prefix, EntityId_t entityId, String topicName) {
+	protected Reader(GuidPrefix_t prefix, EntityId_t entityId, String topicName) {
 		super(prefix, entityId, topicName);
 	}
 
-	protected HistoryCache getHistoryCache(GuidPrefix_t writerPrefix) {
-		HistoryCache historyCache = readerCaches.get(writerPrefix);
+	protected HistoryCache getHistoryCache(GUID_t writerGuid) {
+		HistoryCache historyCache = readerCaches.get(writerGuid);
 		if (historyCache == null) {
-			log.debug("Creating new HistoryCache for writer {}", writerPrefix);
-			historyCache = new HistoryCache();
-			readerCaches.put(writerPrefix, historyCache);
+			log.debug("Creating new HistoryCache for writer {}", writerGuid);
+			historyCache = new HistoryCache(writerGuid);
+			readerCaches.put(writerGuid, historyCache);
 		}
 		
 		return historyCache;

@@ -1,5 +1,7 @@
 package alt.rtps.types;
 
+import java.util.Arrays;
+
 import alt.rtps.transport.RTPSByteBuffer;
 
 /**
@@ -25,11 +27,20 @@ public class GUID_t {
 		this.entityId = EntityId_t.readEntityId(bb);
 	}
 	
-		
-	public boolean equals(GUID_t other) {
-		return other != null && prefix.equals(other.prefix) && entityId.equals(other.entityId);
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof GUID_t) {
+			GUID_t o = (GUID_t) other;
+			return o != null && prefix.equals(o.prefix) && entityId.equals(o.entityId);	
+		}
+		return false;
 	}
 	
+	@Override
+	public int hashCode() {
+		return prefix.hashCode() + entityId.hashCode();
+	}
+
 	public void writeTo(RTPSByteBuffer buffer) {
 		prefix.writeTo(buffer);
 		entityId.writeTo(buffer);

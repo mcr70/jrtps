@@ -3,6 +3,12 @@ package alt.rtps.message.data;
 import alt.rtps.message.DataEncapsulation;
 import alt.rtps.transport.RTPSByteBuffer;
 
+/**
+ * CDREncapsulation. 
+ * 
+ * @author mcr70
+ *
+ */
 public class CDREncapsulation extends DataEncapsulation {
 
 	private final RTPSByteBuffer bb;

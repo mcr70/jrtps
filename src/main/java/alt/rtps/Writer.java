@@ -16,6 +16,7 @@ import alt.rtps.message.Message;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
+import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 /**
@@ -42,7 +43,7 @@ public abstract class Writer extends Endpoint {
 	/**
 	 * Contains the history of CacheChange changes for this Writer.
 	 */
-	protected HistoryCache writer_cache = new HistoryCache();
+	protected HistoryCache writer_cache;
 	
 
 	/**
@@ -53,6 +54,8 @@ public abstract class Writer extends Endpoint {
 	 */
 	public Writer(GuidPrefix_t prefix, EntityId_t entityId, String topicName) {
 		super(prefix, entityId, topicName);
+		
+		writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
 	}
 		
 	
@@ -98,28 +101,7 @@ public abstract class Writer extends Endpoint {
 	}
 
 
-	public void sendToLocator(Message m, Locator_t locator) {
-		log.debug("Sending {} to {}", m, locator.getSocketAddress());
-		
-		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(512));
-		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-		m.writeTo(buffer);
-		buffer.getBuffer().flip();
-		
-		//writeToFile(buffer.getBuffer(), "tmp/my-spdp-message.bin");
-		
-		try {
-			DatagramChannel channel = DatagramChannel.open();	
-			channel.connect(locator.getSocketAddress());
-			channel.write(buffer.getBuffer());
-			channel.close();
-		} 
-		catch (IOException e) {
-			log.error("Failed to send message to " + locator, e);
-		}
-	}
-	
-	public void sendToLocators(Message m, List<Locator_t> locators) {
+	protected void sendToLocators(Message m, List<Locator_t> locators) {
 		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(512));
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		m.writeTo(buffer);
@@ -160,7 +142,7 @@ public abstract class Writer extends Endpoint {
 	}
 
 
-	public HistoryCache getHistoryCache() {
+	protected HistoryCache getHistoryCache() {
 		return writer_cache;
 	}
 	

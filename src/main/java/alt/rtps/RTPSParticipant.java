@@ -23,13 +23,20 @@ import alt.rtps.builtin.WriterDataMarshaller;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.UDPReceiver;
-import alt.rtps.types.BuiltinTopicKey_t;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 
+/**
+ * RTPSParticipant is the main entry point to RTPS (DDS) domain.
+ * Participant is responsible for creating readers and writers and setting up
+ * network receivers.
+ * 
+ * @author mcr70
+ *
+ */
 public class RTPSParticipant {
 	private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
@@ -166,6 +173,14 @@ public class RTPSParticipant {
 		startWriters();
 	}
 
+	/**
+	 * Creates a new RTPSWriter.
+	 * 
+	 * @param eId
+	 * @param topicName
+	 * @param marshaller
+	 * @return
+	 */
 	public RTPSWriter createWriter(EntityId_t eId, String topicName, Marshaller marshaller) {
 		RTPSWriter writer = new RTPSWriter(guid.prefix, eId, topicName, marshaller);
 		writer.setDiscoveredParticipants(discoveredParticipants);
@@ -180,6 +195,14 @@ public class RTPSParticipant {
 		return writer;
 	}
 
+	/**
+	 * Creates a new RTPSReader.
+	 * 
+	 * @param eId
+	 * @param topicName
+	 * @param marshaller
+	 * @return
+	 */
 	public RTPSReader createReader(EntityId_t eId, String topicName, Marshaller marshaller) {
 		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
 		reader.setDiscoveredParticipants(discoveredParticipants);

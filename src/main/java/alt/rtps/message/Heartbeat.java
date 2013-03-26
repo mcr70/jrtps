@@ -4,6 +4,12 @@ import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.SequenceNumber_t;
 
+/**
+ * This message is sent from an RTPS Writer to an RTPS Reader to communicate 
+ * the sequence numbers of changes that the Writer has available.
+ * 
+ * @see 8.3.7.5
+ */
 public class Heartbeat extends SubMessage {
 	public static final int KIND = 0x07;
 	
@@ -26,36 +32,67 @@ public class Heartbeat extends SubMessage {
 		header.flags |= 2; // set FinalFlag. No response needed.
 	}
 	
-	public Heartbeat(SubMessageHeader smh, RTPSByteBuffer is) {
+	Heartbeat(SubMessageHeader smh, RTPSByteBuffer is) {
 		super(smh);
 		
 		readMessage(is);
 	}
 
+	/**
+	 * Appears in the Submessage header flags. Indicates whether the Reader 
+	 * is required to respond to the Heartbeat or if it is just an advisory heartbeat.
+	 * If finalFlag is set, Reader is not required to respond with AckNack.
+	 * 
+	 * @return
+	 */
 	public boolean finalFlag() {
 		return (header.flags & 0x2) != 0;
 	}
 
+	/**
+	 * Appears in the Submessage header flags. Indicates that the DDS DataWriter 
+	 * associated with the RTPS Writer of the message has manually asserted its LIVELINESS.
+	 * 
+	 * @return
+	 */
 	public boolean livelinessFlag() {
 		return (header.flags & 0x4) != 0;
 	}
 	
+	/**
+	 * Identifies the Reader Entity that is being informed of the availability of a set of sequence numbers.
+	 * Can be set to ENTITYID_UNKNOWN to indicate all readers for the writer that sent the message.
+	 */
 	public EntityId_t getReaderId() {
 		return readerId;
 	}
 	
+	/**
+	 * Identifies the Writer Entity to which the range of sequence numbers applies.
+	 */	
 	public EntityId_t getWriterId() {
 		return writerId;
 	}
 	
+	/**
+	 * Identifies the first (lowest) sequence number that is available in the Writer.
+	 */
 	public SequenceNumber_t getFirstSequenceNumber() {
 		return firstSN;
 	}
 
+	/**
+	 * Identifies the last (highest) sequence number that is available in the Writer.
+	 */
 	public SequenceNumber_t getLastSequenceNumber() {
 		return lastSN;
 	}
 
+	/**
+	 * A counter that is incremented each time a new Heartbeat message is sent.
+	 * Provides the means for a Reader to detect duplicate Heartbeat messages that 
+	 * can result from the presence of redundant communication paths.
+	 */
 	public int getCount() {
 		return count;
 	}
