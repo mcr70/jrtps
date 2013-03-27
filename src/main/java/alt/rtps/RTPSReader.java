@@ -24,14 +24,14 @@ public class RTPSReader extends Reader {
 	private List<DataListener> listeners = new LinkedList<DataListener>();
 	private int ackNackCount = 0;
 	private Marshaller marshaller;
-	
+
 	private final EntityId_t matchedEntity;
 
 	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
 		super(prefix, entityId, topicName);
-		
+
 		this.marshaller = marshaller;
-		
+
 		if (entityId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER)) {
 			matchedEntity = EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER;
 		}
@@ -57,18 +57,18 @@ public class RTPSReader extends Reader {
 
 	@Override
 	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) {
-		
+
 		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
 		GUID_t writerGuid = new GUID_t(prefix, data.getWriterId()); 
-		
+
 		if (obj instanceof DiscoveredData) {
 			((DiscoveredData) obj).setWriterGuid(writerGuid); 
 		}
-		
+
 		//HistoryCache hc = getHistoryCache(prefix);
 		HistoryCache hc = getHistoryCache(writerGuid);
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
-		
+
 		if (dataAdded) {
 			log.debug("Got " + obj.getClass().getSimpleName() + " for " + getGuid().entityId + ": " + data.getWriterSequenceNumber() + ", " + obj);
 			for (DataListener dl : listeners) {
@@ -77,15 +77,17 @@ public class RTPSReader extends Reader {
 		}
 	}
 
-	
+
 	@Override
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
 		log.debug("Got {}", hb); 
-		Message m = new Message(getGuid().prefix);
-		AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
-		m.addSubMessage(an);
-		log.debug("Sending {}", an);
-		sendMessage(m, senderGuidPrefix);
+		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
+			Message m = new Message(getGuid().prefix);
+			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
+			m.addSubMessage(an);
+			log.debug("Sending {}", an);
+			sendMessage(m, senderGuidPrefix);
+		}
 	}
 
 
@@ -93,13 +95,13 @@ public class RTPSReader extends Reader {
 	private AckNack createAckNack(GUID_t writerGuid, long seqNumFirst, long seqNumLast) {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
-		
+
 		HistoryCache hc = getHistoryCache(writerGuid);
 		seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
-		
+
 		AckNack an = new AckNack(getGuid().entityId, matchedEntity, snSet, ackNackCount++);
 
 		return an;
