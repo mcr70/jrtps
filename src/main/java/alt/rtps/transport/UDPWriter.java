@@ -23,7 +23,7 @@ public class UDPWriter {
 	}
 	
 	public void sendMessage(Message m) {
-		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(512)); // TODO: hardcoded 512
+		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		m.writeTo(buffer);
 		buffer.getBuffer().flip();

@@ -99,7 +99,7 @@ public class EntityId_t  {
 					entityId = new VendorSpecificEntityId(eKey, (byte) kind);
 				}
 				else { // User specific
-					entityId = new UserSpecificEntityId(eKey, (byte) kind);
+					entityId = new UserDefinedEntityId(eKey, (byte) kind);
 				}	
 		}
 		
@@ -116,8 +116,8 @@ public class EntityId_t  {
 
 
 
-	public static class UserSpecificEntityId extends EntityId_t {
-		public UserSpecificEntityId(byte[] entityKey, byte entityKind) {
+	public static class UserDefinedEntityId extends EntityId_t {
+		public UserDefinedEntityId(byte[] entityKey, byte entityKind) {
 			super(entityKey, entityKind);
 		}
 	}

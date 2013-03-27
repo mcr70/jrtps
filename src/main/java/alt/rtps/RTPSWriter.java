@@ -105,6 +105,7 @@ public class RTPSWriter extends Writer {
 		List<CacheChange> changes = getHistoryCache().getChanges();
 		
 		for (CacheChange cc : changes) {
+			log.trace("Marshalling {}", cc.getData());
 			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
 			Data data = new Data(ackNack.getReaderId(), getGuid().entityId, seqNum++, null, dEnc);
 			
