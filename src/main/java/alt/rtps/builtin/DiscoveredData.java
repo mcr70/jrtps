@@ -38,6 +38,7 @@ public class DiscoveredData {
 		this.typeName = typeName;
 		this.topicName = topicName;
 		this.key = key;
+		this.keyHash = new KeyHash(key.getBytes());
 	}
 	
 	public String getTypeName() {

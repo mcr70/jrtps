@@ -90,7 +90,7 @@ public class Endpoint {
 		Set<Locator_t> locators = getParticipantLocators(targetPrefix);
 
 		if (locators.size() > 0) {
-			log.trace("Sending message {} to {}", m, locators);
+			log.debug("Sending message to {}", locators);
 		}
 
 		for (Locator_t locator : locators) {

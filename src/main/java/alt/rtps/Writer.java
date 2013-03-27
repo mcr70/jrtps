@@ -102,7 +102,7 @@ public abstract class Writer extends Endpoint {
 
 
 	protected void sendToLocators(Message m, List<Locator_t> locators) {
-		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(512));
+		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		m.writeTo(buffer);
 		buffer.getBuffer().flip();

@@ -110,9 +110,7 @@ public class RTPSParticipant {
 		
 		// ----  Create a Writers for SEDP  ---------
 		RTPSWriter pw = createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, BUILTIN_TOPICNAME_PUBLICATION, wdm);
-		//createDataForPublicationsWriter(pw);
 		RTPSWriter sw = createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, BUILTIN_TOPICNAME_SUBSCRIPTION, rdm);
-		//createDataForSubscriptionWriter(sw);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
 		
@@ -122,7 +120,6 @@ public class RTPSParticipant {
 		
 
 		// ----  Create a Readers for SEDP  ---------
-
 		RTPSReader pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, BUILTIN_TOPICNAME_PUBLICATION, wdm);
 		pubReader.addListener(builtinListener);
 
@@ -133,7 +130,6 @@ public class RTPSParticipant {
 		topicReader.addListener(builtinListener);
 		
 		// ----  Create a Writer for SPDP  -----------------------
-
 		RTPSWriter spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, BUILTIN_TOPICNAME_PARTICIPANT, pdm);
 		
 		ParticipantData pd = createSPDPParticipantData();
@@ -141,8 +137,6 @@ public class RTPSParticipant {
 		spdp_w.setResendDataPeriod(new Duration_t(10, 0)); // Starts a resender thread
 		spdp_w.addMatchedEndpointLocator(Locator_t.defaultDiscoveryMulticastLocator(domainId));
 
-		//pw.writer_cache.
-		
 		participantId++;
 	}
 
@@ -170,7 +164,6 @@ public class RTPSParticipant {
 		writerEndpoints.add(writer);
 
 		Writer pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
-		long seqNum = pw.lastChangeSequenceNumber(); // TODO: Not thread safe: seqNum
 		WriterData wd = new WriterData(writer.getTopicName(), WriterData.class.getName(), pw.getGuid());
 		pw.writer_cache.createChange(wd);
 		
@@ -192,7 +185,6 @@ public class RTPSParticipant {
 		readerEndpoints.add(reader);
 
 		Writer sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
-		long seqNum = sw.lastChangeSequenceNumber(); // TODO: Not thread safe: seqNum
 		ReaderData rd = new ReaderData(reader.getTopicName(), ReaderData.class.getName(), sw.getGuid());
 		sw.writer_cache.createChange(rd);
 		
@@ -324,7 +316,7 @@ public class RTPSParticipant {
 			//Thread t = new Thread(w);
 			//t.start();
 		}
-		log.info("{} writers started", writerEndpoints.size());
+		log.debug("{} writers started", writerEndpoints.size());
 	}
 
 
@@ -374,7 +366,6 @@ public class RTPSParticipant {
 		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
 		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
 		
-
 		log.debug("{}", new BuiltinEndpointSet(eps));
 
 		return eps;
