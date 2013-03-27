@@ -1,6 +1,9 @@
 package alt.rtps;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.channels.DatagramChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -12,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import alt.rtps.builtin.ParticipantData;
 import alt.rtps.message.Message;
+import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.transport.UDPWriter;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
@@ -102,6 +106,30 @@ public class Endpoint {
 				log.warn("Failed to send message to " + locator, e);
 			}
 		}
-
 	}
+	
+	// TODO: This method is almost the same as above
+	protected void sendToLocators(Message m, List<Locator_t> locators) {
+		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
+		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
+		m.writeTo(buffer);
+		buffer.getBuffer().flip();
+		
+		for (Locator_t locator : locators) {
+			log.debug("Sending to " + locator.getSocketAddress() + ": " + m);
+			
+			try {
+				// TODO: opening and closing can be optimized
+				DatagramChannel channel = DatagramChannel.open();
+				channel.connect(locator.getSocketAddress());
+				channel.write(buffer.getBuffer());
+				channel.close();
+			} 
+			catch (IOException e) {
+				log.error("Failed to send message to " + locator, e);
+			}
+			
+			buffer.getBuffer().rewind(); // Reset buffer to beginning
+		}
+	}	
 }
