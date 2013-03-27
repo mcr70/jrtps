@@ -70,7 +70,7 @@ public class RTPSParticipant {
 	protected int domainId = 0; // Default domainId
 	private static byte participantId = 0; // TODO: We need an instance variable in code below
 
-	private List<Reader> readerEndpoints = new LinkedList<Reader>();
+	private List<RTPSReader> readerEndpoints = new LinkedList<>();
 	private List<RTPSWriter> writerEndpoints = new LinkedList<>();
 
 	GUID_t guid;
@@ -221,8 +221,8 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return 
 	 */
-	public Reader getReader(EntityId_t readerId) {
-		for (Reader reader : readerEndpoints) {
+	public RTPSReader getReader(EntityId_t readerId) {
+		for (RTPSReader reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
 			}
