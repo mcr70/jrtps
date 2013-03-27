@@ -94,7 +94,9 @@ public class RTPSWriter extends Writer {
 			sendData(senderPrefix, ackNack);
 		}
 		else { // Send HB / GAP to reader so that it knows our state
-			sendHeartBeat(senderPrefix, ackNack); 
+			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
+				sendHeartBeat(senderPrefix, ackNack);
+			}
 		}
 	}
 
