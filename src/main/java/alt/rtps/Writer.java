@@ -1,10 +1,5 @@
 package alt.rtps;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.DatagramChannel;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,13 +7,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import alt.rtps.builtin.ReaderData;
-import alt.rtps.message.Message;
-import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
-import alt.rtps.types.Locator_t;
 /**
  * 
  * @author mcr70
@@ -100,50 +92,7 @@ public abstract class Writer extends Endpoint {
 		return writer_cache.getSeqNumMax();
 	}
 
-
-	protected void sendToLocators(Message m, List<Locator_t> locators) {
-		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
-		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-		m.writeTo(buffer);
-		buffer.getBuffer().flip();
-		
-		//writeToFile(buffer.getBuffer(), "tmp/my-spdp-message.bin");
-		
-		for (Locator_t locator : locators) {
-			log.debug("Sending to " + locator.getSocketAddress() + ": " + m);
-			
-			try {
-				// TODO: opening and closing can be optimized
-				DatagramChannel channel = DatagramChannel.open();
-				channel.connect(locator.getSocketAddress());
-				channel.write(buffer.getBuffer());
-				channel.close();
-			} 
-			catch (IOException e) {
-				log.error("Failed to send message to " + locator, e);
-			}
-			
-			buffer.getBuffer().rewind(); // Reset buffer to beginning
-		}
-	}
-	
-	
-	private void writeToFile(ByteBuffer buffer, String fileName) {
-		try {
-			FileOutputStream fos = new FileOutputStream(fileName);
-			fos.getChannel().write(buffer);
-			fos.close();
-		}  
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		buffer.rewind();
-	}
-
-
 	protected HistoryCache getHistoryCache() {
 		return writer_cache;
-	}
-	
+	}	
 }
