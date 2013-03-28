@@ -40,8 +40,8 @@ public class UDPReceiver implements Runnable {
 	}
 	
 	public void run() {
+		DatagramSocket socket = null;
 		try {
-			DatagramSocket socket = null;
 			if (locator.getInetAddress().isMulticastAddress()) {
 				socket = new MulticastSocket(locator.getPort());
 				((MulticastSocket)socket).joinGroup(locator.getInetAddress());
@@ -68,16 +68,15 @@ public class UDPReceiver implements Runnable {
 					//dumpMessage(i++, p.getData(), p.getLength()); // TODO: remove this
 				}
 			}
-						
-//			ch.setOption(StandardSocketOptions.SO_REUSEADDR, true);
-//			ch.setOption(StandardSocketOptions.IP_MULTICAST_IF, ni);
-
-		} catch (SocketException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} 
+		catch (SocketException e) {
+			log.error("Got SocketException. Closing.", e); 
+		} 
+		catch (IOException e) {
+			log.error("Got IOException. Closing.", e);
+		}
+		finally {
+			socket.close();
 		}
 	}
 	
