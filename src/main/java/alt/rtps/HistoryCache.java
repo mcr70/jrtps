@@ -7,9 +7,10 @@ import alt.rtps.types.GUID_t;
 
 class HistoryCache {
 	private List<CacheChange> changes = new LinkedList<CacheChange>();
+	private GUID_t guid; // HistoryCache belongs to a specific GUID_t
+	
 	private long seqNumMax = 0;
 	private long seqNumMin = 0;
-	private GUID_t guid; // HistoryCache belongs to a specific GUID_t
 	
 	
 	public HistoryCache(GUID_t guid) {

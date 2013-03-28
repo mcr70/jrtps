@@ -9,7 +9,6 @@ import alt.rtps.builtin.ParticipantData;
 import alt.rtps.builtin.ReaderData;
 import alt.rtps.builtin.TopicData;
 import alt.rtps.builtin.WriterData;
-import alt.rtps.types.BuiltinTopicKey_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;

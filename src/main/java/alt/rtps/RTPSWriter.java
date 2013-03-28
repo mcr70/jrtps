@@ -70,19 +70,17 @@ public class RTPSWriter extends Endpoint {
 					List<CacheChange> changes = writer_cache.getChanges();
 					log.debug("Sending " + changes.size() + " changes");
 					for (CacheChange change : changes) { // TODO: ConcurrentModification
-						Message m1 = new Message(getGuid().prefix);
+						Message m = new Message(getGuid().prefix);
 						
 						InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
-						m1.addSubMessage(iTime);
+						m.addSubMessage(iTime);
 						
 						DataEncapsulation dEnc = marshaller.marshall(change.getData());
 						Data data = new Data(EntityId_t.UNKNOWN_ENTITY, getGuid().entityId, seqNum++, null, dEnc);
-						
-						m1.addSubMessage(data);
-						
-						Message m = m1;
-						
-						sendToLocators(m, getMatchedEndpointLocators());
+						m.addSubMessage(data);
+
+						//sendToLocators(m, getMatchedEndpointLocators());
+						sendMessage(m, null);
 					}
 					
 					synchronized (writer_cache) {
@@ -109,7 +107,7 @@ public class RTPSWriter extends Endpoint {
 		}
 		else { // Send HB / GAP to reader so that it knows our state
 			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
-				sendHeartBeat(senderPrefix, ackNack);
+				sendHeartbeat(senderPrefix, ackNack);
 			}
 		}
 	}
@@ -130,7 +128,7 @@ public class RTPSWriter extends Endpoint {
 		sendMessage(m, senderPrefix);
 	}
 
-	private void sendHeartBeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat();
 		m.addSubMessage(hb);
@@ -147,6 +145,11 @@ public class RTPSWriter extends Endpoint {
 		return hb;
 	}
 
+	/**
+	 * Get the BuiltinEndpointSet ID of this RTPSWriter.
+	 * 
+	 * @return 0, if this RTPSWriter is not builtin endpoint
+	 */
 	int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
 	}
