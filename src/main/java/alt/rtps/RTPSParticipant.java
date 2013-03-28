@@ -133,7 +133,7 @@ public class RTPSParticipant {
 		RTPSWriter spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, BUILTIN_TOPICNAME_PARTICIPANT, pdm);
 		
 		ParticipantData pd = createSPDPParticipantData();
-		spdp_w.writer_cache.createChange(pd, 1);
+		spdp_w.getHistoryCache().createChange(pd, 1);
 		spdp_w.setResendDataPeriod(new Duration_t(10, 0)); // Starts a resender thread
 		spdp_w.addMatchedEndpointLocator(Locator_t.defaultDiscoveryMulticastLocator(domainId));
 
@@ -143,10 +143,17 @@ public class RTPSParticipant {
 
 
 	public void start() throws SocketException {
-		prepareReceivers();		
-		startReceivers();
+		
+		receivers.add(new UDPReceiver(meta_mcLoc, this));
+		receivers.add(new UDPReceiver(meta_ucLoc, this));
+		receivers.add(new UDPReceiver(mcLoc, this));			
+		receivers.add(new UDPReceiver(ucLoc, this));		
+		
+		for (UDPReceiver receiver : receivers) {
+			threadPoolExecutor.execute(receiver);
+		}
 
-		startWriters();
+		log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(), writerEndpoints.size());
 	}
 
 	/**
@@ -163,9 +170,9 @@ public class RTPSParticipant {
 		
 		writerEndpoints.add(writer);
 
-		Writer pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
+		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
 		WriterData wd = new WriterData(writer.getTopicName(), WriterData.class.getName(), pw.getGuid());
-		pw.writer_cache.createChange(wd);
+		pw.getHistoryCache().createChange(wd);
 		
 		return writer;
 	}
@@ -184,9 +191,9 @@ public class RTPSParticipant {
 		
 		readerEndpoints.add(reader);
 
-		Writer sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
+		RTPSWriter sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
 		ReaderData rd = new ReaderData(reader.getTopicName(), ReaderData.class.getName(), sw.getGuid());
-		sw.writer_cache.createChange(rd);
+		sw.getHistoryCache().createChange(rd);
 		
 		return reader;
 	}
@@ -194,8 +201,8 @@ public class RTPSParticipant {
 
 
 
-	Writer getWriterForTopic(String topicName) {
-		for (Writer w : writerEndpoints) {
+	RTPSWriter getWriterForTopic(String topicName) {
+		for (RTPSWriter w : writerEndpoints) {
 			if (w.getTopicName().equals(topicName)) {
 				return w;
 			}
@@ -308,33 +315,6 @@ public class RTPSParticipant {
 		return null;
 	}
 
-
-	private void startWriters() {
-		
-		for (Writer w : writerEndpoints) {
-			// TODO: Threadpooling
-			//Thread t = new Thread(w);
-			//t.start();
-		}
-		log.debug("{} writers started", writerEndpoints.size());
-	}
-
-
-
-	private void prepareReceivers() throws SocketException {
-		// Prepare known Receivers
-		receivers.add(new UDPReceiver(meta_mcLoc, this));
-		receivers.add(new UDPReceiver(meta_ucLoc, this));
-		receivers.add(new UDPReceiver(mcLoc, this));			
-		receivers.add(new UDPReceiver(ucLoc, this));
-	}
-
-
-	private void startReceivers() {
-		for (UDPReceiver receiver : receivers) {
-			threadPoolExecutor.execute(receiver);
-		}
-	}
 
 	private ParticipantData createSPDPParticipantData() {
 		int epSet = createEndpointSet();
