@@ -247,7 +247,7 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return
 	 */
-	public Reader getReader(EntityId_t readerId, EntityId_t writerId) {
+	public RTPSReader getReader(EntityId_t readerId, EntityId_t writerId) {
 		if (readerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(readerId)) {
 			return getReader(readerId);
 		}
@@ -268,7 +268,7 @@ public class RTPSParticipant {
 			return getReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
 		}
 
-		log.warn("Failed to find Reader for reader {} or matching writer {}", readerId, writerId);
+		log.warn("Failed to find RTPSReader for reader entity {} or matching writer entity {}", readerId, writerId);
 		return null;
 	}
 
@@ -328,7 +328,7 @@ public class RTPSParticipant {
 
 	private int createEndpointSet() {
 		int eps = 0;
-		for (Reader r : readerEndpoints) {
+		for (RTPSReader r : readerEndpoints) {
 			eps |= r.endpointId();
 		}
 
