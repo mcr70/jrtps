@@ -146,4 +146,8 @@ public class RTPSWriter extends Endpoint {
 		
 		return hb;
 	}
+
+	int endpointSetId() {
+		return getGuid().entityId.getEndpointSetId();
+	}
 }
