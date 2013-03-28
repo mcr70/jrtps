@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import alt.rtps.RTPSParticipant;
+import alt.rtps.RTPSReader;
 import alt.rtps.RTPSWriter;
-import alt.rtps.Reader;
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
@@ -73,7 +73,7 @@ public class RTPSMessageBroker {
 	}
 
 	private void handleData(GuidPrefix_t prefix, Time_t timestamp, Data data) {
-		Reader reader = participant.getReader(data.getReaderId());
+		RTPSReader reader = participant.getReader(data.getReaderId());
 		
 		if (reader != null) {
 			reader.onData(prefix, data, timestamp);
@@ -84,7 +84,7 @@ public class RTPSMessageBroker {
 	}
 
 	private void handleHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {		
-		Reader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
+		RTPSReader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
 		
 		if (reader != null) {
 			reader.onHeartbeat(senderGuidPrefix, hb);
