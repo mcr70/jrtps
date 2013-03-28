@@ -83,14 +83,7 @@ public abstract class Writer extends Endpoint {
 		return nackSuppressionDuration;
 	}
 	
-	/**
-	 * Internal counter used to assign increasing sequence number to each change made by the
-	 * Writer.
-	 * @return
-	 */
-	public long lastChangeSequenceNumber() {
-		return writer_cache.getSeqNumMax();
-	}
+
 
 	protected HistoryCache getHistoryCache() {
 		return writer_cache;
