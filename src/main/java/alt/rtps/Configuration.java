@@ -6,15 +6,20 @@ import alt.rtps.types.Duration_t;
  * @author mcr70
  * @see 8.4.7.1
  */
-public class WriterConfiguration {
+public class Configuration {
 
+	// --- Writer configurations -------------
 	private boolean pushMode = true;	
 	private Duration_t heartbeatPeriod = new Duration_t(5, 0); // 5 sec, tunable
 	private Duration_t nackResponseDelay = new Duration_t(0, 200000000); // 200 ms
 	private Duration_t nackSuppressionDuration = new Duration_t(0, 0); // 0, tunable
 	
 
-	public WriterConfiguration() {
+	// --- Reader configurations -------------
+	private Duration_t heartbeatSuppressionDuration = new Duration_t(0, 0);
+	private Duration_t heartbeatResponseDelay = new Duration_t(0, 500000000); // 500 ms
+
+	public Configuration() {
 	}
 		
 	/**
@@ -56,5 +61,22 @@ public class WriterConfiguration {
 	 */
 	public Duration_t nackSupressionDuration() {
 		return nackSuppressionDuration;
+	}
+
+	/**
+	 * Protocol tuning parameter that allows the RTPS Reader to ignore HEARTBEATs that
+	 * arrive ‘too soon’ after a previous HEARTBEAT was received.
+	 */
+	public Duration_t getHeartbeatSuppressionDuration() {
+		return heartbeatSuppressionDuration;
+	}
+
+	/**
+	 * Protocol tuning parameter that allows the RTPS Reader to delay the sending of a
+	 * positive or negative acknowledgment (seeSection 8.4.12.2)
+	 * @return
+	 */
+	public Duration_t getHeartbeatResponseDelay() {
+		return heartbeatResponseDelay;
 	}
 }
