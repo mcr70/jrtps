@@ -329,22 +329,27 @@ public class RTPSParticipant {
 	private int createEndpointSet() {
 		int eps = 0;
 		for (RTPSReader r : readerEndpoints) {
-			eps |= r.endpointId();
+			eps |= r.endpointSetId();
 		}
-
+		for (RTPSWriter w : writerEndpoints) {
+			eps |= w.endpointSetId();
+		}
+	
+		//log.debug("{}", new BuiltinEndpointSet(eps));
+		
 		//System.out.println("EPS: " + new BuiltinEndpointSet(0x3cf));
 		//System.out.println("EPS: " + new BuiltinEndpointSet(0x415));
-		eps = 0x0; // 0x3cf, 0x415
+		//eps = 0x0; // 0x3cf, 0x415
 
-		// Endpointset: Writers
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR;
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
-		
 		// Endpointset: Readers
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
-		eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
+		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR;
+		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
+		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
+		
+		// Endpointset: Writers
+		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
+		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
+		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
 		
 		log.debug("{}", new BuiltinEndpointSet(eps));
 

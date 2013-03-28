@@ -2,6 +2,7 @@ package alt.rtps.types;
 
 import java.util.Arrays;
 
+import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.transport.RTPSByteBuffer;
 
 /**
@@ -12,7 +13,7 @@ import alt.rtps.transport.RTPSByteBuffer;
  * NOTE: this implementation ignores Deprecated EntityIds in version 2.1 of the Protocol
  * as specified in 9.3.1.4 
  */
-public class EntityId_t  {
+public abstract class EntityId_t  {
 	public static final EntityId_t SPDP_BUILTIN_PARTICIPANT_WRITER = new SPDPbuiltinParticipantWriter();
 	public static final EntityId_t SPDP_BUILTIN_PARTICIPANT_READER = new SPDPbuiltinParticipantReader();
 	
@@ -33,7 +34,8 @@ public class EntityId_t  {
 	private byte[] entityKey;
 	private byte entityKind;
 
-	public EntityId_t(byte[] entityKey, byte entityKind) {
+	
+	private EntityId_t(byte[] entityKey, byte entityKind) {
 		this.entityKey = entityKey;
 		this.entityKind = entityKind;
 
@@ -120,11 +122,21 @@ public class EntityId_t  {
 		public UserDefinedEntityId(byte[] entityKey, byte entityKind) {
 			super(entityKey, entityKind);
 		}
+
+		@Override
+		public int getEndpointSetId() {
+			return 0;
+		}
 	}
 
 	public static class VendorSpecificEntityId extends EntityId_t {
 		public VendorSpecificEntityId(byte[] entityKey, byte entityKind) {
 			super(entityKey, entityKind);
+		}
+
+		@Override
+		public int getEndpointSetId() {
+			return 0;
 		}
 	}
 
@@ -133,11 +145,21 @@ public class EntityId_t  {
 		private UnknownEntity() {
 			super(new byte[] {0,0,0}, (byte) 0x00);
 		}
+
+		@Override
+		public int getEndpointSetId() {
+			return 0;
+		}
 	}
 
 	public static class Participant extends EntityId_t {
 		private Participant() {
 			super(new byte[] {0,0,1}, (byte) 0xc1);
+		}
+
+		@Override
+		public int getEndpointSetId() {
+			return 0; // TODO: check this
 		}
 	}
 
@@ -145,11 +167,21 @@ public class EntityId_t  {
 		private SEDPbuiltinTopicWriter() {
 			super(new byte[] {0,0,2},(byte) 0xc2);
 		}
+
+		@Override
+		public int getEndpointSetId() {
+			return 0; // TODO: check this
+		}
 	}
 
 	public static class SEDPbuiltinTopicReader extends EntityId_t {
 		private SEDPbuiltinTopicReader() {
 			super(new byte[] {0,0,2},(byte) 0xc7);
+		}
+
+		@Override
+		public int getEndpointSetId() {
+			return 0; // TODO: check this
 		}
 	}
 
@@ -157,11 +189,21 @@ public class EntityId_t  {
 		private SEDPbuiltinPublicationsWriter() {
 			super(new byte[] {0,0,3},(byte) 0xc2);
 		}
+
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
+		}
 	}
 
 	public static class SEDPbuiltinPublicationsReader extends EntityId_t {
 		private SEDPbuiltinPublicationsReader() {
 			super(new byte[] {0,0,3},(byte) 0xc7);
+		}
+
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
 		}
 	}
 
@@ -169,17 +211,32 @@ public class EntityId_t  {
 		private SEDPbuiltinSubscriptionsWriter() {
 			super(new byte[] {0,0,4},(byte) 0xc2);
 		}
+
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
+		}
 	}
 
 	public static class SEDPbuiltinSubscriptionsReader extends EntityId_t {
 		private SEDPbuiltinSubscriptionsReader() {
 			super(new byte[] {0,0,4},(byte) 0xc7);
 		}
+	
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
+		}
 	}
 
 	public static class SPDPbuiltinParticipantWriter extends EntityId_t {
 		private SPDPbuiltinParticipantWriter() {
 			super(new byte[] {0,1,0},(byte) 0xc2);
+		}
+		
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER; // TODO: Check this
 		}
 	}
 
@@ -188,11 +245,21 @@ public class EntityId_t  {
 		private SPDPbuiltinParticipantReader() {
 			super(new byte[] {0,1,0},(byte) 0xc7);
 		}
+
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR; // TODO: Check this
+		}
 	}
 
 	public static class BuiltinParticipantMessageWriter extends EntityId_t {
 		private BuiltinParticipantMessageWriter() {
 			super(new byte[] {0,2,0},(byte) 0xc2);
+		}
+
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER; // TODO: Check this
 		}
 	}
 
@@ -200,7 +267,12 @@ public class EntityId_t  {
 		private BuiltinParticipantMessageReader() {
 			super(new byte[] {0,2,0},(byte) 0xc7);
 		}
-	}
+
+		@Override
+		public int getEndpointSetId() {
+			return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER; // TODO: Check this
+		}
+}
 
 	public String toString() {
 		if (isBuiltinEntity() || this instanceof UnknownEntity) {
@@ -235,4 +307,7 @@ public class EntityId_t  {
 		
 		return bytes;
 	}
+
+
+	public abstract int getEndpointSetId();
 }

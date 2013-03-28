@@ -124,8 +124,7 @@ public class RTPSReader extends Endpoint {
 		return historyCache;
 	}
 
-	public int endpointId() {
-		// TODO Auto-generated method stub
-		return 0;
+	int endpointSetId() {
+		return getGuid().entityId.getEndpointSetId();
 	}
 }
