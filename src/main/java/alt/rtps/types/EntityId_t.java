@@ -192,7 +192,7 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
+			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
 		}
 	}
 
@@ -203,7 +203,7 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
+			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
 		}
 	}
 
@@ -214,7 +214,7 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
+			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
 		}
 	}
 
@@ -225,7 +225,7 @@ public abstract class EntityId_t  {
 	
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
+			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
 		}
 	}
 
@@ -236,7 +236,7 @@ public abstract class EntityId_t  {
 		
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER; // TODO: Check this
+			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER; // TODO: Check this
 		}
 	}
 
@@ -248,7 +248,7 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR; // TODO: Check this
+			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR; // TODO: Check this
 		}
 	}
 
@@ -259,7 +259,7 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER; // TODO: Check this
+			return BuiltinEndpointSet_t.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER; // TODO: Check this
 		}
 	}
 
@@ -270,7 +270,7 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER; // TODO: Check this
+			return BuiltinEndpointSet_t.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER; // TODO: Check this
 		}
 }
 
