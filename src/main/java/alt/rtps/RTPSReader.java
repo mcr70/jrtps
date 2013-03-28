@@ -124,6 +124,11 @@ public class RTPSReader extends Endpoint {
 		return historyCache;
 	}
 
+	/**
+	 * Get the BuiltinEndpointSet ID of this RTPSReader.
+	 * 
+	 * @return 0, if this RTPSReader is not builtin endpoint
+	 */
 	int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
 	}

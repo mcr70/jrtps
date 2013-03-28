@@ -1,9 +1,6 @@
 package alt.rtps;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.channels.DatagramChannel;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import alt.rtps.builtin.ParticipantData;
 import alt.rtps.message.Message;
-import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.transport.UDPWriter;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
@@ -70,7 +66,7 @@ public class Endpoint {
 	 * @param prefix GuidPrefix of the participant
 	 * @return
 	 */
-	protected Set<Locator_t> getParticipantLocators(GuidPrefix_t prefix) {
+	private Set<Locator_t> getParticipantLocators(GuidPrefix_t prefix) {
 		log.trace("getParticipantLocators() for {}: {}", prefix, discoveredParticipants.keySet());
 		
 		ParticipantData pd = discoveredParticipants.get(prefix);
@@ -78,14 +74,18 @@ public class Endpoint {
 			return pd.getAllLocators();
 		}
 		else {
-			log.trace("Unknown participant. Returning an empty list of locators");
-			// TODO: Should we return default MC address, or default participant UC address
-			return new HashSet<Locator_t>();
+			log.trace("Unknown participant. Returning default multicast locators");
+
+			HashSet<Locator_t> hs = new HashSet<>();
+			hs.add(Locator_t.defaultDiscoveryMulticastLocator(guid.prefix.getDomainId()));
+			hs.add(Locator_t.defaultUserMulticastLocator(guid.prefix.getDomainId()));
+			
+			return hs;
 		}
 	}
 
 
-	protected void setDiscoveredParticipants(HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
+	void setDiscoveredParticipants(HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
 		this.discoveredParticipants = discoveredParticipants;
 	}
 	
@@ -103,33 +103,8 @@ public class Endpoint {
 				w.sendMessage(m);
 				w.close();					
 			} catch (IOException e) {
-				log.warn("Failed to send message to " + locator, e);
+				log.warn("Failed to send message to {}", locator, e);
 			}
 		}
 	}
-	
-	// TODO: This method is almost the same as above
-	protected void sendToLocators(Message m, List<Locator_t> locators) {
-		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
-		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-		m.writeTo(buffer);
-		buffer.getBuffer().flip();
-		
-		for (Locator_t locator : locators) {
-			log.debug("Sending to " + locator.getSocketAddress() + ": " + m);
-			
-			try {
-				// TODO: opening and closing can be optimized
-				DatagramChannel channel = DatagramChannel.open();
-				channel.connect(locator.getSocketAddress());
-				channel.write(buffer.getBuffer());
-				channel.close();
-			} 
-			catch (IOException e) {
-				log.error("Failed to send message to " + locator, e);
-			}
-			
-			buffer.getBuffer().rewind(); // Reset buffer to beginning
-		}
-	}	
 }
