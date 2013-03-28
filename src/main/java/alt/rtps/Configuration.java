@@ -1,8 +1,12 @@
 package alt.rtps;
 
 import alt.rtps.types.Duration_t;
+
 /**
- * 
+ * Configuration for jRTPS.
+ * All the protocol tuning parameters mentoined in specification can be obtained from 
+ * this class, as well as jRTPS specific configuration parameters.
+ *  
  * @author mcr70
  * @see 8.4.7.1
  */
