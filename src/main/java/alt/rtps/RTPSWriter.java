@@ -14,6 +14,7 @@ import alt.rtps.message.Message;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
+import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 
@@ -22,7 +23,7 @@ import alt.rtps.types.Time_t;
  * @author mcr70
  *
  */
-public class RTPSWriter extends Writer {
+public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private Thread statelessResenderThread;
 	private boolean running;
@@ -36,12 +37,25 @@ public class RTPSWriter extends Writer {
 	private Duration_t resendDataPeriod = null;//new Duration_t(30, 0);
 
 	private final Marshaller marshaller;
+	private final HistoryCache writer_cache;
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
+	
 
 	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
 		super(prefix, entityId, topicName);
 		
+		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		this.marshaller = marshaller;
+	}
+	
+	
+	/**
+	 * Get the HistoryCache of this RTPSWriter
+	 * 
+	 * @return
+	 */
+	public HistoryCache getHistoryCache() {
+		return writer_cache;
 	}
 
 	public void setResendDataPeriod(Duration_t period) {
@@ -89,8 +103,8 @@ public class RTPSWriter extends Writer {
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("Got {}", ackNack);
 		
-		HistoryCache hc = getHistoryCache();
-		if (hc.size() > 0) {
+		
+		if (writer_cache.size() > 0) {
 			sendData(senderPrefix, ackNack);
 		}
 		else { // Send HB / GAP to reader so that it knows our state
@@ -102,7 +116,7 @@ public class RTPSWriter extends Writer {
 
 	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		Message m = new Message(getGuid().prefix);
-		List<CacheChange> changes = getHistoryCache().getChanges();
+		List<CacheChange> changes = writer_cache.getChanges();
 		
 		for (CacheChange cc : changes) {
 			log.trace("Marshalling {}", cc.getData());
@@ -126,9 +140,9 @@ public class RTPSWriter extends Writer {
 	}
 
 	private Heartbeat createHeartbeat() {
-		HistoryCache hc = getHistoryCache();
+		
 		Heartbeat hb = new Heartbeat(EntityId_t.UNKNOWN_ENTITY, getGuid().entityId,
-				hc.getSeqNumMin(), hc.getSeqNumMax(), hbCount++ );
+				writer_cache.getSeqNumMin(), writer_cache.getSeqNumMax(), hbCount++ );
 		
 		return hb;
 	}

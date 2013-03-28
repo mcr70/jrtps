@@ -1,5 +1,6 @@
 package alt.rtps;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -18,9 +19,14 @@ import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.SequenceNumberSet;
 import alt.rtps.types.Time_t;
 
-public class RTPSReader extends Reader {
+public class RTPSReader extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
+	/**
+	 * Contains the history caches of matching writers. Each Reader may be matched with multiple writers.
+	 */
+	private HashMap<GUID_t, HistoryCache> readerCaches = new HashMap<>();
+	
 	private List<DataListener> listeners = new LinkedList<DataListener>();
 	private int ackNackCount = 0;
 	private Marshaller marshaller;
@@ -55,7 +61,7 @@ public class RTPSReader extends Reader {
 		listeners.add(listener);
 	}
 
-	@Override
+
 	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) {
 
 		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
@@ -78,7 +84,6 @@ public class RTPSReader extends Reader {
 	}
 
 
-	@Override
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
 		log.debug("Got {}", hb); 
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
@@ -105,5 +110,22 @@ public class RTPSReader extends Reader {
 		AckNack an = new AckNack(getGuid().entityId, matchedEntity, snSet, ackNackCount++);
 
 		return an;
+	}
+	
+	
+	private HistoryCache getHistoryCache(GUID_t writerGuid) {
+		HistoryCache historyCache = readerCaches.get(writerGuid);
+		if (historyCache == null) {
+			log.debug("Creating new HistoryCache for writer {}", writerGuid);
+			historyCache = new HistoryCache(writerGuid);
+			readerCaches.put(writerGuid, historyCache);
+		}
+		
+		return historyCache;
+	}
+
+	public int endpointId() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 }
