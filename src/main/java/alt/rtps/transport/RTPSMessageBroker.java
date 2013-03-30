@@ -16,6 +16,7 @@ import alt.rtps.message.InfoSource;
 import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
 import alt.rtps.message.SubMessage;
+import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
 
@@ -73,7 +74,13 @@ public class RTPSMessageBroker {
 	}
 
 	private void handleData(GuidPrefix_t prefix, Time_t timestamp, Data data) {
-		RTPSReader reader = participant.getReader(data.getReaderId());
+		RTPSReader reader = null;
+		if (data.getReaderId().equals(EntityId_t.UNKNOWN_ENTITY)) {
+			reader = participant.getMatchingReader(data.getWriterId());
+		}
+		else {
+			reader = participant.getReader(data.getReaderId());
+		}
 		
 		if (reader != null) {
 			reader.onData(prefix, data, timestamp);

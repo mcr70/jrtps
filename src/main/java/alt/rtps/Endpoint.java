@@ -3,8 +3,6 @@ package alt.rtps;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 
 import org.slf4j.Logger;
@@ -22,13 +20,9 @@ public class Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(Endpoint.class);
 	
 	private final String topicName;
-	private final GUID_t guid;
-	
-	//protected Locator_t unicastLocator;// = new LinkedList<Locator_t>();
-	//protected Locator_t multicastLocator;// = new LinkedList<Locator_t>();
-
-	private List<Locator_t> matchedEndpointLocators = new LinkedList<Locator_t>();
+	private final GUID_t guid;	
 	private HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
+	
 	
 	/**
 	 * 
@@ -51,15 +45,6 @@ public class Endpoint {
 	}
 	
 	
-	public void addMatchedEndpointLocator(Locator_t locator) {
-		matchedEndpointLocators.add(locator);
-	}
-	
-	public List<Locator_t> getMatchedEndpointLocators() {
-		return matchedEndpointLocators;
-	}
-
-
 	/**
 	 * Gets all locators for given participant.
 	 * 
@@ -91,6 +76,16 @@ public class Endpoint {
 	
 	
 	protected void sendMessage(Message m, GuidPrefix_t targetPrefix) {
+		// TODO: we should check, that there is a recipient we need in each Locator.
+		//       now we just assume remote participant will ignore if there isn't
+		// we should have sendMessage(Messagem, GuidPrefix_t remoteParticipant, EntityId_t remoteEntity)
+		// - RTPSReader.onHeartbeat : sendMessage(m, senderGuidPrefix, hb.getWriterId())
+		// - RTPSWriter.sendData : sendMessage(m, senderPrefix, ackNack.getReaderId())
+		// - RTPSWriter.sendHeartbeat : sendMessage(m, senderPrefix, ackNack.getReaderId())
+		// - Writer.setResendDataPeriod : sendMessage(m, senderPrefix, null) // or new EntityId::Participant();
+		//
+		// getParticipantLocators should be changed to getLocator(new Guid(prefix, entityId))
+		// Q: prefer multicast?
 		Set<Locator_t> locators = getParticipantLocators(targetPrefix);
 
 		if (locators.size() > 0) {

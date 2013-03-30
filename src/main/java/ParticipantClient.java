@@ -17,7 +17,7 @@ public class ParticipantClient {
 
 	private static void createHelloReader(RTPSParticipant p) {
 		p.createReader(new EntityId_t.UserDefinedEntityId(new byte[]{0,0,1}, (byte)0x07), 
-				"HelloTopic", new Marshaller() {
+				"HelloWorldData_Msg", "HelloWorldData::Msg", new Marshaller() {
 					@Override
 					public Object unmarshall(DataEncapsulation dEnc) {
 						System.out.println("Unmarshall !!!!!!!!!!!!!!!!!!!!!");

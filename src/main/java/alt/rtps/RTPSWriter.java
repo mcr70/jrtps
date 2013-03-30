@@ -125,7 +125,7 @@ public class RTPSWriter extends Endpoint {
 		}
 		
 		log.debug("Sending {}", m);
-		sendMessage(m, senderPrefix);
+		sendMessage(m, senderPrefix); 
 	}
 
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
