@@ -35,10 +35,12 @@ public class GuidPrefix_t {
 		bb.read(bytes);
 	}
 
-	private GuidPrefix_t(byte[] bytes) {
+	GuidPrefix_t(byte[] bytes) {
 		this.bytes = bytes;
 
-		assert bytes.length == 12;
+		if (bytes.length != 12) {
+			throw new IllegalArgumentException("Length of GuidPrefix must be 12");
+		}
 	}
 
 	/**

@@ -44,7 +44,9 @@ public class ReaderData extends DiscoveredData {
 				super.typeName = ((TypeName)param).getTypeName();
 				break;
 			case PID_KEY_HASH:
-				keyHash = (KeyHash) param; break;
+				keyHash = (KeyHash) param;
+				super.key = new GUID_t(keyHash.getBytes()); // TODO: We should store either GUID, or KeyHash only
+				break;
 			case PID_SENTINEL:
 				break;
 			case PID_PAD:
