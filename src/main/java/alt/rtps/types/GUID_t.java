@@ -27,6 +27,21 @@ public class GUID_t {
 		this.entityId = EntityId_t.readEntityId(bb);
 	}
 	
+	public GUID_t(byte[] bytes) {
+		if (bytes == null || bytes.length != 16) {
+			throw new IllegalArgumentException("Length of GUID_t must be 16");
+		}
+		
+		byte[] prefixBytes = new byte[12];
+		System.arraycopy(bytes, 0, prefixBytes, 0, 12);
+		this.prefix = new GuidPrefix_t(prefixBytes);
+		
+		byte[] entityBytes = new byte[3];
+		System.arraycopy(bytes, 12, prefixBytes, 0, 3);
+		byte entityKind = bytes[15];
+		this.entityId = EntityId_t.readEntityId(entityBytes, entityKind);
+	}
+
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof GUID_t) {

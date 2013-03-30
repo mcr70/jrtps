@@ -31,7 +31,7 @@ public class RTPSReader extends Endpoint {
 	private int ackNackCount = 0;
 	private Marshaller marshaller;
 
-	private final EntityId_t matchedEntity;
+	private EntityId_t matchedEntity;
 
 	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
 		super(prefix, entityId, topicName);

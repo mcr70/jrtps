@@ -54,6 +54,7 @@ class BuiltinListener implements DataListener {
 		}
 		else if (data instanceof WriterData) {
 			WriterData writerData = (WriterData) data;
+			writerData.getKey();
 			discoveredWriters.put(writerData.getWriterGuid(), writerData);
 		}
 		else if (data instanceof ReaderData) {
