@@ -75,7 +75,8 @@ public class RTPSReader extends Endpoint {
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 
 		if (dataAdded) {
-			log.debug("Got " + obj.getClass().getSimpleName() + " for " + getGuid().entityId + ": " + data.getWriterSequenceNumber() + ", " + obj);
+			log.debug("Got {}: {}: {}", data, obj.getClass().getSimpleName(), obj);
+
 			for (DataListener dl : listeners) {
 				dl.onData(obj, timestamp);
 			}
