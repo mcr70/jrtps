@@ -1,8 +1,5 @@
 package alt.rtps.builtin;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.KeyHash;
@@ -13,7 +10,6 @@ import alt.rtps.message.parameter.TypeName;
 import alt.rtps.transport.Marshaller;
 
 public class WriterDataMarshaller extends Marshaller<WriterData> {
-	private static Logger log = LoggerFactory.getLogger(WriterDataMarshaller.class); 
 	@Override
 	public WriterData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;

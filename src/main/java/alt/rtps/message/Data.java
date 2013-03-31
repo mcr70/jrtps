@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
-import alt.rtps.types.GUID_t;
 import alt.rtps.types.SequenceNumber_t;
 
 
