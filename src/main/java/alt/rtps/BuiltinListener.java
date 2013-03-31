@@ -9,8 +9,11 @@ import alt.rtps.builtin.ParticipantData;
 import alt.rtps.builtin.ReaderData;
 import alt.rtps.builtin.TopicData;
 import alt.rtps.builtin.WriterData;
+import alt.rtps.message.AckNack;
+import alt.rtps.message.Heartbeat;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
+import alt.rtps.types.SequenceNumberSet;
 import alt.rtps.types.Time_t;
 
 /**
@@ -54,7 +57,18 @@ class BuiltinListener implements DataListener {
 		}
 		else if (data instanceof WriterData) {
 			WriterData writerData = (WriterData) data;
-			writerData.getKey();
+			RTPSReader r = participant.getReaderForTopic(writerData.getTopicName());
+			if (r != null) {
+				GUID_t key = writerData.getKey();
+				r.getHistoryCache(key); // Creates a history cache for this 
+				if (true) { // Send AckNack to discovered writer
+					//AckNack an = r.createAckNack(key, 1, 1); 
+					//r.sendMessage(m, targetPrefix)
+					Heartbeat hb = new Heartbeat(r.getGuid().entityId, key.entityId, 1, 1, 1);
+					r.onHeartbeat(key.prefix, hb);
+				}
+			}
+			
 			discoveredWriters.put(writerData.getWriterGuid(), writerData);
 		}
 		else if (data instanceof ReaderData) {
