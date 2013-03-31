@@ -17,6 +17,7 @@ import alt.rtps.builtin.ParticipantData;
 import alt.rtps.builtin.ParticipantDataMarshaller;
 import alt.rtps.builtin.ReaderData;
 import alt.rtps.builtin.ReaderDataMarshaller;
+import alt.rtps.builtin.TopicData;
 import alt.rtps.builtin.TopicDataMarshaller;
 import alt.rtps.builtin.WriterData;
 import alt.rtps.builtin.WriterDataMarshaller;
@@ -115,18 +116,22 @@ public class RTPSParticipant {
 
 
 		// ----  Create a Reader for SPDP  -----------------------
-		RTPSReader partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, BUILTIN_TOPICNAME_PARTICIPANT, pdm);
+		RTPSReader partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
+				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
 		partReader.addListener(builtinListener);
 
 
 		// ----  Create a Readers for SEDP  ---------
-		RTPSReader pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, BUILTIN_TOPICNAME_PUBLICATION, wdm);
+		RTPSReader pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
+				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
 		pubReader.addListener(builtinListener);
 
-		RTPSReader subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, BUILTIN_TOPICNAME_SUBSCRIPTION, rdm);
+		RTPSReader subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
+				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(),rdm);
 		subReader.addListener(builtinListener);
 
-		RTPSReader topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, BUILTIN_TOPICNAME_TOPIC, tdm);
+		RTPSReader topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
+				BUILTIN_TOPICNAME_TOPIC, TopicData.class.getName(), tdm);
 		topicReader.addListener(builtinListener);
 
 		// ----  Create a Writer for SPDP  -----------------------
@@ -182,21 +187,10 @@ public class RTPSParticipant {
 	 * 
 	 * @param eId
 	 * @param topicName
+	 * @param typeName
 	 * @param marshaller
 	 * @return
 	 */
-	public RTPSReader createReader(EntityId_t eId, String topicName, Marshaller marshaller) {
-		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
-		reader.setDiscoveredParticipants(discoveredParticipants);
-
-		readerEndpoints.add(reader);
-
-		RTPSWriter sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
-		ReaderData rd = new ReaderData(reader.getTopicName(), ReaderData.class.getName(), sw.getGuid());
-		sw.getHistoryCache().createChange(rd);
-
-		return reader;
-	}
 	public RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
 		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
 		reader.setDiscoveredParticipants(discoveredParticipants);
@@ -223,8 +217,8 @@ public class RTPSParticipant {
 		return null;
 	}
 
-	Endpoint getReaderForTopic(String topicName) {
-		for (Endpoint r : readerEndpoints) {
+	RTPSReader getReaderForTopic(String topicName) {
+		for (RTPSReader r : readerEndpoints) {
 			if (r.getTopicName().equals(topicName)) {
 				return r;
 			}
@@ -346,22 +340,6 @@ public class RTPSParticipant {
 		for (RTPSWriter w : writerEndpoints) {
 			eps |= w.endpointSetId();
 		}
-
-		//log.debug("{}", new BuiltinEndpointSet(eps));
-
-		//System.out.println("EPS: " + new BuiltinEndpointSet(0x3cf));
-		//System.out.println("EPS: " + new BuiltinEndpointSet(0x415));
-		//eps = 0x0; // 0x3cf, 0x415
-
-		// Endpointset: Readers
-		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR;
-		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
-		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
-
-		// Endpointset: Writers
-		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
-		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
-		//eps |= BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
 
 		log.debug("{}", new BuiltinEndpointSet(eps));
 

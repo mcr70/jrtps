@@ -71,7 +71,6 @@ public class RTPSReader extends Endpoint {
 			((DiscoveredData) obj).setWriterGuid(writerGuid); 
 		}
 
-		//HistoryCache hc = getHistoryCache(prefix);
 		HistoryCache hc = getHistoryCache(writerGuid);
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 
@@ -88,7 +87,8 @@ public class RTPSReader extends Endpoint {
 		log.debug("Got {}", hb); 
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 			Message m = new Message(getGuid().prefix);
-			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
+			//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
+			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 			m.addSubMessage(an);
 			log.debug("Sending {}", an);
 			sendMessage(m, senderGuidPrefix);
@@ -112,8 +112,22 @@ public class RTPSReader extends Endpoint {
 		return an;
 	}
 	
+	AckNack createAckNack(GUID_t writerGuid) {
+		// This is a simple AckNack, that can be optimized if store
+		// out-of-order data samples in a separate cache.
+
+		HistoryCache hc = getHistoryCache(writerGuid);
+		long seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
+		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
+
+		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
+
+		AckNack an = new AckNack(getGuid().entityId, matchedEntity, snSet, ackNackCount++);
+
+		return an;
+	}
 	
-	private HistoryCache getHistoryCache(GUID_t writerGuid) {
+	HistoryCache getHistoryCache(GUID_t writerGuid) {
 		HistoryCache historyCache = readerCaches.get(writerGuid);
 		if (historyCache == null) {
 			log.debug("Creating new HistoryCache for writer {}", writerGuid);
