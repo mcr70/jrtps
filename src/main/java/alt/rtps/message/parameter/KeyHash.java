@@ -1,9 +1,6 @@
 package alt.rtps.message.parameter;
 
-import java.util.Arrays;
-
 import alt.rtps.transport.RTPSByteBuffer;
-import alt.rtps.types.GUID_t;
 
 
 /**
