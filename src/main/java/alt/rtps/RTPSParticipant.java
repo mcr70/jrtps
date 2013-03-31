@@ -110,8 +110,10 @@ public class RTPSParticipant {
 
 
 		// ----  Create a Writers for SEDP  ---------
-		RTPSWriter pw = createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, BUILTIN_TOPICNAME_PUBLICATION, wdm);
-		RTPSWriter sw = createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, BUILTIN_TOPICNAME_SUBSCRIPTION, rdm);
+		RTPSWriter pw = createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
+				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
+		RTPSWriter sw = createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
+				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(), rdm);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
 
@@ -135,7 +137,8 @@ public class RTPSParticipant {
 		topicReader.addListener(builtinListener);
 
 		// ----  Create a Writer for SPDP  -----------------------
-		RTPSWriter spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, BUILTIN_TOPICNAME_PARTICIPANT, pdm);
+		RTPSWriter spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
+				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.getHistoryCache().createChange(pd, 1);
@@ -169,14 +172,14 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return
 	 */
-	public RTPSWriter createWriter(EntityId_t eId, String topicName, Marshaller marshaller) {
+	public RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
 		RTPSWriter writer = new RTPSWriter(guid.prefix, eId, topicName, marshaller);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);
 
 		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
-		WriterData wd = new WriterData(writer.getTopicName(), WriterData.class.getName(), pw.getGuid());
+		WriterData wd = new WriterData(writer.getTopicName(), typeName, pw.getGuid());
 		pw.getHistoryCache().createChange(wd);
 
 		return writer;
