@@ -30,7 +30,6 @@ public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private Thread statelessResenderThread;
 	private boolean running;
-	private long seqNum = 0;
 	
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
@@ -79,7 +78,7 @@ public class RTPSWriter extends Endpoint {
 						m.addSubMessage(iTime);
 						
 						DataEncapsulation dEnc = marshaller.marshall(change.getData());
-						Data data = new Data(readerId, getGuid().entityId, seqNum++, null, dEnc);
+						Data data = new Data(readerId, getGuid().entityId, change.getSequenceNumber(), null, dEnc);
 						m.addSubMessage(data);
 
 						sendMessage(m, null);
@@ -120,7 +119,7 @@ public class RTPSWriter extends Endpoint {
 		for (CacheChange cc : changes) {
 			log.trace("Marshalling {}", cc.getData());
 			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-			Data data = new Data(ackNack.getReaderId(), getGuid().entityId, seqNum++, null, dEnc);
+			Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
 			
 			m.addSubMessage(data);
 		}
