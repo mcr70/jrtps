@@ -1,5 +1,6 @@
 package alt.rtps;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -10,6 +11,9 @@ import alt.rtps.builtin.ReaderData;
 import alt.rtps.builtin.TopicData;
 import alt.rtps.builtin.WriterData;
 import alt.rtps.message.Heartbeat;
+import alt.rtps.message.parameter.BuiltinEndpointSet;
+import alt.rtps.types.BuiltinEndpointSet_t;
+import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Time_t;
@@ -29,19 +33,19 @@ class BuiltinListener implements DataListener {
 	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
 	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
 
-	
+
 	BuiltinListener(RTPSParticipant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
 		this.participant = p;
 		this.discoveredParticipants = discoveredParticipants;
 	}
-	
+
 	@Override
 	public void onData(Object data, Time_t timestamp) {
 		if (data instanceof ParticipantData) {	
-			
+
 			ParticipantData pd = (ParticipantData) data;
 			log.debug("Considering Participant {}", pd.getGuid());
-			
+
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
 				if (pd.getGuidPrefix().equals(participant.guid.prefix)) {
@@ -50,6 +54,22 @@ class BuiltinListener implements DataListener {
 				else {
 					log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
+					BuiltinEndpointSet eps = new BuiltinEndpointSet(pd.getBuiltinEndpoints());
+					try {
+						if (eps.hasPublicationDetector()) {
+							RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
+							pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), 
+									EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+						}
+						else if (eps.hasSubscriptionDetector()) {
+							RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
+							pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), 
+									EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+						}
+					}
+					catch(IOException ioe) {
+						log.error("Failed to send data to detected participant", ioe);
+					}
 				}
 			}
 		}
@@ -66,7 +86,7 @@ class BuiltinListener implements DataListener {
 					r.onHeartbeat(key.prefix, hb);
 				}
 			}
-			
+
 			discoveredWriters.put(writerData.getWriterGuid(), writerData);
 		}
 		else if (data instanceof ReaderData) {

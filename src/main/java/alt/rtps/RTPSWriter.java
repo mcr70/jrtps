@@ -1,5 +1,6 @@
 package alt.rtps;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -12,10 +13,12 @@ import alt.rtps.message.Heartbeat;
 import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
 import alt.rtps.transport.Marshaller;
+import alt.rtps.transport.UDPWriter;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
+import alt.rtps.types.Locator_t;
 import alt.rtps.types.Time_t;
 
 /**
@@ -152,5 +155,23 @@ public class RTPSWriter extends Endpoint {
 	 */
 	int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
+	}
+
+	public void sendHistoryCache(Locator_t locator, EntityId_t readerId) throws IOException {
+		Message m = new Message(getGuid().prefix);
+		List<CacheChange> changes = writer_cache.getChanges();
+		
+		for (CacheChange cc : changes) {
+			log.trace("Marshalling {}", cc.getData());
+			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
+			Data data = new Data(readerId, getGuid().entityId, seqNum++, null, dEnc);
+			
+			m.addSubMessage(data);
+		}
+		
+		log.debug("{}: Sending history cache to {}", getGuid().entityId, locator);
+		UDPWriter u = new UDPWriter(locator);
+		u.sendMessage(m);
+		u.close();
 	}
 }
