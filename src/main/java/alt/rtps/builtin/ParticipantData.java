@@ -45,13 +45,13 @@ public class ParticipantData {
 	 * List of unicast locators (transport, address, port combinations) that
 	 * can be used to send messages to the built-in Endpoints contained in the Participant.
 	 */
-	private Set<Locator_t> metatrafficUnicastLocatorList = new HashSet<Locator_t>();
+	private Locator_t metatrafficUnicastLocator;
 
 	/**
 	 * List of multicast locators (transport, address, port combinations)
 	 * that can be used to send messages to the built-in Endpoints contained in the Participant.
 	 */
-	private Set<Locator_t> metatrafficMulticastLocatorList = new HashSet<Locator_t>();
+	private Locator_t metatrafficMulticastLocator;
 
 	/**
 	 * Default list of unicast locators (transport, address, port combinations) that can be used 
@@ -64,7 +64,7 @@ public class ParticipantData {
 	 * 
 	 * (to SPDPbuiltinParticipantWriter? or SPPDPbuiltinParticipantReader? or Participant?)
 	 */
-	private Set<Locator_t> defaultUnicastLocatorList = new HashSet<Locator_t>(); 
+	private Locator_t unicastLocator; 
 
 	/**
 	 * Default list of multicast locators (transport, address, port combinations) that can be used 
@@ -72,7 +72,7 @@ public class ParticipantData {
 	 * These are the multicast locators that will be used in case the Endpoint does not specify its 
 	 * own set of Locators.
 	 */
-	private Set<Locator_t> defaultMulticastLocatorList = new HashSet<Locator_t>();
+	private Locator_t multicastLocator;
 
 	/**
 	 * All Participants must support the SEDP. This attribute identifies the kinds of built-in 
@@ -112,16 +112,16 @@ public class ParticipantData {
 
 		// TODO: So far, we have only one locator in list.		
 		if (u_ucLocator != null) { 
-			defaultUnicastLocatorList.add(u_ucLocator);
+			unicastLocator = u_ucLocator;
 		}
 		if (u_mcLocator != null) {
-			defaultMulticastLocatorList.add(u_mcLocator);
+			multicastLocator = u_mcLocator;
 		}
 		if (m_ucLocator != null) {
-			metatrafficUnicastLocatorList.add(m_ucLocator);
+			metatrafficUnicastLocator = m_ucLocator;
 		}
 		if (m_mcLocator != null) {
-			metatrafficMulticastLocatorList.add(m_mcLocator);
+			metatrafficMulticastLocator = m_mcLocator;
 		}
 	}
 	
@@ -155,16 +155,16 @@ public class ParticipantData {
 				vendorId = ((VendorId)param).getVendorId();
 				break;
 			case PID_DEFAULT_UNICAST_LOCATOR:
-				defaultUnicastLocatorList.add(((DefaultUnicastLocator)param).getLocator());
+				unicastLocator = ((DefaultUnicastLocator)param).getLocator();
 				break;
 			case PID_METATRAFFIC_UNICAST_LOCATOR:
-				metatrafficUnicastLocatorList.add(((MetatrafficUnicastLocator)param).getLocator());
+				metatrafficUnicastLocator = ((MetatrafficUnicastLocator)param).getLocator();
 				break;
 			case PID_DEFAULT_MULTICAST_LOCATOR:
-				defaultMulticastLocatorList.add(((DefaultMulticastLocator)param).getLocator());
+				multicastLocator = ((DefaultMulticastLocator)param).getLocator();
 				break;
 			case PID_METATRAFFIC_MULTICAST_LOCATOR:
-				metatrafficMulticastLocatorList.add(((MetatrafficMulticastLocator)param).getLocator());
+				metatrafficMulticastLocator = ((MetatrafficMulticastLocator)param).getLocator();
 				break;
 			case PID_PARTICIPANT_LEASE_DURATION:
 				this.leaseDuration = ((ParticipantLeaseDuration)param).getDuration();
@@ -202,20 +202,19 @@ public class ParticipantData {
 		return expectsInlineQos;
 	}
 
-	public Set<Locator_t> getMetatrafficUnicastLocatorList() {
-		return metatrafficUnicastLocatorList;
+	public Locator_t getMetatrafficUnicastLocator() {
+		return metatrafficUnicastLocator;
 	}
 
-	public Set<Locator_t> getMetatrafficMulticastLocatorList() {
-		return metatrafficMulticastLocatorList;
+	public Locator_t getMetatrafficMulticastLocator() {
+		return metatrafficMulticastLocator;
+	}
+	public Locator_t getUnicastLocator() {
+		return unicastLocator;
 	}
 
-	public Set<Locator_t> getDefaultUnicastLocatorList() {
-		return defaultUnicastLocatorList;
-	}
-
-	public Set<Locator_t> getDefaultMulticastLocatorList() {
-		return defaultMulticastLocatorList;
+	public Locator_t getMulticastLocator() {
+		return multicastLocator;
 	}
 
 	public int getBuiltinEndpoints() {
@@ -232,8 +231,8 @@ public class ParticipantData {
 
 	public Set<Locator_t> getUserLocators() {
 		Set<Locator_t> userLocators = new HashSet<Locator_t>();
-		userLocators.addAll(defaultMulticastLocatorList);
-		userLocators.addAll(defaultUnicastLocatorList);
+		userLocators.add(multicastLocator);
+		userLocators.add(unicastLocator);
 		
 		return userLocators;
 	}
@@ -241,19 +240,19 @@ public class ParticipantData {
 	
 	public Set<Locator_t> getMetatrafficLocators() {
 		Set<Locator_t> metaLocators = new HashSet<Locator_t>();
-		metaLocators.addAll(metatrafficMulticastLocatorList);
-		metaLocators.addAll(metatrafficUnicastLocatorList);
+		metaLocators.add(metatrafficMulticastLocator);
+		metaLocators.add(metatrafficUnicastLocator);
 		
 		return metaLocators;
 	}
 	
 	
-	public Set<Locator_t> getAllLocators() {
+	private Set<Locator_t> getAllLocators() {
 		Set<Locator_t> allLocators = new HashSet<Locator_t>();
-		//allLocators.addAll(defaultMulticastLocatorList);
-		//allLocators.addAll(defaultUnicastLocatorList);
-		//allLocators.addAll(metatrafficMulticastLocatorList);
-		allLocators.addAll(metatrafficUnicastLocatorList); 
+		allLocators.add(multicastLocator);
+		allLocators.add(unicastLocator);
+		allLocators.add(metatrafficMulticastLocator);
+		allLocators.add(metatrafficUnicastLocator); 
 		
 		// TODO: SEDPbuiltinPublicationReader sends to getAllLocators()
 		

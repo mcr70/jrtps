@@ -18,12 +18,12 @@ import alt.rtps.types.Locator_t;
 
 public class Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(Endpoint.class);
-	
+
 	private final String topicName;
 	private final GUID_t guid;	
 	private HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
-	
-	
+
+
 	/**
 	 * 
 	 * @param prefix prefix from the participant that creates this endpoint.
@@ -34,8 +34,8 @@ public class Endpoint {
 
 		this.topicName = topicName;
 	}
-	
-	
+
+
 	public String getTopicName() {
 		return topicName;
 	}
@@ -43,38 +43,37 @@ public class Endpoint {
 	public GUID_t getGuid() {
 		return guid;
 	}
-	
-	
+
+
 	/**
 	 * Gets all locators for given participant.
 	 * 
 	 * @param prefix GuidPrefix of the participant
 	 * @return
 	 */
-	private Set<Locator_t> getParticipantLocators(GuidPrefix_t prefix) {
+	private Locator_t getParticipantLocators(GuidPrefix_t prefix) {
 		log.trace("getParticipantLocators() for {}: {}", prefix, discoveredParticipants.keySet());
-		
+
 		ParticipantData pd = discoveredParticipants.get(prefix);
 		if (pd != null) {
-			return pd.getAllLocators();
+			if (guid.entityId.isBuiltinEntity()) {
+				return pd.getMetatrafficUnicastLocator();
+			}
+			else {
+				return pd.getUnicastLocator();
+			}
 		}
-		else {
-			log.trace("Unknown participant. Returning default multicast locators");
 
-			HashSet<Locator_t> hs = new HashSet<>();
-			hs.add(Locator_t.defaultDiscoveryMulticastLocator(guid.prefix.getDomainId()));
-			hs.add(Locator_t.defaultUserMulticastLocator(guid.prefix.getDomainId()));
-			
-			return hs;
-		}
+		log.debug("Unknown participant. Returning default metatraffic multicast locator");
+		return Locator_t.defaultDiscoveryMulticastLocator(guid.prefix.getDomainId());
 	}
 
 
 	void setDiscoveredParticipants(HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
 		this.discoveredParticipants = discoveredParticipants;
 	}
-	
-	
+
+
 	protected void sendMessage(Message m, GuidPrefix_t targetPrefix) {
 		// TODO: we should check, that there is a recipient we need in each Locator.
 		//       now we just assume remote participant will ignore if there isn't
@@ -86,20 +85,14 @@ public class Endpoint {
 		//
 		// getParticipantLocators should be changed to getLocator(new Guid(prefix, entityId))
 		// Q: prefer multicast?
-		Set<Locator_t> locators = getParticipantLocators(targetPrefix);
+		Locator_t locator = getParticipantLocators(targetPrefix);
 
-		if (locators.size() > 0) {
-			log.debug("Sending message to {}", locators);
-		}
-
-		for (Locator_t locator : locators) {
-			try {
-				UDPWriter w = new UDPWriter(locator); // TODO: No need to create and close all the time
-				w.sendMessage(m);
-				w.close();					
-			} catch (IOException e) {
-				log.warn("Failed to send message to {}", locator, e);
-			}
+		try {
+			UDPWriter w = new UDPWriter(locator); // TODO: No need to create and close all the time
+			w.sendMessage(m);
+			w.close();					
+		} catch (IOException e) {
+			log.warn("Failed to send message to {}", locator, e);
 		}
 	}
 }

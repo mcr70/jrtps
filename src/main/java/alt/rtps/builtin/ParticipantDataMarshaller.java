@@ -42,24 +42,24 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 		payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
 		payloadParams.add(new VendorId(pd.getVendorId()));
 
-		Set<Locator_t> defaultUnicastLocatorList = pd.getDefaultUnicastLocatorList();
-		for (Locator_t loc : defaultUnicastLocatorList) {
-			payloadParams.add(new DefaultUnicastLocator(loc));			
+		Locator_t unicastLocator = pd.getUnicastLocator();
+		if (unicastLocator != null) {
+			payloadParams.add(new DefaultUnicastLocator(unicastLocator));			
 		}
 
-		Set<Locator_t> defaultMulticastLocatorList = pd.getDefaultMulticastLocatorList();
-		for (Locator_t loc : defaultMulticastLocatorList) {
-			payloadParams.add(new DefaultMulticastLocator(loc));
+		Locator_t multicastLocator = pd.getMulticastLocator();
+		if (multicastLocator != null) {
+			payloadParams.add(new DefaultMulticastLocator(multicastLocator));
 		}
 
-		Set<Locator_t> metatrafficUnicastLocatorList = pd.getMetatrafficUnicastLocatorList();
-		for (Locator_t loc : metatrafficUnicastLocatorList) {
-			payloadParams.add(new MetatrafficUnicastLocator(loc));
+		Locator_t metaUnicastLocator = pd.getMetatrafficUnicastLocator();
+		if (metaUnicastLocator != null) {
+			payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
 		}
 
-		Set<Locator_t> metatrafficMulticastLocatorList = pd.getMetatrafficMulticastLocatorList();
-		for (Locator_t loc : metatrafficMulticastLocatorList) {
-			payloadParams.add(new MetatrafficMulticastLocator(loc));
+		Locator_t metaMulticastLocator = pd.getMetatrafficMulticastLocator();
+		if (metaMulticastLocator != null) {
+			payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
 		}
 
 		payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
