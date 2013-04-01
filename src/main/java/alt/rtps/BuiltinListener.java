@@ -57,12 +57,14 @@ class BuiltinListener implements DataListener {
 					BuiltinEndpointSet eps = new BuiltinEndpointSet(pd.getBuiltinEndpoints());
 					try {
 						if (eps.hasPublicationDetector()) {
-							RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
+							//RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
+							RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 							pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), 
 									EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
 						}
-						else if (eps.hasSubscriptionDetector()) {
-							RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
+						if (eps.hasSubscriptionDetector()) {
+							//RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
+							RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 							pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), 
 									EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 						}
