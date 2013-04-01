@@ -75,7 +75,7 @@ public class RTPSReader extends Endpoint {
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 
 		if (dataAdded) {
-			log.debug("Got {}, {}: {}", obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
+			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
 
 			for (DataListener dl : listeners) {
 				dl.onData(obj, timestamp);
@@ -85,7 +85,7 @@ public class RTPSReader extends Endpoint {
 
 
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		log.debug("Got {}", hb); 
+		log.debug("[{}] Got {}", getGuid().entityId, hb); 
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 			Message m = new Message(getGuid().prefix);
 			//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
@@ -131,7 +131,7 @@ public class RTPSReader extends Endpoint {
 	HistoryCache getHistoryCache(GUID_t writerGuid) {
 		HistoryCache historyCache = readerCaches.get(writerGuid);
 		if (historyCache == null) {
-			log.debug("Creating new HistoryCache for writer {}", writerGuid);
+			log.debug("[{}] Creating new HistoryCache for writer {}", getGuid().entityId, writerGuid);
 			historyCache = new HistoryCache(writerGuid);
 			readerCaches.put(writerGuid, historyCache);
 		}

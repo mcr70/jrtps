@@ -52,8 +52,8 @@ public class Endpoint {
 	 * @return
 	 */
 	private Locator_t getParticipantLocators(GuidPrefix_t prefix) {
-		log.trace("getParticipantLocators() for {}: {}", prefix, discoveredParticipants.keySet());
-
+		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().entityId, prefix, discoveredParticipants.keySet());
+		
 		ParticipantData pd = discoveredParticipants.get(prefix);
 		if (pd != null) {
 			if (guid.entityId.isBuiltinEntity()) {
@@ -64,7 +64,7 @@ public class Endpoint {
 			}
 		}
 
-		log.debug("Unknown participant. Returning default metatraffic multicast locator");
+		log.debug("[{}] Unknown participant. Returning default metatraffic multicast locator", getGuid().entityId);
 		return Locator_t.defaultDiscoveryMulticastLocator(guid.prefix.getDomainId());
 	}
 
@@ -92,7 +92,7 @@ public class Endpoint {
 			w.sendMessage(m);
 			w.close();					
 		} catch (IOException e) {
-			log.warn("Failed to send message to {}", locator, e);
+			log.warn("[{}] Failed to send message to {}", getGuid().entityId, locator, e);
 		}
 	}
 }

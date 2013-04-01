@@ -145,7 +145,7 @@ public class RTPSParticipant {
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.getHistoryCache().createChange(pd, 1);
-		spdp_w.setResendDataPeriod(new Duration_t(10, 0)); // Starts a resender thread
+		spdp_w.setResendDataPeriod(new Duration_t(10, 0), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER); // Starts a resender thread
 		//spdp_w.addMatchedEndpointLocator(Locator_t.defaultDiscoveryMulticastLocator(domainId));
 
 		participantId++;
