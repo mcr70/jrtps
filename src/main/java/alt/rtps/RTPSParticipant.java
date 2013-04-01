@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -88,7 +89,9 @@ public class RTPSParticipant {
 	 * @see EntityId_t
 	 */
 	public RTPSParticipant(int domainId) {
-		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, participantId++), EntityId_t.PARTICIPANT);
+		Random r = new Random(System.currentTimeMillis());
+		
+		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, participantId++, r.nextInt()), EntityId_t.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
 		this.domainId = domainId;
