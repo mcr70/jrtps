@@ -26,8 +26,8 @@ public class GuidPrefix_t {
 	 */
 	private final byte[] bytes;
 
-	public GuidPrefix_t(byte domainId, byte participantid) {
-		this(new byte[] {domainId, participantid, 0, 0, 0xc,0xa,0xf,0xe,0xb,0xa,0xb,0xe});
+	public GuidPrefix_t(byte domainId, byte participantid, int vmid) {
+		this(new byte[] {domainId, participantid, (byte) (vmid>>8 & 0xff), (byte) (vmid&0xff), 0xc,0xa,0xf,0xe,0xb,0xa,0xb,0xe});
 	}
 
 	public GuidPrefix_t(RTPSByteBuffer bb) {
