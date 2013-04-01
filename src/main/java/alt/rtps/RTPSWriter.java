@@ -169,7 +169,7 @@ public class RTPSWriter extends Endpoint {
 			m.addSubMessage(data);
 		}
 		
-		log.debug("{}: Sending history cache to {}", getGuid().entityId, locator);
+		log.debug("{}: Sending history cache to {}: {}", getGuid().entityId, locator, m);
 		UDPWriter u = new UDPWriter(locator);
 		u.sendMessage(m);
 		u.close();
