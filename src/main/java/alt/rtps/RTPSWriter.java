@@ -61,9 +61,9 @@ public class RTPSWriter extends Endpoint {
 		return writer_cache;
 	}
 
-	public void setResendDataPeriod(Duration_t period) {
+	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
 		resendDataPeriod = period;
-		
+
 		statelessResenderThread = new Thread() {
 			@Override
 			public void run() {
@@ -71,7 +71,7 @@ public class RTPSWriter extends Endpoint {
 				
 				while (running) {
 					List<CacheChange> changes = writer_cache.getChanges();
-					log.debug("Sending " + changes.size() + " changes");
+					log.debug("[{}] Sending {} changes", getGuid().entityId, changes.size());
 					for (CacheChange change : changes) { // TODO: ConcurrentModification
 						Message m = new Message(getGuid().prefix);
 						
@@ -79,10 +79,9 @@ public class RTPSWriter extends Endpoint {
 						m.addSubMessage(iTime);
 						
 						DataEncapsulation dEnc = marshaller.marshall(change.getData());
-						Data data = new Data(EntityId_t.UNKNOWN_ENTITY, getGuid().entityId, seqNum++, null, dEnc);
+						Data data = new Data(readerId, getGuid().entityId, seqNum++, null, dEnc);
 						m.addSubMessage(data);
 
-						//sendToLocators(m, getMatchedEndpointLocators());
 						sendMessage(m, null);
 					}
 					
@@ -93,17 +92,16 @@ public class RTPSWriter extends Endpoint {
 					}
 				}
 				
-				log.debug("Resend thread dying");
+				log.debug("[{}] Resend thread dying", getGuid().entityId);
 			}
 		};
 	
-		log.debug("Starting resend thread for {} with period {}", getGuid().entityId, period);
+		log.debug("[{}] Starting resend thread with period {}", getGuid().entityId, period);
 		statelessResenderThread.start();
 	}
 
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
-		log.debug("Got {}", ackNack);
-		
+		log.debug("[{}] Got {}", getGuid().entityId, ackNack);
 		
 		if (writer_cache.size() > 0) {
 			sendData(senderPrefix, ackNack);
@@ -127,7 +125,7 @@ public class RTPSWriter extends Endpoint {
 			m.addSubMessage(data);
 		}
 		
-		log.debug("Sending {}", m);
+		log.debug("[{}] Sending {}", getGuid().entityId, m);
 		sendMessage(m, senderPrefix); 
 	}
 
@@ -136,7 +134,7 @@ public class RTPSWriter extends Endpoint {
 		Heartbeat hb = createHeartbeat();
 		m.addSubMessage(hb);
 		
-		log.debug("Sending {}", m);
+		log.debug("[{}] Sending {}", getGuid().entityId, m);
 		sendMessage(m, senderPrefix);
 	}
 
@@ -162,14 +160,14 @@ public class RTPSWriter extends Endpoint {
 		List<CacheChange> changes = writer_cache.getChanges();
 		
 		for (CacheChange cc : changes) {
-			log.trace("Marshalling {}", cc.getData());
+			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
 			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-			Data data = new Data(readerId, getGuid().entityId, seqNum++, null, dEnc);
+			Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
 			
 			m.addSubMessage(data);
 		}
 		
-		log.debug("{}: Sending history cache to {}: {}", getGuid().entityId, locator, m);
+		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
 		UDPWriter u = new UDPWriter(locator);
 		u.sendMessage(m);
 		u.close();

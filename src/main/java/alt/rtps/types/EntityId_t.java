@@ -142,7 +142,7 @@ public abstract class EntityId_t  {
 
 
 	public static class UnknownEntity extends EntityId_t {
-		private UnknownEntity() {
+		public UnknownEntity() {
 			super(new byte[] {0,0,0}, (byte) 0x00);
 		}
 

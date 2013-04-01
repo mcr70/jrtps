@@ -9,16 +9,22 @@ class HistoryCache {
 	private List<CacheChange> changes = new LinkedList<CacheChange>();
 	private GUID_t guid; // HistoryCache belongs to a specific GUID_t
 	
-	private long seqNumMax = 0;
-	private long seqNumMin = 0;
+	private volatile long seqNumMax = 0;
+	private volatile long seqNumMin = 0;
 	
+	private int maxSize;
 	
 	public HistoryCache(GUID_t guid) {
+		this(guid, Integer.MAX_VALUE);
+	}
+	
+	public HistoryCache(GUID_t guid, int maxSize) {
 		this.guid = guid;
+		this.maxSize = maxSize;
 	}
 
 	List<CacheChange> getChanges() {
-		return changes;
+		return changes; 
 	}
 
 	/**
@@ -29,18 +35,6 @@ class HistoryCache {
 		return guid;
 	}
 	
-	boolean containsSeqNum(long seqNumToCheck) {
-		if (seqNumToCheck >= seqNumMin && seqNumToCheck <= seqNumMax) {
-			for (CacheChange change : changes) {		
-				if (change.getSequenceNumber() == seqNumToCheck) {
-					return true;
-				}
-			}
-		}
-		
-		// Every change was considered and no match was found
-		return false;
-	}
 
 	long getSeqNumMax() {
 		return seqNumMax;
@@ -55,7 +49,14 @@ class HistoryCache {
 	boolean createChange(Object data, long sequenceNumber) {
 		// Data must come in order. If not, drop it. Manage out-of-order data with 
 		// HeartBeat & AckNack messages
-		if (sequenceNumber == seqNumMax + 1) { 
+		
+		synchronized (changes) {
+			if (changes.size() >= maxSize) {
+				changes.remove(0);
+			}
+		}
+
+		if (true || sequenceNumber == seqNumMax + 1) { 
 			changes.add(new CacheChange(sequenceNumber, data));
 			seqNumMax++;
 			
@@ -65,11 +66,8 @@ class HistoryCache {
 		return false;
 	}
 	
-	long createChange(Object data) {
-		seqNumMax++;
-		changes.add(new CacheChange(seqNumMax, data));
-		
-		return seqNumMax;
+	boolean createChange(Object data) {
+		return createChange(data, seqNumMax + 1);
 	}
 
 	long getSeqNumMin() {
