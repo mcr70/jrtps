@@ -56,7 +56,7 @@ public class RTPSWriter extends Endpoint {
 	 * 
 	 * @return
 	 */
-	public HistoryCache getHistoryCache() {
+	HistoryCache getHistoryCache() {
 		return writer_cache;
 	}
 
@@ -168,7 +168,13 @@ public class RTPSWriter extends Endpoint {
 		
 		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
 		UDPWriter u = new UDPWriter(locator);
-		u.sendMessage(m);
+		u.sendMessage(m, "c:/temp/hc.bin");
 		u.close();
+	}
+
+
+	public void createChange(Object obj) {
+		getHistoryCache().createChange(obj);
+		
 	}
 }

@@ -1,6 +1,9 @@
 package alt.rtps.transport;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.DatagramChannel;
@@ -23,6 +26,9 @@ public class UDPWriter {
 	}
 	
 	public void sendMessage(Message m) {
+		sendMessage(m, null);
+	}
+	public void sendMessage(Message m, String fileName) {
 		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		m.writeTo(buffer);
@@ -33,9 +39,23 @@ public class UDPWriter {
 		} 
 		catch (IOException e) {
 			log.error("Failed to send message to " + locator, e);
-		}		
+		}
+		
+		if (fileName != null) {
+			writeToFile(buffer.getBuffer().rewind(), fileName);
+		}
 	}
 	
+	private void writeToFile(Buffer buffer, String fileName) {
+		try {
+			FileOutputStream fos = new FileOutputStream(fileName);
+			fos.getChannel().write((ByteBuffer) buffer);
+			fos.close();
+		} catch (Exception e) {
+			log.warn("", e);
+		}
+	}
+
 	public void close() throws IOException {
 		channel.close();		
 	}

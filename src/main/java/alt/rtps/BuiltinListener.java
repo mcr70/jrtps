@@ -81,10 +81,11 @@ class BuiltinListener implements DataListener {
 			if (r != null) {
 				GUID_t key = writerData.getKey();
 				r.getHistoryCache(key); // Creates a history cache for this 
-				if (false) { // Send AckNack to discovered writer
+				if (false) { //key.entityId.isUserDefinedEntity()) { // Send AckNack to discovered writer
 					//AckNack an = r.createAckNack(key, 1, 1); 
 					//r.sendMessage(m, targetPrefix)
 					Heartbeat hb = new Heartbeat(r.getGuid().entityId, key.entityId, 1, 1, 1);
+					hb.finalFlag(false);
 					r.onHeartbeat(key.prefix, hb);
 				}
 			}

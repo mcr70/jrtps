@@ -73,13 +73,16 @@ public class RTPSReader extends Endpoint {
 
 		HistoryCache hc = getHistoryCache(writerGuid);
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
-
+		
 		if (dataAdded) {
 			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
 
 			for (DataListener dl : listeners) {
 				dl.onData(obj, timestamp);
 			}
+		}
+		else {
+			log.warn("[{}] Data was not added to cache: {}, {}", getGuid().entityId, data.getWriterSequenceNumber(), obj);
 		}
 	}
 

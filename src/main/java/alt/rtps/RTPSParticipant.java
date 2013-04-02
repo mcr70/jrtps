@@ -183,8 +183,8 @@ public class RTPSParticipant {
 
 		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, pw.getGuid());
-		pw.getHistoryCache().createChange(wd);
-
+		boolean b = pw.getHistoryCache().createChange(wd);
+//System.out.println("***** " + b + ", " + topicName);
 		return writer;
 	}
 
