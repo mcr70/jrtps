@@ -9,10 +9,13 @@
 		</encoder>
 	</appender>
 
-	<logger name="alt" level="TRACE">
+	<logger name="alt" level="DEBUG">
 		<appender-ref ref="console" />
 	</logger>
-	<logger name="alt.rtps.message" level="DEBUG">
+	<logger name="alt.rtps.message" level="trace">
+		<appender-ref ref="console" />
+	</logger>
+	<logger name="alt.rtps.message.parameter" level="info">
 		<appender-ref ref="console" />
 	</logger>
 </configuration>
