@@ -66,7 +66,7 @@ class HistoryCache {
 		return false;
 	}
 	
-	boolean createChange(Object data) {
+	public boolean createChange(Object data) {
 		return createChange(data, seqNumMax + 1);
 	}
 

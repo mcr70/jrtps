@@ -49,6 +49,16 @@ public class Heartbeat extends SubMessage {
 		return (header.flags & 0x2) != 0;
 	}
 
+	public void finalFlag(boolean flag) {
+		if (flag) {
+			header.flags |= 0x2;
+		}
+		else {
+			header.flags |= 0x2;
+			header.flags ^= 0x2;
+		}
+	}
+
 	/**
 	 * Appears in the Submessage header flags. Indicates that the DDS DataWriter 
 	 * associated with the RTPS Writer of the message has manually asserted its LIVELINESS.
