@@ -37,7 +37,8 @@ public class Message implements Externalizable {
 	 */
 	public Message(RTPSByteBuffer bb) {
 		header = new Header(bb); 
-			
+		log.trace("Reading message, header: {}", header);
+		
 		while(bb.getBuffer().hasRemaining()) {
 			bb.align(4);
 			SubMessageHeader smh = new SubMessageHeader(bb);
