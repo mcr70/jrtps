@@ -4,8 +4,8 @@ import java.nio.ByteBuffer;
 import alt.rtps.RTPSParticipant;
 import alt.rtps.RTPSReader;
 import alt.rtps.RTPSWriter;
-import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.data.CDREncapsulation;
+import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 
@@ -38,11 +38,11 @@ public class ParticipantClient {
 
 			@Override
 			public DataEncapsulation marshall(HelloWorldData data) {			
-				RTPSByteBuffer bb = new RTPSByteBuffer(ByteBuffer.allocate(512));
+				CDREncapsulation cdrEnc = new CDREncapsulation(512);
+				RTPSByteBuffer bb = cdrEnc.getBuffer();
+				
 				bb.write_long(data.id);
 				bb.write_string(data.message);
-				
-				CDREncapsulation cdrEnc = new CDREncapsulation(bb, (short) 0);
 				
 				return cdrEnc;
 			}

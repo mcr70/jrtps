@@ -1,6 +1,6 @@
 package alt.rtps.transport;
 
-import alt.rtps.message.DataEncapsulation;
+import alt.rtps.message.data.DataEncapsulation;
 
 /**
  * Marshaller is used to transform Object to/from different data encodings.  

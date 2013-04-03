@@ -1,6 +1,6 @@
 package alt.rtps.builtin;
 
-import alt.rtps.message.DataEncapsulation;
+import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.ParameterList;

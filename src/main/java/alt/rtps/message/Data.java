@@ -5,6 +5,7 @@ import java.nio.ByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 import alt.rtps.types.EntityId_t;
