@@ -36,10 +36,12 @@ public class SubMessageHeader {
 		this.submessageLength = 0; // Length will be calculated during Data.writeTo(...);		
 	}
 	
-	SubMessageHeader(RTPSByteBuffer is) {
-		kind = (byte) is.read_octet();
-		flags = (byte) is.read_octet();
-		submessageLength = ((int)is.read_short()) & 0xff;
+	SubMessageHeader(RTPSByteBuffer bb) {
+		kind = (byte) bb.read_octet();
+		flags = (byte) bb.read_octet();
+		bb.setEndianess(endianessFlag());
+		
+		submessageLength = ((int)bb.read_short()) & 0xffff;
 	}
 
 

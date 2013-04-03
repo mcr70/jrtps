@@ -41,10 +41,10 @@ public class Message implements Externalizable {
 		
 		while(bb.getBuffer().hasRemaining()) {
 			bb.align(4);
+			int smhPosition = bb.position();
 			SubMessageHeader smh = new SubMessageHeader(bb);
-			bb.setEndianess(smh.endianessFlag());
-		
-			log.trace("SubMessageHeader: " + smh);
+					
+			log.trace("SubMessageHeader, starts at {}: {}", smhPosition, smh);
 			
 			SubMessage sm = null;
 			

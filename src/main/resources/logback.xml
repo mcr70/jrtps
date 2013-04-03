@@ -11,6 +11,6 @@
 		<appender-ref ref="console" />
 	</root>
 	<logger name="alt" level="DEBUG" />
-	<logger name="alt.rtps.message" level="trace" />
+	<logger name="alt.rtps.message" level="debug" />
 	<logger name="alt.rtps.message.parameter" level="info" />
 </configuration>
