@@ -1,8 +1,5 @@
 package alt.rtps.transport;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -51,21 +48,22 @@ public class UDPReceiver implements Runnable {
 			}
 			
 			byte[] buf = new byte[16384];
-			
-			int i = 0;	
+				
 			while(running) {
 				DatagramPacket p = new DatagramPacket(buf, buf.length);
 				socket.receive(p);
 				
-				// TODO: We could put msg into BlockingQueue and go immediately back to receiving
-				try {
-					Message msg = parseMessage(p.getData(), p.getLength());
+				try {	
+					byte[] msgBytes = new byte[p.getLength()];
+					System.arraycopy(p.getData(), 0, msgBytes, 0, msgBytes.length);
+					// TODO: We could put msgBytes into BlockingQueue and go back to receiving
+					Message msg = new Message(new RTPSByteBuffer(msgBytes));
+					
 					log.debug("Parsed RTPS message from {}: {}", locator, msg);
 					broker.handleMessage(msg);
 				}
 				catch(Exception e) {
 					log.warn("Failed to parse message of length " + p.getLength(), e);
-					//dumpMessage(i++, p.getData(), p.getLength()); // TODO: remove this
 				}
 			}
 		} 
@@ -81,33 +79,10 @@ public class UDPReceiver implements Runnable {
 	}
 	
 
-	private Message parseMessage(byte[] array, int length) {
-		Message msg = null;
-		try {
-			msg = new Message(new RTPSByteBuffer(new ByteArrayInputStream(array, 0, length)));
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return msg;
-	}
-
 	public void stop() {
 		running = false;
 	}
 
-
-	private void dumpMessage(int i, byte[] data, int length) {
-		try {
-			FileOutputStream fos = new FileOutputStream(new File("tmp/msg_" + i + ".bin"));
-			fos.write(data, 0, length);
-			fos.close();
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
 
 	public Locator_t getLocator() {
 		return locator;
