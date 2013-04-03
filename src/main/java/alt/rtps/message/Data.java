@@ -100,6 +100,7 @@ public class Data extends SubMessage {
 		}
 		
 		if (inlineQosFlag()) {
+			log.trace("Reading inline QoS");
 			this.inlineQosParams = new ParameterList(bb);
 		}
 		
@@ -116,6 +117,7 @@ public class Data extends SubMessage {
 				serializedPayload = new byte[buffer.capacity() - buffer.position()];
 			}
 			
+			log.trace("Serialized payload starts at {}, {} bytes", end_count, serializedPayload.length);
 			bb.read(serializedPayload);
 			dataEncapsulation = DataEncapsulation.createInstance(serializedPayload);
 		}
