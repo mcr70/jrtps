@@ -44,18 +44,10 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 	public byte[] getSerializedPayload() {
 
 		ByteBuffer buffer = ByteBuffer.allocate(1024); // TODO: hardcoded
+		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		RTPSByteBuffer bb = new RTPSByteBuffer(buffer);
 		
-		if (littleEndian) {
-			buffer.order(ByteOrder.LITTLE_ENDIAN); 
-			bb.write(PL_CDR_LE_HEADER);
-		}
-		else {
-			buffer.order(ByteOrder.BIG_ENDIAN);
-			bb.write(PL_CDR_BE_HEADER);
-		}
-		
-		//bb.write_short(options);
+		bb.write(PL_CDR_LE_HEADER);
 		
 		parameters.writeTo(bb);
 		
