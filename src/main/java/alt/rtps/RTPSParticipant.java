@@ -166,6 +166,45 @@ public class RTPSParticipant {
 
 		log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(), writerEndpoints.size());
 	}
+	
+	
+	/**
+	 * Each user entity is assigned a unique number, this field is used for that purpose
+	 */
+	private volatile int userEntityIdx = 1;
+
+	/**
+	 * Creates an user defined writer. Topic name is the simple name of Class given.
+	 * and type name is the fully qualified class name of the class given.
+	 * 
+	 * @param c
+	 * @param marshaller
+	 * @return
+	 * @see java.lang.Class.getSimpleName()
+	 * @see java.lang.Class.getName()
+	 */
+	public RTPSWriter createWriter(Class c, Marshaller marshaller) {
+		return createWriter(c.getSimpleName(), c.getName(), marshaller);
+	}
+	
+	/**
+	 * Creates an user defined entity with given topic and type names.
+	 * 
+	 * @param topicName
+	 * @param typeName
+	 * @param marshaller
+	 * @return
+	 */
+	public RTPSWriter createWriter(String topicName, String typeName, Marshaller<?> marshaller) {
+		int myIdx = userEntityIdx++;
+		byte[] myKey = new byte[3];
+		myKey[0] = (byte) (myIdx & 0xff);
+		myKey[1] = (byte) (myIdx >> 8 & 0xff);
+		myKey[2] = (byte) (myIdx >> 16 & 0xff);
+		
+		int kind = 0x02; // User defined writer, with key
+		return createWriter(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
+	}
 
 	/**
 	 * Creates a new RTPSWriter.
@@ -175,7 +214,7 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return
 	 */
-	public RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
+	private RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
 		RTPSWriter writer = new RTPSWriter(guid.prefix, eId, topicName, marshaller);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
@@ -184,10 +223,44 @@ public class RTPSParticipant {
 		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		boolean b = pw.getHistoryCache().createChange(wd);
-//System.out.println("***** " + b + ", " + topicName);
+
 		return writer;
 	}
 
+	/**
+	 * Creates an user defined reader. Topic name is the simple name of Class given.
+	 * and type name is the fully qualified class name of the class given.
+	 * 
+	 * @param c
+	 * @param marshaller
+	 * @return
+	 * @see java.lang.Class.getSimpleName()
+	 * @see java.lang.Class.getName()
+	 */
+	public RTPSReader createReader(Class c, Marshaller marshaller) {
+		return createReader(c.getSimpleName(), c.getName(), marshaller);
+	}
+	
+	/**
+	 * Creates an user defined entity with given topic and type names.
+	 * 
+	 * @param topicName
+	 * @param typeName
+	 * @param marshaller
+	 * @return
+	 */
+	public RTPSReader createReader(String topicName, String typeName, Marshaller<?> marshaller) {
+		int myIdx = userEntityIdx++;
+		byte[] myKey = new byte[3];
+		myKey[0] = (byte) (myIdx & 0xff);
+		myKey[1] = (byte) (myIdx >> 8 & 0xff);
+		myKey[2] = (byte) (myIdx >> 16 & 0xff);
+		
+		int kind = 0x07; // User defined reader, with key
+		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
+	}
+
+	
 	/**
 	 * Creates a new RTPSReader.
 	 * 
@@ -197,7 +270,7 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return
 	 */
-	public RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
+	private RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
 		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
