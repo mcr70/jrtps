@@ -75,7 +75,8 @@ public class RTPSReader extends Endpoint {
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 		
 		if (dataAdded) {
-			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
+			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, 
+					obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
 
 			for (DataListener dl : listeners) {
 				dl.onData(obj, timestamp);
@@ -94,7 +95,7 @@ public class RTPSReader extends Endpoint {
 			//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
 			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 			m.addSubMessage(an);
-			log.debug("Sending {}", an);
+			log.debug("[{}] Sending {}", getGuid().entityId, an);
 			sendMessage(m, senderGuidPrefix);
 		}
 	}

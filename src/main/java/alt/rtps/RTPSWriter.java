@@ -70,7 +70,7 @@ public class RTPSWriter extends Endpoint {
 				
 				while (running) {
 					List<CacheChange> changes = writer_cache.getChanges();
-					log.debug("[{}] Sending {} changes", getGuid().entityId, changes.size());
+					
 					for (CacheChange change : changes) { // TODO: ConcurrentModification
 						Message m = new Message(getGuid().prefix);
 						
@@ -80,7 +80,11 @@ public class RTPSWriter extends Endpoint {
 						DataEncapsulation dEnc = marshaller.marshall(change.getData());
 						Data data = new Data(readerId, getGuid().entityId, change.getSequenceNumber(), null, dEnc);
 						m.addSubMessage(data);
-
+						
+						log.debug("[{}] Send {}, {}: {}", getGuid().entityId, 
+								change.getData().getClass().getSimpleName(), 
+								change.getSequenceNumber(), change.getData());
+						
 						sendMessage(m, null);
 					}
 					
