@@ -14,7 +14,7 @@ import alt.rtps.transport.RTPSByteBuffer;
 public class CDREncapsulation extends DataEncapsulation {
 
 	private final RTPSByteBuffer bb;
-	private final short options;
+	private short options;
 
 
 	CDREncapsulation(RTPSByteBuffer bb) {
@@ -23,12 +23,11 @@ public class CDREncapsulation extends DataEncapsulation {
 	}
 	
 	public CDREncapsulation(int size) {
-		this.options = 0;
 		this.bb = new RTPSByteBuffer(ByteBuffer.allocate(size));
 		bb.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		
 		bb.write(CDR_LE_HEADER);
-		bb.write_short(options); // bb is positioned to start of actual data
+		//bb.write_short(options); // bb is positioned to start of actual data
 	}
 
 	@Override
