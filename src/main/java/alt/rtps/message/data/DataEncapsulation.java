@@ -2,7 +2,6 @@ package alt.rtps.message.data;
 
 import java.nio.ByteOrder;
 
-import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 
 /**
@@ -50,7 +49,7 @@ public abstract class DataEncapsulation {
 		bb.read(encapsulationHeader);
 		
 		short eh = (short) (((short)encapsulationHeader[0] << 8) | encapsulationHeader[1]);
-		short options = 0;
+		
 		switch (eh) {
 		case 0:
 		case 1:
