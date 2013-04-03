@@ -16,6 +16,7 @@ import alt.rtps.types.BuiltinEndpointSet_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
+import alt.rtps.types.Locator_t;
 import alt.rtps.types.Time_t;
 
 /**
@@ -54,24 +55,8 @@ class BuiltinListener implements DataListener {
 				else {
 					log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
-					BuiltinEndpointSet eps = new BuiltinEndpointSet(pd.getBuiltinEndpoints());
-					try {
-						if (eps.hasPublicationDetector()) {
-							//RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
-							RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
-							pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), 
-									EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
-						}
-						if (eps.hasSubscriptionDetector()) {
-							//RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
-							RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
-							pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), 
-									EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
-						}
-					}
-					catch(IOException ioe) {
-						log.error("Failed to send data to detected participant", ioe);
-					}
+
+					handleBuiltinEnpointSet(pd.getBuiltinEndpoints(), pd.getMetatrafficUnicastLocator());
 				}
 			}
 		}
@@ -99,6 +84,27 @@ class BuiltinListener implements DataListener {
 		else if (data instanceof TopicData) {
 			TopicData topicData = (TopicData) data;
 			discoveredTopics.put(topicData.getKey(), topicData);
+		}
+	}
+
+	/**
+	 * Handle builtin endpoints for discovered participant.
+	 * If participant has a builtin reader for publications or subscriptions,
+	 * send history cache to them.
+	 * 
+	 * @param builtinEndpoints
+	 */
+	private void handleBuiltinEnpointSet(int builtinEndpoints, Locator_t locator) {
+		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
+		if (eps.hasPublicationDetector()) {
+			//RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
+			RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+			pw.sendHistoryCache(locator, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+		}
+		if (eps.hasSubscriptionDetector()) {
+			//RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
+			RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+			pw.sendHistoryCache(locator, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 		}
 	}
 }

@@ -154,7 +154,7 @@ public class RTPSWriter extends Endpoint {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
-	public void sendHistoryCache(Locator_t locator, EntityId_t readerId) throws IOException {
+	public void sendHistoryCache(Locator_t locator, EntityId_t readerId) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 		
@@ -167,9 +167,15 @@ public class RTPSWriter extends Endpoint {
 		}
 		
 		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
-		UDPWriter u = new UDPWriter(locator);
-		u.sendMessage(m, "c:/temp/hc.bin");
-		u.close();
+		
+		try {
+			UDPWriter u = new UDPWriter(locator);
+			u.sendMessage(m, "c:/tmp/" + getGuid().entityId + "-hc.rtps");
+			u.close();
+		}
+		catch(IOException ioe) {
+			log.warn("Failed to send HistoryCache: {}", ioe);
+		}
 	}
 
 
