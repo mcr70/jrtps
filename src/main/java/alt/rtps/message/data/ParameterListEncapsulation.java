@@ -16,14 +16,18 @@ import alt.rtps.transport.RTPSByteBuffer;
 public class ParameterListEncapsulation extends DataEncapsulation {
 	private ParameterList parameters;
 	private final boolean littleEndian;
+	private short options;
 
 	public ParameterListEncapsulation(ParameterList parameters) {
-		this(parameters, true);
+		this.parameters = parameters;
+		this.options = 0;
+		this.littleEndian = true;
 	}
 	
-	public ParameterListEncapsulation(ParameterList parameters, boolean littleEndian) {
-		this.parameters = parameters;
-		this.littleEndian = littleEndian;
+	ParameterListEncapsulation(RTPSByteBuffer bb) {
+		this.options = (short) bb.read_short();
+		this.parameters = new ParameterList(bb);
+		this.littleEndian = bb.getBuffer().order().equals(ByteOrder.LITTLE_ENDIAN);
 	}
 
 
@@ -50,6 +54,8 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 			buffer.order(ByteOrder.BIG_ENDIAN);
 			bb.write(PL_CDR_BE_HEADER);
 		}
+		
+		//bb.write_short(options);
 		
 		parameters.writeTo(bb);
 		

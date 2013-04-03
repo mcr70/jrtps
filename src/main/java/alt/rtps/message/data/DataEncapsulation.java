@@ -54,7 +54,6 @@ public abstract class DataEncapsulation {
 		switch (eh) {
 		case 0:
 		case 1:
-			options = (short) bb.read_short();
 			boolean littleEndian = (eh & 0x1) == 0x1;
 			if (littleEndian) {
 				bb.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
@@ -63,10 +62,10 @@ public abstract class DataEncapsulation {
 				bb.getBuffer().order(ByteOrder.BIG_ENDIAN);
 			}
 
-			return new CDREncapsulation(bb, options);
+			return new CDREncapsulation(bb);
 		case 2:
 		case 3:
-			options = (short) bb.read_short();
+			
 			littleEndian = (eh & 0x1) == 0x1;
 			if (littleEndian) {
 				bb.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
@@ -75,8 +74,7 @@ public abstract class DataEncapsulation {
 				bb.getBuffer().order(ByteOrder.BIG_ENDIAN);
 			}
 			
-			ParameterList pl = new ParameterList(bb);
-			return new ParameterListEncapsulation(pl, littleEndian);
+			return new ParameterListEncapsulation(bb);
 		}
 		
 		
