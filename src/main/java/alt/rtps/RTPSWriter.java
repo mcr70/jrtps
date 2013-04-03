@@ -184,7 +184,6 @@ public class RTPSWriter extends Endpoint {
 
 
 	public void createChange(Object obj) {
-		getHistoryCache().createChange(obj);
-		
+		getHistoryCache().createChange(obj);	
 	}
 }

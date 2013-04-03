@@ -22,10 +22,7 @@ import alt.rtps.types.Time_t;
 public class RTPSReader extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
-	/**
-	 * Contains the history caches of matching writers. Each Reader may be matched with multiple writers.
-	 */
-	private HashMap<GUID_t, HistoryCache> readerCaches = new HashMap<>();
+	private HistoryCache reader_cache;
 	
 	private List<DataListener> listeners = new LinkedList<DataListener>();
 	private int ackNackCount = 0;
@@ -35,7 +32,8 @@ public class RTPSReader extends Endpoint {
 
 	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
 		super(prefix, entityId, topicName);
-
+		this.reader_cache = new HistoryCache(new GUID_t(prefix, entityId));
+		
 		this.marshaller = marshaller;
 
 		if (entityId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER)) {
@@ -71,7 +69,7 @@ public class RTPSReader extends Endpoint {
 			((DiscoveredData) obj).setWriterGuid(writerGuid); 
 		}
 
-		HistoryCache hc = getHistoryCache(writerGuid);
+		HistoryCache hc = getHistoryCache();
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 		
 		if (dataAdded) {
@@ -106,7 +104,7 @@ public class RTPSReader extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		HistoryCache hc = getHistoryCache(writerGuid);
+		HistoryCache hc = getHistoryCache();
 		seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 
@@ -121,7 +119,7 @@ public class RTPSReader extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		HistoryCache hc = getHistoryCache(writerGuid);
+		HistoryCache hc = getHistoryCache();
 		long seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 
@@ -132,15 +130,8 @@ public class RTPSReader extends Endpoint {
 		return an;
 	}
 	
-	HistoryCache getHistoryCache(GUID_t writerGuid) {
-		HistoryCache historyCache = readerCaches.get(writerGuid);
-		if (historyCache == null) {
-			log.debug("[{}] Creating new HistoryCache for writer {}", getGuid().entityId, writerGuid);
-			historyCache = new HistoryCache(writerGuid);
-			readerCaches.put(writerGuid, historyCache);
-		}
-		
-		return historyCache;
+	HistoryCache getHistoryCache() {
+		return reader_cache;
 	}
 
 	/**
