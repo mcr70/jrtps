@@ -67,7 +67,7 @@ public abstract class EntityId_t  {
 	 * @return
 	 */
 	public boolean isUserDefinedEntity() {
-		return (entityKind & 0xc0) == 0x40; // @see 9.3.1.2
+		return (entityKind & 0xc0) == 0x00; // @see 9.3.1.2
 	}
 
 	/**
@@ -75,7 +75,7 @@ public abstract class EntityId_t  {
 	 * @return
 	 */
 	public boolean isVendorSpecifiEntity() {
-		return (entityKind & 0xc0) == 0x00; // @see 9.3.1.2
+		return (entityKind & 0xc0) == 0x40; // @see 9.3.1.2
 	}
 
 	public static EntityId_t readEntityId(byte[] eKey, int kind) {		
