@@ -11,15 +11,16 @@ import alt.rtps.types.EntityId_t;
 public class ParticipantClient {
 	public static void main(String[] args) throws IOException {		
 		RTPSParticipant p = new RTPSParticipant(0); // Participant to domain 0
-
-		createHelloReader(p);
-		createHelloWriter(p);
 		
+		//createHelloReader(p);
+		RTPSWriter w = createHelloWriter(p);
+		w.createChange(new HelloWorldData(1, "mika"));
+
 		p.start(); // start Participant. Threads will start and initial messages are sent
 	}
 
-	private static void createHelloReader(RTPSParticipant p) {
-		p.createReader(new EntityId_t.UserDefinedEntityId(new byte[]{0,0,1}, (byte)0x07), 
+	private static RTPSReader createHelloReader(RTPSParticipant p) {
+		return p.createReader(new EntityId_t.UserDefinedEntityId(new byte[]{0,0,1}, (byte)0x07), 
 				"HelloWorldData_Msg", "HelloWorldData::Msg", new Marshaller() {
 					@Override
 					public Object unmarshall(DataEncapsulation dEnc) {
@@ -35,8 +36,8 @@ public class ParticipantClient {
 				});
 	}
 
-	private static void createHelloWriter(RTPSParticipant p) {
-		 RTPSWriter w = p.createWriter(new EntityId_t.UserDefinedEntityId(new byte[]{0,0,1}, (byte)0x02), 
+	private static RTPSWriter createHelloWriter(RTPSParticipant p) {
+		 return p.createWriter(new EntityId_t.UserDefinedEntityId(new byte[]{0,0,1}, (byte)0x02), 
 				"HelloWorldData_Msg", "HelloWorldData::Msg", new Marshaller() {
 					@Override
 					public Object unmarshall(DataEncapsulation dEnc) {
@@ -50,8 +51,6 @@ public class ParticipantClient {
 						return null;
 					}
 				});
-		 
-		 w.createChange(new HelloWorldData(1, "mika"));
 	}
 	
 	private static class HelloWorldData {
