@@ -182,7 +182,7 @@ public class RTPSParticipant {
 		writerEndpoints.add(writer);
 
 		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
-		WriterData wd = new WriterData(writer.getTopicName(), typeName, pw.getGuid());
+		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		boolean b = pw.getHistoryCache().createChange(wd);
 //System.out.println("***** " + b + ", " + topicName);
 		return writer;
@@ -204,7 +204,7 @@ public class RTPSParticipant {
 		readerEndpoints.add(reader);
 
 		RTPSWriter sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
-		ReaderData rd = new ReaderData(topicName, typeName, sw.getGuid());
+		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
 		sw.getHistoryCache().createChange(rd);
 
 		return reader;
