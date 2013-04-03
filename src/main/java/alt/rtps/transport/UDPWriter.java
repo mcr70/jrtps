@@ -1,6 +1,5 @@
 package alt.rtps.transport;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.Buffer;

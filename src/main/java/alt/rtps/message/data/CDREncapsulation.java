@@ -19,7 +19,7 @@ public class CDREncapsulation extends DataEncapsulation {
 
 	CDREncapsulation(RTPSByteBuffer bb) {
 		this.bb = bb;
-		this.options = (short) bb.read_short();
+		this.options = (short) bb.read_short(); // NOT Used
 	}
 	
 	public CDREncapsulation(int size) {
