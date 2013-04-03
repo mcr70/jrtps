@@ -51,19 +51,29 @@ public class ParticipantClient {
 
 	private static RTPSWriter createHelloWriter(RTPSParticipant p) {
 		 return p.createWriter(new EntityId_t.UserDefinedEntityId(new byte[]{0,0,1}, (byte)0x02), 
-				"HelloWorldData_Msg", "HelloWorldData::Msg", new Marshaller() {
-					@Override
-					public Object unmarshall(DataEncapsulation dEnc) {
-						System.out.println("Unmarshall !!!!!!!!!!!!!!!!!!!!!");
-						return null;
-					}
+					"HelloWorldData_Msg", "HelloWorldData::Msg", new Marshaller<HelloWorldData>() {
+				@Override
+				public HelloWorldData unmarshall(DataEncapsulation dEnc) {
+					CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;
+					
+					RTPSByteBuffer bb = cdrEnc.getBuffer();
+					int id = bb.read_long();
+					String msg = bb.read_string();
+					
+					return new HelloWorldData(id, msg);
+				}
 
-					@Override
-					public DataEncapsulation marshall(Object data) {
-						System.out.println("Marhsall !!!!!!!!!!!!!!!!!!!!!!!");
-						return null;
-					}
-				});
+				@Override
+				public DataEncapsulation marshall(HelloWorldData data) {			
+					RTPSByteBuffer bb = new RTPSByteBuffer(ByteBuffer.allocate(512));
+					bb.write_long(data.id);
+					bb.write_string(data.message);
+					
+					CDREncapsulation cdrEnc = new CDREncapsulation(bb, (short) 0);
+					
+					return cdrEnc;
+				}
+			});
 	}
 	
 	private static class HelloWorldData {

@@ -43,7 +43,7 @@ class BuiltinListener implements DataListener {
 		if (data instanceof ParticipantData) {	
 
 			ParticipantData pd = (ParticipantData) data;
-			log.debug("Considering Participant {}", pd.getGuid());
+			log.trace("Considering Participant {}", pd.getGuid());
 
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
@@ -100,7 +100,7 @@ class BuiltinListener implements DataListener {
 	 * @param readerData
 	 */
 	private void handleReaderData(ReaderData readerData) {
-		log.debug("handleReaderData({})", readerData);
+		log.trace("handleReaderData({})", readerData);
 		GUID_t key = readerData.getKey();
 		// builtin entities are handled with SEDP in ParticipantData reception
 		if (key.entityId.isUserDefinedEntity()) {  
@@ -114,9 +114,6 @@ class BuiltinListener implements DataListener {
 					log.warn("Participant was not found: {}", key.prefix);
 				}
 			}
-		}
-		else {
-			log.debug("Will not send history cache to {}", key.entityId);
 		}
 	}
 
