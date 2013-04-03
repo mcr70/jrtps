@@ -31,4 +31,8 @@ public class CDREncapsulation extends DataEncapsulation {
 		return null;
 	}
 
+	
+	public RTPSByteBuffer getBuffer() {
+		return bb;
+	}
 }
