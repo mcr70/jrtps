@@ -15,19 +15,17 @@ import alt.rtps.transport.RTPSByteBuffer;
  */
 public class ParameterListEncapsulation extends DataEncapsulation {
 	private ParameterList parameters;
-	private final boolean littleEndian;
 	private short options;
 
 	public ParameterListEncapsulation(ParameterList parameters) {
 		this.parameters = parameters;
 		this.options = 0;
-		this.littleEndian = true;
+
 	}
 	
 	ParameterListEncapsulation(RTPSByteBuffer bb) {
 		this.options = (short) bb.read_short();
 		this.parameters = new ParameterList(bb);
-		this.littleEndian = bb.getBuffer().order().equals(ByteOrder.LITTLE_ENDIAN);
 	}
 
 
@@ -42,7 +40,6 @@ public class ParameterListEncapsulation extends DataEncapsulation {
 
 	@Override
 	public byte[] getSerializedPayload() {
-
 		ByteBuffer buffer = ByteBuffer.allocate(1024); // TODO: hardcoded
 		buffer.order(ByteOrder.LITTLE_ENDIAN);
 		RTPSByteBuffer bb = new RTPSByteBuffer(buffer);
