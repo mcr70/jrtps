@@ -17,20 +17,18 @@ public class CDREncapsulation extends DataEncapsulation {
 	private final short options;
 
 
-	CDREncapsulation(RTPSByteBuffer bb, short options) {
+	CDREncapsulation(RTPSByteBuffer bb) {
 		this.bb = bb;
-		this.options = options;
+		this.options = (short) bb.read_short();
 	}
 	
 	public CDREncapsulation(int size) {
+		this.options = 0;
 		this.bb = new RTPSByteBuffer(ByteBuffer.allocate(size));
 		bb.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		
-		bb.write_octet((byte) 0);
-		bb.write_octet((byte) 1); // CDR_LE
-		
-		this.options = 0;
-		bb.write_short(options);
+		bb.write(CDR_LE_HEADER);
+		bb.write_short(options); // bb is positioned to start of actual data
 	}
 
 	@Override
@@ -40,7 +38,10 @@ public class CDREncapsulation extends DataEncapsulation {
 
 	@Override
 	public byte[] getSerializedPayload() {
-		return null;
+		byte[] serializedPayload = new byte[bb.position()];
+		System.arraycopy(bb.getBuffer().array(), 0, serializedPayload, 0, serializedPayload.length);
+		
+		return serializedPayload;
 	}
 
 	
