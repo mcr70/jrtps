@@ -1,6 +1,5 @@
 package alt.rtps;
 
-import java.io.IOException;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -12,7 +11,6 @@ import alt.rtps.builtin.TopicData;
 import alt.rtps.builtin.WriterData;
 import alt.rtps.message.Heartbeat;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
-import alt.rtps.types.BuiltinEndpointSet_t;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;
@@ -55,7 +53,12 @@ class BuiltinListener implements DataListener {
 				else {
 					log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
+					
+					// First, make sure remote participant knows about us.
+					RTPSWriter pw = participant.getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
+					pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
 
+					// Then, announce our builtin endpoints
 					handleBuiltinEnpointSet(pd.getBuiltinEndpoints(), pd.getMetatrafficUnicastLocator());
 				}
 			}
@@ -79,11 +82,41 @@ class BuiltinListener implements DataListener {
 		}
 		else if (data instanceof ReaderData) {
 			ReaderData readerData = (ReaderData) data;			
+			
+			handleReaderData(readerData);
 			discoveredReaders.put(readerData.getReaderGuid(), readerData);
 		}
 		else if (data instanceof TopicData) {
 			TopicData topicData = (TopicData) data;
 			discoveredTopics.put(topicData.getKey(), topicData);
+		}
+	}
+
+	/**
+	 * Handler discovered ReaderData. If ReaderData represents an user defined
+	 * Reader, and this participant has a Writer for same topic, send writers history
+	 * cache to reader.
+	 * 
+	 * @param readerData
+	 */
+	private void handleReaderData(ReaderData readerData) {
+		log.debug("handleReaderData({})", readerData);
+		GUID_t key = readerData.getKey();
+		// builtin entities are handled with SEDP in ParticipantData reception
+		if (key.entityId.isUserDefinedEntity()) {  
+			RTPSWriter writer = participant.getWriterForTopic(readerData.getTopicName());
+			if (writer != null) {
+				ParticipantData pd = discoveredParticipants.get(key.prefix);
+				if (pd != null) {
+					writer.sendHistoryCache(pd.getUnicastLocator(), key.entityId);
+				}
+				else {
+					log.warn("Participant was not found: {}", key.prefix);
+				}
+			}
+		}
+		else {
+			log.debug("Will not send history cache to {}", key.entityId);
 		}
 	}
 
