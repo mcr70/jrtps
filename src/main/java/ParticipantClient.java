@@ -1,5 +1,4 @@
 import java.io.IOException;
-import java.nio.ByteBuffer;
 
 import alt.rtps.RTPSParticipant;
 import alt.rtps.RTPSReader;
@@ -16,7 +15,7 @@ public class ParticipantClient {
 		
 		Marshaller<HelloWorldData> m = createMarshaller();
 		
-		createHelloReader(p, m);
+		//createHelloReader(p, m);
 		RTPSWriter w = createHelloWriter(p, m);
 		w.createChange(new HelloWorldData(1, "mika"));
 
@@ -63,6 +62,10 @@ public class ParticipantClient {
 		public HelloWorldData(int id, String message) {
 			this.id = id;
 			this.message = message;
+		}
+		
+		public String toString() {
+			return id + ":" + message;
 		}
 	}
 }
