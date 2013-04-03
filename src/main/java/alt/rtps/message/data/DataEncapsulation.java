@@ -1,9 +1,7 @@
-package alt.rtps.message;
+package alt.rtps.message.data;
 
 import java.nio.ByteOrder;
 
-import alt.rtps.message.data.CDREncapsulation;
-import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.transport.RTPSByteBuffer;
 

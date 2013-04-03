@@ -2,7 +2,7 @@ package alt.rtps.builtin;
 
 import java.util.Set;
 
-import alt.rtps.message.DataEncapsulation;
+import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.message.parameter.DefaultMulticastLocator;

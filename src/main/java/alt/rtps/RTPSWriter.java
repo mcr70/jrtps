@@ -8,10 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
-import alt.rtps.message.DataEncapsulation;
 import alt.rtps.message.Heartbeat;
 import alt.rtps.message.InfoTimestamp;
 import alt.rtps.message.Message;
+import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.UDPWriter;
 import alt.rtps.types.Duration_t;
