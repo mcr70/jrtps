@@ -119,8 +119,8 @@ public abstract class EntityId_t  {
 
 
 	public static class UserDefinedEntityId extends EntityId_t {
-		public UserDefinedEntityId(byte[] entityKey, byte entityKind) {
-			super(entityKey, entityKind);
+		public UserDefinedEntityId(byte[] entityKey, int entityKind) {
+			super(entityKey, (byte) entityKind);
 		}
 
 		@Override
