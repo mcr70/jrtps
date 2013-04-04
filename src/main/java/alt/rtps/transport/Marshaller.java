@@ -1,5 +1,7 @@
 package alt.rtps.transport;
 
+import java.io.IOException;
+
 import alt.rtps.message.data.DataEncapsulation;
 
 /**
@@ -14,13 +16,15 @@ public abstract class Marshaller<T> {
 	 * Unmarshalls given DataEncapsulation to Object.
 	 * @param dEnc
 	 * @return
+	 * @throws IOException 
 	 */
-	public abstract T unmarshall(DataEncapsulation dEnc);
+	public abstract T unmarshall(DataEncapsulation dEnc) throws IOException;
 
 	/**
 	 * Marshalls given Object to DataEncapsulation
 	 * @param data 
 	 * @return
+	 * @throws IOException 
 	 */
-	public abstract DataEncapsulation marshall(T data);
+	public abstract DataEncapsulation marshall(T data) throws IOException;
 }

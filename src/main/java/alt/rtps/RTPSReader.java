@@ -1,5 +1,6 @@
 package alt.rtps;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -59,7 +60,7 @@ public class RTPSReader extends Endpoint {
 	}
 
 
-	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) {
+	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) throws IOException {
 
 		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
 		GUID_t writerGuid = new GUID_t(prefix, data.getWriterId()); 
