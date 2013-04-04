@@ -1,5 +1,6 @@
 package alt.rtps.transport;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -24,24 +25,29 @@ public class RTPSMessageBroker {
 	private static final Logger log = LoggerFactory.getLogger(RTPSMessageBroker.class);
 
 	private final RTPSParticipant participant;
-	
+
 	public RTPSMessageBroker(RTPSParticipant p) {
 		this.participant = p;
 	}
-	
+
 	public void handleMessage(Message msg) {
 		Time_t timestamp = null;
 		GuidPrefix_t destGuidPrefix = msg.getHeader().getGuidPrefix();
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		List<SubMessage> subMessages = msg.getSubMessages();
-		
+
 		for (SubMessage subMsg : subMessages) {
 			switch (subMsg.getKind()) {
 			case ACKNACK:
 				handleAckNack(sourceGuidPrefix, (AckNack)subMsg);
 				break;
 			case DATA:
-				handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
+				try {
+					handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
+				}
+				catch(IOException ioe) {
+					log.warn("Failed to handle data", ioe);
+				}
 				break;
 			case HEARTBEAT:
 				handleHeartbeat(sourceGuidPrefix, (Heartbeat)subMsg);
@@ -73,7 +79,7 @@ public class RTPSMessageBroker {
 		}
 	}
 
-	private void handleData(GuidPrefix_t prefix, Time_t timestamp, Data data) {
+	private void handleData(GuidPrefix_t prefix, Time_t timestamp, Data data) throws IOException {
 		RTPSReader reader = null;
 		if (data.getReaderId().equals(EntityId_t.UNKNOWN_ENTITY)) {
 			reader = participant.getMatchingReader(data.getWriterId());
@@ -81,7 +87,7 @@ public class RTPSMessageBroker {
 		else {
 			reader = participant.getReader(data.getReaderId());
 		}
-		
+
 		if (reader != null) {
 			reader.onData(prefix, data, timestamp);
 		}
@@ -92,7 +98,7 @@ public class RTPSMessageBroker {
 
 	private void handleHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {		
 		RTPSReader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
-		
+
 		if (reader != null) {
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}

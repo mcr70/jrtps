@@ -30,7 +30,7 @@ public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private Thread statelessResenderThread;
 	private boolean running;
-	
+
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
 	 * all the changes in the writer’s HistoryCache to all the Locators
@@ -41,16 +41,16 @@ public class RTPSWriter extends Endpoint {
 	private final Marshaller marshaller;
 	private final HistoryCache writer_cache;
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
-	
+
 
 	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
 		super(prefix, entityId, topicName);
-		
+
 		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		this.marshaller = marshaller;
 	}
-	
-	
+
+
 	/**
 	 * Get the HistoryCache of this RTPSWriter
 	 * 
@@ -67,45 +67,50 @@ public class RTPSWriter extends Endpoint {
 			@Override
 			public void run() {
 				running = true;
-				
+
 				while (running) {
 					List<CacheChange> changes = writer_cache.getChanges();
-					
+
 					for (CacheChange change : changes) { // TODO: ConcurrentModification
-						Message m = new Message(getGuid().prefix);
-						
-						InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
-						m.addSubMessage(iTime);
-						
-						DataEncapsulation dEnc = marshaller.marshall(change.getData());
-						Data data = new Data(readerId, getGuid().entityId, change.getSequenceNumber(), null, dEnc);
-						m.addSubMessage(data);
-						
-						log.debug("[{}] Send {}, {}: {}", getGuid().entityId, 
-								change.getData().getClass().getSimpleName(), 
-								change.getSequenceNumber(), change.getData());
-						
-						sendMessage(m, null);
+						try {
+							Message m = new Message(getGuid().prefix);
+
+							InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
+							m.addSubMessage(iTime);
+
+							DataEncapsulation dEnc = marshaller.marshall(change.getData());
+							Data data = new Data(readerId, getGuid().entityId, change.getSequenceNumber(), null, dEnc);
+							m.addSubMessage(data);
+
+							log.debug("[{}] Send {}, {}: {}", getGuid().entityId, 
+									change.getData().getClass().getSimpleName(), 
+									change.getSequenceNumber(), change.getData());
+
+							sendMessage(m, null);
+						}
+						catch(IOException ioe) {
+							log.warn("Failed to send cache change {}", change);
+						}
 					}
-					
+
 					synchronized (writer_cache) {
 						try {
 							writer_cache.wait(resendDataPeriod.sec * 1000);
 						} catch (InterruptedException e) { }
 					}
 				}
-				
+
 				log.debug("[{}] Resend thread dying", getGuid().entityId);
 			}
 		};
-	
+
 		log.debug("[{}] Starting resend thread with period {}", getGuid().entityId, period);
 		statelessResenderThread.start();
 	}
 
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got {}", getGuid().entityId, ackNack);
-		
+
 		if (writer_cache.size() > 0) {
 			sendData(senderPrefix, ackNack);
 		}
@@ -119,15 +124,20 @@ public class RTPSWriter extends Endpoint {
 	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
-		
+
 		for (CacheChange cc : changes) {
 			log.trace("Marshalling {}", cc.getData());
-			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-			Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
-			
-			m.addSubMessage(data);
+			try {
+				DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
+				Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
+
+				m.addSubMessage(data);
+			}
+			catch(IOException ioe) {
+				log.warn("Failed to add cache change to message", ioe);
+			}
 		}
-		
+
 		log.debug("[{}] Sending {}", getGuid().entityId, m);
 		sendMessage(m, senderPrefix); 
 	}
@@ -136,16 +146,16 @@ public class RTPSWriter extends Endpoint {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat();
 		m.addSubMessage(hb);
-		
+
 		log.debug("[{}] Sending {}", getGuid().entityId, m);
 		sendMessage(m, senderPrefix);
 	}
 
 	private Heartbeat createHeartbeat() {
-		
+
 		Heartbeat hb = new Heartbeat(EntityId_t.UNKNOWN_ENTITY, getGuid().entityId,
 				writer_cache.getSeqNumMin(), writer_cache.getSeqNumMax(), hbCount++ );
-		
+
 		return hb;
 	}
 
@@ -161,17 +171,22 @@ public class RTPSWriter extends Endpoint {
 	public void sendHistoryCache(Locator_t locator, EntityId_t readerId) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
-		
+
 		for (CacheChange cc : changes) {
 			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
-			DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-			Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
-			
-			m.addSubMessage(data);
+			try {
+				DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
+				Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
+
+				m.addSubMessage(data);
+			}
+			catch(IOException ioe) {
+				log.warn("Failed to add cache change to message", ioe);
+			}
 		}
-		
+
 		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
-		
+
 		try {
 			UDPWriter u = new UDPWriter(locator);
 			u.sendMessage(m, "c:/tmp/" + getGuid().entityId + "-hc.rtps");
