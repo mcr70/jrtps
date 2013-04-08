@@ -6,8 +6,10 @@ import java.util.List;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.types.GUID_t;
+import alt.rtps.types.Locator_t;
 
 public class DiscoveredData {
+	private Locator_t locator;
 	protected String typeName;
 	protected String topicName;
 	// On spec, key is BuiltinTopicKey_t (4 bytes), but KeyHash Parameter is 16 bytes.
@@ -74,5 +76,13 @@ public class DiscoveredData {
 
 	public void setWriterGuid(GUID_t writerGuid) {
 		this.writerGuid = writerGuid;
+	}
+
+	public Locator_t getLocator() {
+		return locator;
+	}
+
+	public void setLocator(Locator_t locator) {
+		this.locator = locator;
 	}
 }

@@ -1,6 +1,8 @@
 package alt.rtps;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -8,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import alt.rtps.builtin.DiscoveredData;
+import alt.rtps.builtin.WriterData;
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
@@ -22,6 +25,9 @@ import alt.rtps.types.Time_t;
 public class RTPSReader extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
+	private HashSet<WriterData> matchedWriters = new HashSet<>();
+	private HashMap<GUID_t, HistoryCache> reader_caches = new HashMap<>();
+	
 	private HistoryCache reader_cache;
 	
 	private List<DataListener> listeners = new LinkedList<DataListener>();
@@ -32,7 +38,7 @@ public class RTPSReader extends Endpoint {
 
 	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
 		super(prefix, entityId, topicName);
-		this.reader_cache = new HistoryCache(new GUID_t(prefix, entityId));
+		//this.reader_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		
 		this.marshaller = marshaller;
 
@@ -69,7 +75,7 @@ public class RTPSReader extends Endpoint {
 			((DiscoveredData) obj).setWriterGuid(writerGuid); 
 		}
 
-		HistoryCache hc = getHistoryCache();
+		HistoryCache hc = getHistoryCache(writerGuid);
 		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
 		
 		if (dataAdded) {
@@ -99,27 +105,11 @@ public class RTPSReader extends Endpoint {
 	}
 
 
-
-	private AckNack createAckNack(GUID_t writerGuid, long seqNumFirst, long seqNumLast) {
+	private AckNack createAckNack(GUID_t writerGuid) {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		HistoryCache hc = getHistoryCache();
-		seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
-		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
-
-		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
-
-		AckNack an = new AckNack(getGuid().entityId, matchedEntity, snSet, ackNackCount++);
-
-		return an;
-	}
-	
-	AckNack createAckNack(GUID_t writerGuid) {
-		// This is a simple AckNack, that can be optimized if store
-		// out-of-order data samples in a separate cache.
-
-		HistoryCache hc = getHistoryCache();
+		HistoryCache hc = getHistoryCache(writerGuid);
 		long seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 
@@ -130,8 +120,14 @@ public class RTPSReader extends Endpoint {
 		return an;
 	}
 	
-	HistoryCache getHistoryCache() {
-		return reader_cache;
+	private HistoryCache getHistoryCache(GUID_t writerGuid) {
+		HistoryCache hc = reader_caches.get(writerGuid);;
+		if (hc == null) {
+			hc = new HistoryCache(writerGuid);
+			reader_caches.put(writerGuid, hc);
+		}
+		
+		return hc;
 	}
 
 	/**
@@ -141,5 +137,16 @@ public class RTPSReader extends Endpoint {
 	 */
 	int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
+	}
+
+	public void close() {
+		reader_caches.values();
+		for (HistoryCache hc : reader_caches.values()) {
+			hc.getChanges().clear();
+		}
+	}
+
+	void addMatchedWriter(WriterData writerData) {
+		matchedWriters.add(writerData);
 	}
 }

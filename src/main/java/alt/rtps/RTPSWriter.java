@@ -1,11 +1,13 @@
 package alt.rtps;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import alt.rtps.builtin.ReaderData;
 import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
@@ -28,6 +30,8 @@ import alt.rtps.types.Time_t;
  */
 public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
+	
+	private HashSet<ReaderData> matchedReaders = new HashSet<>();
 	private Thread statelessResenderThread;
 	private boolean running;
 
@@ -41,6 +45,7 @@ public class RTPSWriter extends Endpoint {
 	private final Marshaller marshaller;
 	private final HistoryCache writer_cache;
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
+	protected Object resend_lock = new Object();
 
 
 	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
@@ -92,11 +97,13 @@ public class RTPSWriter extends Endpoint {
 							log.warn("Failed to send cache change {}", change);
 						}
 					}
-
-					synchronized (writer_cache) {
+					
+					synchronized (resend_lock ) {
 						try {
-							writer_cache.wait(resendDataPeriod.sec * 1000);
-						} catch (InterruptedException e) { }
+							Thread.sleep(resendDataPeriod.sec * 1000);
+						} catch (InterruptedException e) { 
+							running = false;
+						}
 					}
 				}
 
@@ -200,5 +207,16 @@ public class RTPSWriter extends Endpoint {
 
 	public void createChange(Object obj) {
 		getHistoryCache().createChange(obj);	
+	}
+
+
+	public void close() {
+		//resend_lock.notify();
+		writer_cache.getChanges().clear();
+	}
+
+
+	void addMatchedReader(ReaderData readerData) {
+		matchedReaders.add(readerData);
 	}
 }
