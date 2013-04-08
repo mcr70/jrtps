@@ -5,11 +5,11 @@ import java.util.HashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import alt.rtps.builtin.DiscoveredData;
 import alt.rtps.builtin.ParticipantData;
 import alt.rtps.builtin.ReaderData;
 import alt.rtps.builtin.TopicData;
 import alt.rtps.builtin.WriterData;
-import alt.rtps.message.Heartbeat;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
@@ -40,42 +40,64 @@ class BuiltinListener implements DataListener {
 
 	@Override
 	public void onData(Object data, Time_t timestamp) {
-		if (data instanceof ParticipantData) {	
-
-			ParticipantData pd = (ParticipantData) data;
-			log.trace("Considering Participant {}", pd.getGuid());
-
-			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
-			if (d == null && pd.getGuidPrefix() != null) {
-				if (pd.getGuidPrefix().equals(participant.guid.prefix)) {
-					log.trace("Ignoring self");
+		if (data instanceof DiscoveredData) {
+			DiscoveredData dd = (DiscoveredData)data;
+			GUID_t key = dd.getKey();
+			ParticipantData pd = discoveredParticipants.get(key.prefix);
+			if (pd != null) {
+				if (key.entityId.isBuiltinEntity()) {
+					dd.setLocator(pd.getMetatrafficUnicastLocator());
 				}
 				else {
-					log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
-					discoveredParticipants.put(pd.getGuidPrefix(), pd);
-					
-					// First, make sure remote participant knows about us.
-					RTPSWriter pw = participant.getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
-					pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
-
-					// Then, announce our builtin endpoints
-					handleBuiltinEnpointSet(pd.getBuiltinEndpoints(), pd.getMetatrafficUnicastLocator());
+					dd.setLocator(pd.getUnicastLocator());
 				}
 			}
 		}
+		
+		if (data instanceof ParticipantData) {	
+			handleParticipantData((ParticipantData) data);
+		}
 		else if (data instanceof WriterData) {
-			WriterData writerData = (WriterData) data;
-			discoveredWriters.put(writerData.getWriterGuid(), writerData);
+			handleWriterData((WriterData) data);
 		}
 		else if (data instanceof ReaderData) {
-			ReaderData readerData = (ReaderData) data;			
-			
-			handleReaderData(readerData);
-			discoveredReaders.put(readerData.getReaderGuid(), readerData);
+			handleReaderData((ReaderData) data);
 		}
 		else if (data instanceof TopicData) {
-			TopicData topicData = (TopicData) data;
-			discoveredTopics.put(topicData.getKey(), topicData);
+			handleTopicData((TopicData) data);
+		}
+	}
+
+
+
+	private void handleParticipantData(ParticipantData pd) {
+		log.trace("Considering Participant {}", pd.getGuid());
+
+		ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
+		if (d == null && pd.getGuidPrefix() != null) {
+			if (pd.getGuidPrefix().equals(participant.guid.prefix)) {
+				log.trace("Ignoring self");
+			}
+			else {
+				log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
+				discoveredParticipants.put(pd.getGuidPrefix(), pd);
+
+				// First, make sure remote participant knows about us.
+				RTPSWriter pw = participant.getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
+				pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
+
+				// Then, announce our builtin endpoints
+				handleBuiltinEnpointSet(pd.getBuiltinEndpoints(), pd.getMetatrafficUnicastLocator());
+			}
+		}
+	}
+
+	private void handleWriterData(WriterData writerData) {
+		discoveredWriters.put(writerData.getWriterGuid(), writerData);
+		
+		RTPSReader r = participant.getReaderForTopic(writerData.getTopicName());
+		if (r != null) {
+			r.addMatchedWriter(writerData);
 		}
 	}
 
@@ -87,11 +109,17 @@ class BuiltinListener implements DataListener {
 	 * @param readerData
 	 */
 	private void handleReaderData(ReaderData readerData) {
-		log.trace("handleReaderData({})", readerData);
+		discoveredReaders.put(readerData.getReaderGuid(), readerData);
 		GUID_t key = readerData.getKey();
+
+		RTPSWriter writer = participant.getWriterForTopic(readerData.getTopicName());
+		if (writer != null) {
+			writer.addMatchedReader(readerData);
+		}
+		
 		// builtin entities are handled with SEDP in ParticipantData reception
 		if (key.entityId.isUserDefinedEntity()) {  
-			RTPSWriter writer = participant.getWriterForTopic(readerData.getTopicName());
+			
 			if (writer != null) {
 				ParticipantData pd = discoveredParticipants.get(key.prefix);
 				if (pd != null) {
@@ -104,6 +132,12 @@ class BuiltinListener implements DataListener {
 		}
 	}
 
+	private void handleTopicData(TopicData data) {
+		TopicData topicData = (TopicData) data;
+		discoveredTopics.put(topicData.getKey(), topicData);
+	}
+
+	
 	/**
 	 * Handle builtin endpoints for discovered participant.
 	 * If participant has a builtin reader for publications or subscriptions,

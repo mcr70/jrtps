@@ -28,6 +28,7 @@ public class UDPReceiver implements Runnable {
 	private final Locator_t locator;
 	
 	private boolean running = true;
+	DatagramSocket socket = null;
 
 	public UDPReceiver(Locator_t locator, RTPSParticipant p) throws SocketException {
 		this.locator = locator;
@@ -37,7 +38,6 @@ public class UDPReceiver implements Runnable {
 	}
 	
 	public void run() {
-		DatagramSocket socket = null;
 		try {
 			if (locator.getInetAddress().isMulticastAddress()) {
 				socket = new MulticastSocket(locator.getPort());
@@ -51,6 +51,7 @@ public class UDPReceiver implements Runnable {
 				
 			while(running) {
 				DatagramPacket p = new DatagramPacket(buf, buf.length);
+
 				socket.receive(p);
 				
 				try {	
@@ -68,18 +69,22 @@ public class UDPReceiver implements Runnable {
 			}
 		} 
 		catch (SocketException e) {
-			log.error("Got SocketException. Closing.", e); 
+			// Expected: on close() 
 		} 
 		catch (IOException e) {
 			log.error("Got IOException. Closing.", e);
 		}
 		finally {
-			socket.close();
+			if (socket.isConnected()) {
+				socket.close();
+			}
 		}
 	}
 	
 
-	public void stop() {
+	public void close() {
+		log.debug("Closing {}", locator);
+		socket.close();
 		running = false;
 	}
 

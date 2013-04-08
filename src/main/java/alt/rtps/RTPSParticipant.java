@@ -445,4 +445,24 @@ public class RTPSParticipant {
 
 		return null;
 	}
+
+
+	/**
+	 * Close this RTPSParticipant. All the network listeners will be stopped 
+	 * and all the history caches of all entities will be cleared.
+	 */
+	public void close() {
+		// First, close network receivers
+		for (UDPReceiver r : receivers) {
+			r.close();
+		}
+
+		// Then entities
+		for (RTPSReader r : readerEndpoints) {
+			r.close();
+		}
+		for (RTPSWriter w : writerEndpoints) {
+			w.close();
+		}
+	}
 }
