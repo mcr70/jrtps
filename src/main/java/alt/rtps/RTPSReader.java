@@ -22,11 +22,19 @@ import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.SequenceNumberSet;
 import alt.rtps.types.Time_t;
 
+/**
+ * RTPSReader implements RTPS Reader endpoint functionality.
+ * RTPSReader does not store any data received. It only keeps track of data
+ * entries sent by writers and propagates received data to DataListeners registered.
+ * 
+ * @author mcr70
+ * @see DataListener
+ */
 public class RTPSReader extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
-	private HashMap<GUID_t, HistoryCache> reader_caches = new HashMap<>();
+	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
 	
 	private HistoryCache reader_cache;
 	
@@ -75,8 +83,8 @@ public class RTPSReader extends Endpoint {
 			((DiscoveredData) obj).setWriterGuid(writerGuid); 
 		}
 
-		HistoryCache hc = getHistoryCache(writerGuid);
-		boolean dataAdded = hc.createChange(obj, data.getWriterSequenceNumber().getAsLong());
+		WriterProxy wp = getWriterProxy(writerGuid);
+		boolean dataAdded = wp.acceptData(obj, data.getWriterSequenceNumber().getAsLong());
 		
 		if (dataAdded) {
 			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, 
@@ -109,7 +117,7 @@ public class RTPSReader extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		HistoryCache hc = getHistoryCache(writerGuid);
+		WriterProxy hc = getWriterProxy(writerGuid);
 		long seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 
@@ -120,14 +128,14 @@ public class RTPSReader extends Endpoint {
 		return an;
 	}
 	
-	private HistoryCache getHistoryCache(GUID_t writerGuid) {
-		HistoryCache hc = reader_caches.get(writerGuid);;
-		if (hc == null) {
-			hc = new HistoryCache(writerGuid);
-			reader_caches.put(writerGuid, hc);
+	private WriterProxy getWriterProxy(GUID_t writerGuid) {
+		WriterProxy wp = writerProxies.get(writerGuid);;
+		if (wp == null) {
+			wp = new WriterProxy(writerGuid);
+			writerProxies.put(writerGuid, wp);
 		}
 		
-		return hc;
+		return wp;
 	}
 
 	/**
@@ -140,10 +148,7 @@ public class RTPSReader extends Endpoint {
 	}
 
 	public void close() {
-		reader_caches.values();
-		for (HistoryCache hc : reader_caches.values()) {
-			hc.getChanges().clear();
-		}
+		// TODO: No use for this
 	}
 
 	void addMatchedWriter(WriterData writerData) {
