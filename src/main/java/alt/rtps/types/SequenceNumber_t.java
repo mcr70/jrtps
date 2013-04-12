@@ -10,7 +10,7 @@ import alt.rtps.transport.RTPSByteBuffer;
 public class SequenceNumber_t {
 	public static final int LENGTH = 8;
 	
-	private int high = 0;
+	private int high = 0; // TODO: store as long instead
 	private int low = 0;
 
 	public SequenceNumber_t (RTPSByteBuffer bb) {

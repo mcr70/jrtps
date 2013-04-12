@@ -4,7 +4,8 @@ import alt.rtps.types.GUID_t;
 
 
 /**
- * WriterProxy represents a remote writer
+ * WriterProxy represents a remote writer. It also determines if
+ * an incoming Data message is out-of-order or not.
  * 
  * @author mcr70
  *
@@ -25,17 +26,16 @@ class WriterProxy {
 	}
 	
 	/**
+	 * Determines if incoming Data should be accepted or not.
 	 * 
-	 * @param data
 	 * @param sequenceNumber
 	 * @return true, if data was added to cache
 	 */
-	boolean acceptData(Object data, long sequenceNumber) {
+	boolean acceptData(long sequenceNumber) {
 		// Data must come in order. If not, drop it. Manage out-of-order data with 
 		// HeartBeat & AckNack messages
 
 		if (true || sequenceNumber == seqNumMax + 1) { 
-			//changes.add(new CacheChange(sequenceNumber, data));
 			seqNumMax++;
 			
 			return true;

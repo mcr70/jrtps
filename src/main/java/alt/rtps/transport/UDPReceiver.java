@@ -33,8 +33,6 @@ public class UDPReceiver implements Runnable {
 	public UDPReceiver(Locator_t locator, RTPSParticipant p) throws SocketException {
 		this.locator = locator;
 		broker = new RTPSMessageBroker(p);
-		
-		log.debug("Listening on {}", locator);
 	}
 	
 	public void run() {
@@ -46,6 +44,8 @@ public class UDPReceiver implements Runnable {
 			else {
 				socket = new DatagramSocket(locator.getPort());
 			}
+			
+			log.debug("Listening on {}", locator);
 			
 			byte[] buf = new byte[16384];
 				
@@ -69,13 +69,13 @@ public class UDPReceiver implements Runnable {
 			}
 		} 
 		catch (SocketException e) {
-			// Expected: on close() 
+			log.error("Got SocketException, {}", locator, e); 
 		} 
 		catch (IOException e) {
 			log.error("Got IOException. Closing.", e);
 		}
 		finally {
-			if (socket.isConnected()) {
+			if (socket != null && socket.isConnected()) {
 				socket.close();
 			}
 		}

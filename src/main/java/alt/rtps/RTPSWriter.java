@@ -3,7 +3,6 @@ package alt.rtps;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -28,6 +27,7 @@ import alt.rtps.types.Locator_t;
 import alt.rtps.types.Time_t;
 
 /**
+ * RTPSWriter implements RTPS writer endpoint.
  * 
  * @author mcr70
  *
@@ -126,6 +126,12 @@ public class RTPSWriter extends Endpoint {
 		resendThread.start();
 	}
 
+	/**
+	 * Handle incoming AckNack message.
+	 * 
+	 * @param senderPrefix
+	 * @param ackNack
+	 */
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got {}", getGuid().entityId, ackNack);
 
