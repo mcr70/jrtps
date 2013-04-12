@@ -71,7 +71,14 @@ public class RTPSReader extends Endpoint {
 		listeners.add(listener);
 	}
 
-
+	/**
+	 * Handle incoming Data message.
+	 * 
+	 * @param prefix
+	 * @param data
+	 * @param timestamp
+	 * @throws IOException
+	 */
 	public void onData(GuidPrefix_t prefix, Data data, Time_t timestamp) throws IOException {
 
 		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
@@ -83,7 +90,7 @@ public class RTPSReader extends Endpoint {
 
 		WriterProxy wp = getWriterProxy(writerGuid);
 		
-		if (wp.acceptData(obj, data.getWriterSequenceNumber())) {
+		if (wp.acceptData(data.getWriterSequenceNumber())) {
 			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
 
@@ -97,7 +104,12 @@ public class RTPSReader extends Endpoint {
 		}
 	}
 
-
+	/**
+	 * Handle incoming HeartBeat message.
+	 * 
+	 * @param senderGuidPrefix
+	 * @param hb
+	 */
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
 		log.debug("[{}] Got {}", getGuid().entityId, hb); 
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
@@ -115,8 +127,8 @@ public class RTPSReader extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		WriterProxy hc = getWriterProxy(writerGuid);
-		long seqNumFirst = hc.getSeqNumMax(); // Positively ACK all that we have..
+		WriterProxy wp = getWriterProxy(writerGuid);
+		long seqNumFirst = wp.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
