@@ -38,7 +38,7 @@ public class RTPSWriter extends Endpoint {
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
 	private Thread resendThread;
 	private boolean running;
-	private CyclicBarrier barrier = new CyclicBarrier(2);
+	private CyclicBarrier barrier;
 
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
@@ -72,7 +72,8 @@ public class RTPSWriter extends Endpoint {
 
 	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
 		resendDataPeriod = period;
-
+		barrier = new CyclicBarrier(2);
+		
 		resendThread = new Thread() {
 			@Override
 			public void run() {
@@ -222,16 +223,18 @@ public class RTPSWriter extends Endpoint {
 
 	public void close() {
 		// TODO: This is not working at the moment
-		try {
-			barrier.await(15, TimeUnit.SECONDS);
-		} catch (Exception e) {
-			log.warn("Exception ", e);
+		if (barrier != null) {
+			try {
+				barrier.await(15, TimeUnit.SECONDS);
+			} catch (Exception e) {
+				log.warn("Exception ", e);
+			}
+
+			if (running) {
+				resendThread.interrupt();
+			}
 		}
-		
-		if (running) {
-			resendThread.interrupt();
-		}
-		
+
 		writer_cache.getChanges().clear();
 	}
 
