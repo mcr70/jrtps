@@ -3,6 +3,10 @@ package alt.rtps;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,10 +34,11 @@ import alt.rtps.types.Time_t;
  */
 public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
-	
+
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
-	private Thread statelessResenderThread;
+	private Thread resendThread;
 	private boolean running;
+	private CyclicBarrier barrier = new CyclicBarrier(2);
 
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
@@ -68,7 +73,7 @@ public class RTPSWriter extends Endpoint {
 	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
 		resendDataPeriod = period;
 
-		statelessResenderThread = new Thread() {
+		resendThread = new Thread() {
 			@Override
 			public void run() {
 				running = true;
@@ -97,14 +102,19 @@ public class RTPSWriter extends Endpoint {
 							log.warn("Failed to send cache change {}", change);
 						}
 					}
-					
-					synchronized (resend_lock ) {
-						try {
-							Thread.sleep(resendDataPeriod.sec * 1000);
-						} catch (InterruptedException e) { 
-							running = false;
-						}
+
+					try {
+						barrier.await(resendDataPeriod.sec, TimeUnit.SECONDS);
+					} catch (TimeoutException te) {
+						barrier.reset();
+					} catch (Exception e) {
+						running = false;
 					}
+					//					try {
+					//						Thread.sleep(resendDataPeriod.sec * 1000);
+					//					} catch (InterruptedException e) { 
+					//						running = false;
+					//					}
 				}
 
 				log.debug("[{}] Resend thread dying", getGuid().entityId);
@@ -112,7 +122,7 @@ public class RTPSWriter extends Endpoint {
 		};
 
 		log.debug("[{}] Starting resend thread with period {}", getGuid().entityId, period);
-		statelessResenderThread.start();
+		resendThread.start();
 	}
 
 	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
@@ -211,7 +221,17 @@ public class RTPSWriter extends Endpoint {
 
 
 	public void close() {
-		//resend_lock.notify();
+		// TODO: This is not working at the moment
+		try {
+			barrier.await(15, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			log.warn("Exception ", e);
+		}
+		
+		if (running) {
+			resendThread.interrupt();
+		}
+		
 		writer_cache.getChanges().clear();
 	}
 
