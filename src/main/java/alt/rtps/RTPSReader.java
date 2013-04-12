@@ -35,9 +35,7 @@ public class RTPSReader extends Endpoint {
 
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
-	
-	private HistoryCache reader_cache;
-	
+		
 	private List<DataListener> listeners = new LinkedList<DataListener>();
 	private int ackNackCount = 0;
 	private Marshaller marshaller;
@@ -84,9 +82,8 @@ public class RTPSReader extends Endpoint {
 		}
 
 		WriterProxy wp = getWriterProxy(writerGuid);
-		boolean dataAdded = wp.acceptData(obj, data.getWriterSequenceNumber().getAsLong());
 		
-		if (dataAdded) {
+		if (wp.acceptData(obj, data.getWriterSequenceNumber())) {
 			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
 
@@ -95,7 +92,8 @@ public class RTPSReader extends Endpoint {
 			}
 		}
 		else {
-			log.warn("[{}] Data was not added to cache: {}, {}", getGuid().entityId, data.getWriterSequenceNumber(), obj);
+			log.warn("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+					data.getWriterSequenceNumber(), wp.getSeqNumMax());
 		}
 	}
 

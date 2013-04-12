@@ -172,8 +172,8 @@ public class Data extends SubMessage {
 	 * Each change gets a consecutive sequence number. Each RTPS
 	 * Writer maintains is own sequence number.
 	 */
-	public SequenceNumber_t getWriterSequenceNumber() {
-		return writerSN;
+	public long getWriterSequenceNumber() {
+		return writerSN.getAsLong();
 	}
 
 	
