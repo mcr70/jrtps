@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.1.2" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="true">  
+  <class id="1" language="java" name="alt.rtps.types.EntityId_t.SEDPbuiltinTopicWriter" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1914" y="859"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <enumeration id="2" language="java" name="alt.rtps.types.ChangeKind_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/ChangeKind_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="171" width="238" x="139" y="-67"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </enumeration>  
+  <class id="3" language="java" name="alt.rtps.types.EntityId_t.SEDPbuiltinSubscriptionsReader" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2035" y="907"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="4" language="java" name="alt.rtps.types.EntityId_t.UserDefinedEntityId" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="3121" y="927"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="5" language="java" name="alt.rtps.types.EntityId_t.SEDPbuiltinSubscriptionsWriter" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2092" y="935"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="6" language="java" name="alt.rtps.types.EntityId_t.BuiltinParticipantMessageReader" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2649" y="1054"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="7" language="java" name="alt.rtps.types.TopicKind_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/TopicKind_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="185" y="167"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="8" language="java" name="alt.rtps.types.SequenceNumber_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/SequenceNumber_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="528" y="292"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="9" language="java" name="alt.rtps.types.BuiltinEndpointSet_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/BuiltinEndpointSet_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="891" y="243"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="10" language="java" name="alt.rtps.types.SequenceNumberSet" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/SequenceNumberSet.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="189" width="233" x="417" y="-67"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="11" language="java" name="alt.rtps.types.EntityId_t.BuiltinParticipantMessageWriter" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2776" y="1030"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="12" language="java" name="alt.rtps.types.StatusInfo_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/StatusInfo_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1189" y="34"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="13" language="java" name="alt.rtps.types.Duration_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/Duration_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1194" y="168"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="14" language="java" name="alt.rtps.types.GuidPrefix_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/GuidPrefix_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2203" y="563"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="15" language="java" name="alt.rtps.types.EntityId_t.SPDPbuiltinParticipantWriter" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2343" y="1022"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="16" language="java" name="alt.rtps.types.EntityId_t.SEDPbuiltinPublicationsWriter" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2142" y="963"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="17" language="java" name="alt.rtps.types.BuiltinTopicKey_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/BuiltinTopicKey_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="212" y="319"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="18" language="java" name="alt.rtps.types.GUID_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/GUID_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2430" y="285"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="19" language="java" name="alt.rtps.types.EntityId_t.SEDPbuiltinPublicationsReader" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2181" y="988"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="20" language="java" name="alt.rtps.types.EntityId_t.VendorSpecificEntityId" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="3049" y="959"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="21" language="java" name="alt.rtps.types.ProtocolVersion_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/ProtocolVersion_t.java" binary="false" corner="BOTTOM_LEFT">    
+    <position height="-1" width="-1" x="1410" y="46"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="22" language="java" name="alt.rtps.types.ContentFilterInfo_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/ContentFilterInfo_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2093" y="35"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="23" language="java" name="alt.rtps.types.Locator_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/Locator_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1842" y="210"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="24" language="java" name="alt.rtps.types.LocatorUDPv4_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/LocatorUDPv4_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="189" width="191" x="2806" y="-67"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="25" language="java" name="alt.rtps.types.Time_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/Time_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2430" y="76"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="26" language="java" name="alt.rtps.types.EntityId_t.SPDPbuiltinParticipantReader" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="2395" y="1047"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="27" language="java" name="alt.rtps.types.EntityId_t.Participant" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="3177" y="892"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="28" language="java" name="alt.rtps.types.ReliabilityKind_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/ReliabilityKind_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="99" width="119" x="3336" y="-67"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="29" language="java" name="alt.rtps.types.EntityId_t.SEDPbuiltinTopicReader" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1987" y="879"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <class id="30" language="java" name="alt.rtps.types.ContentFilterProperty_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/ContentFilterProperty_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1197" y="365"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="31" language="java" name="alt.rtps.types.VendorId_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/VendorId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="1403" y="252"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="32" language="java" name="alt.rtps.types.EntityId_t" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="333" width="215" x="2569" y="504"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="true" package="true" protected="true" private="true"/>    
+    </display>  
+  </class>  
+  <class id="33" language="java" name="alt.rtps.types.EntityId_t.UnknownEntity" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/types/EntityId_t.java" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="3182" y="838"/>    
+    <display autosize="true" stereotype="false" package="false" initial-value="false" signature="true" accessors="true" 
+      visibility="true">      
+      <attributes public="true" package="true" protected="true" private="true"/>      
+      <operations public="false" package="false" protected="false" private="false"/>    
+    </display>  
+  </class>  
+  <association id="34">    
+    <end type="SOURCE" refId="28" navigable="false">      
+      <attribute id="35" name="BEST_EFFORT"/>      
+      <multiplicity id="36" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="37">    
+    <end type="SOURCE" refId="27"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="38">    
+    <end type="SOURCE" refId="33"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <association id="39">    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="40" name="PROTOCOLVERSION_2_1">        
+        <position height="18" width="134" x="1523" y="1"/>      
+      </attribute>      
+      <multiplicity id="41" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="21" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="42">    
+    <end type="SOURCE" refId="10" navigable="false">      
+      <attribute id="43" name="bitmapBase"/>      
+      <multiplicity id="44" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="8" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="45">    
+    <end type="SOURCE" refId="19"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <association id="46">    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="47" name="PRISMTECH">        
+        <position height="18" width="66" x="1506" y="255"/>      
+      </attribute>      
+      <multiplicity id="48" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="31" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="49">    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="50" name="PROTOCOLVERSION_1_0">        
+        <position height="18" width="134" x="1520" y="112"/>      
+      </attribute>      
+      <multiplicity id="51" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="21" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="52">    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="53" name="VENDORID_INVALID"/>      
+      <multiplicity id="54" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="31" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="55">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="56" name="WITH_KEY"/>      
+      <multiplicity id="57" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="58">    
+    <end type="SOURCE" refId="18" navigable="false">      
+      <attribute id="59" name="entityId"/>      
+      <multiplicity id="60" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="32" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="61">    
+    <end type="SOURCE" refId="15"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <association id="62">    
+    <end type="SOURCE" refId="7" navigable="false">      
+      <attribute id="63" name="NO_KEY"/>      
+      <multiplicity id="64" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="7" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="65">    
+    <end type="SOURCE" refId="11"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="66">    
+    <end type="SOURCE" refId="1"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <association id="67">    
+    <end type="SOURCE" refId="31" navigable="false">      
+      <attribute id="68" name="VENDORID_JRTPS">        
+        <position height="18" width="99" x="1501" y="224"/>      
+      </attribute>      
+      <multiplicity id="69" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="31" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="70">    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="71" name="PROTOCOLVERSION_1_1"/>      
+      <multiplicity id="72" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="21" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="73">    
+    <end type="SOURCE" refId="6"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="74">    
+    <end type="SOURCE" refId="20"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <association id="75">    
+    <end type="SOURCE" refId="21" navigable="false">      
+      <attribute id="76" name="PROTOCOLVERSION_2_0">        
+        <position height="18" width="134" x="1521" y="47"/>      
+      </attribute>      
+      <multiplicity id="77" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="21" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <association id="78">    
+    <end type="SOURCE" refId="18" navigable="false">      
+      <attribute id="79" name="prefix"/>      
+      <multiplicity id="80" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="14" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="81">    
+    <end type="SOURCE" refId="16"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <association id="82">    
+    <end type="SOURCE" refId="28" navigable="false">      
+      <attribute id="83" name="RELIABLE"/>      
+      <multiplicity id="84" minimum="0" maximum="1"/>    
+    </end>    
+    <end type="TARGET" refId="28" navigable="true"/>    
+    <display labels="true" multiplicity="true"/>  
+  </association>  
+  <generalization id="85">    
+    <end type="SOURCE" refId="29"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="86">    
+    <end type="SOURCE" refId="3"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="87">    
+    <end type="SOURCE" refId="26"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="88">    
+    <end type="SOURCE" refId="4"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <generalization id="89">    
+    <end type="SOURCE" refId="5"/>    
+    <end type="TARGET" refId="32"/>  
+  </generalization>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    accessors="true" visibility="true">    
+    <attributes public="true" package="true" protected="true" private="true"/>    
+    <operations public="true" package="true" protected="true" private="true"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
