@@ -15,7 +15,6 @@ import alt.rtps.message.AckNack;
 import alt.rtps.message.Data;
 import alt.rtps.message.Heartbeat;
 import alt.rtps.message.Message;
-import alt.rtps.transport.Marshaller;
 import alt.rtps.types.EntityId_t;
 import alt.rtps.types.GUID_t;
 import alt.rtps.types.GuidPrefix_t;

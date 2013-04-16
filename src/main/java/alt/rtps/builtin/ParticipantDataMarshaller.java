@@ -1,5 +1,6 @@
 package alt.rtps.builtin;
 
+import alt.rtps.Marshaller;
 import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
@@ -13,7 +14,6 @@ import alt.rtps.message.parameter.ParticipantLeaseDuration;
 import alt.rtps.message.parameter.ProtocolVersion;
 import alt.rtps.message.parameter.Sentinel;
 import alt.rtps.message.parameter.VendorId;
-import alt.rtps.transport.Marshaller;
 import alt.rtps.types.Locator_t;
 
 /**
