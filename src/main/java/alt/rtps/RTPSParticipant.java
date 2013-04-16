@@ -23,7 +23,6 @@ import alt.rtps.builtin.TopicDataMarshaller;
 import alt.rtps.builtin.WriterData;
 import alt.rtps.builtin.WriterDataMarshaller;
 import alt.rtps.message.parameter.BuiltinEndpointSet;
-import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.UDPReceiver;
 import alt.rtps.types.Duration_t;
 import alt.rtps.types.EntityId_t;

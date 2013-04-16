@@ -1,11 +1,11 @@
 import java.io.IOException;
 
+import alt.rtps.Marshaller;
 import alt.rtps.RTPSParticipant;
 import alt.rtps.RTPSReader;
 import alt.rtps.RTPSWriter;
 import alt.rtps.message.data.CDREncapsulation;
 import alt.rtps.message.data.DataEncapsulation;
-import alt.rtps.transport.Marshaller;
 import alt.rtps.transport.RTPSByteBuffer;
 
 

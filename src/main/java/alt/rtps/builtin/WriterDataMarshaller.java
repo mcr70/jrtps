@@ -1,5 +1,6 @@
 package alt.rtps.builtin;
 
+import alt.rtps.Marshaller;
 import alt.rtps.message.data.DataEncapsulation;
 import alt.rtps.message.data.ParameterListEncapsulation;
 import alt.rtps.message.parameter.KeyHash;
@@ -7,7 +8,6 @@ import alt.rtps.message.parameter.ParameterList;
 import alt.rtps.message.parameter.Sentinel;
 import alt.rtps.message.parameter.TopicName;
 import alt.rtps.message.parameter.TypeName;
-import alt.rtps.transport.Marshaller;
 
 public class WriterDataMarshaller extends Marshaller<WriterData> {
 	@Override

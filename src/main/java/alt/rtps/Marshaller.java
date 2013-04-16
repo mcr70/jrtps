@@ -1,4 +1,4 @@
-package alt.rtps.transport;
+package alt.rtps;
 
 import java.io.IOException;
 
