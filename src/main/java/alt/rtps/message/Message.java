@@ -18,7 +18,7 @@ import alt.rtps.types.GuidPrefix_t;
  * @author mcr70
  *
  */
-public class Message implements Externalizable {
+public class Message {
 	private static final Logger log = LoggerFactory.getLogger(Message.class);
 	
 	private Header header;
@@ -124,11 +124,4 @@ public class Message implements Externalizable {
 	public String toString() { 
 		return getHeader() + ", " + getSubMessages();
 	}
-
-	@Override
-	public void readFrom(RTPSByteBuffer buffer) {
-		// TODO Auto-generated method stub
-		
-	}
-
 }
