@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<class-diagram version="1.1.2" icons="true" always-add-relationships="false" generalizations="true" realizations="true" 
+  associations="true" dependencies="false" nesting-relationships="true">  
+  <package id="1" language="java" name="alt.rtps.builtin" project="jrtps" file="/jrtps/src/main/java/alt/rtps/builtin" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="50" width="101" x="84" y="38"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <package id="2" language="java" name="alt.rtps" project="jrtps" file="/jrtps/src/main/java/alt/rtps" binary="false" 
+    corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="354" y="51"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <package id="3" language="java" name="alt.rtps.message" project="jrtps" file="/jrtps/src/main/java/alt/rtps/message" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="587" y="189"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <package id="4" language="java" name="alt.rtps.message.data" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/message/data" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="575" y="75"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <package id="5" language="java" name="alt.rtps.message.parameter" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/message/parameter" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="568" y="310"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <package id="6" language="java" name="alt.rtps.transport" project="jrtps" 
+    file="/jrtps/src/main/java/alt/rtps/transport" binary="false" corner="BOTTOM_RIGHT">    
+    <position height="-1" width="-1" x="155" y="182"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <package id="7" language="java" name="alt.rtps.types" project="jrtps" file="/jrtps/src/main/java/alt/rtps/types" 
+    binary="false" corner="BOTTOM_RIGHT">    
+    <position height="50" width="101" x="255" y="328"/>    
+    <display autosize="true" stereotype="true" accessors="true"/>  
+  </package>  
+  <dependency id="8">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="1"/>  
+  </dependency>  
+  <dependency id="9">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="5"/>  
+  </dependency>  
+  <dependency id="10">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="3"/>  
+  </dependency>  
+  <dependency id="11">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="7"/>  
+  </dependency>  
+  <dependency id="12">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="4"/>  
+  </dependency>  
+  <dependency id="13">    
+    <end type="SOURCE" refId="2"/>    
+    <end type="TARGET" refId="6"/>  
+  </dependency>  
+  <classifier-display autosize="true" stereotype="true" package="true" initial-value="false" signature="true" 
+    accessors="true" visibility="true">    
+    <attributes public="false" package="false" protected="false" private="false"/>    
+    <operations public="true" package="true" protected="true" private="false"/>  
+  </classifier-display>  
+  <association-display labels="true" multiplicity="true"/>
+</class-diagram>
