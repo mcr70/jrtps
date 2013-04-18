@@ -32,6 +32,11 @@ import alt.rtps.types.Time_t;
  *
  */
 public class RTPSWriter extends Endpoint {
+	public enum ChangeKind {
+		WRITE, DISPOSE, UNREGISTER;
+	}
+
+	
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
@@ -223,10 +228,13 @@ public class RTPSWriter extends Endpoint {
 	 * @param obj
 	 * @see sendHeartbeat()
 	 */
-	public void createChange(Object obj) {
+	public void createChange(ChangeKind kind, Object obj) {
 		writer_cache.createChange(obj);	
 	}
 
+	public void createChange(Object obj) {
+		createChange(ChangeKind.WRITE, obj);	
+	}
 
 	public void close() {
 		// TODO: This is not working at the moment
