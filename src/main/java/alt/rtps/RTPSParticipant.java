@@ -67,10 +67,6 @@ public class RTPSParticipant {
 			new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 5, TimeUnit.SECONDS, 
 					new LinkedBlockingQueue<Runnable>(50)); // TODO: check parameterization
 
-
-	protected int domainId = 0; // Default domainId
-	private static byte participantId = 0; // TODO: We need an instance variable in code below
-
 	private List<RTPSReader> readerEndpoints = new LinkedList<>();
 	private List<RTPSWriter> writerEndpoints = new LinkedList<>();
 
@@ -82,18 +78,28 @@ public class RTPSParticipant {
 	private Locator_t ucLoc;
 
 	/**
-	 * Creates a new participant with given domainId.
+	 * 
+	 */
+	public RTPSParticipant(int participantId) {
+		this(0, participantId);
+	}
+	
+	/**
+	 * Creates a new participant with given domainId and participantId. Domain ID and particiapnt ID
+	 * is used to construct unicast locators to this RTPSParticipant. In general, participants in the same
+	 * domain get to know each other through SPDP. Each participant has a uniques unicast locator to access
+	 * its endpoints. 
 	 *  
 	 * @param domainId Domain ID of the participant
+	 * @param participantId Participant ID 
 	 * @see EntityId_t
 	 */
-	public RTPSParticipant(int domainId) {
+	public RTPSParticipant(int domainId, int participantId) {
 		Random r = new Random(System.currentTimeMillis());
 		
-		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, participantId++, r.nextInt()), EntityId_t.PARTICIPANT);
+		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, (byte) participantId, r.nextInt()), EntityId_t.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
-		this.domainId = domainId;
 
 		meta_mcLoc = Locator_t.defaultDiscoveryMulticastLocator(domainId);
 		meta_ucLoc = Locator_t.defaultMetatrafficUnicastLocator(domainId, participantId);
