@@ -3,12 +3,10 @@ package alt.rtps;
 import java.util.LinkedList;
 import java.util.List;
 
+import alt.rtps.RTPSWriter.ChangeKind;
 import alt.rtps.types.GUID_t;
 
 class HistoryCache {
-	enum ChangeKind {
-		WRITE, DISPOSE, UNREGISTER;
-	}
 
 	private List<CacheChange> changes = new LinkedList<CacheChange>();
 	private GUID_t guid; // HistoryCache belongs to a specific GUID_t

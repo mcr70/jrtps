@@ -1,6 +1,6 @@
 package alt.rtps;
 
-import alt.rtps.HistoryCache.ChangeKind;
+import alt.rtps.RTPSWriter.ChangeKind;
 
 
 class CacheChange {
@@ -8,7 +8,7 @@ class CacheChange {
 	private final Object data;
 	private final ChangeKind kind;
 
-	CacheChange(HistoryCache.ChangeKind kind, long seqNum, Object data) {
+	CacheChange(ChangeKind kind, long seqNum, Object data) {
 		this.kind = kind;
 		sequenceNumber = seqNum;
 		this.data = data;
