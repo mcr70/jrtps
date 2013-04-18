@@ -143,7 +143,7 @@ public class RTPSParticipant {
 				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
 
 		ParticipantData pd = createSPDPParticipantData();
-		spdp_w.getHistoryCache().createChange(pd, 1);
+		spdp_w.createChange(pd);
 		spdp_w.setResendDataPeriod(new Duration_t(10, 0), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER); // Starts a resender thread
 		//spdp_w.addMatchedEndpointLocator(Locator_t.defaultDiscoveryMulticastLocator(domainId));
 
@@ -221,7 +221,7 @@ public class RTPSParticipant {
 
 		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
-		boolean b = pw.getHistoryCache().createChange(wd);
+		pw.createChange(wd);
 
 		return writer;
 	}
@@ -277,7 +277,7 @@ public class RTPSParticipant {
 
 		RTPSWriter sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
-		sw.getHistoryCache().createChange(rd);
+		sw.createChange(rd);
 
 		return reader;
 	}
