@@ -1,12 +1,16 @@
 package alt.rtps;
 
+import alt.rtps.HistoryCache.ChangeKind;
+
 
 class CacheChange {
-	private long sequenceNumber;
-	private Object data;
+	private final long sequenceNumber;
+	private final Object data;
+	private final ChangeKind kind;
 
-	CacheChange(long seqNum, Object data) {
-		this.setSequenceNumber(seqNum);
+	CacheChange(HistoryCache.ChangeKind kind, long seqNum, Object data) {
+		this.kind = kind;
+		sequenceNumber = seqNum;
 		this.data = data;
 	}
 
@@ -16,9 +20,5 @@ class CacheChange {
 
 	long getSequenceNumber() {
 		return sequenceNumber;
-	}
-
-	void setSequenceNumber(long sequenceNumber) {
-		this.sequenceNumber = sequenceNumber;
 	}
 }

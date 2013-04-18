@@ -60,14 +60,6 @@ public class RTPSWriter extends Endpoint {
 	}
 
 
-	/**
-	 * Get the HistoryCache of this RTPSWriter
-	 * 
-	 * @return
-	 */
-	HistoryCache getHistoryCache() {
-		return writer_cache;
-	}
 
 	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
 		resendDataPeriod = period;
@@ -220,9 +212,19 @@ public class RTPSWriter extends Endpoint {
 		}
 	}
 
-
+	/**
+	 * Creates a new cache change to history cache. Note, that matced readers are not notified automatically
+	 * of changes in history cache. Use sendHeartbeat() method to notify remote readers of changes in history cache.
+	 * This way, multiple changes can be notified only once.
+	 * <p> 
+	 * As a side effect, Message sent as a response to readers AckNack message can (and will) contain 
+	 * multiple Data submessages in one UDP packet.
+	 * 
+	 * @param obj
+	 * @see sendHeartbeat()
+	 */
 	public void createChange(Object obj) {
-		getHistoryCache().createChange(obj);	
+		writer_cache.createChange(obj);	
 	}
 
 
@@ -246,5 +248,21 @@ public class RTPSWriter extends Endpoint {
 
 	void addMatchedReader(ReaderData readerData) {
 		matchedReaders.add(readerData);
+	}
+
+	/**
+	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, remote readers 
+	 * know about Data samples available on this writer.
+	 * 
+	 */
+	public void sendHeartbeat() {
+		Message m = new Message(getGuid().prefix);
+		Heartbeat hb = createHeartbeat(); 
+		m.addSubMessage(hb);
+		
+		log.debug("[{}] Sending {} to {} matched readers", getGuid().entityId, m, matchedReaders.size());
+		for (ReaderData r : matchedReaders) {
+			sendMessage(m, r.getReaderGuid().prefix);
+		}
 	}
 }
