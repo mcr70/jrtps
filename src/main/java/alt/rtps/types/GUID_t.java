@@ -67,11 +67,7 @@ public class GUID_t {
 	 */
 	public byte[] getBytes() {
 		byte[] guid_bytes = new byte[16];
-//		byte[] prefix_bytes = prefix.getBytes();
-//		byte[] entity_bytes = entityId.getBytes();
-//		
-//		System.arraycopy(prefix_bytes, 0, guid_bytes, 0, prefix_bytes.length);
-//		System.arraycopy(entity_bytes, 0, guid_bytes, 12, 4);
+
 		RTPSByteBuffer bb = new RTPSByteBuffer(guid_bytes);
 		writeTo(bb);
 		
