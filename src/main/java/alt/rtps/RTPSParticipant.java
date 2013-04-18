@@ -49,8 +49,6 @@ public class RTPSParticipant {
 	private int CORE_POOL_SIZE = 10; // TODO: configurable
 	private int MAX_POOL_SIZE = 2 * CORE_POOL_SIZE;
 
-	private int builtinDataKey = 0; // TODO: We should do something with this
-
 	/**
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
