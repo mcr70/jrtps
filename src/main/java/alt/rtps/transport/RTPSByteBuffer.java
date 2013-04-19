@@ -3,6 +3,7 @@ package alt.rtps.transport;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -144,5 +145,33 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 		else {
 			buffer.order(ByteOrder.BIG_ENDIAN);
 		}
+	}
+
+	/**
+	 * Gets an InputStream reading from the backing ByteBuffer.
+	 * InputStream will start reading from current position of the ByteBuffer.
+	 * 
+	 * @return
+	 */
+	public InputStream getInputStream() {
+		return new InputStream() {
+			@Override
+			public int read() throws IOException {
+				if (!buffer.hasRemaining()) {
+					return -1;
+				}
+
+				return buffer.get() & 0xff;
+			}
+		};
+	}
+	
+	public OutputStream getOutputStream() {
+		return new OutputStream() {
+			@Override
+			public void write(int arg0) throws IOException {
+				buffer.put((byte) arg0);
+			}
+		};
 	}
 }
