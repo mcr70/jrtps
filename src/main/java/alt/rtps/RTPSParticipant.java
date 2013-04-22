@@ -97,11 +97,8 @@ public class RTPSParticipant {
 	 */
 	public RTPSParticipant(int domainId, int participantId) {
 		this.domainId = domainId;
-		// TODO: for some reason, we need to increment participantId here.
-		//       otherwise, communication with OSPL won't work.
-		this.participantId = participantId++; 
+		this.participantId = participantId; 
 		Random r = new Random(System.currentTimeMillis());
-		// TODO: Why do we need to increment participantId here. If we dont, we wont receive any discovery data!!!
 		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, (byte) participantId, r.nextInt()), EntityId_t.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
