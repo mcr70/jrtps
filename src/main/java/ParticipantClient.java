@@ -11,7 +11,7 @@ import alt.rtps.transport.RTPSByteBuffer;
 
 public class ParticipantClient {
 	public static void main(String[] args) throws IOException {		
-		RTPSParticipant p = new RTPSParticipant(0); // Participant to domain 0
+		RTPSParticipant p = new RTPSParticipant(1); // Participant 1
 		
 		Marshaller<HelloWorldData> m = createMarshaller();
 		
