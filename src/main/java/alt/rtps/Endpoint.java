@@ -64,8 +64,8 @@ public class Endpoint {
 			}
 		}
 
-		log.trace("[{}] Unknown participant. Returning default metatraffic multicast locator", getGuid().entityId);
-		return Locator_t.defaultDiscoveryMulticastLocator(guid.prefix.getDomainId());
+		log.trace("[{}] Unknown participant. Returning default metatraffic multicast locator for domain 0", getGuid().entityId);
+		return Locator_t.defaultDiscoveryMulticastLocator(0); // TODO: this is not working with other vendors
 	}
 
 

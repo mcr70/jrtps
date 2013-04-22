@@ -50,13 +50,6 @@ public class GuidPrefix_t {
 		return bytes[0];
 	}
 
-	/**
-	 * Get the participantId associated with this GuidPrefix
-	 */
-	public byte getParticipantId() {
-		return bytes[1];
-	}
-
 	
 	public byte[] getBytes() {
 		return bytes;
