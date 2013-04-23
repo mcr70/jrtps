@@ -32,7 +32,7 @@ public class RTPSMessageBroker {
 
 	public void handleMessage(Message msg) {
 		Time_t timestamp = null;
-		GuidPrefix_t destGuidPrefix = msg.getHeader().getGuidPrefix();
+		GuidPrefix_t destGuidPrefix = GuidPrefix_t.GUIDPREFIX_UNKNOWN;
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		List<SubMessage> subMessages = msg.getSubMessages();
 
@@ -79,7 +79,7 @@ public class RTPSMessageBroker {
 		}
 	}
 
-	private void handleData(GuidPrefix_t prefix, Time_t timestamp, Data data) throws IOException {
+	private void handleData(GuidPrefix_t sourcePrefix, Time_t timestamp, Data data) throws IOException {
 		RTPSReader reader = null;
 		if (data.getReaderId().equals(EntityId_t.UNKNOWN_ENTITY)) {
 			reader = participant.getMatchingReader(data.getWriterId());
@@ -89,7 +89,7 @@ public class RTPSMessageBroker {
 		}
 
 		if (reader != null) {
-			reader.onData(prefix, data, timestamp);
+			reader.onData(sourcePrefix, data, timestamp);
 		}
 		else {
 			log.debug("No Reader ({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
