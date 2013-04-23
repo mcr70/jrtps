@@ -94,7 +94,8 @@ class BuiltinListener implements DataListener {
 	}
 
 	private void handleWriterData(WriterData writerData) {
-		discoveredWriters.put(writerData.getWriterGuid(), writerData);
+		//discoveredWriters.put(writerData.getWriterGuid(), writerData);
+		discoveredWriters.put(writerData.getKey(), writerData);
 		
 		RTPSReader r = participant.getReaderForTopic(writerData.getTopicName());
 		if (r != null) {

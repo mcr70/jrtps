@@ -22,6 +22,7 @@ public class DiscoveredData {
 	protected List<QualityOfService> qosList = new LinkedList<>();
 	
 	private GUID_t writerGuid;
+	private GuidPrefix_t remoteGuidprefix;
 	
 	/**
 	 * This constructor is used when DiscoveredData is being created from 
@@ -71,16 +72,12 @@ public class DiscoveredData {
 		return topicName + "(" + typeName + "): " + keyHash  + ", QoS: " + getQualityOfServices();
 	}
 
-	public GUID_t getWriterGuid() {
-		return writerGuid;
-	}
-
-	public void setWriterGuid(GUID_t writerGuid) {
-		this.writerGuid = writerGuid;
+	public void setRemoteGuidPrefix(GuidPrefix_t remoteGuidPrefix) {
+		remoteGuidprefix = remoteGuidPrefix;
 	}
 
 	public GuidPrefix_t getRemoteGuidPrefix() {
-		return writerGuid.prefix;
+		return remoteGuidprefix;
 	}
 	
 	public Locator_t getLocator() {
