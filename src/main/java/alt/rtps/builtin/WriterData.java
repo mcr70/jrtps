@@ -33,8 +33,8 @@ public class WriterData extends DiscoveredData {
 			case PID_TYPE_NAME:
 				super.typeName = ((TypeName)param).getTypeName(); break;
 			case PID_KEY_HASH:
-				super.keyHash = (KeyHash) param; 
-				super.key = new GUID_t(keyHash.getBytes()); // TODO: We should store either GUID, or KeyHash only
+				//super.keyHash = (KeyHash) param; 
+				super.key = new GUID_t(param.getBytes()); // TODO: We should store either GUID, or KeyHash only
 				break;
 			case PID_SENTINEL:
 				break;
