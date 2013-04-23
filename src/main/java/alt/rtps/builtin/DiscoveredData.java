@@ -3,10 +3,8 @@ package alt.rtps.builtin;
 import java.util.LinkedList;
 import java.util.List;
 
-import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.types.GUID_t;
-import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 
 public class DiscoveredData {
@@ -18,7 +16,6 @@ public class DiscoveredData {
 	// interpretation is, for builtin topics, key is 
 	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
 	protected GUID_t key;  
-	protected KeyHash keyHash;
 	protected List<QualityOfService> qosList = new LinkedList<>();
 	
 	/**
@@ -39,20 +36,33 @@ public class DiscoveredData {
 		this.typeName = typeName;
 		this.topicName = topicName;
 		this.key = key;
-		this.keyHash = new KeyHash(key.getBytes()); // TODO: we should store either guid or keyhash only
 	}
 	
+	/**
+	 * Get the type name that is associated with this DiscovereData.
+	 * Topic name is formed from the PID_TYPE_NAME parameter
+	 * @return
+	 */
 	public String getTypeName() {
 		return typeName;
 	}
 	
+	/**
+	 * Get the topic name that is associated with this DiscovereData.
+	 * Topic name is formed from the PID_TOPIC_NAME parameter
+	 * @return
+	 */
 	public String getTopicName() {
 		return topicName;
 	}
-	
+
+	/**
+	 * Gets the GUID_t of the entity represented by this DiscoveredData.
+	 * GUID_t is formed from the PID_KEY_HASH parameter.
+	 * 
+	 * @return
+	 */
 	public GUID_t getKey() {
-		// TODO: Should we have getKey()  -> BuiltinTopicKey_t and
-		//                      getGuid() -> key
 		return key;
 	}
 	
@@ -66,7 +76,7 @@ public class DiscoveredData {
 	}
 
 	public String toString() {
-		return topicName + "(" + typeName + "): " + keyHash  + ", QoS: " + getQualityOfServices();
+		return topicName + "(" + typeName + "): " + key  + ", QoS: " + getQualityOfServices();
 	}
 	
 	public Locator_t getLocator() {
