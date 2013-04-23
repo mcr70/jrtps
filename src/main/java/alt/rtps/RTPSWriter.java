@@ -36,7 +36,7 @@ public class RTPSWriter extends Endpoint {
 		WRITE, DISPOSE, UNREGISTER;
 	}
 
-	
+
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
@@ -69,7 +69,7 @@ public class RTPSWriter extends Endpoint {
 	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
 		resendDataPeriod = period;
 		barrier = new CyclicBarrier(2);
-		
+
 		resendThread = new Thread() {
 			@Override
 			public void run() {
@@ -128,7 +128,7 @@ public class RTPSWriter extends Endpoint {
 
 	void sendHistoryCache(Locator_t locator, EntityId_t readerId) { // TODO: Can we get rid of this.
 		//if (true) return;
-		
+
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 
@@ -197,7 +197,7 @@ public class RTPSWriter extends Endpoint {
 	void addMatchedReader(ReaderData readerData) {
 		matchedReaders.add(readerData);
 		log.debug("Adding matchedReader {}", readerData);
-		sendHeartbeat();
+		sendHeartbeat(readerData.getKey());
 	}
 
 	/**
@@ -253,13 +253,13 @@ public class RTPSWriter extends Endpoint {
 		if (entityId == null) {
 			entityId = EntityId_t.UNKNOWN_ENTITY;
 		}
-		
+
 		Heartbeat hb = new Heartbeat(entityId, getGuid().entityId,
 				writer_cache.getSeqNumMin(), writer_cache.getSeqNumMax(), hbCount++ );
 
 		return hb;
 	}
-		
+
 	/**
 	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, remote readers 
 	 * know about Data samples available on this writer.
@@ -267,12 +267,18 @@ public class RTPSWriter extends Endpoint {
 	 */
 	public void sendHeartbeat() {		
 		log.debug("[{}] Sending Heartbeat to {} matched readers", getGuid().entityId, matchedReaders.size());
-		for (ReaderData r : matchedReaders) {
-			Message m = new Message(getGuid().prefix);
-			Heartbeat hb = createHeartbeat(r.getKey().entityId); 
-			m.addSubMessage(hb);
-			
-			sendMessage(m, r.getKey().prefix);
+		for (ReaderData rd : matchedReaders) {
+			sendHeartbeat(rd.getKey());
 		}
+	}
+
+	private void sendHeartbeat(GUID_t readerGuid) {
+		log.debug("[{}] Sending Heartbeat to {}", getGuid().entityId, readerGuid);
+		
+		Message m = new Message(getGuid().prefix);
+		Heartbeat hb = createHeartbeat(readerGuid.entityId); 
+		m.addSubMessage(hb);
+
+		sendMessage(m, readerGuid.prefix);
 	}
 }
