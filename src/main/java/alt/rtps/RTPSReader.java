@@ -83,10 +83,6 @@ public class RTPSReader extends Endpoint {
 		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
 		GUID_t writerGuid = new GUID_t(sourcePrefix, data.getWriterId()); 
 
-		if (obj instanceof DiscoveredData) {
-			((DiscoveredData) obj).setRemoteGuidPrefix(sourcePrefix); 
-		}
-
 		WriterProxy wp = getWriterProxy(writerGuid);
 		
 		if (wp.acceptData(data.getWriterSequenceNumber())) {
