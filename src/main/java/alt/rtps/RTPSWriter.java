@@ -107,11 +107,6 @@ public class RTPSWriter extends Endpoint {
 					} catch (Exception e) {
 						running = false;
 					}
-					//					try {
-					//						Thread.sleep(resendDataPeriod.sec * 1000);
-					//					} catch (InterruptedException e) { 
-					//						running = false;
-					//					}
 				}
 
 				log.debug("[{}] Resend thread dying", getGuid().entityId);
@@ -123,63 +118,6 @@ public class RTPSWriter extends Endpoint {
 	}
 
 	/**
-	 * Handle incoming AckNack message.
-	 * 
-	 * @param senderPrefix
-	 * @param ackNack
-	 */
-	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
-		log.debug("[{}] Got {}", getGuid().entityId, ackNack);
-
-		if (writer_cache.size() > 0) {
-			sendData(senderPrefix, ackNack);
-		}
-		else { // Send HB / GAP to reader so that it knows our state
-			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
-				sendHeartbeat(senderPrefix, ackNack);
-			}
-		}
-	}
-
-	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
-		Message m = new Message(getGuid().prefix);
-		List<CacheChange> changes = writer_cache.getChanges();
-
-		for (CacheChange cc : changes) {
-			log.trace("Marshalling {}", cc.getData());
-			try {
-				DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-				Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
-
-				m.addSubMessage(data);
-			}
-			catch(IOException ioe) {
-				log.warn("Failed to add cache change to message", ioe);
-			}
-		}
-
-		log.debug("[{}] Sending {}", getGuid().entityId, m);
-		sendMessage(m, senderPrefix); 
-	}
-
-	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
-		Message m = new Message(getGuid().prefix);
-		Heartbeat hb = createHeartbeat();
-		m.addSubMessage(hb);
-
-		log.debug("[{}] Sending {}", getGuid().entityId, m);
-		sendMessage(m, senderPrefix);
-	}
-
-	private Heartbeat createHeartbeat() {
-
-		Heartbeat hb = new Heartbeat(EntityId_t.UNKNOWN_ENTITY, getGuid().entityId,
-				writer_cache.getSeqNumMin(), writer_cache.getSeqNumMax(), hbCount++ );
-
-		return hb;
-	}
-
-	/**
 	 * Get the BuiltinEndpointSet ID of this RTPSWriter.
 	 * 
 	 * @return 0, if this RTPSWriter is not builtin endpoint
@@ -188,7 +126,9 @@ public class RTPSWriter extends Endpoint {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
-	public void sendHistoryCache(Locator_t locator, EntityId_t readerId) {
+	void sendHistoryCache(Locator_t locator, EntityId_t readerId) { // TODO: Can we get rid of this.
+		//if (true) return;
+		
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 
@@ -256,21 +196,82 @@ public class RTPSWriter extends Endpoint {
 
 	void addMatchedReader(ReaderData readerData) {
 		matchedReaders.add(readerData);
+		log.debug("Adding matchedReader {}", readerData);
+		sendHeartbeat();
 	}
 
+	/**
+	 * Handle incoming AckNack message.
+	 * 
+	 * @param senderPrefix
+	 * @param ackNack
+	 */
+	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
+		log.debug("[{}] Got {}", getGuid().entityId, ackNack);
+
+		if (writer_cache.size() > 0) {
+			sendData(senderPrefix, ackNack);
+		}
+		else { // Send HB / GAP to reader so that it knows our state
+			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
+				sendHeartbeat(senderPrefix, ackNack);
+			}
+		}
+	}
+
+	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
+		Message m = new Message(getGuid().prefix);
+		List<CacheChange> changes = writer_cache.getChanges();
+
+		for (CacheChange cc : changes) {
+			log.trace("Marshalling {}", cc.getData());
+			try {
+				DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
+				Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
+
+				m.addSubMessage(data);
+			}
+			catch(IOException ioe) {
+				log.warn("Failed to add cache change to message", ioe);
+			}
+		}
+
+		log.debug("[{}] Sending {}", getGuid().entityId, m);
+		sendMessage(m, senderPrefix); 
+	}
+
+	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
+		Message m = new Message(getGuid().prefix);
+		Heartbeat hb = createHeartbeat(ackNack.getReaderId());
+		m.addSubMessage(hb);
+
+		log.debug("[{}] Sending {}", getGuid().entityId, m);
+		sendMessage(m, senderPrefix);
+	}
+
+	private Heartbeat createHeartbeat(EntityId_t entityId) {
+		if (entityId == null) {
+			entityId = EntityId_t.UNKNOWN_ENTITY;
+		}
+		
+		Heartbeat hb = new Heartbeat(entityId, getGuid().entityId,
+				writer_cache.getSeqNumMin(), writer_cache.getSeqNumMax(), hbCount++ );
+
+		return hb;
+	}
+		
 	/**
 	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, remote readers 
 	 * know about Data samples available on this writer.
 	 * 
 	 */
-	public void sendHeartbeat() {
-		Message m = new Message(getGuid().prefix);
-		Heartbeat hb = createHeartbeat(); 
-		m.addSubMessage(hb);
-		
-		log.debug("[{}] Sending {} to {} matched readers", getGuid().entityId, m, matchedReaders.size());
+	public void sendHeartbeat() {		
+		log.debug("[{}] Sending Heartbeat to {} matched readers", getGuid().entityId, matchedReaders.size());
 		for (ReaderData r : matchedReaders) {
-			//sendMessage(m, r.getParticipantGuid().prefix);
+			Message m = new Message(getGuid().prefix);
+			Heartbeat hb = createHeartbeat(r.getKey().entityId); 
+			m.addSubMessage(hb);
+			
 			sendMessage(m, r.getKey().prefix);
 		}
 	}
