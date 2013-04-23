@@ -84,7 +84,7 @@ public class RTPSReader extends Endpoint {
 		GUID_t writerGuid = new GUID_t(sourcePrefix, data.getWriterId()); 
 
 		if (obj instanceof DiscoveredData) {
-			((DiscoveredData) obj).setWriterGuid(writerGuid); 
+			((DiscoveredData) obj).setRemoteGuidPrefix(sourcePrefix); 
 		}
 
 		WriterProxy wp = getWriterProxy(writerGuid);
