@@ -6,6 +6,7 @@ import java.util.List;
 import alt.rtps.message.parameter.KeyHash;
 import alt.rtps.message.parameter.QualityOfService;
 import alt.rtps.types.GUID_t;
+import alt.rtps.types.GuidPrefix_t;
 import alt.rtps.types.Locator_t;
 
 public class DiscoveredData {
@@ -78,6 +79,10 @@ public class DiscoveredData {
 		this.writerGuid = writerGuid;
 	}
 
+	public GuidPrefix_t getRemoteGuidPrefix() {
+		return writerGuid.prefix;
+	}
+	
 	public Locator_t getLocator() {
 		return locator;
 	}

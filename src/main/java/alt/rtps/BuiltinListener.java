@@ -42,6 +42,7 @@ class BuiltinListener implements DataListener {
 	public void onData(Object data, Time_t timestamp) {
 		if (data instanceof DiscoveredData) {
 			DiscoveredData dd = (DiscoveredData)data;
+
 			GUID_t key = dd.getKey();
 			ParticipantData pd = discoveredParticipants.get(key.prefix);
 			if (pd != null) {
@@ -109,7 +110,8 @@ class BuiltinListener implements DataListener {
 	 * @param readerData
 	 */
 	private void handleReaderData(ReaderData readerData) {
-		discoveredReaders.put(readerData.getReaderGuid(), readerData);
+		//discoveredReaders.put(readerData.getParticipantGuid(), readerData);
+		discoveredReaders.put(readerData.getKey(), readerData);
 		GUID_t key = readerData.getKey();
 
 		RTPSWriter writer = participant.getWriterForTopic(readerData.getTopicName());

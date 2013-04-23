@@ -18,7 +18,7 @@ import alt.rtps.types.GUID_t;
 public class ReaderData extends DiscoveredData {
 	private static final Logger log = LoggerFactory.getLogger(ReaderData.class);
 
-	private GUID_t readerGuid;
+	private GUID_t participantGuid;
 	private boolean expectsInlineQos = false;
 	
 	private ContentFilterProperty_t contentFilter;
@@ -38,7 +38,7 @@ public class ReaderData extends DiscoveredData {
 				super.topicName = ((TopicName)param).getName();
 				break;
 			case PID_PARTICIPANT_GUID:
-				readerGuid = ((ParticipantGuid)param).getParticipantGuid();
+				participantGuid = ((ParticipantGuid)param).getParticipantGuid();
 				break;
 			case PID_TYPE_NAME:
 				super.typeName = ((TypeName)param).getTypeName();
@@ -68,8 +68,8 @@ public class ReaderData extends DiscoveredData {
 		super(typeName, topicName, key);
 	}
 	
-	public GUID_t getReaderGuid() {
-		return readerGuid;
+	public GUID_t getParticipantGuid() {
+		return participantGuid;
 	}
 	
 	public boolean expectsInlineQos() {

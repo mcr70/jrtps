@@ -270,7 +270,8 @@ public class RTPSWriter extends Endpoint {
 		
 		log.debug("[{}] Sending {} to {} matched readers", getGuid().entityId, m, matchedReaders.size());
 		for (ReaderData r : matchedReaders) {
-			sendMessage(m, r.getReaderGuid().prefix);
+			//sendMessage(m, r.getParticipantGuid().prefix);
+			sendMessage(m, r.getKey().prefix);
 		}
 	}
 }
