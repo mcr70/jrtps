@@ -21,9 +21,6 @@ public class DiscoveredData {
 	protected KeyHash keyHash;
 	protected List<QualityOfService> qosList = new LinkedList<>();
 	
-	private GUID_t writerGuid;
-	private GuidPrefix_t remoteGuidprefix;
-	
 	/**
 	 * This constructor is used when DiscoveredData is being created from 
 	 * RTPSByteBuffer
@@ -70,14 +67,6 @@ public class DiscoveredData {
 
 	public String toString() {
 		return topicName + "(" + typeName + "): " + keyHash  + ", QoS: " + getQualityOfServices();
-	}
-
-	public void setRemoteGuidPrefix(GuidPrefix_t remoteGuidPrefix) {
-		remoteGuidprefix = remoteGuidPrefix;
-	}
-
-	public GuidPrefix_t getRemoteGuidPrefix() {
-		return remoteGuidprefix;
 	}
 	
 	public Locator_t getLocator() {
