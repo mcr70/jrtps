@@ -24,13 +24,13 @@ public class UDPWriter {
 		channel.connect(locator.getSocketAddress());
 	}
 	
-	public void sendMessage(Message m) {
-		sendMessage(m, null);
+	public boolean sendMessage(Message m) {
+		return sendMessage(m, null);
 	}
-	public void sendMessage(Message m, String fileName) {
+	public boolean sendMessage(Message m, String fileName) {
 		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
-		m.writeTo(buffer);
+		boolean overFlowed = m.writeTo(buffer);
 		buffer.getBuffer().flip();
 
 		try {
@@ -43,6 +43,8 @@ public class UDPWriter {
 		if (fileName != null) {
 			writeToFile(buffer.getBuffer().rewind(), fileName);
 		}
+		
+		return overFlowed;
 	}
 	
 	private void writeToFile(Buffer buffer, String fileName) {
