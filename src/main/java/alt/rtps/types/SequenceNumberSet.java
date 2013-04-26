@@ -31,6 +31,9 @@ public class SequenceNumberSet {
 		}
 	}
 
+	public long getBitmapBase() {
+		return bitmapBase.getAsLong();
+	}
 	
 	public List<Long> getSequenceNumbers() {
 		List<Long> seqNums = new LinkedList<Long>();
