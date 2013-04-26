@@ -2,6 +2,8 @@ package alt.rtps.message;
 
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -40,35 +42,50 @@ public class Message {
 		log.trace("Reading message, header: {}", header);
 		
 		while(bb.getBuffer().hasRemaining()) {
-			bb.align(4);
-			int smhPosition = bb.position();
-			SubMessageHeader smh = new SubMessageHeader(bb);
-					
-			log.trace("SubMessageHeader, starts at {}: {}", smhPosition, smh);
+			try {
+				bb.align(4);
+				int smhPosition = bb.position();
 			
-			SubMessage sm = null;
-			
-			switch(smh.kind) { // @see 9.4.5.1.1
-			case Pad.KIND: sm = new Pad(smh, bb); break;
-			case AckNack.KIND: sm = new AckNack(smh, bb); break;
-			case Heartbeat.KIND: sm = new Heartbeat(smh, bb); break;
-			case Gap.KIND: sm = new Gap(smh, bb); break;
-			case InfoTimestamp.KIND: sm = new InfoTimestamp(smh, bb); break;
-			case InfoSource.KIND: sm = new InfoSource(smh, bb); break;
-			case InfoReplyIp4.KIND: sm = new InfoReplyIp4(smh, bb); break;
-			case InfoDestination.KIND: sm = new InfoDestination(smh, bb); break;
-			case InfoReply.KIND: sm = new InfoReply(smh, bb); break;
-			case NackFrag.KIND: sm = new NackFrag(smh, bb); break;
-			case HeartbeatFrag.KIND: sm = new HeartbeatFrag(smh, bb); break;
-			case Data.KIND: sm = new Data(smh, bb); break;
-			case DataFrag.KIND: sm = new DataFrag(smh, bb); break;
-			
-			default:
-				sm = new UnknownSubMessage(smh, bb);
+				SubMessageHeader smh = new SubMessageHeader(bb);
+				int smStart = bb.position();
+				
+				log.trace("SubMessageHeader, starts at {}: {}", smhPosition, smh);
+
+				SubMessage sm = null;
+
+				switch(smh.kind) { // @see 9.4.5.1.1
+				case Pad.KIND: sm = new Pad(smh, bb); break;
+				case AckNack.KIND: sm = new AckNack(smh, bb); break;
+				case Heartbeat.KIND: sm = new Heartbeat(smh, bb); break;
+				case Gap.KIND: sm = new Gap(smh, bb); break;
+				case InfoTimestamp.KIND: sm = new InfoTimestamp(smh, bb); break;
+				case InfoSource.KIND: sm = new InfoSource(smh, bb); break;
+				case InfoReplyIp4.KIND: sm = new InfoReplyIp4(smh, bb); break;
+				case InfoDestination.KIND: sm = new InfoDestination(smh, bb); break;
+				case InfoReply.KIND: sm = new InfoReply(smh, bb); break;
+				case NackFrag.KIND: sm = new NackFrag(smh, bb); break;
+				case HeartbeatFrag.KIND: sm = new HeartbeatFrag(smh, bb); break;
+				case Data.KIND: sm = new Data(smh, bb); break;
+				case DataFrag.KIND: sm = new DataFrag(smh, bb); break;
+
+				default:
+					sm = new UnknownSubMessage(smh, bb);
+				}
+
+				int smEnd = bb.position();
+				if (smEnd - smStart != smh.submessageLength && smh.submessageLength != 0) {
+					log.warn("SubMessage length differs for {} != {} for {}", smEnd-smStart, smh.submessageLength, sm.getKind());
+				}
+				else {
+					log.debug("SubMessage, position {}, length {} for {}", smEnd, smh.submessageLength, sm.getKind());
+				}
+				log.trace("{}", sm);
+				submessages.add(sm);
 			}
-			
-			log.trace("{}", sm);
-			submessages.add(sm);
+			catch(BufferUnderflowException bue) {
+				log.warn("Buffer underflow");
+				break;
+			}
 		}
 	}
 
@@ -97,15 +114,25 @@ public class Message {
 
 		int position = 0;
 		for (SubMessage msg : submessages) {
-			SubMessageHeader hdr = msg.getHeader();
-			hdr.writeTo(buffer);
-			
-			position = buffer.position();  
-			msg.writeTo(buffer);
-			int subMessageLength = buffer.position() - position;
+			int subMsgStartPosition = buffer.position();
 
-			// Position to 'submessageLength' -2 is for short (2 bytes)
-			buffer.getBuffer().putShort(position-2, (short) subMessageLength);
+			try {
+				SubMessageHeader hdr = msg.getHeader();
+				buffer.align(4);
+				hdr.writeTo(buffer);
+				
+				position = buffer.position();  
+				msg.writeTo(buffer);
+				int subMessageLength = buffer.position() - position;
+
+				// Position to 'submessageLength' -2 is for short (2 bytes)
+				buffer.getBuffer().putShort(position-2, (short) subMessageLength);
+			}
+			catch(BufferOverflowException boe) {
+				log.warn("Buffer overflow occured, dropping rest of the sub messages");
+				buffer.getBuffer().position(subMsgStartPosition);
+				break;
+			}			
 		}
 		
 		// Length of last submessage is 0, @see 8.3.3.2.3 submessageLength
