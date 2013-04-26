@@ -94,7 +94,7 @@ public class RTPSReader extends Endpoint {
 			}
 		}
 		else {
-			log.warn("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+			log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
 					data.getWriterSequenceNumber(), wp.getSeqNumMax());
 		}
 	}
@@ -117,7 +117,7 @@ public class RTPSReader extends Endpoint {
 				doSend = true;
 			}
 			else {
-				log.debug("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
+				log.trace("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
 			}
 		}
 
