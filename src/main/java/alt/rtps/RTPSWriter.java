@@ -245,7 +245,10 @@ public class RTPSWriter extends Endpoint {
 		}
 
 		log.debug("[{}] Sending Data: {}-{}", getGuid().entityId, firstSeqNum, lastSeqNum);
-		sendMessage(m, senderPrefix); 
+		boolean overFlowed = sendMessage(m, senderPrefix); 
+		if (overFlowed) {
+			sendHeartbeat(senderPrefix, ackNack);
+		}
 	}
 
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {

@@ -107,9 +107,10 @@ public class Message {
 
 	
 	
-	public void writeTo(RTPSByteBuffer buffer) {
+	public boolean writeTo(RTPSByteBuffer buffer) {
 		header.writeTo(buffer);
-
+		boolean overFlowed = false;
+		
 		int position = 0;
 		for (SubMessage msg : submessages) {
 			int subMsgStartPosition = buffer.position();
@@ -129,12 +130,15 @@ public class Message {
 			catch(BufferOverflowException boe) {
 				log.warn("Buffer overflow occured, dropping rest of the sub messages");
 				buffer.getBuffer().position(subMsgStartPosition);
+				overFlowed = true;
 				break;
 			}			
 		}
 		
 		// Length of last submessage is 0, @see 8.3.3.2.3 submessageLength
 		buffer.getBuffer().putShort(position-2, (short)0);
+		
+		return overFlowed;
 	}
 
 	

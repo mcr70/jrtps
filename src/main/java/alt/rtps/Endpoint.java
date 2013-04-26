@@ -74,7 +74,7 @@ public class Endpoint {
 	}
 
 
-	protected void sendMessage(Message m, GuidPrefix_t targetPrefix) {
+	protected boolean sendMessage(Message m, GuidPrefix_t targetPrefix) {
 		// TODO: we should check, that there is a recipient we need in each Locator.
 		//       now we just assume remote participant will ignore if there isn't
 		// we should have sendMessage(Messagem, GuidPrefix_t remoteParticipant, EntityId_t remoteEntity)
@@ -86,13 +86,15 @@ public class Endpoint {
 		// getParticipantLocators should be changed to getLocator(new Guid(prefix, entityId))
 		// Q: prefer multicast?
 		Locator_t locator = getParticipantLocators(targetPrefix);
-
+		boolean overFlowed = true;
 		try {
 			UDPWriter w = new UDPWriter(locator); // TODO: No need to create and close all the time
-			w.sendMessage(m);
+			overFlowed = w.sendMessage(m);
 			w.close();					
 		} catch (IOException e) {
 			log.warn("[{}] Failed to send message to {}", getGuid().entityId, locator, e);
 		}
+
+		return overFlowed;
 	}
 }
