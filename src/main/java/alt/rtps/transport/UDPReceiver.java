@@ -1,5 +1,7 @@
 package alt.rtps.transport;
 
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -57,6 +59,9 @@ public class UDPReceiver implements Runnable {
 				try {	
 					byte[] msgBytes = new byte[p.getLength()];
 					System.arraycopy(p.getData(), 0, msgBytes, 0, msgBytes.length);
+					
+					//writeMessage("c:/tmp/jrtps-received.bin", msgBytes);
+					
 					// TODO: We could put msgBytes into BlockingQueue and go back to receiving
 					Message msg = new Message(new RTPSByteBuffer(msgBytes));
 					
@@ -91,5 +96,16 @@ public class UDPReceiver implements Runnable {
 
 	public Locator_t getLocator() {
 		return locator;
+	}
+
+
+	private void writeMessage(String string, byte[] msgBytes) {
+		try {
+			FileOutputStream fos = new FileOutputStream(string);
+			fos.write(msgBytes, 0, msgBytes.length);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} 
 	}
 }

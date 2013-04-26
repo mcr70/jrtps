@@ -223,11 +223,16 @@ public class RTPSWriter extends Endpoint {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 		long lastSeqNum = 0;
+		long firstSeqNum = 0;
 		for (CacheChange cc : changes) {
 			log.trace("Marshalling {}", cc.getData());
 			try {
 				lastSeqNum = cc.getSequenceNumber();
 				if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+					if (firstSeqNum == 0) {
+						firstSeqNum = lastSeqNum;
+					}
+					
 					DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
 					Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
 
@@ -239,8 +244,11 @@ public class RTPSWriter extends Endpoint {
 			}
 		}
 
-		log.debug("[{}] Sending Data: {}", getGuid().entityId, lastSeqNum);
-		sendMessage(m, senderPrefix); 
+		log.debug("[{}] Sending Data: {}-{}", getGuid().entityId, firstSeqNum, lastSeqNum);
+		boolean overFlowed = sendMessage(m, senderPrefix); 
+		if (overFlowed) {
+			sendHeartbeat(senderPrefix, ackNack);
+		}
 	}
 
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
