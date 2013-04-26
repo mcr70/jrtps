@@ -87,15 +87,15 @@ public class Heartbeat extends SubMessage {
 	/**
 	 * Identifies the first (lowest) sequence number that is available in the Writer.
 	 */
-	public SequenceNumber_t getFirstSequenceNumber() {
-		return firstSN;
+	public long getFirstSequenceNumber() {
+		return firstSN.getAsLong();
 	}
 
 	/**
 	 * Identifies the last (highest) sequence number that is available in the Writer.
 	 */
-	public SequenceNumber_t getLastSequenceNumber() {
-		return lastSN;
+	public long getLastSequenceNumber() {
+		return lastSN.getAsLong();
 	}
 
 	/**

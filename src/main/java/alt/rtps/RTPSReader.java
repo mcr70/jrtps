@@ -80,14 +80,14 @@ public class RTPSReader extends Endpoint {
 	 */
 	public void onData(GuidPrefix_t sourcePrefix, Data data, Time_t timestamp) throws IOException {
 
-		Object obj = marshaller.unmarshall(data.getDataEncapsulation());
 		GUID_t writerGuid = new GUID_t(sourcePrefix, data.getWriterId()); 
 
 		WriterProxy wp = getWriterProxy(writerGuid);
 		
 		if (wp.acceptData(data.getWriterSequenceNumber())) {
-			log.debug("[{}] Got {}, {}: {}", getGuid().entityId, 
-					obj.getClass().getSimpleName(), data.getWriterSequenceNumber(), obj);
+			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
+			log.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
+					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 
 			for (DataListener dl : listeners) {
 				dl.onData(obj, timestamp);
@@ -106,13 +106,27 @@ public class RTPSReader extends Endpoint {
 	 * @param hb
 	 */
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		log.debug("[{}] Got {}", getGuid().entityId, hb); 
+		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+		boolean doSend = false;
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
+			doSend = true;
+		}
+		else {
+			WriterProxy wp = getWriterProxy(new GUID_t(senderGuidPrefix, hb.getWriterId()));
+			if (wp.acceptHeartbeat(hb.getLastSequenceNumber())) {
+				doSend = true;
+			}
+			else {
+				log.debug("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
+			}
+		}
+
+		if (doSend) {
 			Message m = new Message(getGuid().prefix);
 			//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
 			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 			m.addSubMessage(an);
-			log.debug("[{}] Sending {}", getGuid().entityId, an);
+			log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
 			sendMessage(m, senderGuidPrefix);
 		}
 	}
@@ -128,7 +142,7 @@ public class RTPSReader extends Endpoint {
 
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
 
-		AckNack an = new AckNack(getGuid().entityId, matchedEntity, snSet, ackNackCount++);
+		AckNack an = new AckNack(getGuid().entityId, writerGuid.entityId, snSet, ackNackCount++);
 
 		return an;
 	}
