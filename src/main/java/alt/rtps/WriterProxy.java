@@ -35,12 +35,16 @@ class WriterProxy {
 		// Data must come in order. If not, drop it. Manage out-of-order data with 
 		// HeartBeat & AckNack messages
 
-		if (true || sequenceNumber == seqNumMax + 1) { 
+		if (sequenceNumber == seqNumMax + 1) { 
 			seqNumMax++;
 			
 			return true;
 		}
 
 		return false;
+	}
+
+	boolean acceptHeartbeat(long sequenceNumber) {
+		return seqNumMax < sequenceNumber;
 	}
 }
