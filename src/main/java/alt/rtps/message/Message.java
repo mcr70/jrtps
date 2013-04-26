@@ -76,9 +76,7 @@ public class Message {
 				if (smEnd - smStart != smh.submessageLength && smh.submessageLength != 0) {
 					log.warn("SubMessage length differs for {} != {} for {}", smEnd-smStart, smh.submessageLength, sm.getKind());
 				}
-				else {
-					log.debug("SubMessage, position {}, length {} for {}", smEnd, smh.submessageLength, sm.getKind());
-				}
+				
 				log.trace("{}", sm);
 				submessages.add(sm);
 			}
