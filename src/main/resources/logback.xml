@@ -10,7 +10,7 @@
 	<root>
 		<appender-ref ref="console" />
 	</root>
-	<logger name="alt" level="DEBUG" />
-	<logger name="alt.rtps.message" level="debug" />
-	<logger name="alt.rtps.message.parameter" level="info" />
+	<logger name="net.sf.jrtps" level="DEBUG" />
+	<logger name="net.sf.jrtps.message" level="debug" />
+	<logger name="net.sf.jrtps.message.parameter" level="info" />
 </configuration>
