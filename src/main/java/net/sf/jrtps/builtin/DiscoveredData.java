@@ -12,7 +12,7 @@ public class DiscoveredData {
 	protected String typeName;
 	protected String topicName;
 	// On spec, key is BuiltinTopicKey_t (4 bytes), but KeyHash Parameter is 16 bytes.
-	// @see table 9.10, 9.6.3.3 KeyHash.
+	// see table 9.10, 9.6.3.3 KeyHash.
 	// interpretation is, for builtin topics, key is 
 	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
 	protected GUID_t key;  

@@ -57,7 +57,7 @@ public class Configuration {
 	
 	/**
 	 * Protocol tuning parameter that allows the RTPS Writer to ignore requests for data from
-	 * negative acknowledgments that arrive ‘too soon’ after the corresponding change is sent.
+	 * negative acknowledgments that arrive 'too soon' after the corresponding change is sent.
 	 * <p>
 	 * See chapter 8.4.7.1.1 for default values 
 	 * @return 
@@ -69,7 +69,7 @@ public class Configuration {
 
 	/**
 	 * Protocol tuning parameter that allows the RTPS Reader to ignore HEARTBEATs that
-	 * arrive ‘too soon’ after a previous HEARTBEAT was received.
+	 * arrive 'too soon' after a previous HEARTBEAT was received.
 	 */
 	public Duration_t getHeartbeatSuppressionDuration() {
 		return heartbeatSuppressionDuration;

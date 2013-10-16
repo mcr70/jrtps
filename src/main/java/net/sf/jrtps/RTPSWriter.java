@@ -46,7 +46,7 @@ public class RTPSWriter extends Endpoint {
 
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
-	 * all the changes in the writer’s HistoryCache to all the Locators
+	 * all the changes in the writer's HistoryCache to all the Locators
 	 * periodically each resendPeriod.
 	 */
 	private Duration_t resendDataPeriod = null;//new Duration_t(30, 0);

@@ -8,7 +8,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class LocatorUDPv4_t {
 	public static final LocatorUDPv4_t LOCATORUDPv4_INVALID = new LocatorUDPv4_t(0,0);
 	/**
-	 * The mapping between the dot-notation “a.b.c.d” of an IPv4 address and its representation as an unsigned
+	 * The mapping between the dot-notation 'a.b.c.d' of an IPv4 address and its representation as an unsigned
 	 * long is as follows: address = (((a*256 + b)*256) + c)*256 + d
 	 */
 	private final int address;
