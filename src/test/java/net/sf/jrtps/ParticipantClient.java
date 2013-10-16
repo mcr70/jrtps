@@ -1,3 +1,4 @@
+package net.sf.jrtps;
 import java.io.IOException;
 
 import net.sf.jrtps.Marshaller;
