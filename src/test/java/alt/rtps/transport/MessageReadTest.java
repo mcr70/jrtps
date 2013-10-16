@@ -6,9 +6,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel.MapMode;
 
-import org.junit.Test;
+import net.sf.jrtps.message.Message;
+import net.sf.jrtps.transport.RTPSByteBuffer;
 
-import alt.rtps.message.Message;
+import org.junit.Test;
 
 public class MessageReadTest {
 	@Test
