@@ -8,22 +8,22 @@ import net.sf.jrtps.types.Time_t;
 
 /**
  * This class is an adapter between DDS DataListener and RTPS DataListener.
- * More specifically, between alt.udds.DataListener and alt.rtps.DataListener.
+ * More specifically, between net.sf.udds.DataListener and net.sf.jrtps.DataListener.
  * 
  * @author mcr70
  *
  */
 class DataListenerAdapter<T> implements net.sf.jrtps.DataListener<T> {
-	private DataListener<T> dds_listener;
+	private DataListener<T> udds_listener;
 	
 	public DataListenerAdapter(DataListener<T> dds_listener) {
-		this.dds_listener = dds_listener;
+		this.udds_listener = dds_listener;
 	}
 	
 	@Override
 	public void onData(T data, Time_t timestamp) {
 		List<T> list = new LinkedList<>();
 		list.add(data);
-		dds_listener.onDataAvailable(list);
+		udds_listener.onDataAvailable(list);
 	}
 }
