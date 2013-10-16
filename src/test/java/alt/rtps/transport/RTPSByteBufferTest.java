@@ -1,6 +1,7 @@
 package alt.rtps.transport;
 
 import static org.junit.Assert.*;
+import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.junit.Test;
 

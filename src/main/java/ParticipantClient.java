@@ -1,12 +1,12 @@
 import java.io.IOException;
 
-import alt.rtps.Marshaller;
-import alt.rtps.RTPSParticipant;
-import alt.rtps.RTPSReader;
-import alt.rtps.RTPSWriter;
-import alt.rtps.message.data.CDREncapsulation;
-import alt.rtps.message.data.DataEncapsulation;
-import alt.rtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.Marshaller;
+import net.sf.jrtps.RTPSParticipant;
+import net.sf.jrtps.RTPSReader;
+import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.message.data.CDREncapsulation;
+import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
 public class ParticipantClient {
