@@ -11,7 +11,7 @@ import net.sf.udds.Sample;
 
 public class HelloReader implements DataListener<HelloMessage> {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-		HelloReader tc = new HelloReader();
+		HelloReader tc = new HelloReader(); // implements DataListener
 		
 		Participant p = new Participant(0, 2); // Create participant; domain 0, participant 2
 
