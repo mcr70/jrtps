@@ -2,6 +2,9 @@ package net.sf.udds;
 
 import java.net.SocketException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
@@ -14,7 +17,8 @@ import net.sf.jrtps.RTPSWriter;
  *
  */
 public class Participant {
-
+	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
+	
 	private final RTPSParticipant rtps_participant;
 	private final JavaSerializableMarshaller marshaller;
 
@@ -39,6 +43,7 @@ public class Participant {
 	 */
 	public Participant(int domainId, int participantId) throws SocketException {
 		marshaller = new JavaSerializableMarshaller();
+		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 		
 		rtps_participant = new RTPSParticipant(domainId, participantId);
 		rtps_participant.start();
@@ -69,6 +74,7 @@ public class Participant {
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, String typeName) {
 		RTPSReader rtps_reader = rtps_participant.createReader(topicName, typeName, marshaller);
+		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
 		return new DataReader<T>(topicName, rtps_reader);
 	} 
@@ -95,6 +101,7 @@ public class Participant {
 	 */
 	public <T> DataWriter<T> createDataWriter(String topicName, String typeName) {
 		RTPSWriter rtps_writer = rtps_participant.createWriter(topicName, typeName, marshaller);
+		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
 		return new DataWriter<T>(topicName, rtps_writer);
 	}
