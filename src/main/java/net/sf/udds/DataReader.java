@@ -46,10 +46,28 @@ public class DataReader<T> extends Entity {
 		return null;
 	}
 
+	/**
+	 * Adds a new listener for this DataReader.
+	 * @param listener a DataListener to add.
+	 */
 	public void addListener(DataListener<T> listener) {
 		DataListenerAdapter<T> dla = new DataListenerAdapter<>(listener);
 		rtps_reader.addListener(dla);
 		
 		dataListeners.add(dla);
+	}
+
+	/**
+	 * Removes a listener.
+	 * 
+	 * @param listener DataListener to remove
+	 */
+	public void removeListener(DataListener<T> listener) {
+		for (DataListenerAdapter<T> dla : dataListeners) {
+			if (dla.udds_listener.equals(listener)) {
+				rtps_reader.removeListener(dla);
+				dataListeners.remove(dla);
+			}
+		}
 	}
 }

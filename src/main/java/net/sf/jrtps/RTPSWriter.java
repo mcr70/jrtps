@@ -158,7 +158,7 @@ public class RTPSWriter extends Endpoint {
 	}
 
 	/**
-	 * Creates a new cache change to history cache. Note, that matced readers are not notified automatically
+	 * Creates a new cache change to history cache. Note, that matched readers are not notified automatically
 	 * of changes in history cache. Use sendHeartbeat() method to notify remote readers of changes in history cache.
 	 * This way, multiple changes can be notified only once.
 	 * <p> 

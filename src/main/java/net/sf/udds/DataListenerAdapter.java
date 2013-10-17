@@ -14,7 +14,7 @@ import net.sf.jrtps.types.Time_t;
  *
  */
 class DataListenerAdapter<T> implements net.sf.jrtps.DataListener<T> {
-	private DataListener<T> udds_listener;
+	DataListener<T> udds_listener;
 	
 	public DataListenerAdapter(DataListener<T> dds_listener) {
 		this.udds_listener = dds_listener;

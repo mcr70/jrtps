@@ -18,10 +18,25 @@ public class Participant {
 	private final RTPSParticipant rtps_participant;
 	private final JavaSerializableMarshaller marshaller;
 
+	/**
+	 * Create a Participant with domainId 0 and participantId 0.
+	 * @throws SocketException
+	 */
 	public Participant() throws SocketException {
 		this(0, 0);
 	} 
 	
+	/**
+	 * Create a Participant with given domainId and participantId.
+	 * Participants with same domainId are able to communicate with each other.
+	 * participantId is used to distinguish participants within this domain(and JVM).
+	 * More specifically, domainId and participantId are used to select networking ports used
+	 * by participant.
+	 * 
+	 * @param domainId domainId of this participant.
+	 * @param participantId participantId of this participant. 
+	 * @throws SocketException
+	 */
 	public Participant(int domainId, int participantId) throws SocketException {
 		marshaller = new JavaSerializableMarshaller();
 		
@@ -33,8 +48,8 @@ public class Participant {
 	/**
 	 * Create a new DataReader for given type T. DataReader is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
-	 * 
-	 * @param c
+	 * Typename of the DataReader is set to fully qualified class name.
+	 * @param c 
 	 * @return
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> c) {
@@ -45,6 +60,13 @@ public class Participant {
 		return createDataReader(c.getSimpleName(), c.getName());
 	} 
 
+	/**
+	 * Create DataReader with given topicName and typeName.
+	 * 
+	 * @param topicName name of the topic
+	 * @param typeName name of the type
+	 * @return
+	 */
 	public <T> DataReader<T> createDataReader(String topicName, String typeName) {
 		RTPSReader rtps_reader = rtps_participant.createReader(topicName, typeName, marshaller);
 		
@@ -53,7 +75,10 @@ public class Participant {
 
 	
 	/**
-	 * Creates a new DataWriter of given type.
+	 * Creates a new DataWriter of given type. DataWriter is bound to a topic
+	 * named c.getSimpleName(), which corresponds to class name of the argument. 
+	 * Typename of the DataWriter is set to fully qualified class name.
+	 * 
 	 * @param c A class, that is used with created DataWriter.
 	 * @return
 	 */
@@ -61,6 +86,13 @@ public class Participant {
 		return createDataWriter(c.getSimpleName(), c.getName());
 	} 
 
+	/**
+	 * Create DataWriter with given topicName and typeName.
+	 * 
+	 * @param topicName name of the topic
+	 * @param typeName name of the type
+	 * @return
+	 */
 	public <T> DataWriter<T> createDataWriter(String topicName, String typeName) {
 		RTPSWriter rtps_writer = rtps_participant.createWriter(topicName, typeName, marshaller);
 		
@@ -68,7 +100,7 @@ public class Participant {
 	}
 
 	/**
-	 * Close this participant. 
+	 * Close this participant.
 	 */
 	public void close() {
 		rtps_participant.close();
