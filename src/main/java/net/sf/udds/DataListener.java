@@ -7,7 +7,7 @@ import java.util.List;
  * 
  * @author mcr70
  *
- * @param <T> Type of the Objects received from DDS
+ * @param <T> Type of the Objects received
  */
 public interface DataListener<T> {
 	/**

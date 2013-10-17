@@ -6,7 +6,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
@@ -30,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @see DataListener
  */
 public class RTPSReader extends Endpoint {
-	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
+	private static final Logger logger = LoggerFactory.getLogger(RTPSReader.class);
 
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
@@ -60,16 +59,31 @@ public class RTPSReader extends Endpoint {
 			matchedEntity = EntityId_t.SEDP_BUILTIN_TOPIC_WRITER;
 		}
 		else {
-			log.warn("Setting matched entity for {}:{} to UNKNOWN_ENTITY", prefix, entityId);
+			logger.warn("Setting matched entity for {}:{} to UNKNOWN_ENTITY", prefix, entityId);
 			matchedEntity = EntityId_t.UNKNOWN_ENTITY;
 		}
 	}
 
-
+	/**
+	 * Adds a DataListener to this RTPSReader.
+	 * 
+	 * @param listener DataListener to add.
+	 */
 	public void addListener(DataListener listener) {
+		logger.debug("Adding DataListener {}", listener);
 		listeners.add(listener);
 	}
 
+	/**
+	 * Removes a DataListener from this RTPSReader.
+	 * 
+	 * @param listener DataListener to remove
+	 */
+	public void removeListener(DataListener listener) {
+		logger.debug("Removing DataListener {}", listener);
+		listeners.remove(listener);
+	}
+	
 	/**
 	 * Handle incoming Data message.
 	 * 
@@ -86,7 +100,7 @@ public class RTPSReader extends Endpoint {
 		
 		if (wp.acceptData(data.getWriterSequenceNumber())) {
 			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
-			log.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
+			logger.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 
 			for (DataListener dl : listeners) {
@@ -94,7 +108,7 @@ public class RTPSReader extends Endpoint {
 			}
 		}
 		else {
-			log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+			logger.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
 					data.getWriterSequenceNumber(), wp.getSeqNumMax());
 		}
 	}
@@ -106,7 +120,7 @@ public class RTPSReader extends Endpoint {
 	 * @param hb
 	 */
 	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+		logger.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 		boolean doSend = false;
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 			doSend = true;
@@ -117,7 +131,7 @@ public class RTPSReader extends Endpoint {
 				doSend = true;
 			}
 			else {
-				log.trace("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
+				logger.trace("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
 			}
 		}
 
@@ -126,7 +140,7 @@ public class RTPSReader extends Endpoint {
 			//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
 			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 			m.addSubMessage(an);
-			log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
+			logger.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
 			sendMessage(m, senderGuidPrefix);
 		}
 	}

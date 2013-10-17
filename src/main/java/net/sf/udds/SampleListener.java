@@ -3,7 +3,7 @@ package net.sf.udds;
 import java.util.List;
 
 /**
- * DataListener interface is used to get notifications of changes in associated DDS Topic.
+ * SampleListener interface is used to get notifications of changes in associated DDS Topic.
  * 
  * @author mcr70
  *
