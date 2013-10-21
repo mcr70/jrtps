@@ -10,7 +10,7 @@ import net.sf.jrtps.udds.Participant;
 
 public class HelloWriter2 {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, SocketException, InterruptedException {
-		Participant p = new Participant(0, 4); // Create participant; domain 0, participant 3
+		Participant p = new Participant(0, 4); // Create participant; domain 0, participant 4
 		
 		DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
 		
@@ -18,7 +18,7 @@ public class HelloWriter2 {
 		for (int i = 0; i < 10; i++) {
 			msgs.add(new HelloMessage(i, "hello " + i));
 		}
-		dw.write(msgs);
-		Thread.sleep(1000);
+		
+		dw.write(msgs); // send 10 HelloMessages on one call
 	}
 }
