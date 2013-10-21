@@ -13,9 +13,11 @@ public class HelloWriter {
 		HelloMessage m = new HelloMessage(1, "Hello");
 		DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
 		
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			dw.write(m);
 			Thread.sleep(1000);
 		}
+		
+		p.close();
 	}
 }
