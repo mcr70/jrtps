@@ -1,6 +1,5 @@
 package net.sf.jrtps.transport;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -88,8 +87,10 @@ public class UDPReceiver implements Runnable {
 	
 
 	public void close() {
-		log.debug("Closing {}", locator);
-		socket.close();
+		log.debug("Closing {}, {}", locator, socket);
+		if (socket != null) {
+			socket.close();
+		}
 		running = false;
 	}
 
