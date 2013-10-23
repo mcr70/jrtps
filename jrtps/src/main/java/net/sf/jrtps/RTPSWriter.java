@@ -224,7 +224,17 @@ public class RTPSWriter extends Endpoint {
 		List<CacheChange> changes = writer_cache.getChanges();
 		long lastSeqNum = 0;
 		long firstSeqNum = 0;
+		long prevTimeStamp = 0;
+		
 		for (CacheChange cc : changes) {
+			long timeStamp = cc.getTimeStamp();
+			//if (timeStamp > prevTimeStamp) {
+				InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
+				System.out.println("ADDING infoTS: " + infoTS);
+				m.addSubMessage(infoTS);
+			//}
+			prevTimeStamp = timeStamp;
+			
 			log.trace("Marshalling {}", cc.getData());
 			try {
 				lastSeqNum = cc.getSequenceNumber();

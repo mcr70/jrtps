@@ -170,7 +170,7 @@ public class RTPSParticipant {
 		for (UDPReceiver receiver : receivers) {
 			threadPoolExecutor.execute(receiver);
 		}
-
+		
 		log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(), writerEndpoints.size());
 	}
 	
@@ -459,7 +459,10 @@ public class RTPSParticipant {
 	 * and all the history caches of all entities will be cleared.
 	 */
 	public void close() {
-		// First, close network receivers
+		log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
+
+		threadPoolExecutor.shutdown();
+//		// First, close network receivers
 		for (UDPReceiver r : receivers) {
 			r.close();
 		}

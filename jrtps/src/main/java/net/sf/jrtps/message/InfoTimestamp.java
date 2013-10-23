@@ -27,6 +27,11 @@ public class InfoTimestamp extends SubMessage {
 		readMessage(is);
 	}
 
+	public InfoTimestamp(long systemCurrentMillis) {
+		super(new SubMessageHeader(KIND));
+		this.timestamp = new Time_t(systemCurrentMillis);
+	}
+	
 	public InfoTimestamp(Time_t timestamp) {
 		super(new SubMessageHeader(KIND));
 
