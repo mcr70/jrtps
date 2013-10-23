@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.util.concurrent.Semaphore;
 
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.message.Message;
@@ -24,10 +25,12 @@ import org.slf4j.LoggerFactory;
  */
 public class UDPReceiver implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
-	
+
+	private final Semaphore initLock = new Semaphore(1);
+
 	private final RTPSMessageBroker broker;
 	private final Locator_t locator;
-	
+
 	private boolean running = true;
 	DatagramSocket socket = null;
 
@@ -35,8 +38,16 @@ public class UDPReceiver implements Runnable {
 		this.locator = locator;
 		broker = new RTPSMessageBroker(p);
 	}
-	
+
 	public void run() {
+		try {
+			initLock.acquire();
+		} 
+		catch (InterruptedException e1) {
+			log.debug("Failed to acquire lock duringin initialization. exiting.");
+			return;
+		}
+		
 		try {
 			if (locator.getInetAddress().isMulticastAddress()) {
 				socket = new MulticastSocket(locator.getPort());
@@ -45,53 +56,56 @@ public class UDPReceiver implements Runnable {
 			else {
 				socket = new DatagramSocket(locator.getPort());
 			}
-			
-			log.debug("Listening on {}", locator);
-			
-			byte[] buf = new byte[16384];
-				
-			while(running) {
-				DatagramPacket p = new DatagramPacket(buf, buf.length);
-
-				socket.receive(p);
-				
-				try {	
-					byte[] msgBytes = new byte[p.getLength()];
-					System.arraycopy(p.getData(), 0, msgBytes, 0, msgBytes.length);
-					
-					//writeMessage("c:/tmp/jrtps-received.bin", msgBytes);
-					
-					// TODO: We could put msgBytes into BlockingQueue and go back to receiving
-					Message msg = new Message(new RTPSByteBuffer(msgBytes));
-					
-					log.debug("Parsed RTPS message from {}: {}", locator, msg);
-					broker.handleMessage(msg);
-				}
-				catch(Exception e) {
-					log.warn("Failed to parse message of length " + p.getLength(), e);
-				}
-			}
-		} 
-		catch (SocketException e) {
-			log.error("Got SocketException, {}", locator, e); 
-		} 
-		catch (IOException e) {
-			log.error("Got IOException. Closing.", e);
 		}
-		finally {
-			if (socket != null && socket.isConnected()) {
-				socket.close();
+		catch(IOException ioe) {
+			log.warn("Got IOException during creation of socket", ioe);
+		}
+
+		log.debug("Listening on {}", locator);
+		initLock.release();
+
+
+		byte[] buf = new byte[16384];
+
+		while(running) {
+			DatagramPacket p = new DatagramPacket(buf, buf.length);
+			try {	
+				socket.receive(p);
+
+				byte[] msgBytes = new byte[p.getLength()];
+				System.arraycopy(p.getData(), 0, msgBytes, 0, msgBytes.length);
+
+				//writeMessage("c:/tmp/jrtps-received.bin", msgBytes);
+
+				// TODO: We could put msgBytes into BlockingQueue and go back to receiving
+				Message msg = new Message(new RTPSByteBuffer(msgBytes));
+
+				log.debug("Parsed RTPS message from {}: {}", locator, msg);
+				broker.handleMessage(msg);
+			}
+			catch(SocketException se) {
+				// Ignore. If we are still running, try to receive again
+			}
+			catch(Exception e) {
+				log.warn("Failed to parse message of length " + p.getLength(), e);
 			}
 		}
 	}
-	
+
 
 	public void close() {
 		log.debug("Closing {}, {}", locator, socket);
-		if (socket != null) {
-			socket.close();
+		try {
+			initLock.acquire();
+			if (socket != null) {
+				socket.close();
+			}
+			running = false;
+
+		} 
+		catch (InterruptedException e) {
+			log.debug("close() was interrupted");
 		}
-		running = false;
 	}
 
 

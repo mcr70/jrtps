@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 
 import net.sf.jrtps.message.Message;
@@ -36,6 +37,9 @@ public class UDPWriter {
 		try {
 			channel.write(buffer.getBuffer());
 		} 
+		catch(ClosedByInterruptException cbie) {
+			log.debug("Message sending was interrputed");
+		}
 		catch (IOException e) {
 			log.error("Failed to send message to " + locator, e);
 		}
