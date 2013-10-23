@@ -9,7 +9,7 @@ import net.sf.jrtps.message.data.CDREncapsulation;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-class JavaSerializableMarshaller extends Marshaller {
+class JavaSerializableMarshaller extends Marshaller<Object> {
 
 	@Override
 	public Object unmarshall(DataEncapsulation dEnc) throws IOException {
@@ -29,7 +29,7 @@ class JavaSerializableMarshaller extends Marshaller {
 
 	@Override
 	public DataEncapsulation marshall(Object data) throws IOException {
-		CDREncapsulation cdrEnc = new CDREncapsulation(1024);
+		CDREncapsulation cdrEnc = new CDREncapsulation(1024); // TODO: hardcoded
 		RTPSByteBuffer bb = cdrEnc.getBuffer();
 		
 		ObjectOutputStream os = new ObjectOutputStream(bb.getOutputStream());
