@@ -1,0 +1,13 @@
+o Quality of Service
+	- Use reasonable defaults, configuration, adaptation.
+	- Liveliness. This should be part of jrtps. At least automatic_liveliness.
+	- Role of jrtps vs. udds vs. java5-psm
+
+o OSGi
+	- Build jrtps/udds as an OSGi bundle.
+	- OSGi service: DataListener{topic-name, type-name[, qos]}. 
+	- What other services is needed?
+	- test with felix, equinox, 
+	
+o Encryption/signing
+
