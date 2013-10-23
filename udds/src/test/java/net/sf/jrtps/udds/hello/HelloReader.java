@@ -1,13 +1,9 @@
 package net.sf.jrtps.udds.hello;
 
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
 
-import net.sf.jrtps.udds.DataListener;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.Participant;
-import net.sf.jrtps.udds.Sample;
 
 
 public class HelloReader {
@@ -19,7 +15,7 @@ public class HelloReader {
 		DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
 		dr.addListener(hl);
 		
-		System.out.println("Press enter to close Participant");
+		System.out.println("\n*** Press enter to close Participant ***\n");
 		System.in.read();
 		
 		p.close();
