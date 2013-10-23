@@ -9,6 +9,8 @@ import java.io.Serializable;
  *
  */
 public class HelloMessage implements Serializable {
+	private static final long serialVersionUID = 5427974433060817425L;
+
 	// Should we have some annotation for keys, like
 	// @Key
 	public int userId;

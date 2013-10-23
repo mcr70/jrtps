@@ -2,7 +2,6 @@ package net.sf.jrtps.builtin;
 
 import java.util.Iterator;
 
-import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantGuid;

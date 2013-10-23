@@ -9,7 +9,7 @@ import net.sf.jrtps.udds.Participant;
 public class HelloReader {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
 		HelloListener hl = new HelloListener(); // implements DataListener
-		
+
 		Participant p = new Participant(0, 2); // Create participant; domain 0, participant 2
 
 		DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);

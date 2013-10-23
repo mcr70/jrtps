@@ -15,6 +15,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  */
 public class ParameterListEncapsulation extends DataEncapsulation {
 	private ParameterList parameters;
+	@SuppressWarnings("unused")
 	private short options;
 
 	public ParameterListEncapsulation(ParameterList parameters) {

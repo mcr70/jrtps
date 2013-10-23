@@ -14,6 +14,7 @@ public class ParameterFactory {
 	 * 
 	 * @see 9.4.2.11 ParameterList
 	 */
+	@SuppressWarnings("deprecation")
 	public static Parameter readParameter(RTPSByteBuffer bb) {
 		bb.align(4);
 

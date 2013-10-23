@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-class BuiltinListener implements DataListener {
+class BuiltinListener implements DataListener<Object> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinListener.class);
 	private RTPSParticipant participant;
 

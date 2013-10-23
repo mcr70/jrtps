@@ -46,6 +46,7 @@ public class UDPWriter {
 		return overFlowed;
 	}
 	
+	@SuppressWarnings("unused")
 	private void writeToFile(Buffer buffer, String fileName) {
 		try {
 			FileOutputStream fos = new FileOutputStream(fileName);
