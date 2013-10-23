@@ -149,7 +149,7 @@ public class RTPSWriter extends Endpoint {
 
 		try {
 			UDPWriter u = new UDPWriter(locator);
-			u.sendMessage(m, "c:/tmp/" + getGuid().entityId + "-hc.rtps");
+			u.sendMessage(m);
 			u.close();
 		}
 		catch(IOException ioe) {
@@ -228,11 +228,11 @@ public class RTPSWriter extends Endpoint {
 		
 		for (CacheChange cc : changes) {
 			long timeStamp = cc.getTimeStamp();
-			//if (timeStamp > prevTimeStamp) {
+			if (timeStamp > prevTimeStamp) {
 				InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
 				System.out.println("ADDING infoTS: " + infoTS);
 				m.addSubMessage(infoTS);
-			//}
+			}
 			prevTimeStamp = timeStamp;
 			
 			log.trace("Marshalling {}", cc.getData());

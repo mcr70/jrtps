@@ -26,9 +26,6 @@ public class UDPWriter {
 	}
 	
 	public boolean sendMessage(Message m) {
-		return sendMessage(m, null);
-	}
-	public boolean sendMessage(Message m, String fileName) {
 		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		boolean overFlowed = m.writeTo(buffer);
@@ -44,9 +41,7 @@ public class UDPWriter {
 			log.error("Failed to send message to " + locator, e);
 		}
 		
-		if (fileName != null) {
-			writeToFile(buffer.getBuffer().rewind(), fileName);
-		}
+		//	writeToFile(buffer.getBuffer().rewind(), fileName);
 		
 		return overFlowed;
 	}
