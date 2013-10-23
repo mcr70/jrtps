@@ -51,13 +51,14 @@ public class RTPSWriter extends Endpoint {
 	 */
 	private Duration_t resendDataPeriod = null;//new Duration_t(30, 0);
 
+	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
 	private final HistoryCache writer_cache;
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 	protected Object resend_lock = new Object();
 
 
-	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller marshaller) {
+	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller) {
 		super(prefix, entityId, topicName);
 
 		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));

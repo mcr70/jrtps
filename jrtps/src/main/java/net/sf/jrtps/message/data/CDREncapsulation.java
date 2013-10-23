@@ -14,6 +14,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class CDREncapsulation extends DataEncapsulation {
 
 	private final RTPSByteBuffer bb;
+	@SuppressWarnings("unused")
 	private short options;
 
 

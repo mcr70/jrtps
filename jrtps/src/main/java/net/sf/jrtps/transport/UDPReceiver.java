@@ -114,10 +114,12 @@ public class UDPReceiver implements Runnable {
 	}
 
 
+	@SuppressWarnings("unused")
 	private void writeMessage(String string, byte[] msgBytes) {
 		try {
 			FileOutputStream fos = new FileOutputStream(string);
 			fos.write(msgBytes, 0, msgBytes.length);
+			fos.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

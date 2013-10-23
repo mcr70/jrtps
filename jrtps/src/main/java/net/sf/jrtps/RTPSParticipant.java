@@ -120,9 +120,9 @@ public class RTPSParticipant {
 
 
 		// ----  Create a Writers for SEDP  ---------
-		RTPSWriter pw = createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
+		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
 				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
-		RTPSWriter sw = createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
+		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
 				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(), rdm);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
@@ -190,7 +190,7 @@ public class RTPSParticipant {
 	 * @see java.lang.Class.getSimpleName()
 	 * @see java.lang.Class.getName()
 	 */
-	public RTPSWriter createWriter(Class c, Marshaller marshaller) {
+	public RTPSWriter createWriter(Class<?> c, Marshaller<?> marshaller) {
 		return createWriter(c.getSimpleName(), c.getName(), marshaller);
 	}
 	
@@ -221,7 +221,7 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return
 	 */
-	private RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
+	private RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
 		RTPSWriter writer = new RTPSWriter(guid.prefix, eId, topicName, marshaller);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
@@ -244,7 +244,7 @@ public class RTPSParticipant {
 	 * @see java.lang.Class.getSimpleName()
 	 * @see java.lang.Class.getName()
 	 */
-	public RTPSReader createReader(Class c, Marshaller marshaller) {
+	public RTPSReader createReader(Class<?> c, Marshaller<?> marshaller) {
 		return createReader(c.getSimpleName(), c.getName(), marshaller);
 	}
 	
@@ -277,7 +277,7 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return
 	 */
-	private RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller marshaller) {
+	private RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
 		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 

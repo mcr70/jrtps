@@ -2,8 +2,6 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;

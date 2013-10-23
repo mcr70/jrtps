@@ -1,7 +1,5 @@
 package net.sf.jrtps.types;
 
-import java.util.Arrays;
-
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
