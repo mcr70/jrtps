@@ -9,7 +9,8 @@ import net.sf.jrtps.message.data.DataEncapsulation;
  * 
  * @author mcr70
  *
- * @param <T> Type of this Marshaller
+ * @param <T> Type of this Marshaller. Type is used to enforce symmetry
+ * 			  between unmarshall and marshall methods.
  */
 public abstract class Marshaller<T> {
 	/**
