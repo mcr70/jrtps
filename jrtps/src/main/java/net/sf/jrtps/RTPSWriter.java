@@ -227,23 +227,23 @@ public class RTPSWriter extends Endpoint {
 		long firstSeqNum = 0;
 		long prevTimeStamp = 0;
 		
-		for (CacheChange cc : changes) {
-			long timeStamp = cc.getTimeStamp();
-			if (timeStamp > prevTimeStamp) {
-				InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
-				System.out.println("ADDING infoTS: " + infoTS);
-				m.addSubMessage(infoTS);
-			}
-			prevTimeStamp = timeStamp;
-			
-			log.trace("Marshalling {}", cc.getData());
+		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
 				if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+					long timeStamp = cc.getTimeStamp();
+					if (timeStamp > prevTimeStamp) {
+						InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
+						log.debug("Adding {}", infoTS);
+						m.addSubMessage(infoTS);
+					}
+					prevTimeStamp = timeStamp;
+
 					if (firstSeqNum == 0) {
 						firstSeqNum = lastSeqNum;
 					}
 					
+					log.trace("Marshalling {}", cc.getData());
 					DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
 					Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
 
