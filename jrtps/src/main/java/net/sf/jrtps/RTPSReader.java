@@ -40,21 +40,8 @@ public class RTPSReader extends Endpoint {
 
 	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller) {
 		super(prefix, entityId, topicName);
-		//this.reader_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		
 		this.marshaller = marshaller;
-
-		if (entityId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER)) {
-		}
-		else if (entityId.equals(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER)) {
-		}
-		else if (entityId.equals(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER)) {
-		}
-		else if (entityId.equals(EntityId_t.SEDP_BUILTIN_TOPIC_READER)) {
-		}
-		else {
-			logger.warn("Setting matched entity for {}:{} to UNKNOWN_ENTITY", prefix, entityId);
-		}
 	}
 
 	/**
