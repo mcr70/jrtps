@@ -80,8 +80,8 @@ public abstract class EntityId_t  {
 	public static EntityId_t readEntityId(byte[] eKey, int kind) {		
 		EntityId_t entityId = null;
 		
-		int key = (eKey[0] << 24) | (eKey[1] << 16) | (eKey[2] << 8) | kind;
-		
+		int key = (eKey[0] << 24) | (eKey[1] << 16) | (eKey[2] << 8) | (kind & 0xff);
+
 		switch (key) {
 			case  (0)            : entityId = new UnknownEntity(); break;
 			case  (1 << 8) | 0xc1: entityId = new Participant(); break;
