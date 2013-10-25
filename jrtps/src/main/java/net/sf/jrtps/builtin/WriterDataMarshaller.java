@@ -21,7 +21,7 @@ public class WriterDataMarshaller extends Marshaller<WriterData> {
 	@Override
 	public DataEncapsulation marshall(WriterData wd) {
 		ParameterList payloadParams = new ParameterList();
-		 
+
 		payloadParams.add(new TopicName(wd.getTopicName()));
 		payloadParams.add(new TypeName(wd.getTypeName()));
 		payloadParams.add(new KeyHash(wd.getKey().getBytes()));

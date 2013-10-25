@@ -54,8 +54,10 @@ public class RTPSParticipant {
 	 * all entities created by this participant. 
 	 */
 	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants =  new HashMap<>();
-
-
+	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
+	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
+	private final HashMap<GUID_t, TopicData> discoveredTopics = new HashMap<>();
+	
 	/**
 	 * A map that stores network receivers for each locator we know. (For listening purposes)
 	 */
@@ -110,8 +112,6 @@ public class RTPSParticipant {
 
 		// TODO: Consider moving builtin stuff to uDDS project
 
-		BuiltinListener builtinListener = new BuiltinListener(this, discoveredParticipants);
-
 		// ----  Builtin marshallers  ---------------
 		ParticipantDataMarshaller pdm = new ParticipantDataMarshaller();
 		WriterDataMarshaller wdm = new WriterDataMarshaller();		
@@ -130,21 +130,21 @@ public class RTPSParticipant {
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
 				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
-		partReader.addListener(builtinListener);
+		partReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
 				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
-		pubReader.addListener(builtinListener);
+		pubReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 
 		RTPSReader subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
 				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(),rdm);
-		subReader.addListener(builtinListener);
+		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
 		RTPSReader topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
 				BUILTIN_TOPICNAME_TOPIC, TopicData.class.getName(), tdm);
-		topicReader.addListener(builtinListener);
+		topicReader.addListener(new BuiltinTopicDataListener(this));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 

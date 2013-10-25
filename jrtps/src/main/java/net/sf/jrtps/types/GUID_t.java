@@ -37,6 +37,7 @@ public class GUID_t {
 		byte[] entityBytes = new byte[3];
 		System.arraycopy(bytes, 12, entityBytes, 0, 3);
 		byte entityKind = bytes[15];
+		
 		this.entityId = EntityId_t.readEntityId(entityBytes, entityKind);
 	}
 
