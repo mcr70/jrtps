@@ -14,6 +14,8 @@ import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.transport.UDPWriter;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
@@ -32,11 +34,6 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class RTPSWriter extends Endpoint {
-	public enum ChangeKind {
-		WRITE, DISPOSE, UNREGISTER;
-	}
-
-
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
@@ -79,25 +76,24 @@ public class RTPSWriter extends Endpoint {
 				while (running) {
 					List<CacheChange> changes = writer_cache.getChanges();
 
-					for (CacheChange change : changes) { // TODO: ConcurrentModification
+					for (CacheChange cc : changes) { // TODO: ConcurrentModification
 						try {
 							Message m = new Message(getGuid().prefix);
 
 							InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
 							m.addSubMessage(iTime);
 
-							DataEncapsulation dEnc = marshaller.marshall(change.getData());
-							Data data = new Data(readerId, getGuid().entityId, change.getSequenceNumber(), null, dEnc);
+							Data data = createData(readerId, cc);
 							m.addSubMessage(data);
 
 							log.debug("[{}] Send {}, {}: {}", getGuid().entityId, 
-									change.getData().getClass().getSimpleName(), 
-									change.getSequenceNumber(), change.getData());
+									cc.getData().getClass().getSimpleName(), 
+									cc.getSequenceNumber(), cc.getData());
 
 							sendMessage(m, null);
 						}
 						catch(IOException ioe) {
-							log.warn("Failed to send cache change {}", change);
+							log.warn("Failed to send cache change {}", cc);
 						}
 					}
 
@@ -136,9 +132,7 @@ public class RTPSWriter extends Endpoint {
 		for (CacheChange cc : changes) {
 			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
 			try {
-				DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-				Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
-
+				Data data = createData(readerId, cc);
 				m.addSubMessage(data);
 			}
 			catch(IOException ioe) {
@@ -244,9 +238,7 @@ public class RTPSWriter extends Endpoint {
 					}
 					
 					log.trace("Marshalling {}", cc.getData());
-					DataEncapsulation dEnc = marshaller.marshall(cc.getData()); 
-					Data data = new Data(ackNack.getReaderId(), getGuid().entityId, cc.getSequenceNumber(), null, dEnc);
-
+					Data data = createData(ackNack.getReaderId(), cc);
 					m.addSubMessage(data);
 				}
 			}
@@ -302,5 +294,20 @@ public class RTPSWriter extends Endpoint {
 		m.addSubMessage(hb);
 
 		sendMessage(m, readerGuid.prefix);
+	}
+
+	
+	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
+		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
+		
+		ParameterList inlineQos = null;
+		if (!cc.getKind().equals(ChangeKind.WRITE)) {
+			inlineQos = new ParameterList();
+			inlineQos.add(new StatusInfo(cc.getKind()));
+		}
+		
+		Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), inlineQos, dEnc);
+
+		return data;
 	}
 }

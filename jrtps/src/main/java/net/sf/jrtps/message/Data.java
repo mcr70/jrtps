@@ -2,8 +2,12 @@ package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 
+import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.parameter.Parameter;
+import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.SequenceNumber_t;
@@ -131,6 +135,34 @@ public class Data extends SubMessage {
 	 */
 	public boolean inlineQosFlag() {
 		return (header.flags & 0x2) != 0;
+	}
+
+	/**
+	 * Gets the inlineQos parameters if present. Inline QoS parameters are present, if 
+	 * inlineQosFlag() returns true;
+	 * @see inlineQosFlag
+	 * @return
+	 */
+	public ParameterList getInlineQos() {
+		return inlineQosParams;
+	}
+
+	public boolean isDisposed() {
+		if (inlineQosFlag()) {
+			StatusInfo sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
+			return sInfo.isDisposed();
+		}
+	
+		return false;
+	}
+	
+	public boolean isUnregistered() {
+		if (inlineQosFlag()) {
+			StatusInfo sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
+			return sInfo.isUnregistered();
+		}
+	
+		return false;
 	}
 	
 	/**
