@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ReaderData;
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
 import net.sf.jrtps.types.Time_t;
@@ -32,7 +33,7 @@ public class BuiltinReaderDataListener implements DataListener<ReaderData> {
 	 * @param readerData
 	 */
 	@Override
-	public void onData(ReaderData readerData, Time_t timestamp) {
+	public void onData(ReaderData readerData, Time_t timestamp, StatusInfo sInfo) {
 		//discoveredReaders.put(readerData.getParticipantGuid(), readerData);
 		GUID_t key = readerData.getKey();
 		if (discoveredReaders.put(key, readerData) == null) {
@@ -41,7 +42,12 @@ public class BuiltinReaderDataListener implements DataListener<ReaderData> {
 
 		RTPSWriter writer = participant.getWriterForTopic(readerData.getTopicName());
 		if (writer != null) {
-			writer.addMatchedReader(readerData);
+			if (sInfo.isDisposed()) {
+				writer.removeMatchedReader(readerData);
+			}
+			else {
+				writer.addMatchedReader(readerData);
+			}
 		}
 
 		// builtin entities are handled with SEDP in ParticipantData reception

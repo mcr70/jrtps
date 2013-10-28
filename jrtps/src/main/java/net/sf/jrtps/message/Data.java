@@ -249,4 +249,16 @@ public class Data extends SubMessage {
 		
 		return sb.toString();
 	}
+
+	/**
+	 * Get the StatusInfo inline QoS parameter if it is present.
+	 * @return
+	 */
+	public StatusInfo getStatusInfo() {
+		if (inlineQosFlag()) {
+			return (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
+		}
+		
+		return new StatusInfo(); // return empty StatusInfo (WRITE)
+	}
 }

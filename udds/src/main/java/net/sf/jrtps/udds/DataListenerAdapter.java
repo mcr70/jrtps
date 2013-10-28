@@ -3,6 +3,7 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.Time_t;
 
 
@@ -21,9 +22,14 @@ class DataListenerAdapter<T> implements net.sf.jrtps.DataListener<T> {
 	}
 	
 	@Override
-	public void onData(T data, Time_t timestamp) {
+	public void onData(T data, Time_t timestamp, StatusInfo sInfo) {
 		List<T> list = new LinkedList<>();
 		list.add(data);
-		udds_listener.onDataAvailable(list);
+		if (sInfo.isDisposed()) {
+			udds_listener.onDataDisposed(list);
+		}
+		else {
+			udds_listener.onDataAvailable(list);
+		}
 	}
 }

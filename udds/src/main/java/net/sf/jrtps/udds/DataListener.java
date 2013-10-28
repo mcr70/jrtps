@@ -15,4 +15,9 @@ public interface DataListener<T> {
 	 * @param samples
 	 */
 	public void onDataAvailable(List<T> samples);
+	/**
+	 * Called by DataReader to notify listeners of disposal of type T
+	 * @param samples
+	 */
+	public void onDataDisposed(List<T> samples);
 }

@@ -164,7 +164,7 @@ public class RTPSWriter extends Endpoint {
 	 * @see sendHeartbeat()
 	 */
 	public void createChange(ChangeKind kind, Object obj) {
-		writer_cache.createChange(obj);	
+		writer_cache.createChange(/*kind, */obj); // TODO: enable kind. Currently buffer overflow occurs. Alignment bug?	
 	}
 
 	public void createChange(Object obj) {
@@ -189,6 +189,10 @@ public class RTPSWriter extends Endpoint {
 	}
 
 
+	void removeMatchedReader(ReaderData readerData) {
+		matchedReaders.remove(readerData);
+	}
+	
 	void addMatchedReader(ReaderData readerData) {
 		matchedReaders.add(readerData);
 		log.debug("Adding matchedReader {}", readerData);
@@ -299,6 +303,8 @@ public class RTPSWriter extends Endpoint {
 	
 	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
+		
+		//System.out.println("************* " + cc.getKind());
 		
 		ParameterList inlineQos = null;
 		if (!cc.getKind().equals(ChangeKind.WRITE)) {

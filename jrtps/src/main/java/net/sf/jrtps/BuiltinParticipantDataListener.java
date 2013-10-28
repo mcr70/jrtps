@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GuidPrefix_t;
 import net.sf.jrtps.types.Locator_t;
@@ -31,7 +32,7 @@ class BuiltinParticipantDataListener implements DataListener<ParticipantData> {
 	}
 
 	@Override
-	public void onData(ParticipantData pd, Time_t timestamp) {		
+	public void onData(ParticipantData pd, Time_t timestamp, StatusInfo sInfo) {		
 		log.trace("Considering Participant {}", pd.getGuid());
 		
 		ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());

@@ -3,6 +3,7 @@ package net.sf.jrtps;
 import java.util.HashMap;
 
 import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.Time_t;
 
@@ -21,7 +22,7 @@ public class BuiltinWriterDataListener implements DataListener<WriterData>{
 	}
 	
 	@Override
-	public void onData(WriterData writerData, Time_t timestamp) {
+	public void onData(WriterData writerData, Time_t timestamp, StatusInfo sInfo) {
 		GUID_t key = writerData.getKey();
 		if (discoveredWriters.put(key, writerData) == null) {
 			log.debug("Discovered a new writer {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
@@ -29,7 +30,12 @@ public class BuiltinWriterDataListener implements DataListener<WriterData>{
 
 		RTPSReader r = participant.getReaderForTopic(writerData.getTopicName());
 		if (r != null) {
-			r.addMatchedWriter(writerData);
+			if (sInfo.isDisposed()) {
+				r.removeMatchedWriter(writerData);
+			}
+			else {
+				r.addMatchedWriter(writerData);
+			}
 		}
 	}
 }

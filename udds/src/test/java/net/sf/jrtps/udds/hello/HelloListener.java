@@ -10,4 +10,9 @@ public class HelloListener implements DataListener<HelloMessage> {
 	public void onDataAvailable(List<HelloMessage> samples) {		
 		System.out.println("onDataAvailable(): " + samples);
 	}
+
+	@Override
+	public void onDataDisposed(List<HelloMessage> samples) {
+		System.out.println("onDataDisposed(): " + samples);
+	}
 }
