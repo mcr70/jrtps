@@ -19,7 +19,7 @@ public class HelloWriter2 {
 			msgs.add(new HelloMessage(i, "hello " + i));
 		}
 		
-		dw.write(msgs); // send 10 HelloMessages on one call
+		dw.dispose(msgs); // send 10 HelloMessages on one call
 		
 		System.out.println("\n*** Waiting 2 seconds before closing ***\n");
 		Thread.sleep(2000); // Give some time for the recipients to receive before closing

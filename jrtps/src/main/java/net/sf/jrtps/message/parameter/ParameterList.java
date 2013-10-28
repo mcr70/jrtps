@@ -41,15 +41,17 @@ public class ParameterList {
 
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.align(4); // @see 9.4.2.11
+
+		params.add(new Sentinel()); // Sentinel must be the last Parameter
 		for (Parameter param: params) {
 			buffer.write_short(param.getParameterId().kind());
 			buffer.write_short(0); // length will be calculated
 
 			int pos = buffer.position();
 			param.writeTo(buffer); 
-			
+
 			buffer.align(4); // Make sure length is multiple of 4 & align for next param
-			
+
 			int paramLength = buffer.position() - pos;
 			buffer.getBuffer().putShort(pos - 2, (short) paramLength);
 		}
