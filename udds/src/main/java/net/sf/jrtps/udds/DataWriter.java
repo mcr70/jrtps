@@ -2,8 +2,9 @@ package net.sf.jrtps.udds;
 
 import java.util.List;
 
+import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.RTPSWriter;
-import net.sf.jrtps.RTPSWriter.ChangeKind;
+
 
 /**
  * This class represents a strongly typed DataWriter in spirit of DDS specification.

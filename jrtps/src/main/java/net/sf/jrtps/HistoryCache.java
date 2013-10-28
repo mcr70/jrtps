@@ -3,7 +3,6 @@ package net.sf.jrtps;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.RTPSWriter.ChangeKind;
 import net.sf.jrtps.types.GUID_t;
 
 class HistoryCache {

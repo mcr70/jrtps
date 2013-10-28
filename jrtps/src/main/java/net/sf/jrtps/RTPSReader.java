@@ -11,6 +11,8 @@ import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.Message;
+import net.sf.jrtps.message.parameter.Parameter;
+import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
@@ -83,7 +85,7 @@ public class RTPSReader extends Endpoint {
 			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
 			logger.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
-
+			
 			for (DataListener dl : listeners) {
 				dl.onData(obj, timestamp);
 			}
