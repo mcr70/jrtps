@@ -164,7 +164,7 @@ public class RTPSWriter extends Endpoint {
 	 * @see sendHeartbeat()
 	 */
 	public void createChange(ChangeKind kind, Object obj) {
-		writer_cache.createChange(/*kind, */obj); // TODO: enable kind. Currently buffer overflow occurs. Alignment bug?	
+		writer_cache.createChange(kind, obj); // TODO: enable kind. Currently buffer overflow occurs. Alignment bug?	
 	}
 
 	public void createChange(Object obj) {
