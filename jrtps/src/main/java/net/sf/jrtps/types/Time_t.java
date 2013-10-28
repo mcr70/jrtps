@@ -33,13 +33,9 @@ public class Time_t {
 	}
 
 	public Time_t(long systemCurrentMillis) {
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(systemCurrentMillis);
-
-		// TODO: convert to NTP time
-		// NOTE: SECONDS_BETWEEN_1900_1970 = 2208988800 WONT fit to int
-		this.seconds = cal.get(Calendar.SECOND); 
-		this.fraction = (int) (this.seconds - (systemCurrentMillis / 1000));
+		this.seconds = (int) (systemCurrentMillis / 1000); 
+		long scm = this.seconds * 1000;
+		this.fraction = (int) (systemCurrentMillis - scm);
 	}
 	
 	public void writeTo(RTPSByteBuffer buffer) {
