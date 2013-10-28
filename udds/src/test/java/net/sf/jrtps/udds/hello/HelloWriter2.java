@@ -15,7 +15,7 @@ public class HelloWriter2 {
 		DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
 		
 		List<HelloMessage> msgs = new LinkedList<>();
-		for (int i = 0; i < 10; i++) {
+		for (int i = 0; i < 5; i++) {
 			msgs.add(new HelloMessage(i, "hello " + i));
 		}
 		

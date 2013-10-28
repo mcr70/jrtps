@@ -87,7 +87,7 @@ public class RTPSReader extends Endpoint {
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 			
 			for (DataListener dl : listeners) {
-				dl.onData(obj, timestamp);
+				dl.onData(obj, timestamp, data.getStatusInfo());
 			}
 		}
 		else {
@@ -169,5 +169,8 @@ public class RTPSReader extends Endpoint {
 
 	void addMatchedWriter(WriterData writerData) {
 		matchedWriters.add(writerData);
+	}
+	void removeMatchedWriter(WriterData writerData) {
+		matchedWriters.remove(writerData);
 	}
 }
