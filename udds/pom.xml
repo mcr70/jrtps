@@ -7,7 +7,6 @@
 		<version>0.2.1-SNAPSHOT</version>
 	</parent>
 
-	<groupId>net.sf.jrtps</groupId>
 	<artifactId>udds</artifactId>
 	<name>uDDS</name>
 	<description>A Minimalistic DDS like client library, that utilizes jRTPS for communication</description>
