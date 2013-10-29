@@ -9,13 +9,13 @@ package net.sf.jrtps.udds;
 public interface Sample<T> {
 	/**
 	 * Get the associated data.
-	 * @return
+	 * @return T
 	 */
 	public T getData();
 	
 	/**
 	 * Get the SampleInfo
-	 * @return
+	 * @return SampleInfo
 	 */
 	public SampleInfo getSampleInfo();
 }

@@ -44,7 +44,7 @@ public class DataWriter<T> extends Entity {
 	/**
 	 * Writes a List of instances to subscribed data readers. 
 	 * 
-	 * @param instance
+	 * @param instances a List of instances
 	 */
 	public void write(List<T> instances) {
 		for (T t : instances) { // TODO: this loop should be moved to HistoryCache for synchronization purposes

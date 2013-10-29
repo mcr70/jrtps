@@ -2,12 +2,12 @@ package net.sf.jrtps.udds;
 
 import java.net.SocketException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -55,7 +55,7 @@ public class Participant {
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
 	 * Typename of the DataReader is set to fully qualified class name.
 	 * @param c 
-	 * @return
+	 * @return a DataReader<T>
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> c) {
 		if (!java.io.Serializable.class.isAssignableFrom(c)) {
@@ -70,7 +70,7 @@ public class Participant {
 	 * 
 	 * @param topicName name of the topic
 	 * @param typeName name of the type
-	 * @return
+	 * @return a DataReader<T>
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, String typeName) {
 		RTPSReader rtps_reader = rtps_participant.createReader(topicName, typeName, marshaller);
@@ -86,7 +86,7 @@ public class Participant {
 	 * Typename of the DataWriter is set to fully qualified class name.
 	 * 
 	 * @param c A class, that is used with created DataWriter.
-	 * @return
+	 * @return a DataWriter<T>
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> c) {
 		return createDataWriter(c.getSimpleName(), c.getName());
@@ -97,7 +97,7 @@ public class Participant {
 	 * 
 	 * @param topicName name of the topic
 	 * @param typeName name of the type
-	 * @return
+	 * @return a DataWriter<T>
 	 */
 	public <T> DataWriter<T> createDataWriter(String topicName, String typeName) {
 		RTPSWriter rtps_writer = rtps_participant.createWriter(topicName, typeName, marshaller);
