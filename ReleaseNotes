@@ -1,5 +1,6 @@
 0.2.0	
 	- Turned into multi module build; jrtps & udds separated.
-	
+	  udds likely needs to be moved to another package. 
+	- hello world sample in udds/src/test
 0.1.0	
 	- Initial import
