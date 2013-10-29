@@ -13,9 +13,10 @@ import net.sf.jrtps.types.SequenceNumber_t;
 
 
 /**
+ * see 8.3.7.3 DataFrag
  * 
  * @author mcr70
- * @see 8.3.7.3 DataFrag
+ * 
  */
 public class DataFrag extends SubMessage {
 	public static final int KIND = 0x16;

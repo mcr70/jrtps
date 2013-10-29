@@ -29,7 +29,7 @@ public class DataReader<T> extends Entity {
 	/**
 	 * Read samples.
 	 * 
-	 * @return
+	 * @return a List of Sample<T>
 	 */
 	public List<Sample<T>> read() {
 		//rtps_reader.getHistoryCache();
@@ -40,7 +40,7 @@ public class DataReader<T> extends Entity {
 	
 	/**
 	 * Take samples.
-	 * @return
+	 * @return a List of Sample<T>
 	 */
 	public List<Sample<T>> take() {
 		return null;
@@ -48,6 +48,7 @@ public class DataReader<T> extends Entity {
 
 	/**
 	 * Adds a new listener for this DataReader.
+	 * 
 	 * @param listener a DataListener to add.
 	 */
 	public void addListener(DataListener<T> listener) {

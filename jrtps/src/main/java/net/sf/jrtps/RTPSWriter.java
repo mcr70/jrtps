@@ -160,8 +160,9 @@ public class RTPSWriter extends Endpoint {
 	 * As a side effect, Message sent as a response to readers AckNack message can (and will) contain 
 	 * multiple Data submessages in one UDP packet.
 	 * 
+	 * @param kind
 	 * @param obj
-	 * @see sendHeartbeat()
+	 * @see #sendHeartbeat()
 	 */
 	public void createChange(ChangeKind kind, Object obj) {
 		writer_cache.createChange(kind, obj); // TODO: enable kind. Currently buffer overflow occurs. Alignment bug?	

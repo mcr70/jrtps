@@ -6,9 +6,10 @@ import java.util.List;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
+ * see 9.4.2.6 SequenceNumberSet
  * 
  * @author mcr70
- * @see 9.4.2.6 SequenceNumberSet
+ * 
  */
 public class SequenceNumberSet {
 	private SequenceNumber_t bitmapBase;

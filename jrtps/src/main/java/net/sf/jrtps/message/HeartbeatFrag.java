@@ -11,8 +11,10 @@ import net.sf.jrtps.types.SequenceNumber_t;
  * 
  * Once all fragments are available, a regular Heartbeat message is used.
  * 
+ * see 9.4.5.7 HeartBeatFrag Submessage
+ * 
  * @author mcr70
- * @see 9.4.5.7 HeartBeatFrag Submessage
+ * 
  */
 public class HeartbeatFrag extends SubMessage {
 	public static final int KIND = 0x13;

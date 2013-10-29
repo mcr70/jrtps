@@ -7,10 +7,12 @@ import net.sf.jrtps.types.SequenceNumberSet;
 /**
  * This Submessage is used to communicate the state of a Reader to a Writer. The Submessage allows 
  * the Reader to inform the Writer about the sequence numbers it has received and which ones it is 
- * still missing. This Submessage can be used to do both positive and negative acknowledgments.
+ * still missing. This Submessage can be used to do both positive and negative acknowledgments.<p>
+ * 
+ * see 8.3.7.1 AckNack
  * 
  * @author mcr70
- * @see 8.3.7.1 AckNack
+ * 
  */
 public class AckNack extends SubMessage {
 	public static final int KIND = 0x06;

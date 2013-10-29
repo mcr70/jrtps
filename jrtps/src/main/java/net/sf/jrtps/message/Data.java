@@ -2,9 +2,7 @@ package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 
-import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.message.data.DataEncapsulation;
-import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
@@ -20,8 +18,10 @@ import org.slf4j.LoggerFactory;
  * This Submessage notifies the RTPS Reader of a change to a data-object belonging to the RTPS Writer. 
  * The possible changes include both changes in value as well as changes to the lifecycle of the data-object.
  * 
+ * see 8.3.7.2
+ * 
  * @author mcr70
- * @see 8.3.7.2
+ * 
  */
 public class Data extends SubMessage {
 	public static final int KIND = 0x15;
@@ -42,9 +42,8 @@ public class Data extends SubMessage {
 	 * @param readerId
 	 * @param writerId
 	 * @param seqNum
-	 * @param participantGuid
 	 * @param inlineQosParams Inline QoS parameters. May be null.
-	 * @param payloadParams
+	 * @param dEnc
 	 */
 	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
 			ParameterList inlineQosParams, DataEncapsulation dEnc) {
@@ -131,7 +130,8 @@ public class Data extends SubMessage {
 	/**
 	 * Indicates to the Reader the presence of a ParameterList
 	 * containing QoS parameters that should be used to interpret the message.
-	 * @return
+	 * 
+	 * @return true, if inlineQos flag is set
 	 */
 	public boolean inlineQosFlag() {
 		return (header.flags & 0x2) != 0;
@@ -140,8 +140,8 @@ public class Data extends SubMessage {
 	/**
 	 * Gets the inlineQos parameters if present. Inline QoS parameters are present, if 
 	 * inlineQosFlag() returns true;
-	 * @see inlineQosFlag
-	 * @return
+	 * @see #inlineQosFlag()
+	 * @return InlineQos parameters, or null if not present
 	 */
 	public ParameterList getInlineQos() {
 		return inlineQosParams;
@@ -168,7 +168,8 @@ public class Data extends SubMessage {
 	/**
 	 * Indicates to the Reader that the dataPayload submessage element
 	 * contains the serialized value of the data-object.
-	 * @return
+	 * 
+	 * @return true, data flag is set
 	 */
 	public boolean dataFlag() {
 		return (header.flags & 0x4) != 0;
@@ -177,7 +178,8 @@ public class Data extends SubMessage {
 	/**
 	 * Indicates to the Reader that the dataPayload submessage element
 	 * contains the serialized value of the key of the data-object.
-	 * @return
+	 * 
+	 * @return true, if key flag is set
 	 */
 	public boolean keyFlag() {
 		return (header.flags & 0x8) != 0;
@@ -186,6 +188,8 @@ public class Data extends SubMessage {
 	
 	/**
 	 * Identifies the RTPS Reader entity that is being informed of the change to the data-object.
+	 * 
+	 * @return EntityId_t of the reader
 	 */
 	public EntityId_t getReaderId() {
 		return readerId;
@@ -193,6 +197,8 @@ public class Data extends SubMessage {
 
 	/**
 	 * Identifies the RTPS Writer entity that made the change to the data-object.
+	 * 
+	 * @return EntityId_t of the writer
 	 */
 	public EntityId_t getWriterId() {
 		return writerId;
@@ -203,6 +209,8 @@ public class Data extends SubMessage {
 	 * changes made by the RTPS Writer identified by the writerGuid.
 	 * Each change gets a consecutive sequence number. Each RTPS
 	 * Writer maintains is own sequence number.
+	 * 
+	 * @return sequence number
 	 */
 	public long getWriterSequenceNumber() {
 		return writerSN.getAsLong();
@@ -251,8 +259,10 @@ public class Data extends SubMessage {
 	}
 
 	/**
-	 * Get the StatusInfo inline QoS parameter if it is present.
-	 * @return
+	 * Get the StatusInfo inline QoS parameter if it is present. If inline Qos
+	 * is not present, an empty(default) StatusInfo is returned
+	 * 
+	 * @return StatusInfo
 	 */
 	public StatusInfo getStatusInfo() {
 		if (inlineQosFlag()) {

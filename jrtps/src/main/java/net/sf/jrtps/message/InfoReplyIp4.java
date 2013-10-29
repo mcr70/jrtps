@@ -37,7 +37,7 @@ public class InfoReplyIp4 extends SubMessage {
 
 	/**
 	 * Returns the MulticastFlag. If true, message contains MulticastLocator
-	 * @return
+	 * @return true if message contains MulticastLocator
 	 */
 	public boolean multicastFlag() {
 		return (header.flags & 0x2) != 0;
