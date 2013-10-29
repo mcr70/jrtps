@@ -1,0 +1,4 @@
+jrtps-0.2.0 
+	This release is provided as-is. In short, one can get started by using 
+	classes in net.sf.udds package, which is a minimalistic set of (DDS)classes 
+	that can be used to start communicating over RTPS. 
