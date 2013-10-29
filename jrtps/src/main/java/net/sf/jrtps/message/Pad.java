@@ -6,8 +6,10 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * The purpose of this Submessage is to allow the introduction of any padding necessary to meet any 
  * desired memory alignment requirements. Its has no other meaning.
  * 
+ * see 8.3.7.11 Pad
+ * 
  * @author mcr70
- * @see 8.3.7.11 Pad
+ * 
  */
 public class Pad extends SubMessage {
 	public static final int KIND = 0x01;

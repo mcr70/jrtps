@@ -134,9 +134,10 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 	}
 
 	/**
+	 * see 9.4.5.1.2 flags
 	 * 
 	 * @param endianessFlag
-	 * @see 9.4.5.1.2 flags
+	 * 
 	 */
 	public void setEndianess(boolean endianessFlag) {
 		if (endianessFlag) {
@@ -151,7 +152,7 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 	 * Gets an InputStream reading from the backing ByteBuffer.
 	 * InputStream will start reading from current position of the ByteBuffer.
 	 * 
-	 * @return
+	 * @return InputStream
 	 */
 	public InputStream getInputStream() {
 		return new InputStream() {

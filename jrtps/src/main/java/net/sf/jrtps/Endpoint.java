@@ -26,6 +26,7 @@ public class Endpoint {
 	 * 
 	 * @param prefix prefix from the participant that creates this endpoint.
 	 * @param entityId
+	 * @param topicName
 	 */
 	protected Endpoint(GuidPrefix_t prefix, EntityId_t entityId, String topicName) {
 		this.guid = new GUID_t(prefix, entityId);
@@ -47,7 +48,7 @@ public class Endpoint {
 	 * Gets all locators for given participant.
 	 * 
 	 * @param prefix GuidPrefix of the participant
-	 * @return
+	 * @return Locator_t
 	 */
 	private Locator_t getParticipantLocators(GuidPrefix_t prefix) {
 		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().entityId, prefix, discoveredParticipants.keySet());

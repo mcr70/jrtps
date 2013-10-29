@@ -3,9 +3,9 @@ package net.sf.jrtps.types;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
- * 
+ * see 9.3.1.5 Mapping of the GUID_t
  * @author mcr70
- * @see 9.3.1.5 Mapping of the GUID_t
+ * 
  */
 public class GUID_t {
 	public GuidPrefix_t prefix;

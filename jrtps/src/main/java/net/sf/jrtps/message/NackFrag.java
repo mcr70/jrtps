@@ -10,8 +10,9 @@ import net.sf.jrtps.types.SequenceNumber_t;
  * is sent as a series of fragments, the NackFrag Submessage allows the Reader to inform the Writer 
  * about specific fragment numbers it is still missing.
  *
+ * see 8.3.7.10 NackFrag, 9.4.5.13 NackFrag Submessage
  * @author mcr70
- * @see 8.3.7.10 NackFrag, 9.4.5.13 NackFrag Submessage
+ * 
  */
 public class NackFrag extends SubMessage {
 	public static final int KIND = 0x12;

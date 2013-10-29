@@ -7,9 +7,10 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 /**
  * BuiltinTopicKey is mapped to GuidPrefix, and it is obtained from PID_PARTICIPANT_GUID
  * during SEPD & SPDP.
+ * see table 9.13: PID_PARTICIPANT_GUID & table 9.10
  * 
  * @author mcr70
- * @see table 9.13: PID_PARTICIPANT_GUID & table 9.10
+ * 
  */
 public class BuiltinTopicKey_t {
 	public int key[] = null; // int[3]

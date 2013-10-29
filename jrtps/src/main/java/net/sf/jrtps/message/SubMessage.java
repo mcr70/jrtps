@@ -48,7 +48,7 @@ public abstract class SubMessage {
 	/**
 	 * Writes this SubMessage into given ByteBuffer.
 	 * 
-	 * @param os
+	 * @param buffer
 	 * @throws IOException 
 	 */
 	public abstract void writeTo(RTPSByteBuffer buffer);
