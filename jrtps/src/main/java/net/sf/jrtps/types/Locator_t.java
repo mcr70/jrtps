@@ -71,9 +71,9 @@ public class Locator_t {
 	}
 
 	/**
-	 * 
+	 * see 9.6.1.2 User traffic
 	 * @param domainId
-	 * @see 9.6.1.2 User traffic
+	 * 
 	 */
 	public static Locator_t defaultUserMulticastLocator(int domainId) { 
 		byte[] addr = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,(byte) 239,(byte) 255,0,1};
@@ -82,9 +82,9 @@ public class Locator_t {
 	}
 	
 	/**
-	 * 
+	 * see 9.6.1.2 User traffic
 	 * @param domainId
-	 * @see 9.6.1.2 User traffic
+	 * 
 	 */
 	public static Locator_t defaultUserUnicastLocator(int domainId, int participantId) { 
 		InetAddress addr = null;
@@ -99,9 +99,9 @@ public class Locator_t {
 
 	
 	/**
-	 * 
+	 * see 9.6.1.2 User traffic
 	 * @param domainId
-	 * @see 9.6.1.2 User traffic
+	 * 
 	 */
 	public static Locator_t defaultMetatrafficUnicastLocator(int domainId, int participantId) { 
 		InetAddress addr = null;
@@ -115,9 +115,9 @@ public class Locator_t {
 	}
 	
 	/**
-	 * 
+	 * see 9.6.1.4 Default Settings for the Simple Participant Discovery Protocol
 	 * @param domainId
-	 * @see 9.6.1.4 Default Settings for the Simple Participant Discovery Protocol
+	 * 
 	 */
 	public static Locator_t defaultDiscoveryMulticastLocator(int domainId) { 
 		byte[] addr = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,(byte) 239,(byte) 255,0,1};
@@ -157,7 +157,7 @@ public class Locator_t {
 	
 	/**
 	 * Get the remote socket address
-	 * @return
+	 * @return SocketAddress
 	 */
 	public SocketAddress getSocketAddress() {
 		return new InetSocketAddress(getInetAddress(), port);

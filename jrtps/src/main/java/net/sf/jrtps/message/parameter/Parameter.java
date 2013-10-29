@@ -6,9 +6,10 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * Parameter is used to encapsulate data for builtin entities.
+ * see 9.6.2.2.2 ParameterID values
  * 
  * @author mcr70
- * @see 9.6.2.2.2 ParameterID values
+ * 
  */
 public abstract class Parameter {
 	private ParameterEnum parameterId;
@@ -19,7 +20,7 @@ public abstract class Parameter {
 	 * read(RTPSByteBuffer, int) 
 	 * 
 	 * @param id
-	 * @see read(RTPSByteBuffer, int)
+	 * @see #read(RTPSByteBuffer, int)
 	 */
 	protected Parameter(ParameterEnum id) {
 		this(id, null);
@@ -38,8 +39,9 @@ public abstract class Parameter {
 
 	/**
 	 * Get the parameterId of this parameter.
-	 * @return
-	 * @see 9.6.2.2.2 ParameterID values
+	 * see 9.6.2.2.2 ParameterID values
+	 * @return ParameterEnum
+	 * 
 	 */
 	public ParameterEnum getParameterId() {
 		return parameterId;
@@ -47,7 +49,7 @@ public abstract class Parameter {
 
 	/**
 	 * Parameter value
-	 * @return
+	 * @return bytes
 	 */
 	public byte[] getBytes() {
 		return bytes;

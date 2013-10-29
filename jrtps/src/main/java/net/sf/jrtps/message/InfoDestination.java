@@ -7,8 +7,10 @@ import net.sf.jrtps.types.GuidPrefix_t;
  * This message is sent from an RTPS Writer to an RTPS Reader to modify the GuidPrefix used to 
  * interpret the Reader entityIds appearing in the Submessages that follow it.
  * 
+ * see 8.3.7.7 InfoDestination
+ * 
  * @author mcr70
- * @see 8.3.7.7 InfoDestination
+ * 
  */
 public class InfoDestination extends SubMessage {
 	public static final int KIND = 0x0e;

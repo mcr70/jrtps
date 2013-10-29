@@ -16,7 +16,7 @@ public abstract class Marshaller<T> {
 	/**
 	 * Unmarshalls given DataEncapsulation to Object.
 	 * @param dEnc
-	 * @return
+	 * @return An Object of type T
 	 * @throws IOException 
 	 */
 	public abstract T unmarshall(DataEncapsulation dEnc) throws IOException;
@@ -24,7 +24,7 @@ public abstract class Marshaller<T> {
 	/**
 	 * Marshalls given Object to DataEncapsulation
 	 * @param data 
-	 * @return
+	 * @return DataEncapsulation
 	 * @throws IOException 
 	 */
 	public abstract DataEncapsulation marshall(T data) throws IOException;

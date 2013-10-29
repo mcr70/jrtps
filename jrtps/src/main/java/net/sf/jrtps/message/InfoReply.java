@@ -10,8 +10,10 @@ import net.sf.jrtps.types.Locator_t;
  * This message is sent from an RTPS Reader to an RTPS Writer. It contains explicit information on where 
  * to send a reply to the Submessages that follow it within the same message.
  * 
+ * see 9.4.5.9 InfoReply Submessage, 8.3.7.8 InfoReply
+ * 
  * @author mcr70
- * @see 9.4.5.9 InfoReply Submessage, 8.3.7.8 InfoReply
+ * 
  */
 public class InfoReply extends SubMessage {
 	public static final int KIND = 0x0f;
@@ -52,7 +54,7 @@ public class InfoReply extends SubMessage {
 
 	/**
 	 * Returns the MulticastFlag. If true, message contains MulticastLocatorList
-	 * @return
+	 * @return true, if message contains multicast locator
 	 */
 	public boolean multicastFlag() {
 		return (header.flags & 0x2) != 0;
