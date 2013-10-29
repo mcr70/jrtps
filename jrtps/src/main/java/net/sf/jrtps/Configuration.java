@@ -5,10 +5,12 @@ import net.sf.jrtps.types.Duration_t;
 /**
  * Configuration for jRTPS.
  * All the protocol tuning parameters mentioned in specification can be obtained from 
- * this class, as well as jRTPS specific configuration parameters.
+ * this class, as well as jRTPS specific configuration parameters.<br>
+ * 
+ * see 8.4.7.1
  *  
  * @author mcr70
- * @see 8.4.7.1
+ * 
  */
 public class Configuration {
 
@@ -30,6 +32,8 @@ public class Configuration {
 	 * Configures the mode in which the Writer operates. If pushMode==true, then the
 	 * Writer will push changes to the reader. If pushMode==false, changes will only be 
 	 * announced via heartbeats and only be sent as response to the request of a reader.
+	 * 
+	 * @return pushMode
 	 */	
 	public boolean pushMode() {
 		return pushMode;
@@ -38,7 +42,7 @@ public class Configuration {
 	/**
 	 * Protocol tuning parameter that allows the RTPS Writer to repeatedly announce the
 	 * availability of data by sending a Heartbeat Message.
-	 * @return
+	 * @return heartbeat period
 	 */
 	public Duration_t heartbeatPeriod() {
 		return heartbeatPeriod;
@@ -49,7 +53,7 @@ public class Configuration {
 	 * the response to a request for data from a negative acknowledgment.
 	 * <p>
 	 * See chapter 8.4.7.1.1 for default values 
-	 * @return
+	 * @return Nack response delay
 	 */
 	public Duration_t nackResponseDelay() {
 		return nackResponseDelay;
@@ -60,7 +64,7 @@ public class Configuration {
 	 * negative acknowledgments that arrive 'too soon' after the corresponding change is sent.
 	 * <p>
 	 * See chapter 8.4.7.1.1 for default values 
-	 * @return 
+	 * @return Nack supression duration
 	 * 
 	 */
 	public Duration_t nackSupressionDuration() {
@@ -78,7 +82,7 @@ public class Configuration {
 	/**
 	 * Protocol tuning parameter that allows the RTPS Reader to delay the sending of a
 	 * positive or negative acknowledgment (seeSection 8.4.12.2)
-	 * @return
+	 * @return heartbeat response delay
 	 */
 	public Duration_t getHeartbeatResponseDelay() {
 		return heartbeatResponseDelay;

@@ -31,7 +31,7 @@ public abstract class DataEncapsulation {
 	 * Gets the payload as a byte array. Payload must contain an encapsulation identifier
 	 * as first 2 bytes.
 	 * 
-	 * @return
+	 * @return serialized payload
 	 */
 	public abstract byte[] getSerializedPayload();
 
@@ -41,7 +41,7 @@ public abstract class DataEncapsulation {
 	 * first 2 bytes of serializedPayload.
 	 * 
 	 * @param serializedPayload
-	 * @return
+	 * @return DataEncapsulation
 	 */
 	public static DataEncapsulation createInstance(byte[] serializedPayload) {
 		RTPSByteBuffer bb = new RTPSByteBuffer(serializedPayload);

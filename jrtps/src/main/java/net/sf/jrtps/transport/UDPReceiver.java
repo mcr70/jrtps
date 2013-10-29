@@ -18,10 +18,11 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class receives network data. It is configured according to Locator_t given
- * on constructor.
+ * on constructor. <p> 
+ * see 8.3.4 The RTPS Message Receiver
  * 
  * @author mcr70
- * @see 8.3.4 The RTPS Message Receiver
+ * 
  */
 public class UDPReceiver implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);

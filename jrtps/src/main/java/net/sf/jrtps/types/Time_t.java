@@ -5,9 +5,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * Represents a time in IETF Network Time Protocol (NTP) Standard (IETF RFC 1305) format.
+ * see 9.3.2 Mapping of the Types that Appear Within Submessages or Built-in Topic Data
  * 
  * @author mcr70
- * @see 9.3.2 Mapping of the Types that Appear Within Submessages or Built-in Topic Data
  */
 public class Time_t {
 	public static final int LENGTH = 8;

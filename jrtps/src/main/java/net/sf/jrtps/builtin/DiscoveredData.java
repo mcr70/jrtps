@@ -41,7 +41,8 @@ public class DiscoveredData {
 	/**
 	 * Get the type name that is associated with this DiscovereData.
 	 * Topic name is formed from the PID_TYPE_NAME parameter
-	 * @return
+	 * 
+	 * @return typeName
 	 */
 	public String getTypeName() {
 		return typeName;
@@ -50,7 +51,8 @@ public class DiscoveredData {
 	/**
 	 * Get the topic name that is associated with this DiscovereData.
 	 * Topic name is formed from the PID_TOPIC_NAME parameter
-	 * @return
+	 * 
+	 * @return topicName
 	 */
 	public String getTopicName() {
 		return topicName;
@@ -60,7 +62,7 @@ public class DiscoveredData {
 	 * Gets the GUID_t of the entity represented by this DiscoveredData.
 	 * GUID_t is formed from the PID_KEY_HASH parameter.
 	 * 
-	 * @return
+	 * @return key as GUID_t
 	 */
 	public GUID_t getKey() {
 		return key;

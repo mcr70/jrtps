@@ -8,10 +8,12 @@ import net.sf.jrtps.types.SequenceNumber_t;
 /**
  * This Submessage is sent from an RTPS Writer to an RTPS Reader and indicates to the RTPS Reader 
  * that a range of sequence numbers is no longer relevant. The set may be a contiguous range of 
- * sequence numbers or a specific set of sequence numbers.
+ * sequence numbers or a specific set of sequence numbers.<p>
+ * 
+ * see 8.3.7.4 Gap, 9.4.5.5 Gap Submessage
  * 
  * @author mcr70
- * @see 8.3.7.4 Gap, 9.4.5.5 Gap Submessage
+ * 
  */
 public class Gap extends SubMessage {
 	public static final int KIND = 0x08;

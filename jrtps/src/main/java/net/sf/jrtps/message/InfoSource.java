@@ -8,8 +8,10 @@ import net.sf.jrtps.types.VendorId_t;
 /**
  * This message modifies the logical source of the Submessages that follow.
  * 
+ * see 9.4.5.10 InfoSource Submessage, 8.3.7.9 InfoSource
+ * 
  * @author mcr70
- * @see 9.4.5.10 InfoSource Submessage, 8.3.7.9 InfoSource
+ * 
  */
 public class InfoSource extends SubMessage {
 	public static final int KIND = 0x0c;
