@@ -12,7 +12,7 @@ import net.sf.jrtps.types.Time_t;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BuiltinReaderDataListener implements DataListener<ReaderData> {
+class BuiltinReaderDataListener implements DataListener<ReaderData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
 
 	private final RTPSParticipant participant;

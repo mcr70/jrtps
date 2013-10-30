@@ -2,6 +2,14 @@ package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * UnknownSubMessage. If an unknown SubMessage is received, it is 
+ * wrapped in this class. Implementation does not known what to do with it,
+ * but rest of the SubMessages are processed.
+ * 
+ * @author mcr70
+ *
+ */
 public class UnknownSubMessage extends SubMessage {
 	private byte[] bytes;
 	
