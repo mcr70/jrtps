@@ -25,6 +25,16 @@ import net.sf.jrtps.types.Locator_t;
 public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
+	public boolean hasKey() {
+		return true;
+	}
+
+	@Override
+	public byte[] extractKey(ParticipantData data) {
+		return data.getGuid().getBytes();
+	}
+
+	@Override
 	public ParticipantData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
 		ParticipantData pd = new ParticipantData(plEnc.getParameterList());

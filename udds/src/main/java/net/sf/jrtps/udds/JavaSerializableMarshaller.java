@@ -12,6 +12,16 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 class JavaSerializableMarshaller extends Marshaller<Object> {
 
 	@Override
+	public boolean hasKey() {
+		return false;
+	}
+
+	@Override
+	public byte[] extractKey(Object data) {
+		return null;
+	}
+
+	@Override
 	public Object unmarshall(DataEncapsulation dEnc) throws IOException {
 		CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;		
 		RTPSByteBuffer bb = cdrEnc.getBuffer();
