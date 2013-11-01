@@ -109,8 +109,7 @@ public class ParticipantData {
 			Locator_t m_ucLocator, Locator_t m_mcLocator) {
 		guidPrefix = prefix;
 		availableBuiltinEndpoints = endpoints;
-
-		// TODO: So far, we have only one locator in list.		
+		
 		if (u_ucLocator != null) { 
 			unicastLocator = u_ucLocator;
 		}
@@ -252,8 +251,6 @@ public class ParticipantData {
 		allLocators.add(unicastLocator);
 		allLocators.add(metatrafficMulticastLocator);
 		allLocators.add(metatrafficUnicastLocator); 
-		
-		// TODO: SEDPbuiltinPublicationReader sends to getAllLocators()
 		
 		return allLocators;
 	}
