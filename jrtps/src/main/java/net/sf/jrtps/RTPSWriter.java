@@ -19,12 +19,10 @@ import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
-import net.sf.jrtps.transport.UDPWriter;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
 import net.sf.jrtps.types.Time_t;
 
 import org.slf4j.Logger;
@@ -148,7 +146,7 @@ public class RTPSWriter extends Endpoint {
 	 * @see #sendHeartbeat()
 	 */
 	public void createChange(ChangeKind kind, Object obj) {
-		writer_cache.createChange(kind, obj); // TODO: enable kind. Currently buffer overflow occurs. Alignment bug?	
+		writer_cache.createChange(kind, obj);	
 	}
 
 	public void createChange(Object obj) {
@@ -156,7 +154,6 @@ public class RTPSWriter extends Endpoint {
 	}
 
 	public void close() {
-		// TODO: This is not working at the moment
 		if (barrier != null) {
 			try {
 				barrier.await(15, TimeUnit.SECONDS);
@@ -203,7 +200,14 @@ public class RTPSWriter extends Endpoint {
 	}
 
 
-	
+	/**
+	 * Send data to given participant & reader. readersHighestSeqNum specifies
+	 * Which is the first data to be sent.
+	 * 
+	 * @param senderPrefix
+	 * @param readerId
+	 * @param readersHighestSeqNum
+	 */
 	void sendData(GuidPrefix_t senderPrefix, EntityId_t readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();

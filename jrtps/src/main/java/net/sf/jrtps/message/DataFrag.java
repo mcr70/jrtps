@@ -107,7 +107,7 @@ public class DataFrag extends SubMessage {
 		int unknownOctets = octetsToInlineQos - bytesRead;
 		
 		for (int i = 0; i < unknownOctets; i++) {
-			System.out.println("SKIP");
+			//System.out.println("SKIP");
 			bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3 octetsToInlineQos
 		}
 		
