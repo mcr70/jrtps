@@ -193,48 +193,18 @@ public class RTPSWriter extends Endpoint {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
 		if (writer_cache.size() > 0) {
-			sendData(senderPrefix, ackNack);
+			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
 		}
 		else { // Send HB / GAP to reader so that it knows our state
 			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
-				sendHeartbeat(senderPrefix, ackNack);
+				sendHeartbeat(senderPrefix, ackNack.getReaderId());
 			}
 		}
 	}
 
-	
-	void sendHistoryCache(Locator_t locator, EntityId_t readerId) { // TODO: Can we get rid of this.
-		//if (true) return;
-
-		Message m = new Message(getGuid().prefix);
-		List<CacheChange> changes = writer_cache.getChanges();
-
-		for (CacheChange cc : changes) {
-			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
-			try {
-				Data data = createData(readerId, cc);
-				m.addSubMessage(data);
-			}
-			catch(IOException ioe) {
-				log.warn("Failed to add cache change to message", ioe);
-			}
-		}
-
-		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
-
-		try {
-			UDPWriter u = new UDPWriter(locator);
-			u.sendMessage(m);
-			u.close();
-		}
-		catch(IOException ioe) {
-			log.warn("Failed to send HistoryCache: {}", ioe);
-		}
-	}
 
 	
-	
-	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	void sendData(GuidPrefix_t senderPrefix, EntityId_t readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 		long lastSeqNum = 0;
@@ -244,7 +214,8 @@ public class RTPSWriter extends Endpoint {
 		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
-				if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+				//if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+				if (lastSeqNum >= readersHighestSeqNum) {
 					long timeStamp = cc.getTimeStamp();
 					if (timeStamp > prevTimeStamp) {
 						InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
@@ -258,7 +229,7 @@ public class RTPSWriter extends Endpoint {
 					}
 					
 					log.trace("Marshalling {}", cc.getData());
-					Data data = createData(ackNack.getReaderId(), cc);
+					Data data = createData(readerId, cc);
 					m.addSubMessage(data);
 				}
 			}
@@ -270,13 +241,13 @@ public class RTPSWriter extends Endpoint {
 		log.debug("[{}] Sending Data: {}-{}", getGuid().entityId, firstSeqNum, lastSeqNum);
 		boolean overFlowed = sendMessage(m, senderPrefix); 
 		if (overFlowed) {
-			sendHeartbeat(senderPrefix, ackNack);
+			sendHeartbeat(senderPrefix, readerId);
 		}
 	}
 
-	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
 		Message m = new Message(getGuid().prefix);
-		Heartbeat hb = createHeartbeat(ackNack.getReaderId());
+		Heartbeat hb = createHeartbeat(readerId);
 		m.addSubMessage(hb);
 
 		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
