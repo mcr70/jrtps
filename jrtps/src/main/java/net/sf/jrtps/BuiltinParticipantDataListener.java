@@ -65,12 +65,10 @@ class BuiltinParticipantDataListener implements DataListener<ParticipantData> {
 	private void handleBuiltinEnpointSet(int builtinEndpoints, Locator_t locator) {
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
 		if (eps.hasPublicationDetector()) {
-			//RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
 			RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 			pw.sendHistoryCache(locator, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
 		}
 		if (eps.hasSubscriptionDetector()) {
-			//RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
 			RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 			pw.sendHistoryCache(locator, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 		}

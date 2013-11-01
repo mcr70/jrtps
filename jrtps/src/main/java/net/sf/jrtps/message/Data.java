@@ -248,15 +248,6 @@ public class Data extends SubMessage {
 	public DataEncapsulation getDataEncapsulation() {
 		return dataEncapsulation;
 	}
-	
-	public String toString() {
-		StringBuffer sb = new StringBuffer(super.toString());
-		sb.append(", readerId: " + getReaderId());
-		sb.append(", writerId: " + getWriterId());
-		sb.append(", writerSN: " + writerSN);
-		
-		return sb.toString();
-	}
 
 	/**
 	 * Get the StatusInfo inline QoS parameter if it is present. If inline Qos
@@ -265,10 +256,30 @@ public class Data extends SubMessage {
 	 * @return StatusInfo
 	 */
 	public StatusInfo getStatusInfo() {
+		StatusInfo sInfo = null;
 		if (inlineQosFlag()) {
-			return (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
+			sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
 		}
 		
-		return new StatusInfo(); // return empty StatusInfo (WRITE)
+		if (sInfo == null) {
+			sInfo = new StatusInfo(); // return empty StatusInfo (WRITE)
+		}
+		
+		return sInfo;
 	}
+	
+	
+	public String toString() {
+		StringBuffer sb = new StringBuffer(super.toString());
+		sb.append(", readerId: ").append(getReaderId());
+		sb.append(", writerId: ").append(getWriterId());
+		sb.append(", writerSN: ").append(writerSN);
+		
+		if (inlineQosFlag()) {
+			sb.append(", inline QoS: ").append(inlineQosParams);
+		}
+		
+		return sb.toString();
+	}
+	
 }

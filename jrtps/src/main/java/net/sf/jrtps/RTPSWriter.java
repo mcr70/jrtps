@@ -1,6 +1,8 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
@@ -14,6 +16,7 @@ import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.transport.UDPWriter;
@@ -35,7 +38,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
-
+	private MessageDigest md5 = null;
+	
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
 	private Thread resendThread;
 	private boolean running;
@@ -60,6 +64,14 @@ public class RTPSWriter extends Endpoint {
 
 		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		this.marshaller = marshaller;
+		
+		try {
+			this.md5 = MessageDigest.getInstance("MD5");
+		} 
+		catch (NoSuchAlgorithmException e) {
+			// Just warn. Actual usage might not even need it.
+			log.warn("There is no MD5 algorithm available", e);
+		}
 	}
 
 
@@ -121,35 +133,6 @@ public class RTPSWriter extends Endpoint {
 	 */
 	int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
-	}
-
-	void sendHistoryCache(Locator_t locator, EntityId_t readerId) { // TODO: Can we get rid of this.
-		//if (true) return;
-
-		Message m = new Message(getGuid().prefix);
-		List<CacheChange> changes = writer_cache.getChanges();
-
-		for (CacheChange cc : changes) {
-			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
-			try {
-				Data data = createData(readerId, cc);
-				m.addSubMessage(data);
-			}
-			catch(IOException ioe) {
-				log.warn("Failed to add cache change to message", ioe);
-			}
-		}
-
-		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
-
-		try {
-			UDPWriter u = new UDPWriter(locator);
-			u.sendMessage(m);
-			u.close();
-		}
-		catch(IOException ioe) {
-			log.warn("Failed to send HistoryCache: {}", ioe);
-		}
 	}
 
 	/**
@@ -219,6 +202,38 @@ public class RTPSWriter extends Endpoint {
 		}
 	}
 
+	
+	void sendHistoryCache(Locator_t locator, EntityId_t readerId) { // TODO: Can we get rid of this.
+		//if (true) return;
+
+		Message m = new Message(getGuid().prefix);
+		List<CacheChange> changes = writer_cache.getChanges();
+
+		for (CacheChange cc : changes) {
+			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
+			try {
+				Data data = createData(readerId, cc);
+				m.addSubMessage(data);
+			}
+			catch(IOException ioe) {
+				log.warn("Failed to add cache change to message", ioe);
+			}
+		}
+
+		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
+
+		try {
+			UDPWriter u = new UDPWriter(locator);
+			u.sendMessage(m);
+			u.close();
+		}
+		catch(IOException ioe) {
+			log.warn("Failed to send HistoryCache: {}", ioe);
+		}
+	}
+
+	
+	
 	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
@@ -304,12 +319,28 @@ public class RTPSWriter extends Endpoint {
 	
 	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
+		ParameterList inlineQos = new ParameterList();
 		
-		//System.out.println("************* " + cc.getKind());
+		if (marshaller.hasKey()) { // Add KeyHash if present
+			byte[] key = marshaller.extractKey(cc.getData());
+			if (key == null) {
+				key = new byte[0];
+			}
+			
+			byte[] bytes = null;
+			if (key.length < 16) {
+				
+				bytes = new byte[16];
+				System.arraycopy(key, 0, bytes, 0, key.length);
+			}
+			else {
+				bytes = md5.digest(key);
+			}
+			
+			inlineQos.add(new KeyHash(bytes));
+		}
 		
-		ParameterList inlineQos = null;
-		if (!cc.getKind().equals(ChangeKind.WRITE)) {
-			inlineQos = new ParameterList();
+		if (!cc.getKind().equals(ChangeKind.WRITE)) { // Add status info for operations other than WRITE
 			inlineQos.add(new StatusInfo(cc.getKind()));
 		}
 		
