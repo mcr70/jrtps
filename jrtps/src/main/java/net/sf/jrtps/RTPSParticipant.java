@@ -159,9 +159,14 @@ public class RTPSParticipant {
 	}
 
 
-
+	/**
+	 * Starts this Participant. All the configured endpoints are initialized.
+	 * 
+	 * @throws SocketException
+	 */
 	public void start() throws SocketException {
-
+		// TODO: We should have endpoints for TCP, InMemory, What else? encrypted?, signed? 
+		// UDP is required by the specification. 
 		receivers.add(new UDPReceiver(meta_mcLoc, this));
 		receivers.add(new UDPReceiver(meta_ucLoc, this));
 		receivers.add(new UDPReceiver(mcLoc, this));			
