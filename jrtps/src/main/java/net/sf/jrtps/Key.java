@@ -25,8 +25,26 @@ public @interface Key {
 	 * Indexing for the starts from 0, and it is an error to provide gaps between indices. <p>
 	 * 
 	 * For example, it is correct to provide indices 0,1,2 with this annotation, but 
-	 * incorrect to provide indices 0,2,3, or 2,3,4 (starts from 0)
-	 *  
+	 * incorrect to provide indices 0,2,3, or 2,3,4 (starts from 0) <p>
+	 * 
+	 * A default index is set to 0, which allows RTPS(DDS) types to be annotated with 
+	 * a simple Key annotation:
+	 * <pre>
+	 * public class HelloMessage {
+	 *    private @Key int id;
+	 *    private String message;
+	 * }
+	 * </pre>
+	 * 
+	 * An example with multiple Key elements:
+	 * <pre>
+	 * public class HelloMessage {
+	 *    private @Key(index=0) int id;
+	 *    private @Key(index=1) long foreignId;
+	 *    private String message;
+	 * }
+	 * </pre>
+	 * 
 	 * @return index of the key
 	 */
 	int index() default 0;
