@@ -54,7 +54,7 @@ class BuiltinReaderDataListener implements DataListener<ReaderData> {
 		if (key.entityId.isUserDefinedEntity() && writer != null) {  
 			ParticipantData pd = discoveredParticipants.get(key.prefix);
 			if (pd != null) {
-				writer.sendHistoryCache(pd.getUnicastLocator(), key.entityId);
+				writer.sendData(key.prefix, key.entityId, 0L);
 			}
 			else {
 				log.warn("Participant was not found: {}", key.prefix);
