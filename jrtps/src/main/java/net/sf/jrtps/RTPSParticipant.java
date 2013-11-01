@@ -209,7 +209,11 @@ public class RTPSParticipant {
 		myKey[1] = (byte) (myIdx >> 8 & 0xff);
 		myKey[2] = (byte) (myIdx >> 16 & 0xff);
 		
-		int kind = 0x02; // User defined writer, with key
+		int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
+		if (!marshaller.hasKey()) {
+			kind = 0x03; // User defined writer, no key
+		}
+		
 		return createWriter(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
 	}
 
@@ -264,7 +268,11 @@ public class RTPSParticipant {
 		myKey[1] = (byte) (myIdx >> 8 & 0xff);
 		myKey[2] = (byte) (myIdx >> 16 & 0xff);
 		
-		int kind = 0x07; // User defined reader, with key
+		int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
+		if (!marshaller.hasKey()) {
+			kind = 0x04; // User defined reader, no key
+		}
+		
 		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
 	}
 
