@@ -1,8 +1,0 @@
-$Currently, this looks silly(@RTPSWriter):
-		if (marshaller.hasKey()) { 			# Marhallers do not have keys!!, types have!
-	- What would this mean to udds? jrtps?
-		- udds.registerMarshaller(..)?
-		- udds.registerKeyHandler(..)?
-		- udds.setDefault(..)
-		- jrtps.Marshaller.registerSomething(..)
-		- marshaller.getType().hasKey()?
