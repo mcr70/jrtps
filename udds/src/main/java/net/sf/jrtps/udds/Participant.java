@@ -62,18 +62,19 @@ public class Participant {
 			throw new IllegalArgumentException(c.getName() + " must implement java.io.Serializable" );
 		}
 		
-		return createDataReader(c.getSimpleName(), c.getName());
+		return createDataReader(c.getSimpleName(), c, c.getName());
 	} 
 
 	/**
 	 * Create DataReader with given topicName and typeName.
 	 * 
 	 * @param topicName name of the topic
+	 * @param type type of the DataReader
 	 * @param typeName name of the type
 	 * @return a DataReader<T>
 	 */
-	public <T> DataReader<T> createDataReader(String topicName, String typeName) {
-		RTPSReader rtps_reader = rtps_participant.createReader(topicName, typeName, marshaller);
+	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName) {
+		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, marshaller);
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
 		return new DataReader<T>(topicName, rtps_reader);
@@ -89,18 +90,19 @@ public class Participant {
 	 * @return a DataWriter<T>
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> c) {
-		return createDataWriter(c.getSimpleName(), c.getName());
+		return createDataWriter(c.getSimpleName(), c, c.getName());
 	} 
 
 	/**
 	 * Create DataWriter with given topicName and typeName.
 	 * 
 	 * @param topicName name of the topic
+	 * @param type type of the DataWriter
 	 * @param typeName name of the type
 	 * @return a DataWriter<T>
 	 */
-	public <T> DataWriter<T> createDataWriter(String topicName, String typeName) {
-		RTPSWriter rtps_writer = rtps_participant.createWriter(topicName, typeName, marshaller);
+	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName) {
+		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, marshaller);
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
 		return new DataWriter<T>(topicName, rtps_writer);
