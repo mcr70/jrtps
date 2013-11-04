@@ -1,7 +1,9 @@
 package net.sf.jrtps.udds;
 
 import java.net.SocketException;
+import java.util.HashMap;
 
+import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
@@ -19,8 +21,10 @@ import org.slf4j.LoggerFactory;
 public class Participant {
 	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
 	
+	private Marshaller<?> defaultMarshaller;
+	private final HashMap<String, Marshaller<?>> marshallers = new HashMap<>();
 	private final RTPSParticipant rtps_participant;
-	private final JavaSerializableMarshaller marshaller;
+	
 
 	/**
 	 * Create a Participant with domainId 0 and participantId 0.
@@ -42,7 +46,7 @@ public class Participant {
 	 * @throws SocketException
 	 */
 	public Participant(int domainId, int participantId) throws SocketException {
-		marshaller = new JavaSerializableMarshaller();
+		defaultMarshaller = new JavaSerializableMarshaller();
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 		
 		rtps_participant = new RTPSParticipant(domainId, participantId);
@@ -58,10 +62,6 @@ public class Participant {
 	 * @return a DataReader<T>
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> c) {
-		if (!java.io.Serializable.class.isAssignableFrom(c)) {
-			throw new IllegalArgumentException(c.getName() + " must implement java.io.Serializable" );
-		}
-		
 		return createDataReader(c.getSimpleName(), c, c.getName());
 	} 
 
@@ -74,13 +74,13 @@ public class Participant {
 	 * @return a DataReader<T>
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName) {
-		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, marshaller);
+		Marshaller<?> m = getMarshaller(typeName);
+		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m);
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
 		return new DataReader<T>(topicName, rtps_reader);
 	} 
 
-	
 	/**
 	 * Creates a new DataWriter of given type. DataWriter is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
@@ -102,16 +102,50 @@ public class Participant {
 	 * @return a DataWriter<T>
 	 */
 	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName) {
-		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, marshaller);
+		Marshaller<?> m = getMarshaller(typeName);
+		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m);
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
 		return new DataWriter<T>(topicName, rtps_writer);
 	}
 
+	
+	/**
+	 * Sets the default Marshaller. Default marshaller is used if no other Marshaller 
+	 * could not be used.
+	 * d
+	 * @param m
+	 */
+	public void setDefaultMarshaller(Marshaller<?> m) {
+		defaultMarshaller = m;
+	}
+	
+	/**
+	 * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is
+	 * preferred over default Marshaller.
+	 * 
+	 * @param typeName
+	 * @param m
+	 */
+	public void setMarshaller(String typeName, Marshaller<?> m) {
+		marshallers.put(typeName, m);
+	}
+	
+	
 	/**
 	 * Close this participant.
 	 */
 	public void close() {
 		rtps_participant.close();
 	} 
+
+	
+	private Marshaller<?> getMarshaller(String typeName) {
+		Marshaller<?> m = marshallers.get(typeName);
+		if (m == null) {
+			m = defaultMarshaller;
+		}
+		
+		return m;
+	}
 }
