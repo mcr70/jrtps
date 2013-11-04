@@ -449,27 +449,6 @@ public class RTPSParticipant {
 	}
 
 
-
-	public RTPSReader getMatchingReader(EntityId_t writerId) {
-		if (writerId.isBuiltinEntity()) { // We can find matching writer only for builtin stuff
-			if (writerId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-				return getReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
-			}
-			else if (writerId.equals(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER)) {
-				return getReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
-			}
-			else if (writerId.equals(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER)) {
-				return getReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
-			}
-			else if (writerId.equals(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER)) {
-				return getReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER);
-			}
-		}
-
-		return null;
-	}
-
-
 	/**
 	 * Close this RTPSParticipant. All the network listeners will be stopped 
 	 * and all the history caches of all entities will be cleared.
