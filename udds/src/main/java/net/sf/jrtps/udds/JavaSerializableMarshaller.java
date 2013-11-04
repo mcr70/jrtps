@@ -30,11 +30,36 @@ import org.slf4j.LoggerFactory;
  */
 public class JavaSerializableMarshaller extends Marshaller<Serializable> {
 	private static final Logger log = LoggerFactory.getLogger(JavaSerializableMarshaller.class);
+	private int bufferSize;
 
+	/**
+	 * Constructs this JavaSerializableMarshaller bufferSize 1024. This constructor is used 
+	 * by udds.
+	 */
+	public JavaSerializableMarshaller() {
+		this(1024);
+	}
+	
+	/**
+	 * Constructs this JavaSerializableMarshaller with given bufferSize.
+	 * bufferSize must be big enough to hold serialized object. 
+	 * @param bufferSize the size of the buffer that is used during marshall and unmarshall
+	 */
+	public JavaSerializableMarshaller(int bufferSize) {
+		this.bufferSize = bufferSize;
+	}
+
+	/**
+	 * Extracts key from given data. Object is searched for fields with annotation @Key.
+	 * These fields form a key of the data.
+	 * 
+	 * @param data
+	 * @return a key hash of the annotated field values.
+	 */
 	@Override
 	public byte[] extractKey(Serializable data) {
 		try {
-			ByteArrayOutputStream baos = new ByteArrayOutputStream(1024);
+			ByteArrayOutputStream baos = new ByteArrayOutputStream(bufferSize);
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
 
 			for (Field f : keyFields) {
@@ -52,6 +77,11 @@ public class JavaSerializableMarshaller extends Marshaller<Serializable> {
 		return null;
 	}
 
+	/**
+	 * Unmarshalls an object from DataEncapsulation.
+	 * @param dEnc
+	 * @return Serializable
+	 */
 	@Override
 	public Serializable unmarshall(DataEncapsulation dEnc) throws IOException {
 		CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;		
@@ -68,9 +98,15 @@ public class JavaSerializableMarshaller extends Marshaller<Serializable> {
 		return (Serializable) o;
 	}
 
+	/**
+	 * Marshalls a given Serializable Object into DataEncapsulation.
+	 * 
+	 * @param data Data to marshall
+	 * @return DataEncapsulation
+	 */
 	@Override
 	public DataEncapsulation marshall(Serializable data) throws IOException {
-		CDREncapsulation cdrEnc = new CDREncapsulation(1024); // TODO: hardcoded
+		CDREncapsulation cdrEnc = new CDREncapsulation(bufferSize);
 		RTPSByteBuffer bb = cdrEnc.getBuffer();
 
 		ObjectOutputStream os = new ObjectOutputStream(bb.getOutputStream());
