@@ -20,16 +20,27 @@ import net.sf.jrtps.types.Time_t;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RTPSMessageBroker {
+/**
+ * RTPSMessageBroker.
+ * 
+ * @author mcr70
+ *
+ */
+class RTPSMessageBroker {
 	private static final Logger log = LoggerFactory.getLogger(RTPSMessageBroker.class);
 
 	private final RTPSParticipant participant;
 
-	public RTPSMessageBroker(RTPSParticipant p) {
+	RTPSMessageBroker(RTPSParticipant p) {
 		this.participant = p;
 	}
 
-	public void handleMessage(Message msg) {
+	/**
+	 * Handles incoming Message. Each sub message is transferred to corresponding
+	 * reader.
+	 * @param msg
+	 */
+	void handleMessage(Message msg) {
 		Time_t timestamp = null;
 		GuidPrefix_t destGuidPrefix = GuidPrefix_t.GUIDPREFIX_UNKNOWN;
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
@@ -67,42 +78,35 @@ public class RTPSMessageBroker {
 	}
 
 	private void handleAckNack(GuidPrefix_t sourceGuidPrefix, AckNack ackNack) {
-		RTPSWriter writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
+		RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
 
 		if (writer != null) {
-			//log.debug("Got AckNack for {}", writer.getGuid().entityId);
 			writer.onAckNack(sourceGuidPrefix, ackNack);
 		}
 		else {
-			log.debug("No Writer to handle AckNack from {}", ackNack.getReaderId());
+			log.debug("No Writer({}) to handle AckNack from {}", ackNack.getWriterId(), ackNack.getReaderId());
 		}
 	}
 
 	private void handleData(GuidPrefix_t sourcePrefix, Time_t timestamp, Data data) throws IOException {
-		RTPSReader reader = participant.getReader(data.getReaderId(), data.getWriterId());
-//		if (data.getReaderId().equals(EntityId_t.UNKNOWN_ENTITY)) {
-//			reader = participant.getMatchingReader(data.getWriterId());
-//		}
-//		else {
-//			reader = participant.getReader(data.getReaderId());
-//		}
+		RTPSReader<?> reader = participant.getReader(data.getReaderId(), data.getWriterId());
 
 		if (reader != null) {
 			reader.onData(sourcePrefix, data, timestamp);
 		}
 		else {
-			log.debug("No Reader ({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
+			log.debug("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
 		}
 	}
 
 	private void handleHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {		
-		RTPSReader reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
+		RTPSReader<?> reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
 
 		if (reader != null) {
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {
-			log.debug("No Reader to handle Heartbeat from {}", hb.getWriterId());
+			log.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
 		}
 	}
 }
