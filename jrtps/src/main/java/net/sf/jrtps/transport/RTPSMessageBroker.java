@@ -14,7 +14,6 @@ import net.sf.jrtps.message.InfoSource;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
-import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GuidPrefix_t;
 import net.sf.jrtps.types.Time_t;
 
@@ -80,13 +79,13 @@ public class RTPSMessageBroker {
 	}
 
 	private void handleData(GuidPrefix_t sourcePrefix, Time_t timestamp, Data data) throws IOException {
-		RTPSReader reader = null;
-		if (data.getReaderId().equals(EntityId_t.UNKNOWN_ENTITY)) {
-			reader = participant.getMatchingReader(data.getWriterId());
-		}
-		else {
-			reader = participant.getReader(data.getReaderId());
-		}
+		RTPSReader reader = participant.getReader(data.getReaderId(), data.getWriterId());
+//		if (data.getReaderId().equals(EntityId_t.UNKNOWN_ENTITY)) {
+//			reader = participant.getMatchingReader(data.getWriterId());
+//		}
+//		else {
+//			reader = participant.getReader(data.getReaderId());
+//		}
 
 		if (reader != null) {
 			reader.onData(sourcePrefix, data, timestamp);
