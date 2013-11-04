@@ -6,6 +6,7 @@ import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.RTPSWriter;
 
 
+
 /**
  * This class represents a strongly typed DataWriter in spirit of DDS specification.
  * 
@@ -15,7 +16,7 @@ import net.sf.jrtps.RTPSWriter;
  * IDL compiler, or it may be more dynamically constructed Object that is used with uDDS.
  */
 public class DataWriter<T> extends Entity {
-	private RTPSWriter rtps_writer;
+	private RTPSWriter<T> rtps_writer;
 	
 	// TODO: Consider timestamp methods. At the moment they are left out. 
 	//       Why would anyone want to fake a timestamp. It could cause more trouble than useful stuff.
@@ -26,7 +27,7 @@ public class DataWriter<T> extends Entity {
 	 * 
 	 * @param topicName
 	 */
-	DataWriter(String topicName, RTPSWriter writer) {
+	DataWriter(String topicName, RTPSWriter<T> writer) {
 		super(topicName);
 		this.rtps_writer = writer;
 	}

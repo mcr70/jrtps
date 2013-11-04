@@ -25,8 +25,8 @@ import net.sf.jrtps.types.Locator_t;
 public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
-	public boolean hasKey() {
-		return true;
+	public boolean hasKey(Class<?> data) {
+		return true; // hardcoded. Key is remote participants GUID
 	}
 
 	@Override
