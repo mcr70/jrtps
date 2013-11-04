@@ -2,6 +2,12 @@ package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * A Header of the SubMessage.
+ * 
+ * @author mcr70
+ *
+ */
 public class SubMessageHeader {
 	/**
 	 * Default value for endianess in sub messages. extending classes should utilize this
@@ -27,6 +33,7 @@ public class SubMessageHeader {
 	 * Constructs this SubMessageHeader with given kind and flags.
 	 * Length of the SubMessage is set to 0. Length will be calculated during marshalling
 	 * of the Message.
+	 *
 	 * @param kind
 	 * @param flags
 	 */
@@ -45,13 +52,21 @@ public class SubMessageHeader {
 	}
 
 
-
+	/**
+	 * Writes this SubMessageHeader into RTPSByteBuffer
+	 * @param buffer
+	 */
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_octet(kind);
 		buffer.write_octet(flags);
 		buffer.write_short((short) submessageLength);
 	}
-
+	/**
+	 * Get the endianness for SubMessage. If endianness flag is set, big-endian is used 
+	 * by SubMessage, otherwise little-endian is used.
+	 * 
+	 * @return true, if endianness flag is set
+	 */
 	public boolean endianessFlag() {
 		return (flags & 0x1) == 0x1;
 	}
@@ -60,10 +75,18 @@ public class SubMessageHeader {
 		return !endianessFlag();
 	}
 	
+	/**
+	 * Get the length of the sub message.
+	 * @return length of the sub message
+	 */
 	public int getSubMessageLength() {
 		return submessageLength;
 	}
 
+	/**
+	 * Get the kind of SubMessage
+	 * @return kind
+	 */
 	public byte getSubMessageKind() {
 		return kind;
 	}
@@ -80,5 +103,4 @@ public class SubMessageHeader {
 		
 		return sb.toString();
 	}
-
 }

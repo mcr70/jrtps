@@ -1,6 +1,5 @@
 package net.sf.jrtps.builtin;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -29,9 +28,10 @@ import net.sf.jrtps.types.VendorId_t;
 import org.slf4j.LoggerFactory;
 
 /**
+ * see 8.5.3.2 SPDPdiscoveredParticipantData
  * 
  * @author mcr70
- * @see 8.5.3.2 SPDPdiscoveredParticipantData
+ * 
  */
 public class ParticipantData {
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
@@ -109,8 +109,7 @@ public class ParticipantData {
 			Locator_t m_ucLocator, Locator_t m_mcLocator) {
 		guidPrefix = prefix;
 		availableBuiltinEndpoints = endpoints;
-
-		// TODO: So far, we have only one locator in list.		
+		
 		if (u_ucLocator != null) { 
 			unicastLocator = u_ucLocator;
 		}
@@ -130,8 +129,7 @@ public class ParticipantData {
 	 * positioned to start of serializedData of Data submessage, aligned at 32 bit
 	 * boundary.
 	 * 
-	 * @param is
-	 * @throws IOException
+	 * @param parameterList
 	 */
 	public ParticipantData(ParameterList parameterList) {
 		Iterator<Parameter> iterator = parameterList.getParameters().iterator();
@@ -253,8 +251,6 @@ public class ParticipantData {
 		allLocators.add(unicastLocator);
 		allLocators.add(metatrafficMulticastLocator);
 		allLocators.add(metatrafficUnicastLocator); 
-		
-		// TODO: SEDPbuiltinPublicationReader sends to getAllLocators()
 		
 		return allLocators;
 	}

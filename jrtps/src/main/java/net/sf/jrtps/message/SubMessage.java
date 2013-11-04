@@ -1,12 +1,22 @@
 package net.sf.jrtps.message;
 
-import java.io.IOException;
-
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * An abstract Base class for known sub-messages.
+ *  
+ * @author mcr70
+ *
+ */
 public abstract class SubMessage {
 	
 	protected final SubMessageHeader header;
+
+	/**
+	 * Different kinds of SubMessages
+	 * @author mcr70
+	 *
+	 */
 	public enum Kind {
 		PAD, ACKNACK, HEARTBEAT, GAP, INFOTIMESTAMP, INFOSOURCE, INFOREPLYIP4,
 		INFODESTINATION, INFOREPLY, NACKFRAG, HEARTBEATFRAG, DATA, DATAFRAG, UNKNOWN
@@ -46,12 +56,11 @@ public abstract class SubMessage {
 	}
 	
 	/**
-	 * Writes this SubMessage into given ByteBuffer.
+	 * Writes this SubMessage into given RTPSByteBuffer.
 	 * 
-	 * @param os
-	 * @throws IOException 
+	 * @param bb
 	 */
-	public abstract void writeTo(RTPSByteBuffer buffer);
+	public abstract void writeTo(RTPSByteBuffer bb);
 	
 
 	public String toString() {

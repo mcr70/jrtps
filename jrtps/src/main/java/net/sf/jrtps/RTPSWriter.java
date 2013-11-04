@@ -1,6 +1,8 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CyclicBarrier;
@@ -14,14 +16,13 @@ import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
-import net.sf.jrtps.transport.UDPWriter;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
 import net.sf.jrtps.types.Time_t;
 
 import org.slf4j.Logger;
@@ -35,7 +36,8 @@ import org.slf4j.LoggerFactory;
  */
 public class RTPSWriter extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
-
+	private MessageDigest md5 = null;
+	
 	private HashSet<ReaderData> matchedReaders = new HashSet<>();
 	private Thread resendThread;
 	private boolean running;
@@ -60,6 +62,14 @@ public class RTPSWriter extends Endpoint {
 
 		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		this.marshaller = marshaller;
+		
+		try {
+			this.md5 = MessageDigest.getInstance("MD5");
+		} 
+		catch (NoSuchAlgorithmException e) {
+			// Just warn. Actual usage might not even need it.
+			log.warn("There is no MD5 algorithm available", e);
+		}
 	}
 
 
@@ -123,35 +133,6 @@ public class RTPSWriter extends Endpoint {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
-	void sendHistoryCache(Locator_t locator, EntityId_t readerId) { // TODO: Can we get rid of this.
-		//if (true) return;
-
-		Message m = new Message(getGuid().prefix);
-		List<CacheChange> changes = writer_cache.getChanges();
-
-		for (CacheChange cc : changes) {
-			log.trace("[{}] Marshalling {}", getGuid().entityId, cc.getData());
-			try {
-				Data data = createData(readerId, cc);
-				m.addSubMessage(data);
-			}
-			catch(IOException ioe) {
-				log.warn("Failed to add cache change to message", ioe);
-			}
-		}
-
-		log.debug("[{}] Sending history cache to {}: {}", getGuid().entityId, locator, m);
-
-		try {
-			UDPWriter u = new UDPWriter(locator);
-			u.sendMessage(m);
-			u.close();
-		}
-		catch(IOException ioe) {
-			log.warn("Failed to send HistoryCache: {}", ioe);
-		}
-	}
-
 	/**
 	 * Creates a new cache change to history cache. Note, that matched readers are not notified automatically
 	 * of changes in history cache. Use sendHeartbeat() method to notify remote readers of changes in history cache.
@@ -160,11 +141,12 @@ public class RTPSWriter extends Endpoint {
 	 * As a side effect, Message sent as a response to readers AckNack message can (and will) contain 
 	 * multiple Data submessages in one UDP packet.
 	 * 
+	 * @param kind
 	 * @param obj
-	 * @see sendHeartbeat()
+	 * @see #sendHeartbeat()
 	 */
 	public void createChange(ChangeKind kind, Object obj) {
-		writer_cache.createChange(kind, obj); // TODO: enable kind. Currently buffer overflow occurs. Alignment bug?	
+		writer_cache.createChange(kind, obj);	
 	}
 
 	public void createChange(Object obj) {
@@ -172,7 +154,6 @@ public class RTPSWriter extends Endpoint {
 	}
 
 	public void close() {
-		// TODO: This is not working at the moment
 		if (barrier != null) {
 			try {
 				barrier.await(15, TimeUnit.SECONDS);
@@ -209,16 +190,25 @@ public class RTPSWriter extends Endpoint {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
 		if (writer_cache.size() > 0) {
-			sendData(senderPrefix, ackNack);
+			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
 		}
 		else { // Send HB / GAP to reader so that it knows our state
 			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
-				sendHeartbeat(senderPrefix, ackNack);
+				sendHeartbeat(senderPrefix, ackNack.getReaderId());
 			}
 		}
 	}
 
-	private void sendData(GuidPrefix_t senderPrefix, AckNack ackNack) {
+
+	/**
+	 * Send data to given participant & reader. readersHighestSeqNum specifies
+	 * Which is the first data to be sent.
+	 * 
+	 * @param senderPrefix
+	 * @param readerId
+	 * @param readersHighestSeqNum
+	 */
+	void sendData(GuidPrefix_t senderPrefix, EntityId_t readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 		long lastSeqNum = 0;
@@ -228,7 +218,8 @@ public class RTPSWriter extends Endpoint {
 		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
-				if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+				//if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+				if (lastSeqNum >= readersHighestSeqNum) {
 					long timeStamp = cc.getTimeStamp();
 					if (timeStamp > prevTimeStamp) {
 						InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
@@ -242,7 +233,7 @@ public class RTPSWriter extends Endpoint {
 					}
 					
 					log.trace("Marshalling {}", cc.getData());
-					Data data = createData(ackNack.getReaderId(), cc);
+					Data data = createData(readerId, cc);
 					m.addSubMessage(data);
 				}
 			}
@@ -254,13 +245,13 @@ public class RTPSWriter extends Endpoint {
 		log.debug("[{}] Sending Data: {}-{}", getGuid().entityId, firstSeqNum, lastSeqNum);
 		boolean overFlowed = sendMessage(m, senderPrefix); 
 		if (overFlowed) {
-			sendHeartbeat(senderPrefix, ackNack);
+			sendHeartbeat(senderPrefix, readerId);
 		}
 	}
 
-	private void sendHeartbeat(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
 		Message m = new Message(getGuid().prefix);
-		Heartbeat hb = createHeartbeat(ackNack.getReaderId());
+		Heartbeat hb = createHeartbeat(readerId);
 		m.addSubMessage(hb);
 
 		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
@@ -303,12 +294,28 @@ public class RTPSWriter extends Endpoint {
 	
 	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
+		ParameterList inlineQos = new ParameterList();
 		
-		//System.out.println("************* " + cc.getKind());
+		if (marshaller.hasKey()) { // Add KeyHash if present
+			byte[] key = marshaller.extractKey(cc.getData());
+			if (key == null) {
+				key = new byte[0];
+			}
+			
+			byte[] bytes = null;
+			if (key.length < 16) {
+				
+				bytes = new byte[16];
+				System.arraycopy(key, 0, bytes, 0, key.length);
+			}
+			else {
+				bytes = md5.digest(key);
+			}
+			
+			inlineQos.add(new KeyHash(bytes));
+		}
 		
-		ParameterList inlineQos = null;
-		if (!cc.getKind().equals(ChangeKind.WRITE)) {
-			inlineQos = new ParameterList();
+		if (!cc.getKind().equals(ChangeKind.WRITE)) { // Add status info for operations other than WRITE
 			inlineQos.add(new StatusInfo(cc.getKind()));
 		}
 		

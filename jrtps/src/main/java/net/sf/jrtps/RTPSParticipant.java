@@ -159,9 +159,14 @@ public class RTPSParticipant {
 	}
 
 
-
+	/**
+	 * Starts this Participant. All the configured endpoints are initialized.
+	 * 
+	 * @throws SocketException
+	 */
 	public void start() throws SocketException {
-
+		// TODO: We should have endpoints for TCP, InMemory, What else? encrypted?, signed? 
+		// UDP is required by the specification. 
 		receivers.add(new UDPReceiver(meta_mcLoc, this));
 		receivers.add(new UDPReceiver(meta_ucLoc, this));
 		receivers.add(new UDPReceiver(mcLoc, this));			
@@ -186,9 +191,9 @@ public class RTPSParticipant {
 	 * 
 	 * @param c
 	 * @param marshaller
-	 * @return
-	 * @see java.lang.Class.getSimpleName()
-	 * @see java.lang.Class.getName()
+	 * @return RTPSWriter
+	 * @see java.lang.Class#getSimpleName()
+	 * @see java.lang.Class#getName()
 	 */
 	public RTPSWriter createWriter(Class<?> c, Marshaller<?> marshaller) {
 		return createWriter(c.getSimpleName(), c.getName(), marshaller);
@@ -200,7 +205,7 @@ public class RTPSParticipant {
 	 * @param topicName
 	 * @param typeName
 	 * @param marshaller
-	 * @return
+	 * @return RTPSWriter
 	 */
 	public RTPSWriter createWriter(String topicName, String typeName, Marshaller<?> marshaller) {
 		int myIdx = userEntityIdx++;
@@ -209,7 +214,11 @@ public class RTPSParticipant {
 		myKey[1] = (byte) (myIdx >> 8 & 0xff);
 		myKey[2] = (byte) (myIdx >> 16 & 0xff);
 		
-		int kind = 0x02; // User defined writer, with key
+		int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
+		if (!marshaller.hasKey()) {
+			kind = 0x03; // User defined writer, no key
+		}
+		
 		return createWriter(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
 	}
 
@@ -218,8 +227,9 @@ public class RTPSParticipant {
 	 * 
 	 * @param eId
 	 * @param topicName
+	 * @param typeName
 	 * @param marshaller
-	 * @return
+	 * @return RTPSWriter
 	 */
 	private RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
 		RTPSWriter writer = new RTPSWriter(guid.prefix, eId, topicName, marshaller);
@@ -240,9 +250,9 @@ public class RTPSParticipant {
 	 * 
 	 * @param c
 	 * @param marshaller
-	 * @return
-	 * @see java.lang.Class.getSimpleName()
-	 * @see java.lang.Class.getName()
+	 * @return RTPSReader
+	 * @see java.lang.Class#getSimpleName()
+	 * @see java.lang.Class#getName()
 	 */
 	public RTPSReader createReader(Class<?> c, Marshaller<?> marshaller) {
 		return createReader(c.getSimpleName(), c.getName(), marshaller);
@@ -254,7 +264,7 @@ public class RTPSParticipant {
 	 * @param topicName
 	 * @param typeName
 	 * @param marshaller
-	 * @return
+	 * @return RTPSReader
 	 */
 	public RTPSReader createReader(String topicName, String typeName, Marshaller<?> marshaller) {
 		int myIdx = userEntityIdx++;
@@ -263,7 +273,11 @@ public class RTPSParticipant {
 		myKey[1] = (byte) (myIdx >> 8 & 0xff);
 		myKey[2] = (byte) (myIdx >> 16 & 0xff);
 		
-		int kind = 0x07; // User defined reader, with key
+		int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
+		if (!marshaller.hasKey()) {
+			kind = 0x04; // User defined reader, no key
+		}
+		
 		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
 	}
 
@@ -275,7 +289,7 @@ public class RTPSParticipant {
 	 * @param topicName
 	 * @param typeName
 	 * @param marshaller
-	 * @return
+	 * @return RTPSReader
 	 */
 	private RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
 		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
@@ -318,7 +332,7 @@ public class RTPSParticipant {
 	/**
 	 * Finds a Reader with given entity id.
 	 * @param readerId
-	 * @return 
+	 * @return RTPSReader
 	 */
 	public RTPSReader getReader(EntityId_t readerId) {
 		for (RTPSReader reader : readerEndpoints) {
@@ -337,7 +351,7 @@ public class RTPSParticipant {
 	 * 
 	 * @param readerId
 	 * @param writerId
-	 * @return
+	 * @return RTPSReader
 	 */
 	public RTPSReader getReader(EntityId_t readerId, EntityId_t writerId) {
 		if (readerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(readerId)) {
@@ -369,7 +383,7 @@ public class RTPSParticipant {
 	/**
 	 * Finds a Writer with given entity id.
 	 * @param writerId
-	 * @return 
+	 * @return RTPSWriter
 	 */
 	public RTPSWriter getWriter(EntityId_t writerId) {
 		for (RTPSWriter writer : writerEndpoints) {

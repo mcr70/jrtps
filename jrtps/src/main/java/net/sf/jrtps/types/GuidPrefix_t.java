@@ -11,10 +11,10 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * <p>
  * This implementation has chosen to use prefix: domainId, participantId, 0, 0, 0xcafebabe
  * <p>
+ * see 8.2.4.2 The GUIDs of RTPS Participants<br>
+ * see 9.3.1.1 Mapping of the GuidPrefix_t
  * 
  * @author mcr70
- * @see 8.2.4.2 The GUIDs of RTPS Participants
- * @see 9.3.1.1 Mapping of the GuidPrefix_t
  */
 public class GuidPrefix_t {
 	public static final int LENGTH = 12;

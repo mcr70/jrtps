@@ -14,9 +14,24 @@ import net.sf.jrtps.message.data.DataEncapsulation;
  */
 public abstract class Marshaller<T> {
 	/**
+	 * Determines whether or not a key is associated with type T. 
+	 * @return true, if type T has a key
+	 */
+	public abstract boolean hasKey();
+
+	/**
+	 * Extracts a key from given object. If null is returned, it is assumed to be the same as 
+	 * a byte array of length 0. 
+	 * 
+	 * @param data
+	 * @return key
+	 */
+	public abstract byte[] extractKey(T data);
+
+	/**
 	 * Unmarshalls given DataEncapsulation to Object.
 	 * @param dEnc
-	 * @return
+	 * @return An instance of type T
 	 * @throws IOException 
 	 */
 	public abstract T unmarshall(DataEncapsulation dEnc) throws IOException;
@@ -24,7 +39,7 @@ public abstract class Marshaller<T> {
 	/**
 	 * Marshalls given Object to DataEncapsulation
 	 * @param data 
-	 * @return
+	 * @return DataEncapsulation
 	 * @throws IOException 
 	 */
 	public abstract DataEncapsulation marshall(T data) throws IOException;

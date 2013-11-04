@@ -4,9 +4,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
 /**
- * 
+ * see 8.7.9 Key Hash, 9.6.3.3
  * @author mcr70
- * @see 8.7.9 Key Hash, 9.6.3.3
+ * 
  */
 public class KeyHash extends Parameter {
 
@@ -27,7 +27,7 @@ public class KeyHash extends Parameter {
 	
 	/**
 	 * Get the key hash. Key hash is always of length 16;
-	 * @return
+	 * @return Key hash as byte array
 	 */
 	public byte[] getKeyHash() {
 		return getBytes();

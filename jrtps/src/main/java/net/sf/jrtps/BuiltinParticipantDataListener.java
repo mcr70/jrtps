@@ -46,10 +46,10 @@ class BuiltinParticipantDataListener implements DataListener<ParticipantData> {
 		
 				// First, make sure remote participant knows about us.
 				RTPSWriter pw = participant.getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
-				pw.sendHistoryCache(pd.getMetatrafficUnicastLocator(), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
+				pw.sendData(pd.getGuidPrefix(), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 0L);
 		
 				// Then, announce our builtin endpoints
-				handleBuiltinEnpointSet(pd.getBuiltinEndpoints(), pd.getMetatrafficUnicastLocator());
+				handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
 			}
 		}
 	}
@@ -62,17 +62,15 @@ class BuiltinParticipantDataListener implements DataListener<ParticipantData> {
 	 * 
 	 * @param builtinEndpoints
 	 */
-	private void handleBuiltinEnpointSet(int builtinEndpoints, Locator_t locator) {
+	private void handleBuiltinEnpointSet(GuidPrefix_t prefix, int builtinEndpoints) {
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
 		if (eps.hasPublicationDetector()) {
-			//RTPSWriter pw = participant.getWriterForTopic("DCPSPublication");
 			RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
-			pw.sendHistoryCache(locator, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+			pw.sendData(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 0L);
 		}
 		if (eps.hasSubscriptionDetector()) {
-			//RTPSWriter pw = participant.getWriterForTopic("DCPSSubscription");
 			RTPSWriter pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
-			pw.sendHistoryCache(locator, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+			pw.sendData(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
 		}
 	}
 }

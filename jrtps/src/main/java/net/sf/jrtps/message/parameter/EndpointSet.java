@@ -69,7 +69,7 @@ public class EndpointSet extends Parameter {
 	/**
 	 * Get the bitmap of the supported endpoints contained in participant.
 	 * 
-	 * @return
+	 * @return bitmap of the supported endpoints
 	 */
 	public int getEndpointSet() {
 		return endpointSet;

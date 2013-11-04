@@ -1,6 +1,5 @@
 /**
- * Classes in this package are used with ParameterList encapsulation.
- * ParameterList encapsulation is used by SPDP and SEDP protocols to exchange 
- * data between participants.
+ * Classes in this package are used with ParameterList encapsulation during message exchange
+ * between participants.<p>
  */
 package net.sf.jrtps.message.parameter;

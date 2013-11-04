@@ -10,8 +10,10 @@ package net.sf.jrtps.message.parameter;
  * TOPIC_READER, TOPIC_WRITER<p>
  * Vendor specific extensions may be used to denote support for additional EDPs.
  * 
+ * see 8.5.4.3.
+ * 
  * @author mcr70
- * @see 8.5.4.3.
+ * 
  */
 public class BuiltinEndpointSet extends EndpointSet {
 	public BuiltinEndpointSet(int endpoints) {

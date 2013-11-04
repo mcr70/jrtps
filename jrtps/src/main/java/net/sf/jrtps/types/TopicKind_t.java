@@ -1,9 +1,10 @@
 package net.sf.jrtps.types;
 
 /**
+ * see 9.3.2 Mapping of the Types that Appear Within Submessages or Built-in Topic Data
  * 
  * @author mcr70
- * @see 9.3.2 Mapping of the Types that Appear Within Submessages or Built-in Topic Data
+ * 
  */
 public class TopicKind_t {
 	public static final TopicKind_t NO_KEY = new TopicKind_t(1);

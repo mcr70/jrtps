@@ -9,7 +9,24 @@ import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 
+/**
+ * Marshaller for builtin data for topic DCPSTopic.
+ * With jRTPS, instances of this topic is of type TopicData.
+ * 
+ * @author mcr70
+ *
+ */
 public class TopicDataMarshaller extends Marshaller<TopicData> {
+
+	@Override
+	public boolean hasKey() {
+		return true;
+	}
+
+	@Override
+	public byte[] extractKey(TopicData data) {
+		return data.getKey().getBytes();
+	}
 
 	@Override
 	public TopicData unmarshall(DataEncapsulation data) {
@@ -32,5 +49,4 @@ public class TopicDataMarshaller extends Marshaller<TopicData> {
 
 		return new ParameterListEncapsulation(payloadParams);
 	}
-
 }
