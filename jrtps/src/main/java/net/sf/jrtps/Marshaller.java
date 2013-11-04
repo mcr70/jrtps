@@ -2,6 +2,8 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 
 import net.sf.jrtps.message.data.DataEncapsulation;
@@ -25,7 +27,7 @@ public abstract class Marshaller<T> {
 	 *  
 	 * @return true, if type T has a key
 	 */
-	public boolean hasKey(Class<?> type) {
+	public boolean hasKey(final Class<?> type) {
 		if (keyFields == null) {
 			Field[] fields = type.getDeclaredFields();
 			LinkedList<Field> fieldList = new LinkedList<>();
@@ -35,7 +37,22 @@ public abstract class Marshaller<T> {
 					fieldList.add(f);
 				}
 			}
-
+			
+			// Sort fields according to @Key annotations index field
+			Collections.sort(fieldList, new Comparator<Field>() {
+				@Override
+				public int compare(Field f1, Field f2) {
+					Key key1 = f1.getAnnotation(Key.class);
+					Key key2 = f2.getAnnotation(Key.class);
+					
+					if (key1.index() == key2.index()) {
+						throw new RuntimeException(type + " has two Key annotations with same index: " + key1.index());
+					}
+					
+					return key1.index() - key2.index();
+				}
+			});
+			
 			keyFields = fieldList.toArray(new Field[0]);
 		}
 
