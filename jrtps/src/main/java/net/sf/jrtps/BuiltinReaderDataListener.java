@@ -12,7 +12,7 @@ import net.sf.jrtps.types.Time_t;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BuiltinReaderDataListener implements DataListener<ReaderData> {
+class BuiltinReaderDataListener implements DataListener<ReaderData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
 
 	private final RTPSParticipant participant;
@@ -54,7 +54,7 @@ public class BuiltinReaderDataListener implements DataListener<ReaderData> {
 		if (key.entityId.isUserDefinedEntity() && writer != null) {  
 			ParticipantData pd = discoveredParticipants.get(key.prefix);
 			if (pd != null) {
-				writer.sendHistoryCache(pd.getUnicastLocator(), key.entityId);
+				writer.sendData(key.prefix, key.entityId, 0L);
 			}
 			else {
 				log.warn("Participant was not found: {}", key.prefix);

@@ -75,4 +75,8 @@ public class ParameterList {
 		}
 		return null;
 	}
+	
+	public String toString() {
+		return params.toString();
+	}
 }

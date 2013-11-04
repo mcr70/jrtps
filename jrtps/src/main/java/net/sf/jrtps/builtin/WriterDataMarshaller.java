@@ -9,7 +9,25 @@ import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 
+/**
+ * Marshaller for builtin data for topic DCPSPublication.
+ * With jRTPS, instances of this topic is of type WriterData.
+ * 
+ * @author mcr70
+ *
+ */
 public class WriterDataMarshaller extends Marshaller<WriterData> {
+
+	@Override
+	public boolean hasKey() {
+		return true;
+	}
+
+	@Override
+	public byte[] extractKey(WriterData data) {
+		return data.getKey().getBytes();
+	}
+
 	@Override
 	public WriterData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;

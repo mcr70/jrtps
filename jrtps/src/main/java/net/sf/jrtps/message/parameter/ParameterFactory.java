@@ -9,10 +9,9 @@ public class ParameterFactory {
 	private static final Logger log = LoggerFactory.getLogger(ParameterFactory.class);
 	
 	/**
+	 * see 9.4.2.11 ParameterList
 	 * @param bb
-	 * @return
-	 * 
-	 * @see 9.4.2.11 ParameterList
+	 * @return Parameter
 	 */
 	@SuppressWarnings("deprecation")
 	public static Parameter readParameter(RTPSByteBuffer bb) {

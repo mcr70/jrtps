@@ -1,3 +1,9 @@
+0.2.1
+	- Added Key as a concept; Readers and Writers are created with kind WITH_KEY or NO_KEY.
+	  At RTPS level. If key is present, Data sub-message is marshalled accordingly. uDDS remains as NO_KEY.
+	- Fixed some class visibility issues
+	- Added some javadocs
+	
 0.2.0	
 	- Turned into multi module build; jrtps & udds separated.
 	  udds likely needs to be moved to another package. 

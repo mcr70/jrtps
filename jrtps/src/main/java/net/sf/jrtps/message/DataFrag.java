@@ -13,9 +13,10 @@ import net.sf.jrtps.types.SequenceNumber_t;
 
 
 /**
+ * see 8.3.7.3 DataFrag
  * 
  * @author mcr70
- * @see 8.3.7.3 DataFrag
+ * 
  */
 public class DataFrag extends SubMessage {
 	public static final int KIND = 0x16;
@@ -106,7 +107,7 @@ public class DataFrag extends SubMessage {
 		int unknownOctets = octetsToInlineQos - bytesRead;
 		
 		for (int i = 0; i < unknownOctets; i++) {
-			System.out.println("SKIP");
+			//System.out.println("SKIP");
 			bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3 octetsToInlineQos
 		}
 		

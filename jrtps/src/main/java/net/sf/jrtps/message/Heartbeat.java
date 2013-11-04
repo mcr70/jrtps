@@ -8,7 +8,9 @@ import net.sf.jrtps.types.SequenceNumber_t;
  * This message is sent from an RTPS Writer to an RTPS Reader to communicate 
  * the sequence numbers of changes that the Writer has available.
  * 
- * @see 8.3.7.5
+ * see 8.3.7.5
+ * 
+ * @author mcr70
  */
 public class Heartbeat extends SubMessage {
 	public static final int KIND = 0x07;
@@ -43,7 +45,7 @@ public class Heartbeat extends SubMessage {
 	 * is required to respond to the Heartbeat or if it is just an advisory heartbeat.
 	 * If finalFlag is set, Reader is not required to respond with AckNack.
 	 * 
-	 * @return
+	 * @return true if final flag is set
 	 */
 	public boolean finalFlag() {
 		return (header.flags & 0x2) != 0;
@@ -63,7 +65,7 @@ public class Heartbeat extends SubMessage {
 	 * Appears in the Submessage header flags. Indicates that the DDS DataWriter 
 	 * associated with the RTPS Writer of the message has manually asserted its LIVELINESS.
 	 * 
-	 * @return
+	 * @return true, if liveliness flag is set
 	 */
 	public boolean livelinessFlag() {
 		return (header.flags & 0x4) != 0;

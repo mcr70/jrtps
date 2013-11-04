@@ -1,0 +1,5 @@
+jrtps-0.2.1 
+	This release is provided as-is. In short, one can get started by using 
+	classes in net.sf.udds package, which is a minimalistic set of classes 
+	that can be used to start communicating over RTPS.
+	In this release, 'Key' is added at RTPS layer. 

@@ -8,8 +8,10 @@ import net.sf.jrtps.types.Time_t;
  * In order to implement the DDS_BY_SOURCE_TIMESTAMP_DESTINATIONORDER_QOS policy, implementations
  * must include an InfoTimestamp Submessage with every update from a Writer.
  * 
+ * see 8.3.7.9.6 InfoTimestamp
+ * 
  * @author mcr70
- * @see 8.3.7.9.6 InfoTimestamp
+ * 
  */
 public class InfoTimestamp extends SubMessage {
 	public static final int KIND = 0x09;

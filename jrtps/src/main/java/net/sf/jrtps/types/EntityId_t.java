@@ -5,12 +5,12 @@ import java.util.Arrays;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
- * 
- * @author mcr70
- * @see 9.3.1.2 Mapping of the EntityId_t
+ * see 9.3.1.2 Mapping of the EntityId_t
  * 
  * NOTE: this implementation ignores Deprecated EntityIds in version 2.1 of the Protocol
  * as specified in 9.3.1.4 
+ * 
+ * @author mcr70
  */
 public abstract class EntityId_t  {
 	public static final EntityId_t SPDP_BUILTIN_PARTICIPANT_WRITER = new SPDPbuiltinParticipantWriter();
@@ -55,7 +55,7 @@ public abstract class EntityId_t  {
 	
 	/**
 	 * Checks whether this entity is a builtin entity or not
-	 * @return
+	 * @return true, if this EntityId_t represents a builtin entity
 	 */
 	public boolean isBuiltinEntity() {
 		return (entityKind & 0xc0) == 0xc0; // @see 9.3.1.2 
@@ -63,7 +63,7 @@ public abstract class EntityId_t  {
 
 	/**
 	 * Checks whether this entity is an user defined entity or not
-	 * @return
+	 * @return true, if this EntityId_t represents a user defined entity
 	 */
 	public boolean isUserDefinedEntity() {
 		return (entityKind & 0xc0) == 0x00; // @see 9.3.1.2
@@ -71,7 +71,7 @@ public abstract class EntityId_t  {
 
 	/**
 	 * Checks whether this entity is an user defined entity or not
-	 * @return
+	 * @return true, if this EntityId_t represents a vendor specific entity
 	 */
 	public boolean isVendorSpecifiEntity() {
 		return (entityKind & 0xc0) == 0x40; // @see 9.3.1.2

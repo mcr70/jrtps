@@ -9,7 +9,24 @@ import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 
+/**
+ * Marshaller for builtin data for topic DCPSSubscription.
+ * With jRTPS, instances of this topic is of type ReaderData.
+ * 
+ * @author mcr70
+ *
+ */
 public class ReaderDataMarshaller extends Marshaller<ReaderData> {
+
+	@Override
+	public boolean hasKey() {
+		return true;
+	}
+
+	@Override
+	public byte[] extractKey(ReaderData data) {
+		return data.getKey().getBytes();
+	}
 
 	@Override
 	public ReaderData unmarshall(DataEncapsulation data) {
