@@ -195,19 +195,20 @@ public class RTPSParticipant {
 	 * @see java.lang.Class#getSimpleName()
 	 * @see java.lang.Class#getName()
 	 */
-	public RTPSWriter createWriter(Class<?> c, Marshaller<?> marshaller) {
-		return createWriter(c.getSimpleName(), c.getName(), marshaller);
+	public <T> RTPSWriter<T> createWriter(Class<T> c, Marshaller<?> marshaller) {
+		return createWriter(c.getSimpleName(), c, c.getName(), marshaller);
 	}
 	
 	/**
 	 * Creates an user defined entity with given topic and type names.
 	 * 
 	 * @param topicName
+	 * @param type
 	 * @param typeName
 	 * @param marshaller
 	 * @return RTPSWriter
 	 */
-	public RTPSWriter createWriter(String topicName, String typeName, Marshaller<?> marshaller) {
+	public <T>RTPSWriter<T> createWriter(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller) {
 		int myIdx = userEntityIdx++;
 		byte[] myKey = new byte[3];
 		myKey[0] = (byte) (myIdx & 0xff);
@@ -215,7 +216,7 @@ public class RTPSParticipant {
 		myKey[2] = (byte) (myIdx >> 16 & 0xff);
 		
 		int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
-		if (!marshaller.hasKey()) {
+		if (!marshaller.hasKey(type)) {
 			kind = 0x03; // User defined writer, no key
 		}
 		
@@ -231,13 +232,13 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return RTPSWriter
 	 */
-	private RTPSWriter createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
-		RTPSWriter writer = new RTPSWriter(guid.prefix, eId, topicName, marshaller);
+	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
+		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);
 
-		RTPSWriter pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
+		RTPSWriter<WriterData> pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		pw.createChange(wd);
 
@@ -254,19 +255,20 @@ public class RTPSParticipant {
 	 * @see java.lang.Class#getSimpleName()
 	 * @see java.lang.Class#getName()
 	 */
-	public RTPSReader createReader(Class<?> c, Marshaller<?> marshaller) {
-		return createReader(c.getSimpleName(), c.getName(), marshaller);
+	public <T> RTPSReader<T> createReader(Class<T> c, Marshaller<?> marshaller) {
+		return createReader(c.getSimpleName(), c, c.getName(), marshaller);
 	}
 	
 	/**
 	 * Creates an user defined entity with given topic and type names.
 	 * 
 	 * @param topicName
+	 * @param type
 	 * @param typeName
 	 * @param marshaller
 	 * @return RTPSReader
 	 */
-	public RTPSReader createReader(String topicName, String typeName, Marshaller<?> marshaller) {
+	public <T> RTPSReader<T> createReader(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller) {
 		int myIdx = userEntityIdx++;
 		byte[] myKey = new byte[3];
 		myKey[0] = (byte) (myIdx & 0xff);
@@ -274,7 +276,7 @@ public class RTPSParticipant {
 		myKey[2] = (byte) (myIdx >> 16 & 0xff);
 		
 		int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
-		if (!marshaller.hasKey()) {
+		if (!marshaller.hasKey(type)) {
 			kind = 0x04; // User defined reader, no key
 		}
 		
@@ -291,13 +293,13 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return RTPSReader
 	 */
-	private RTPSReader createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
-		RTPSReader reader = new RTPSReader(guid.prefix, eId, topicName, marshaller);
+	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
+		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
 		readerEndpoints.add(reader);
 
-		RTPSWriter sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
+		RTPSWriter<ReaderData> sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
 		sw.createChange(rd);
 
@@ -444,27 +446,6 @@ public class RTPSParticipant {
 		log.debug("{}", new BuiltinEndpointSet(eps));
 
 		return eps;
-	}
-
-
-
-	public RTPSReader getMatchingReader(EntityId_t writerId) {
-		if (writerId.isBuiltinEntity()) { // We can find matching writer only for builtin stuff
-			if (writerId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-				return getReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
-			}
-			else if (writerId.equals(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER)) {
-				return getReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
-			}
-			else if (writerId.equals(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER)) {
-				return getReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
-			}
-			else if (writerId.equals(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER)) {
-				return getReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER);
-			}
-		}
-
-		return null;
 	}
 
 

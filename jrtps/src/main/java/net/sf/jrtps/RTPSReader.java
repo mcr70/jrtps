@@ -11,8 +11,6 @@ import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.message.parameter.Parameter;
-import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
@@ -30,13 +28,13 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  * @see DataListener
  */
-public class RTPSReader extends Endpoint {
+public class RTPSReader<T> extends Endpoint {
 	private static final Logger logger = LoggerFactory.getLogger(RTPSReader.class);
 
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
 		
-	private List<DataListener<?>> listeners = new LinkedList<DataListener<?>>();
+	private List<DataListener<T>> listeners = new LinkedList<DataListener<T>>();
 	private int ackNackCount = 0;
 	private Marshaller<?> marshaller;
 
@@ -51,7 +49,7 @@ public class RTPSReader extends Endpoint {
 	 * 
 	 * @param listener DataListener to add.
 	 */
-	public void addListener(DataListener<?> listener) {
+	public void addListener(DataListener<T> listener) {
 		logger.debug("Adding DataListener {} for topic {}", listener, getTopicName());
 		listeners.add(listener);
 	}
@@ -61,7 +59,7 @@ public class RTPSReader extends Endpoint {
 	 * 
 	 * @param listener DataListener to remove
 	 */
-	public void removeListener(DataListener<?> listener) {
+	public void removeListener(DataListener<T> listener) {
 		logger.debug("Removing DataListener {} from topic {}", listener, getTopicName());
 		listeners.remove(listener);
 	}

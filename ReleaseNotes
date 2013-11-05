@@ -1,3 +1,10 @@
+0.2.2
+	- Improved generics
+	- @Key annotation is supported by JavaSerializationMarhaller, which is the default marshaller
+	  for udds. Keys are marshalled by serializing fields. This results in PID_KEY_HASH being
+	  always a MD5 checksum. 
+	- custom Marshallers can be registered to udds Participant
+	  
 0.2.1
 	- Added Key as a concept; Readers and Writers are created with kind WITH_KEY or NO_KEY.
 	  At RTPS level. If key is present, Data sub-message is marshalled accordingly. uDDS remains as NO_KEY.

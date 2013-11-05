@@ -19,8 +19,8 @@ import net.sf.jrtps.message.parameter.TypeName;
 public class WriterDataMarshaller extends Marshaller<WriterData> {
 
 	@Override
-	public boolean hasKey() {
-		return true;
+	public boolean hasKey(Class<?> data) {
+		return true; // Always true. Key is PID_KEY_HASH.
 	}
 
 	@Override

@@ -38,10 +38,10 @@ public @interface Key {
 	/**
 	 * Get the index of the key. RTPS(DDS) key may be composed of multiple fields.
 	 * This annotation method provides means to set those fields in a known order.
-	 * Indexing starts from 0, and it is an error to provide gaps between indices. <p>
+	 * Key fields are ordered according to their index.
+	 * <p>
 	 * 
-	 * For example, it is correct to provide indices 0,1,2 with this annotation, but 
-	 * incorrect to provide indices 0,2,3, or 2,3,4.<p>
+	 * It is an error to provide two fields with same index.
 	 * 
 	 * @return index of the key
 	 */
