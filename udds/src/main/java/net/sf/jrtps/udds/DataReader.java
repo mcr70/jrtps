@@ -5,6 +5,8 @@ import java.util.List;
 
 import net.sf.jrtps.RTPSReader;
 
+
+
 /**
  * This class represents a strongly typed DataReader in spirit of DDS specification.
  * 
@@ -15,13 +17,13 @@ import net.sf.jrtps.RTPSReader;
  */
 public class DataReader<T> extends Entity {
 	private List<DataListenerAdapter<T>> dataListeners = new LinkedList<>();
-	private RTPSReader rtps_reader;
+	private RTPSReader<T> rtps_reader;
 
 	/**
 	 * Package access. This class is only instantiated by Participant class.
 	 * @param topicName
 	 */
-	DataReader(String topicName, RTPSReader reader) {
+	DataReader(String topicName, RTPSReader<T> reader) {
 		super(topicName);
 		this.rtps_reader = reader;
 	}

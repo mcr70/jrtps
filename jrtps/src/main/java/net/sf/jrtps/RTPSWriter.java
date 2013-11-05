@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-public class RTPSWriter extends Endpoint {
+public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
 	
@@ -145,11 +145,11 @@ public class RTPSWriter extends Endpoint {
 	 * @param obj
 	 * @see #sendHeartbeat()
 	 */
-	public void createChange(ChangeKind kind, Object obj) {
+	public void createChange(ChangeKind kind, T obj) {
 		writer_cache.createChange(kind, obj);	
 	}
 
-	public void createChange(Object obj) {
+	public void createChange(T obj) {
 		createChange(ChangeKind.WRITE, obj);	
 	}
 
@@ -296,7 +296,7 @@ public class RTPSWriter extends Endpoint {
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
 		ParameterList inlineQos = new ParameterList();
 		
-		if (marshaller.hasKey()) { // Add KeyHash if present
+		if (marshaller.hasKey(cc.getData().getClass())) { // Add KeyHash if present
 			byte[] key = marshaller.extractKey(cc.getData());
 			if (key == null) {
 				key = new byte[0];
