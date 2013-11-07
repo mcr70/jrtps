@@ -1,7 +1,9 @@
 package net.sf.jrtps.transport;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
@@ -46,6 +48,8 @@ class RTPSMessageBroker {
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		List<SubMessage> subMessages = msg.getSubMessages();
 
+		Set<RTPSReader> dataReceivers = new HashSet<>();
+		
 		for (SubMessage subMsg : subMessages) {
 			switch (subMsg.getKind()) {
 			case ACKNACK:
@@ -53,7 +57,8 @@ class RTPSMessageBroker {
 				break;
 			case DATA:
 				try {
-					handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
+					RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
+					dataReceivers.add(r);
 				}
 				catch(IOException ioe) {
 					log.warn("Failed to handle data", ioe);
@@ -75,6 +80,10 @@ class RTPSMessageBroker {
 				log.warn("SubMessage not handled: {}", subMsg);
 			}
 		}
+		
+		for (RTPSReader<?> reader : dataReceivers) {
+			reader.releasePendingSamples();
+		}
 	}
 
 	private void handleAckNack(GuidPrefix_t sourceGuidPrefix, AckNack ackNack) {
@@ -88,15 +97,18 @@ class RTPSMessageBroker {
 		}
 	}
 
-	private void handleData(GuidPrefix_t sourcePrefix, Time_t timestamp, Data data) throws IOException {
+	private RTPSReader<?> handleData(GuidPrefix_t sourcePrefix, Time_t timestamp, Data data) throws IOException {
 		RTPSReader<?> reader = participant.getReader(data.getReaderId(), data.getWriterId());
 
 		if (reader != null) {
-			reader.onData(sourcePrefix, data, timestamp);
+			reader.createSample(sourcePrefix, data, timestamp);
+			return reader;
 		}
 		else {
 			log.debug("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
 		}
+		
+		return null;
 	}
 
 	private void handleHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {		

@@ -33,14 +33,18 @@ public class RTPSReader<T> extends Endpoint {
 
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
-		
-	private List<DataListener<T>> listeners = new LinkedList<DataListener<T>>();
+
+	private List<DataListener<T>> dataListeners = new LinkedList<DataListener<T>>();
+	private List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
+
 	private int ackNackCount = 0;
 	private Marshaller<?> marshaller;
 
+	private List<Sample<T>> pendingSamples = new LinkedList<>();
+
 	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller) {
 		super(prefix, entityId, topicName);
-		
+
 		this.marshaller = marshaller;
 	}
 
@@ -51,7 +55,17 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	public void addListener(DataListener<T> listener) {
 		logger.debug("Adding DataListener {} for topic {}", listener, getTopicName());
-		listeners.add(listener);
+		dataListeners.add(listener);
+	}
+
+	/**
+	 * Adds a SampleListener to this RTPSReader.
+	 * 
+	 * @param listener SampleListener to add.
+	 */
+	public void addListener(SampleListener<T> listener) {
+		logger.debug("Adding SampleListener {} for topic {}", listener, getTopicName());
+		sampleListeners.add(listener);
 	}
 
 	/**
@@ -61,9 +75,19 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	public void removeListener(DataListener<T> listener) {
 		logger.debug("Removing DataListener {} from topic {}", listener, getTopicName());
-		listeners.remove(listener);
+		dataListeners.remove(listener);
 	}
-	
+
+	/**
+	 * Removes a SampleListener from this RTPSReader.
+	 * 
+	 * @param listener SampleListener to remove
+	 */
+	public void removeListener(SampleListener<T> listener) {
+		logger.debug("Removing SampleListener {} from topic {}", listener, getTopicName());
+		sampleListeners.remove(listener);
+	}
+
 	/**
 	 * Handle incoming Data message.
 	 * 
@@ -73,18 +97,22 @@ public class RTPSReader<T> extends Endpoint {
 	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void onData(GuidPrefix_t sourcePrefix, Data data, Time_t timestamp) throws IOException {
+	public void createSample(GuidPrefix_t sourcePrefix, Data data, Time_t timestamp) throws IOException {
 
 		GUID_t writerGuid = new GUID_t(sourcePrefix, data.getWriterId()); 
 
 		WriterProxy wp = getWriterProxy(writerGuid);
-		
+
 		if (wp.acceptData(data.getWriterSequenceNumber())) {
 			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
 			logger.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
-			
-			for (DataListener dl : listeners) {
+
+			synchronized (pendingSamples) {
+				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
+			}
+
+			for (DataListener dl : dataListeners) {
 				dl.onData(obj, timestamp, data.getStatusInfo());
 			}
 		}
@@ -141,14 +169,14 @@ public class RTPSReader<T> extends Endpoint {
 
 		return an;
 	}
-	
+
 	private WriterProxy getWriterProxy(GUID_t writerGuid) {
 		WriterProxy wp = writerProxies.get(writerGuid);;
 		if (wp == null) {
 			wp = new WriterProxy(writerGuid);
 			writerProxies.put(writerGuid, wp);
 		}
-		
+
 		return wp;
 	}
 
@@ -170,5 +198,24 @@ public class RTPSReader<T> extends Endpoint {
 	}
 	void removeMatchedWriter(WriterData writerData) {
 		matchedWriters.remove(writerData);
+	}
+
+
+	/**
+	 * Releases pending samples.
+	 */
+	public void releasePendingSamples() {
+		LinkedList<Sample<T>> ll = new LinkedList<>();
+
+		synchronized(pendingSamples) {
+			ll.addAll(pendingSamples);
+			pendingSamples.clear();
+		}
+
+		if (ll.size() > 0) {
+			for (SampleListener<T> sl: sampleListeners) {
+				sl.onSamples(ll);
+			}
+		}
 	}
 }
