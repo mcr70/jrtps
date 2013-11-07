@@ -112,6 +112,8 @@ public class RTPSReader<T> extends Endpoint {
 				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
 			}
 
+			// This provides support for DataListener interface. 
+			// TODO: should we remove this and use just SampleListener.
 			for (DataListener dl : dataListeners) {
 				dl.onData(obj, timestamp, data.getStatusInfo());
 			}
