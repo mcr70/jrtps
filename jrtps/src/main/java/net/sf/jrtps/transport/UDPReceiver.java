@@ -8,7 +8,6 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.util.concurrent.Semaphore;
 
-import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.types.Locator_t;
 
@@ -29,15 +28,15 @@ public class UDPReceiver implements Runnable {
 
 	private final Semaphore initLock = new Semaphore(1);
 
-	private final RTPSMessageBroker broker;
+	private final MessageHandler handler;
 	private final Locator_t locator;
 
 	private boolean running = true;
 	DatagramSocket socket = null;
 
-	public UDPReceiver(Locator_t locator, RTPSParticipant p) throws SocketException {
+	public UDPReceiver(Locator_t locator, MessageHandler handler) throws SocketException {
 		this.locator = locator;
-		broker = new RTPSMessageBroker(p);
+		this.handler = handler;
 	}
 
 	public void run() {
@@ -82,7 +81,7 @@ public class UDPReceiver implements Runnable {
 				Message msg = new Message(new RTPSByteBuffer(msgBytes));
 
 				log.debug("Parsed RTPS message from {}: {}", locator, msg);
-				broker.handleMessage(msg);
+				handler.handleMessage(msg);
 			}
 			catch(SocketException se) {
 				// Ignore. If we are still running, try to receive again
