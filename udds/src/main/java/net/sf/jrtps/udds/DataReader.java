@@ -4,6 +4,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.RTPSReader;
+import net.sf.jrtps.Sample;
+import net.sf.jrtps.SampleListener;
 
 
 
@@ -53,11 +55,8 @@ public class DataReader<T> extends Entity {
 	 * 
 	 * @param listener a DataListener to add.
 	 */
-	public void addListener(DataListener<T> listener) {
-		DataListenerAdapter<T> dla = new DataListenerAdapter<>(listener);
-		rtps_reader.addListener(dla);
-		
-		dataListeners.add(dla);
+	public void addListener(SampleListener<T> listener) {
+		rtps_reader.addListener(listener);
 	}
 
 	/**
@@ -65,12 +64,7 @@ public class DataReader<T> extends Entity {
 	 * 
 	 * @param listener DataListener to remove
 	 */
-	public void removeListener(DataListener<T> listener) {
-		for (DataListenerAdapter<T> dla : dataListeners) {
-			if (dla.udds_listener.equals(listener)) {
-				rtps_reader.removeListener(dla);
-				dataListeners.remove(dla);
-			}
-		}
+	public void removeListener(SampleListener<T> listener) {
+		rtps_reader.removeListener(listener);
 	}
 }

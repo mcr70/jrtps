@@ -7,7 +7,6 @@ import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
 import net.sf.jrtps.types.Time_t;
 
 import org.slf4j.Logger;

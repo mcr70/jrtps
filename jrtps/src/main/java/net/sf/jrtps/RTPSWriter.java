@@ -73,8 +73,15 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-
-	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
+	/**
+	 * Sets the period at which data gets resend to recipients
+	 * @param period
+	 * @param readerId
+	 */
+	void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
+		// TODO: This is used by SPDP to announce republish ParticipantData periodically.
+		//       Should this be removed from RTPSWriter? I think so.
+		//       SPDPClient?, SEDPClient?
 		resendDataPeriod = period;
 		barrier = new CyclicBarrier(2);
 
@@ -90,7 +97,7 @@ public class RTPSWriter<T> extends Endpoint {
 						try {
 							Message m = new Message(getGuid().prefix);
 
-							InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
+							InfoTimestamp iTime = new InfoTimestamp(new Time_t(System.currentTimeMillis()));
 							m.addSubMessage(iTime);
 
 							Data data = createData(readerId, cc);
@@ -186,7 +193,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param senderPrefix
 	 * @param ackNack
 	 */
-	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
 		if (writer_cache.size() > 0) {
@@ -270,8 +277,11 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	/**
-	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, remote readers 
-	 * know about Data samples available on this writer.
+	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, 
+	 * remote readers know about Data samples available on this writer.<p>
+	 * 
+	 * Heartbeat is not sent automatically. This provides means to create multiple changes,
+	 * before announcing the state to readers.
 	 * 
 	 */
 	public void sendHeartbeat() {		

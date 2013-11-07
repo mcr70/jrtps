@@ -45,4 +45,8 @@ public class Time_t {
 		return "Time_t[" + seconds + ":" + fraction + "], (" + 
 				String.format("0x%04x", seconds) + ":" + String.format("0x%04x", fraction) + ")";
 	}
+
+	public long timeMillis() {
+		return this.seconds * 1000 + fraction;
+	}
 }

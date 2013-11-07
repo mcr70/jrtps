@@ -1,3 +1,6 @@
+0.3.0
+	- RTPSReader produces Samples to SampleListener
+	
 0.2.2
 	- Improved generics
 	- @Key annotation is supported by JavaSerializationMarhaller, which is the default marshaller
