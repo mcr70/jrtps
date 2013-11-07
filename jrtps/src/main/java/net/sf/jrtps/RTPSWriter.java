@@ -73,8 +73,15 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-
-	public void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
+	/**
+	 * Sets the period at which data gets resend to recipients
+	 * @param period
+	 * @param readerId
+	 */
+	void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
+		// TODO: This is used by SPDP to announce republish ParticipantData periodically.
+		//       Should this be removed from RTPSWriter? I think so.
+		//       SPDPClient?, SEDPClient?
 		resendDataPeriod = period;
 		barrier = new CyclicBarrier(2);
 
@@ -90,7 +97,7 @@ public class RTPSWriter<T> extends Endpoint {
 						try {
 							Message m = new Message(getGuid().prefix);
 
-							InfoTimestamp iTime = new InfoTimestamp(new Time_t((int)System.currentTimeMillis(), (int)System.nanoTime()));
+							InfoTimestamp iTime = new InfoTimestamp(new Time_t(System.currentTimeMillis()));
 							m.addSubMessage(iTime);
 
 							Data data = createData(readerId, cc);
