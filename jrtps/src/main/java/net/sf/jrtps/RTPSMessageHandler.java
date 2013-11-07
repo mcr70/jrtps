@@ -1,13 +1,10 @@
-package net.sf.jrtps.transport;
+package net.sf.jrtps;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.jrtps.RTPSParticipant;
-import net.sf.jrtps.RTPSReader;
-import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
@@ -16,6 +13,7 @@ import net.sf.jrtps.message.InfoSource;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
+import net.sf.jrtps.transport.MessageHandler;
 import net.sf.jrtps.types.GuidPrefix_t;
 import net.sf.jrtps.types.Time_t;
 
@@ -23,17 +21,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSMessageBroker.
+ * RTPSMessageHandler.
  * 
  * @author mcr70
  *
  */
-class RTPSMessageBroker {
-	private static final Logger log = LoggerFactory.getLogger(RTPSMessageBroker.class);
+class RTPSMessageHandler implements MessageHandler {
+	private static final Logger log = LoggerFactory.getLogger(RTPSMessageHandler.class);
 
 	private final RTPSParticipant participant;
 
-	RTPSMessageBroker(RTPSParticipant p) {
+	RTPSMessageHandler(RTPSParticipant p) {
 		this.participant = p;
 	}
 
@@ -42,13 +40,16 @@ class RTPSMessageBroker {
 	 * reader.
 	 * @param msg
 	 */
-	void handleMessage(Message msg) {
+	public void handleMessage(Message msg) {
 		Time_t timestamp = null;
 		GuidPrefix_t destGuidPrefix = GuidPrefix_t.GUIDPREFIX_UNKNOWN;
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
+		
+		log.debug("Got Message from {}", sourceGuidPrefix);
+		
 		List<SubMessage> subMessages = msg.getSubMessages();
 
-		Set<RTPSReader> dataReceivers = new HashSet<>();
+		Set<RTPSReader<?>> dataReceivers = new HashSet<>();
 		
 		for (SubMessage subMsg : subMessages) {
 			switch (subMsg.getKind()) {
