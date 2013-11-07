@@ -186,7 +186,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param senderPrefix
 	 * @param ackNack
 	 */
-	public void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
 		if (writer_cache.size() > 0) {
@@ -270,8 +270,11 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	/**
-	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, remote readers 
-	 * know about Data samples available on this writer.
+	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, 
+	 * remote readers know about Data samples available on this writer.<p>
+	 * 
+	 * Heartbeat is not sent automatically. This provides means to create multiple changes,
+	 * before announcing the state to readers.
 	 * 
 	 */
 	public void sendHeartbeat() {		

@@ -97,7 +97,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public void createSample(GuidPrefix_t sourcePrefix, Data data, Time_t timestamp) throws IOException {
+	void createSample(GuidPrefix_t sourcePrefix, Data data, Time_t timestamp) throws IOException {
 
 		GUID_t writerGuid = new GUID_t(sourcePrefix, data.getWriterId()); 
 
@@ -128,7 +128,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param senderGuidPrefix
 	 * @param hb
 	 */
-	public void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
+	void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
 		logger.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 		boolean doSend = false;
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
@@ -204,7 +204,7 @@ public class RTPSReader<T> extends Endpoint {
 	/**
 	 * Releases pending samples.
 	 */
-	public void releasePendingSamples() {
+	void releasePendingSamples() {
 		LinkedList<Sample<T>> ll = new LinkedList<>();
 
 		synchronized(pendingSamples) {
