@@ -9,6 +9,7 @@
 
 	<artifactId>udds</artifactId>
 	<name>uDDS</name>
+	<!--  <packaging>bundle</packaging> -->
 	<description>A Minimalistic DDS like client library, that utilizes jRTPS for communication</description>
 
 	<dependencies>
