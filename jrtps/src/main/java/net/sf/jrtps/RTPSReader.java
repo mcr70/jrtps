@@ -207,6 +207,9 @@ public class RTPSReader<T> extends Endpoint {
 	 * Releases pending samples.
 	 */
 	void releasePendingSamples() {
+		// TODO: pending samples need to be handled differently.
+		//       Maybe have a flag that tells if there is more pending samples
+		//       at the end of the method.
 		LinkedList<Sample<T>> ll = new LinkedList<>();
 
 		synchronized(pendingSamples) {
