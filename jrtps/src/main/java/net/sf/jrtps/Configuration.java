@@ -1,6 +1,11 @@
 package net.sf.jrtps;
 
-import net.sf.jrtps.types.Duration_t;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Configuration for jRTPS.
@@ -12,22 +17,45 @@ import net.sf.jrtps.types.Duration_t;
  * @author mcr70
  * 
  */
-public class Configuration {
+class Configuration {
+	private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
 	// --- Writer configurations -------------
 	private boolean pushMode = true;	
-	private Duration_t heartbeatPeriod = new Duration_t(5, 0); // 5 sec, tunable
-	private Duration_t nackResponseDelay = new Duration_t(0, 200000000); // 200 ms
-	private Duration_t nackSuppressionDuration = new Duration_t(0, 0); // 0, tunable
-	
+	private long heartbeatPeriod = 5000;           // 5 sec
+	private long nackResponseDelay = 200;          // 200 ms
+	private long nackSuppressionDuration = 0;      // 0
+
 
 	// --- Reader configurations -------------
-	private Duration_t heartbeatSuppressionDuration = new Duration_t(0, 0);
-	private Duration_t heartbeatResponseDelay = new Duration_t(0, 500000000); // 500 ms
+	private long heartbeatSuppressionDuration = 0; // 0 ms
+	private long heartbeatResponseDelay = 500;     // 500 ms
 
-	public Configuration() {
+	private final Properties props;
+
+	Configuration() {
+		this("/jrtps.properties");
 	}
-		
+
+	Configuration(String resourceName) {
+		this.props = new Properties();
+
+		InputStream is = getClass().getResourceAsStream(resourceName);
+
+		if (is != null) {
+			try {
+				props.load(is);
+				log.debug("Configuration loaded: {}", props);
+			} 
+			catch (IOException e) {
+				log.warn("Failed to read configuration {}. Using defaults.", resourceName, e);
+			}
+		}
+		else {
+			log.warn("Failed to read configuration {}. Using defaults.", resourceName);
+		}
+	}
+
 	/**
 	 * Configures the mode in which the Writer operates. If pushMode==true, then the
 	 * Writer will push changes to the reader. If pushMode==false, changes will only be 
@@ -35,19 +63,19 @@ public class Configuration {
 	 * 
 	 * @return pushMode
 	 */	
-	public boolean pushMode() {
+	boolean pushMode() {
 		return pushMode;
 	}
-	
+
 	/**
 	 * Protocol tuning parameter that allows the RTPS Writer to repeatedly announce the
 	 * availability of data by sending a Heartbeat Message.
 	 * @return heartbeat period
 	 */
-	public Duration_t heartbeatPeriod() {
+	long heartbeatPeriod() {
 		return heartbeatPeriod;
 	}
-	
+
 	/**
 	 * Protocol tuning parameter that allows the RTPS Writer to delay
 	 * the response to a request for data from a negative acknowledgment.
@@ -55,10 +83,10 @@ public class Configuration {
 	 * See chapter 8.4.7.1.1 for default values 
 	 * @return Nack response delay
 	 */
-	public Duration_t nackResponseDelay() {
+	long nackResponseDelay() {
 		return nackResponseDelay;
 	}
-	
+
 	/**
 	 * Protocol tuning parameter that allows the RTPS Writer to ignore requests for data from
 	 * negative acknowledgments that arrive 'too soon' after the corresponding change is sent.
@@ -67,7 +95,7 @@ public class Configuration {
 	 * @return Nack supression duration
 	 * 
 	 */
-	public Duration_t nackSupressionDuration() {
+	long nackSupressionDuration() {
 		return nackSuppressionDuration;
 	}
 
@@ -75,7 +103,7 @@ public class Configuration {
 	 * Protocol tuning parameter that allows the RTPS Reader to ignore HEARTBEATs that
 	 * arrive 'too soon' after a previous HEARTBEAT was received.
 	 */
-	public Duration_t getHeartbeatSuppressionDuration() {
+	long getHeartbeatSuppressionDuration() {
 		return heartbeatSuppressionDuration;
 	}
 
@@ -84,7 +112,27 @@ public class Configuration {
 	 * positive or negative acknowledgment (seeSection 8.4.12.2)
 	 * @return heartbeat response delay
 	 */
-	public Duration_t getHeartbeatResponseDelay() {
+	long getHeartbeatResponseDelay() {
 		return heartbeatResponseDelay;
+	}
+
+	public int getBufferSize() {
+		return getIntProperty("jrtps.buffer-size", 16384);
+	}
+
+	// package access to ease unit tests
+	int getIntProperty(String key, int defltValue) {
+		String value = props.getProperty(key);
+		int i = defltValue;
+		if (value != null) {
+			try {
+				i = Integer.parseInt(value);
+			}
+			catch(NumberFormatException nfe) {
+				log.warn("Failed to convert value of {}: {} to integer", key, value);
+			}
+		}
+		
+		return i;
 	}
 }

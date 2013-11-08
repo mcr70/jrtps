@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 public class RTPSParticipant {
 	private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
+	private final Configuration config = new Configuration();
+	
 	private static final String BUILTIN_TOPICNAME_PARTICIPANT = "DCPSParticipant";
 	private static final String BUILTIN_TOPICNAME_PUBLICATION = "DCPSPublication";
 	private static final String BUILTIN_TOPICNAME_SUBSCRIPTION = "DCPSSubscription";
@@ -168,10 +170,10 @@ public class RTPSParticipant {
 		// TODO: We should have endpoints for TCP, InMemory, What else? encrypted?, signed? 
 		// UDP is required by the specification. 
 		// TODO: should we have just one RTPSMessageHandler
-		receivers.add(new UDPReceiver(meta_mcLoc, new RTPSMessageHandler(this)));
-		receivers.add(new UDPReceiver(meta_ucLoc, new RTPSMessageHandler(this)));
-		receivers.add(new UDPReceiver(mcLoc, new RTPSMessageHandler(this)));			
-		receivers.add(new UDPReceiver(ucLoc, new RTPSMessageHandler(this)));		
+		receivers.add(new UDPReceiver(meta_mcLoc, new RTPSMessageHandler(this), config.getBufferSize()));
+		receivers.add(new UDPReceiver(meta_ucLoc, new RTPSMessageHandler(this), config.getBufferSize()));
+		receivers.add(new UDPReceiver(mcLoc, new RTPSMessageHandler(this), config.getBufferSize()));			
+		receivers.add(new UDPReceiver(ucLoc, new RTPSMessageHandler(this), config.getBufferSize()));		
 
 		for (UDPReceiver receiver : receivers) {
 			threadPoolExecutor.execute(receiver);
@@ -234,7 +236,7 @@ public class RTPSParticipant {
 	 * @return RTPSWriter
 	 */
 	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
-		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller);
+		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);
@@ -295,7 +297,7 @@ public class RTPSParticipant {
 	 * @return RTPSReader
 	 */
 	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
-		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller);
+		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
 		readerEndpoints.add(reader);
