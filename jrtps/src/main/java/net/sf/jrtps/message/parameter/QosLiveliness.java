@@ -17,12 +17,7 @@ public class QosLiveliness extends Parameter implements QosPolicy {
 	private Duration_t lease_duration;
 
 	public enum Kind {
-		AUTOMATIC(0), MANUAL_BY_PARTICIPANT(1), MANUAL_BY_TOPIC(2), UNKNOWN_LIVELINESS_KIND(99);
-
-		private int __kind;
-		private Kind(int kind) {
-			__kind = kind;
-		}
+		AUTOMATIC, MANUAL_BY_PARTICIPANT, MANUAL_BY_TOPIC, UNKNOWN_LIVELINESS_KIND;
 	}
 
 	
@@ -58,14 +53,15 @@ public class QosLiveliness extends Parameter implements QosPolicy {
 	}
 
 	public String toString() {	
-		return super.toString() + "(" + getKind() + lease_duration + ")";
+		return super.toString() + "(" + getKind() + ", " + lease_duration + ")";
 	}
 
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		if (other instanceof QosLiveliness) {
 			QosLiveliness qOther = (QosLiveliness) other;
-			if (kind >= qOther.kind && lease_duration.asMillis() <= qOther.lease_duration.asMillis()) {
+			if ((kind >= qOther.kind) && 
+				(lease_duration.asMillis() <= qOther.lease_duration.asMillis())) {
 				return true;
 			}
 		}
