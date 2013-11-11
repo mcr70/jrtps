@@ -30,13 +30,15 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 				log.debug("Discovered a new writer {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
 			}
 
-			RTPSReader<?> r = participant.getReaderForTopic(writerData.getTopicName());
-			if (r != null) {
-				if (wdSample.isDisposed()) {
-					r.removeMatchedWriter(writerData);
-				}
-				else {
-					r.addMatchedWriter(writerData);
+			List<RTPSReader<?>> readers = participant.getReadersForTopic(writerData.getTopicName());
+			for (RTPSReader<?> r : readers) {
+				if (r != null) {
+					if (wdSample.isDisposed()) {
+						r.removeMatchedWriter(writerData);
+					}
+					else { // TODO: check compatible QoS
+						r.addMatchedWriter(writerData);
+					}
 				}
 			}
 		}

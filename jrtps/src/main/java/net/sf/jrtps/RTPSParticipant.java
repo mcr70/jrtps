@@ -241,7 +241,7 @@ public class RTPSParticipant {
 
 		writerEndpoints.add(writer);
 
-		RTPSWriter<WriterData> pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
+		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(BUILTIN_TOPICNAME_PUBLICATION).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		pw.createChange(wd);
 
@@ -302,7 +302,7 @@ public class RTPSParticipant {
 
 		readerEndpoints.add(reader);
 
-		RTPSWriter<ReaderData> sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
+		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION).get(0);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
 		sw.createChange(rd);
 
@@ -312,24 +312,26 @@ public class RTPSParticipant {
 
 
 
-	RTPSWriter getWriterForTopic(String topicName) {
-		for (RTPSWriter w : writerEndpoints) {
+	List<RTPSWriter<?>> getWritersForTopic(String topicName) {
+		List<RTPSWriter<?>> writers = new LinkedList<>();
+		for (RTPSWriter<?> w : writerEndpoints) {
 			if (w.getTopicName().equals(topicName)) {
-				return w;
+				writers.add(w);
 			}
 		}
 
-		return null;
+		return writers;
 	}
 
-	RTPSReader getReaderForTopic(String topicName) {
-		for (RTPSReader r : readerEndpoints) {
+	List<RTPSReader<?>> getReadersForTopic(String topicName) {
+		List<RTPSReader<?>> readers = new LinkedList<>();
+		for (RTPSReader<?> r : readerEndpoints) {
 			if (r.getTopicName().equals(topicName)) {
-				return r;
+				readers.add(r);
 			}
 		}
 
-		return null;
+		return readers;
 	}
 
 
