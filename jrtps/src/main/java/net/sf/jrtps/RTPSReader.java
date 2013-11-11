@@ -34,7 +34,6 @@ public class RTPSReader<T> extends Endpoint {
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
 
-	private List<DataListener<T>> dataListeners = new LinkedList<DataListener<T>>();
 	private List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
 
 	private int ackNackCount = 0;
@@ -48,15 +47,6 @@ public class RTPSReader<T> extends Endpoint {
 		this.marshaller = marshaller;
 	}
 
-	/**
-	 * Adds a DataListener to this RTPSReader.
-	 * 
-	 * @param listener DataListener to add.
-	 */
-	public void addListener(DataListener<T> listener) {
-		logger.debug("Adding DataListener {} for topic {}", listener, getTopicName());
-		dataListeners.add(listener);
-	}
 
 	/**
 	 * Adds a SampleListener to this RTPSReader.
@@ -66,16 +56,6 @@ public class RTPSReader<T> extends Endpoint {
 	public void addListener(SampleListener<T> listener) {
 		logger.debug("Adding SampleListener {} for topic {}", listener, getTopicName());
 		sampleListeners.add(listener);
-	}
-
-	/**
-	 * Removes a DataListener from this RTPSReader.
-	 * 
-	 * @param listener DataListener to remove
-	 */
-	public void removeListener(DataListener<T> listener) {
-		logger.debug("Removing DataListener {} from topic {}", listener, getTopicName());
-		dataListeners.remove(listener);
 	}
 
 	/**
@@ -110,12 +90,6 @@ public class RTPSReader<T> extends Endpoint {
 
 			synchronized (pendingSamples) {
 				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
-			}
-
-			// This provides support for DataListener interface. 
-			// TODO: should we remove this and use just SampleListener.
-			for (DataListener dl : dataListeners) {
-				dl.onData(obj, timestamp, data.getStatusInfo());
 			}
 		}
 		else {
