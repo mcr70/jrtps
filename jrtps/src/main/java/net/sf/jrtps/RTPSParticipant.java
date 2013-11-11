@@ -58,6 +58,7 @@ public class RTPSParticipant {
 	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants =  new HashMap<>();
 	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
 	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
+	@SuppressWarnings("unused")
 	private final HashMap<GUID_t, TopicData> discoveredTopics = new HashMap<>();
 	
 	/**
@@ -241,6 +242,7 @@ public class RTPSParticipant {
 
 		writerEndpoints.add(writer);
 
+		@SuppressWarnings("unchecked")
 		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(BUILTIN_TOPICNAME_PUBLICATION).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		pw.createChange(wd);
@@ -302,6 +304,7 @@ public class RTPSParticipant {
 
 		readerEndpoints.add(reader);
 
+		@SuppressWarnings("unchecked")
 		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION).get(0);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
 		sw.createChange(rd);
@@ -341,8 +344,8 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return RTPSReader
 	 */
-	private RTPSReader getReader(EntityId_t readerId) {
-		for (RTPSReader reader : readerEndpoints) {
+	private RTPSReader<?> getReader(EntityId_t readerId) {
+		for (RTPSReader<?> reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
 			}
@@ -360,7 +363,7 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSReader
 	 */
-	RTPSReader getReader(EntityId_t readerId, EntityId_t writerId) {
+	RTPSReader<?> getReader(EntityId_t readerId, EntityId_t writerId) {
 		if (readerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(readerId)) {
 			return getReader(readerId);
 		}
@@ -392,8 +395,8 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSWriter
 	 */
-	RTPSWriter getWriter(EntityId_t writerId) {
-		for (RTPSWriter writer : writerEndpoints) {
+	RTPSWriter<?> getWriter(EntityId_t writerId) {
+		for (RTPSWriter<?> writer : writerEndpoints) {
 			if (writer.getGuid().entityId.equals(writerId)) {
 				return writer;
 			}
@@ -403,7 +406,7 @@ public class RTPSParticipant {
 	}
 
 
-	RTPSWriter getWriter(EntityId_t writerId, EntityId_t readerId) {
+	RTPSWriter<?> getWriter(EntityId_t writerId, EntityId_t readerId) {
 		if (writerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(writerId)) {
 			return getWriter(writerId);
 		}
@@ -441,10 +444,10 @@ public class RTPSParticipant {
 
 	private int createEndpointSet() {
 		int eps = 0;
-		for (RTPSReader r : readerEndpoints) {
+		for (RTPSReader<?> r : readerEndpoints) {
 			eps |= r.endpointSetId();
 		}
-		for (RTPSWriter w : writerEndpoints) {
+		for (RTPSWriter<?> w : writerEndpoints) {
 			eps |= w.endpointSetId();
 		}
 
@@ -468,10 +471,10 @@ public class RTPSParticipant {
 		}
 
 		// Then entities
-		for (RTPSReader r : readerEndpoints) {
+		for (RTPSReader<?> r : readerEndpoints) {
 			r.close();
 		}
-		for (RTPSWriter w : writerEndpoints) {
+		for (RTPSWriter<?> w : writerEndpoints) {
 			w.close();
 		}
 	}
