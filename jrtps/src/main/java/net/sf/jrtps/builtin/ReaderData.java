@@ -5,7 +5,7 @@ import java.util.Iterator;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
-import net.sf.jrtps.message.parameter.QualityOfService;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.types.ContentFilterProperty_t;
@@ -53,8 +53,8 @@ public class ReaderData extends DiscoveredData {
 				break;
 				
 			default:
-				if (param instanceof QualityOfService) {
-					addQualityOfService((QualityOfService) param);
+				if (param instanceof QosPolicy) {
+					addQualityOfService((QosPolicy) param);
 				}
 				else {
 					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);

@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosHistory extends Parameter implements QualityOfService {
+public class QosHistory extends Parameter implements QosPolicy {
 	QosHistory() {
 		super(ParameterEnum.PID_HISTORY);
 	}
@@ -16,5 +16,10 @@ public class QosHistory extends Parameter implements QualityOfService {
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
 		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		return true; // Always true. TODO: check this
 	}
 }
