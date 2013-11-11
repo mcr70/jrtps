@@ -3,8 +3,16 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
-
-public class QosLiveliness extends Parameter implements QualityOfService {
+/**
+ * This policy controls the mechanism and parameters used by the Service to ensure that particular entities on the network
+ * are still “alive.”<p>
+ * 
+ * See DDS specification v1.2, 7.1.3.11 Liveliness
+ * 
+ * @author mcr70
+ *
+ */
+public class QosLiveliness extends Parameter implements QosPolicy {
 	private int kind;
 	private Duration_t lease_duration;
 
@@ -51,5 +59,16 @@ public class QosLiveliness extends Parameter implements QualityOfService {
 
 	public String toString() {	
 		return super.toString() + "(" + getKind() + lease_duration + ")";
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		if (other instanceof QosLiveliness) {
+			QosLiveliness qOther = (QosLiveliness) other;
+			if (kind >= qOther.kind && lease_duration.asMillis() <= qOther.lease_duration.asMillis()) {
+				return true;
+			}
+		}
+		return false;
 	}
 }

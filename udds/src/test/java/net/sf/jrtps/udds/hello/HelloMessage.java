@@ -20,4 +20,8 @@ public class HelloMessage implements Serializable {
 		this.userId = userId;
 		this.message = message;
 	}
+	
+	public String toString() {
+		return userId + ": " + message;
+	}
 }

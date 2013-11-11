@@ -3,7 +3,7 @@ package net.sf.jrtps.builtin;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.message.parameter.QualityOfService;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.Locator_t;
 
@@ -16,7 +16,7 @@ public class DiscoveredData {
 	// interpretation is, for builtin topics, key is 
 	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
 	protected GUID_t key;  
-	protected List<QualityOfService> qosList = new LinkedList<>();
+	protected List<QosPolicy> qosList = new LinkedList<>();
 	
 	/**
 	 * This constructor is used when DiscoveredData is being created from 
@@ -68,12 +68,12 @@ public class DiscoveredData {
 		return key;
 	}
 	
-	public void addQualityOfService(QualityOfService qos) {
+	public void addQualityOfService(QosPolicy qos) {
 		// TODO: reader, writer & topics have different set of QualityOfServices.
 		qosList.add(qos);
 	}
 	
-	public List<QualityOfService> getQualityOfServices() {
+	public List<QosPolicy> getQualityOfServices() {
 		return qosList;
 	}
 
