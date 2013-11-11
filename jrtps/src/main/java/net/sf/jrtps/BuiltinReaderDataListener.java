@@ -41,24 +41,25 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 				log.debug("Discovered a new reader {} for topic {}, type {}", key, readerData.getTopicName(), readerData.getTypeName());
 			}
 
-			RTPSWriter<?> writer = participant.getWriterForTopic(readerData.getTopicName());
-			if (writer != null) {
+			List<RTPSWriter<?>> writers = participant.getWritersForTopic(readerData.getTopicName());
+			for (RTPSWriter<?> w : writers) {
 				if (rdSample.isDisposed()) {
-					writer.removeMatchedReader(readerData);
+					w.removeMatchedReader(readerData);
 				}
-				else {
-					writer.addMatchedReader(readerData);
+				else { // TODO: check QoS compatibility
+					w.addMatchedReader(readerData);
 				}
-			}
 
-			// builtin entities are handled with SEDP in ParticipantData reception
-			if (key.entityId.isUserDefinedEntity() && writer != null) {  
-				ParticipantData pd = discoveredParticipants.get(key.prefix);
-				if (pd != null) {
-					writer.sendData(key.prefix, key.entityId, 0L);
-				}
-				else {
-					log.warn("Participant was not found: {}", key.prefix);
+				// builtin entities are handled with SEDP in ParticipantData reception
+				// TODO: user-defined entities should not be handled differently.
+				if (key.entityId.isUserDefinedEntity()) {  
+					ParticipantData pd = discoveredParticipants.get(key.prefix);
+					if (pd != null) {
+						w.sendData(key.prefix, key.entityId, 0L);
+					}
+					else {
+						log.warn("Participant was not found: {}", key.prefix);
+					}
 				}
 			}
 		}
