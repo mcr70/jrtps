@@ -26,12 +26,13 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 
 	@Override
 	public boolean hasKey(Class<?> data) {
-		return true; // hardcoded. Key is remote participants GUID
+		return false; // hardcoded. Key is remote participants GUID
 	}
 
 	@Override
 	public byte[] extractKey(ParticipantData data) {
-		return data.getGuid().getBytes();
+		return new byte[0];
+		//return data.getGuid().getBytes();
 	}
 
 	@Override
