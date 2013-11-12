@@ -13,6 +13,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class WriterData extends DiscoveredData {
+	public static final String BUILTIN_TOPIC_NAME = "DCPSPublication";
+	
 	private static final Logger log = LoggerFactory.getLogger(WriterData.class);
 	
 	public WriterData(ParameterList parameterList) {
@@ -31,11 +33,8 @@ public class WriterData extends DiscoveredData {
 				super.topicName = ((TopicName)param).getName(); break;
 			case PID_TYPE_NAME:
 				super.typeName = ((TypeName)param).getTypeName(); break;
-			case PID_KEY_HASH:
-				//super.keyHash = (KeyHash) param; 
-				super.key = new GUID_t(param.getBytes()); // TODO: We should store either GUID, or KeyHash only
-
-				break;
+			case PID_KEY_HASH: 
+				super.key = new GUID_t(param.getBytes()); break;
 			case PID_SENTINEL:
 				break;
 			case PID_PAD:
@@ -44,12 +43,16 @@ public class WriterData extends DiscoveredData {
 
 			default:
 				if (param instanceof QosPolicy) {
-					addQualityOfService((QosPolicy) param);
+					addQosPolicy((QosPolicy) param);
 				}
 				else {
 					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
 				}
 			}
+		}
+		
+		if (super.typeName == null) { // Other vendors may use different typeName
+			super.typeName = WriterData.class.getName();
 		}
 	}
 	

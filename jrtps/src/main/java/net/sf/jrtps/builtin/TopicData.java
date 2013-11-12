@@ -13,8 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TopicData extends DiscoveredData {
-	private static final Logger log = LoggerFactory.getLogger(TopicData.class);
+	public static final String BUILTIN_TOPIC_NAME = "DCPSTopic";
 	
+	private static final Logger log = LoggerFactory.getLogger(TopicData.class);
 
 	public TopicData(ParameterList paramterList) {
 		Iterator<Parameter> iter = paramterList.getParameters().iterator();
@@ -31,18 +32,20 @@ public class TopicData extends DiscoveredData {
 				break;
 			default:
 				if (param instanceof QosPolicy) {
-					addQualityOfService((QosPolicy) param);
+					addQosPolicy((QosPolicy) param);
 				}
 				else {
 					log.warn("Parameter {} not handled", param.getParameterId());
 				}
 			}
-
+		}
+		
+		if (super.typeName == null) { // Other vendors may use different typeName
+			super.typeName = TopicData.class.getName();
 		}
 	}
 
 	public TopicData(String typeName, String topicName, GUID_t key) {
 		super(typeName, topicName, key);
 	}
-
 }

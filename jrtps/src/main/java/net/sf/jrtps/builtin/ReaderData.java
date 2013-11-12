@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ReaderData extends DiscoveredData {
+	public static final String BUILTIN_TOPIC_NAME = "DCPSSubscription";
+	
 	private static final Logger log = LoggerFactory.getLogger(ReaderData.class);
 
 	private GUID_t participantGuid;
@@ -54,12 +56,16 @@ public class ReaderData extends DiscoveredData {
 				
 			default:
 				if (param instanceof QosPolicy) {
-					addQualityOfService((QosPolicy) param);
+					addQosPolicy((QosPolicy) param);
 				}
 				else {
 					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
 				}
 			}
+		}
+		
+		if (super.typeName == null) { // Other vendors may use different typeName
+			super.typeName = ReaderData.class.getName();
 		}
 	}
 

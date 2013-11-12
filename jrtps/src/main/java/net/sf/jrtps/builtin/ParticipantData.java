@@ -16,6 +16,7 @@ import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ParticipantManualLivelinessCount;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
+import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
@@ -33,7 +34,9 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  * 
  */
-public class ParticipantData {
+public class ParticipantData extends DiscoveredData {
+	public static final String BUILTIN_TOPIC_NAME = "DCPSParticipant";
+
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
 	
 	private ProtocolVersion_t protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
@@ -122,6 +125,9 @@ public class ParticipantData {
 		if (m_mcLocator != null) {
 			metatrafficMulticastLocator = m_mcLocator;
 		}
+		
+		super.topicName = BUILTIN_TOPIC_NAME;
+		super.typeName = ParticipantData.class.getName();
 	}
 	
 	/**
@@ -170,11 +176,18 @@ public class ParticipantData {
 			case PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT:
 				this.manualLivelinessCount = ((ParticipantManualLivelinessCount)param).getCount();
 				break;
+			case PID_TYPE_NAME:
+				super.typeName = ((TypeName)param).getTypeName();
+				break;
 			case PID_SENTINEL:
 				break;
 			default:
 				log.warn("Parameter {} not handled", param.getParameterId());
 			}
+		}
+		
+		if (super.typeName == null) { // Other vendors may use different typeName
+			super.typeName = ParticipantData.class.getName();
 		}
 	}
 
