@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QoSDurabilityService extends Parameter implements QosPolicy {
+public class QoSDurabilityService extends Parameter implements DataWriterPolicy, TopicPolicy {
 	QoSDurabilityService() {
 		super(ParameterEnum.PID_DURABILITY_SERVICE);
 	}

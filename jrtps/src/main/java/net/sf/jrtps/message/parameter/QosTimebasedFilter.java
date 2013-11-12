@@ -6,7 +6,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
 
-public class QosTimebasedFilter extends Parameter implements QosPolicy {
+public class QosTimebasedFilter extends Parameter implements DataReaderPolicy {
 	private Duration_t minimum_separation;
 
 	public QosTimebasedFilter(Duration_t minimum_separation) {
