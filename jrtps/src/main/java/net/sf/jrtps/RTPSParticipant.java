@@ -43,11 +43,6 @@ public class RTPSParticipant {
 
 	private final Configuration config = new Configuration();
 	
-	private static final String BUILTIN_TOPICNAME_PARTICIPANT = "DCPSParticipant";
-	private static final String BUILTIN_TOPICNAME_PUBLICATION = "DCPSPublication";
-	private static final String BUILTIN_TOPICNAME_SUBSCRIPTION = "DCPSSubscription";
-	private static final String BUILTIN_TOPICNAME_TOPIC = "DCPSTopic";
-
 	private int CORE_POOL_SIZE = 10; // TODO: configurable
 	private int MAX_POOL_SIZE = 2 * CORE_POOL_SIZE;
 
@@ -124,34 +119,34 @@ public class RTPSParticipant {
 
 		// ----  Create a Writers for SEDP  ---------
 		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
-				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
-				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(), rdm);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
 
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader<ParticipantData> partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
-				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm);
 		partReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader<WriterData> pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
-				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm);
 		pubReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 
 		RTPSReader<ReaderData> subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
-				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(),rdm);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(),rdm);
 		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
 		RTPSReader<TopicData> topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
-				BUILTIN_TOPICNAME_TOPIC, TopicData.class.getName(), tdm);
+				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm);
 		topicReader.addListener(new BuiltinTopicDataListener(this));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm);
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
@@ -243,7 +238,7 @@ public class RTPSParticipant {
 		writerEndpoints.add(writer);
 
 		@SuppressWarnings("unchecked")
-		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(BUILTIN_TOPICNAME_PUBLICATION).get(0);
+		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		pw.createChange(wd);
 
@@ -305,7 +300,7 @@ public class RTPSParticipant {
 		readerEndpoints.add(reader);
 
 		@SuppressWarnings("unchecked")
-		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION).get(0);
+		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
 		sw.createChange(rd);
 
