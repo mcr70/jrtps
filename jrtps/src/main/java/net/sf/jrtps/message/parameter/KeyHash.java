@@ -8,8 +8,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  * 
  */
-public class KeyHash extends Parameter {
-
+public class KeyHash extends Parameter implements InlineParameter {
 	KeyHash() {
 		super(ParameterEnum.PID_KEY_HASH);
 	}

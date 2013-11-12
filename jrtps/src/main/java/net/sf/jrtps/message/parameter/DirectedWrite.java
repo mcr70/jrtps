@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class DirectedWrite extends Parameter {
+public class DirectedWrite extends Parameter implements InlineParameter {
 	DirectedWrite() {
 		super(ParameterEnum.PID_DIRECTED_WRITE);
 	}
