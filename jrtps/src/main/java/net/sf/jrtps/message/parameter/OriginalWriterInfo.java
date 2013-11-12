@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class OriginalWriterInfo extends Parameter {
+public class OriginalWriterInfo extends Parameter implements InlineParameter {
 	OriginalWriterInfo() {
 		super(ParameterEnum.PID_ORIGINAL_WRITER_INFO);
 	}

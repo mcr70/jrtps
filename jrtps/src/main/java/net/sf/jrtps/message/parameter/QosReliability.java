@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
 
-public class QosReliability extends Parameter implements QosPolicy {
+public class QosReliability extends Parameter implements QosPolicy, InlineParameter {
 	private int kind;
 	private Duration_t max_blocking_time;
 	

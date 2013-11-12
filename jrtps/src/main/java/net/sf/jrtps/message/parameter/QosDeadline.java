@@ -15,7 +15,7 @@ import net.sf.jrtps.types.Duration_t;
  * @author mcr70
  *
  */
-public class QosDeadline extends Parameter implements QosPolicy {
+public class QosDeadline extends Parameter implements QosPolicy, InlineParameter {
 	private Duration_t period;
 	QosDeadline() {
 		super(ParameterEnum.PID_DEADLINE);

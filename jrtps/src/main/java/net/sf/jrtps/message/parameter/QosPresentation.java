@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosPresentation extends Parameter implements QosPolicy {
+public class QosPresentation extends Parameter implements QosPolicy, InlineParameter {
 	public enum Kind {
 		INSTANCE, TOPIC, GROUP, ILLEGAL
 	};
