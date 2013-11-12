@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosOwnershipStrength extends Parameter implements QosPolicy, InlineParameter {
+public class QosOwnershipStrength extends Parameter implements DataWriterPolicy, InlineParameter {
 	private int strength;
 	
 	QosOwnershipStrength() {

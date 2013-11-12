@@ -3,8 +3,8 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class TopicData extends Parameter {
-	TopicData() {
+public class QosTopicData extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy {
+	QosTopicData() {
 		super(ParameterEnum.PID_TOPIC_DATA);
 	}
 
@@ -16,5 +16,10 @@ public class TopicData extends Parameter {
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
 		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		return true; // Always true
 	}
 }

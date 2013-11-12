@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosPartition extends Parameter implements QosPolicy, InlineParameter {
+public class QosPartition extends Parameter implements SubscriberPolicy, PublisherPolicy, InlineParameter {
 	private String[] partitions;
 	
 	QosPartition() {

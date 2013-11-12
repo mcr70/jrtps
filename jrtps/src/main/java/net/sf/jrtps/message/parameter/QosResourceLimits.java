@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosResourceLimits extends Parameter implements QosPolicy {
+public class QosResourceLimits extends Parameter implements DataReaderPolicy, TopicPolicy, DataWriterPolicy {
 	private int max_samples;
 	private int max_instances;
 	private int max_samples_per_instance;

@@ -3,9 +3,9 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class GroupData extends Parameter {
-	GroupData() {
-		super(ParameterEnum.PID_GROUP_DATA);
+public class QosUserData extends Parameter implements DataReaderPolicy, DataWriterPolicy {
+	QosUserData() {
+		super(ParameterEnum.PID_USER_DATA);
 	}
 
 	@Override
@@ -16,5 +16,10 @@ public class GroupData extends Parameter {
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
 		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		return true; // Always true
 	}
 }

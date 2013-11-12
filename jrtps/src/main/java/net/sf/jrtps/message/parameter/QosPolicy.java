@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 /**
- * A tagging interface used to denote a Parameter as a Quality of Service param.
+ * An interface used to denote a Parameter as a Quality of Service policy parameter.
  * 
  * @author mcr70
  *
@@ -9,6 +9,7 @@ package net.sf.jrtps.message.parameter;
 public interface QosPolicy {
 	/**
 	 * Checks, if this QosPolicy is compatible with other QosPolicy
+	 * 
 	 * @param other
 	 * @return true, if QosPolicy is compatible
 	 */

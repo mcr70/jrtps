@@ -23,10 +23,10 @@ import org.slf4j.LoggerFactory;
 /**
  * RTPSReader implements RTPS Reader endpoint functionality.
  * RTPSReader does not store any data received. It only keeps track of data
- * entries sent by writers and propagates received data to DataListeners registered.
+ * entries sent by writers and propagates received data to SampleListeners registered.
  * 
  * @author mcr70
- * @see DataListener
+ * @see SampleListener
  */
 public class RTPSReader<T> extends Endpoint {
 	private static final Logger logger = LoggerFactory.getLogger(RTPSReader.class);

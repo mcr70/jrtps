@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosHistory extends Parameter implements QosPolicy {
+public class QosHistory extends Parameter implements DataReaderPolicy, TopicPolicy, DataWriterPolicy {
 	QosHistory() {
 		super(ParameterEnum.PID_HISTORY);
 	}
