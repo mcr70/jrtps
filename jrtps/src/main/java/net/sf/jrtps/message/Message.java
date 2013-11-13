@@ -119,6 +119,7 @@ public class Message {
 			try {
 				SubMessageHeader hdr = msg.getHeader();
 				buffer.align(4);
+				buffer.setEndianess(hdr.endianessFlag()); // Set the endianess
 				hdr.writeTo(buffer);
 				
 				subMessageCount++;
