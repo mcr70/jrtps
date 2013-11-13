@@ -112,13 +112,17 @@ public class Message {
 		boolean overFlowed = false;
 		
 		int position = 0;
+		int subMessageCount = 0;
 		for (SubMessage msg : submessages) {
 			int subMsgStartPosition = buffer.position();
 
 			try {
 				SubMessageHeader hdr = msg.getHeader();
 				buffer.align(4);
+				buffer.setEndianess(hdr.endianessFlag()); // Set the endianess
 				hdr.writeTo(buffer);
+				
+				subMessageCount++;
 				
 				position = buffer.position();  
 				msg.writeTo(buffer);
@@ -128,7 +132,8 @@ public class Message {
 				buffer.getBuffer().putShort(position-2, (short) subMessageLength);
 			}
 			catch(BufferOverflowException boe) {
-				log.warn("Buffer overflow occured, dropping rest of the sub messages");
+				log.warn("Buffer overflow occured after {} succesful sub-message writes, dropping rest of the sub messages",
+						subMessageCount);
 				buffer.getBuffer().position(subMsgStartPosition);
 				overFlowed = true;
 				break;

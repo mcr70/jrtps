@@ -1,6 +1,7 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.util.HashMap;
 
 import net.sf.jrtps.builtin.ParticipantData;
@@ -21,6 +22,8 @@ public class Endpoint {
 	private final GUID_t guid;	
 	private HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
 
+	private final Configuration configuration;
+
 
 	/**
 	 * 
@@ -28,10 +31,10 @@ public class Endpoint {
 	 * @param entityId
 	 * @param topicName
 	 */
-	protected Endpoint(GuidPrefix_t prefix, EntityId_t entityId, String topicName) {
+	protected Endpoint(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Configuration configuration) {
 		this.guid = new GUID_t(prefix, entityId);
-
 		this.topicName = topicName;
+		this.configuration = configuration;
 	}
 
 
@@ -43,7 +46,10 @@ public class Endpoint {
 		return guid;
 	}
 
-
+	Configuration getConfiguration() {
+		return configuration;
+	}
+	
 	/**
 	 * Gets all locators for given participant.
 	 * 
@@ -87,11 +93,15 @@ public class Endpoint {
 		Locator_t locator = getParticipantLocators(targetPrefix);
 		boolean overFlowed = true;
 		try {
-			UDPWriter w = new UDPWriter(locator); // TODO: No need to create and close all the time
+			UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO: No need to create and close all the time
 			overFlowed = w.sendMessage(m);
 			w.close();					
-		} catch (IOException e) {
+		} 
+		catch(IOException e) {
 			log.warn("[{}] Failed to send message to {}", getGuid().entityId, locator, e);
+		}
+		catch(BufferOverflowException boe) {
+			log.warn("Got unexpected BufferOverflowException, buffer size is {}. It should be increased.", configuration.getBufferSize());
 		}
 
 		return overFlowed;

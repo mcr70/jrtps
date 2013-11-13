@@ -57,8 +57,8 @@ public class RTPSWriter<T> extends Endpoint {
 	protected Object resend_lock = new Object();
 
 
-	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller) {
-		super(prefix, entityId, topicName);
+	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller, Configuration configuration) {
+		super(prefix, entityId, topicName, configuration);
 
 		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
 		this.marshaller = marshaller;

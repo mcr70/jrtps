@@ -2,8 +2,15 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-
-public class QosDurability extends Parameter implements QualityOfService {
+/**
+ * This QoS policy controls whether the Service will actually make data available to late-joining readers.<p>
+ * 
+ * See DDS specification v1.2, ch. 7.1.3.4
+ * 
+ * @author mcr70
+ *
+ */
+public class QosDurability extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
 	private int kind;
 
 	public enum Kind {
@@ -37,10 +44,20 @@ public class QosDurability extends Parameter implements QualityOfService {
 		case 3: return Kind.PERSISTENT;
 		}
 		
-		return null;
+		return Kind.UNKNOWN_DURABILITY_KIND;
 	}
 	
 	public String toString() {
 		return super.toString() + "(" + getKind() + ")";
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		if (other instanceof QosDurability) {
+			QosDurability qOther = (QosDurability) other;
+			return kind >= qOther.kind;
+		}
+		
+		return false;
 	}
 }

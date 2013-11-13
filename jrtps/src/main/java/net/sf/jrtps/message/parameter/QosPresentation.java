@@ -3,16 +3,11 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosPresentation extends Parameter implements QualityOfService {
+public class QosPresentation extends Parameter implements PublisherPolicy, SubscriberPolicy, InlineParameter {
 	public enum Kind {
-		INSTANCE, TOPIC, GROUP, ILLEGAL;
-				
-		public boolean isCompatible(Kind requested) {
-			return ordinal() >= requested.ordinal();
-		}
+		INSTANCE, TOPIC, GROUP, ILLEGAL
 	};
-	
-	private Kind kind;
+
 	private int access_scope;
 	private boolean coherent_access;
 	private boolean ordered_access;
@@ -20,11 +15,15 @@ public class QosPresentation extends Parameter implements QualityOfService {
 	QosPresentation() {
 		super(ParameterEnum.PID_PRESENTATION);
 	}
-	
+
 	QosPresentation(Kind kind, boolean coherent_access, boolean ordered_access) {
 		super(ParameterEnum.PID_PRESENTATION);
-		this.kind = kind;
-		this.access_scope = kind.ordinal();
+		switch(kind) {
+		case INSTANCE: this.access_scope = 0; break;
+		case TOPIC: this.access_scope = 1; break;
+		case GROUP: this.access_scope = 2; break;
+		}
+
 		this.coherent_access = coherent_access;
 		this.ordered_access = ordered_access;
 	}
@@ -44,20 +43,35 @@ public class QosPresentation extends Parameter implements QualityOfService {
 	}
 
 	public Kind getKind() {
-		if (kind == null) {
-			switch (access_scope) {
-			case 0: kind = Kind.INSTANCE; break;
-			case 1: kind = Kind.TOPIC; break;
-			case 2: kind = Kind.GROUP; break;
-			default: 
-				kind = Kind.ILLEGAL;
+		switch (access_scope) {
+		case 0: return Kind.INSTANCE; 
+		case 1: return Kind.TOPIC; 
+		case 2: return Kind.GROUP;
+		}
+
+		return Kind.ILLEGAL;
+	}
+
+	public String toString() {
+		return super.toString() + "(" + getKind() + ", coherent=" + coherent_access + ", ordered=" + ordered_access + ")";
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		if (other instanceof QosPresentation) {
+			QosPresentation qOther = (QosPresentation) other;
+
+			if (access_scope >= qOther.access_scope) {
+				if ((qOther.coherent_access == false) ||
+						(coherent_access == true && qOther.coherent_access == true)) {
+					if ((qOther.ordered_access == false) ||
+							(ordered_access == true && qOther.ordered_access == true)) {
+						return true;
+					}
+				}
 			}
 		}
 		
-		return kind;
-	}
-	
-	public String toString() {
-		return super.toString() + "(" + getKind() + ", coherent=" + coherent_access + ", ordered=" + ordered_access + ")";
+		return false;
 	}
 }

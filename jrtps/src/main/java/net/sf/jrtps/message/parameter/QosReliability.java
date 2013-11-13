@@ -4,17 +4,12 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
 
-public class QosReliability extends Parameter implements QualityOfService {
+public class QosReliability extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
 	private int kind;
 	private Duration_t max_blocking_time;
 	
 	public enum Kind {
-		BEST_EFFORT(0), RELIABLE(1), UNKNOWN_RELIABILITY_KIND(99);
-
-		private int __kind;
-		private Kind(int kind) {
-			__kind = kind;
-		}
+		BEST_EFFORT, RELIABLE, UNKNOWN_RELIABILITY_KIND;
 	}
 
 	public QosReliability(Kind kind, Duration_t max_blocking_time) {
@@ -44,7 +39,7 @@ public class QosReliability extends Parameter implements QualityOfService {
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.kind = bb.read_long() - 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE 
+		this.kind = bb.read_long(); // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE 
 		max_blocking_time = new Duration_t(bb);
 	}
 	
@@ -56,5 +51,15 @@ public class QosReliability extends Parameter implements QualityOfService {
 
 	public String toString() {	
 		return super.toString() + "(" + getKind() + max_blocking_time + ")";
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		if (other instanceof QosReliability) {
+			QosReliability qOther = (QosReliability) other;
+			
+			return kind >= qOther.kind;
+		}
+		return false;
 	}
 }

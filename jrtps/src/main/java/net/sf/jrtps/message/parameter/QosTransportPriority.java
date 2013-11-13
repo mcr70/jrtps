@@ -3,18 +3,29 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosTransportPriority extends Parameter implements QualityOfService {
+public class QosTransportPriority extends Parameter implements TopicPolicy, DataWriterPolicy, InlineParameter {
+	private int value;
+
 	QosTransportPriority() {
 		super(ParameterEnum.PID_TRANSPORT_PRIORITY);
 	}
 
+	public int getValue() {
+		return value;
+	}
+	
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+		value = bb.read_long();
 	}
 
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
-		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+		bb.write_long(value);
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		return true; // Always true
 	}
 }

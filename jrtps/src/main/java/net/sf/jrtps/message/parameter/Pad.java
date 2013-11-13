@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class Pad extends Parameter {
+public class Pad extends Parameter implements InlineParameter {
 	Pad() {
 		super(ParameterEnum.PID_PAD);
 	}

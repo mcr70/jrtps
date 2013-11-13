@@ -3,18 +3,29 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosOwnershipStrength extends Parameter implements QualityOfService {
+public class QosOwnershipStrength extends Parameter implements DataWriterPolicy, InlineParameter {
+	private int strength;
+	
 	QosOwnershipStrength() {
 		super(ParameterEnum.PID_OWNERSHIP_STRENGTH);
 	}
 
+	public int getStrength() {
+		return strength;
+	}
+	
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+		strength = bb.read_long();
 	}
 
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
-		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+		bb.write_long(strength);
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		return true; // Always true
 	}
 }

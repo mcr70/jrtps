@@ -32,11 +32,11 @@ public class ParameterFactory {
 		// table 9.12:
 		case 0x0000: param = new Pad(); break; 
 		case 0x0001: param = new Sentinel(); break; 
-		case 0x002c: param = new UserData(); break;
+		case 0x002c: param = new QosUserData(); break;
 		case 0x0005: param = new TopicName(); break;
 		case 0x0007: param = new TypeName(); break;
-		case 0x002d: param = new GroupData(); break;
-		case 0x002e: param = new TopicData(); break;
+		case 0x002d: param = new QosGroupData(); break;
+		case 0x002e: param = new QosTopicData(); break;
 		case 0x001d: param = new QosDurability(); break;
 		case 0x001e: param = new QoSDurabilityService(); break;
 		case 0x0023: param = new QosDeadline(); break;

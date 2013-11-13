@@ -16,7 +16,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class StatusInfo extends Parameter {
+public class StatusInfo extends Parameter implements InlineParameter {
 	private static final Logger log = LoggerFactory.getLogger(StatusInfo.class);
 
 	private byte[] flags;

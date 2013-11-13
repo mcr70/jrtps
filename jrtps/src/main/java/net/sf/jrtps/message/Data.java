@@ -139,7 +139,8 @@ public class Data extends SubMessage {
 
 	/**
 	 * Gets the inlineQos parameters if present. Inline QoS parameters are present, if 
-	 * inlineQosFlag() returns true;
+	 * inlineQosFlag() returns true.
+	 * 
 	 * @see #inlineQosFlag()
 	 * @return InlineQos parameters, or null if not present
 	 */

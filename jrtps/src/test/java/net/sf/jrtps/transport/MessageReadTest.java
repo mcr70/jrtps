@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.nio.channels.FileChannel.MapMode;
 
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.junit.Test;
 
@@ -18,7 +17,6 @@ public class MessageReadTest {
 		RTPSByteBuffer bb = new RTPSByteBuffer(fis.getChannel().map(MapMode.READ_ONLY, 0, fis.available()));
 		
 		Message m = new Message(bb);
-		//System.out.println("Read message: " + m);
 		
 		assertTrue(m.getSubMessages().size() == 4);
 	}
