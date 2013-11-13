@@ -7,6 +7,7 @@ import java.util.List;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.LocatorUDPv4_t;
 import net.sf.jrtps.types.Locator_t;
 
 import org.junit.Test;
@@ -49,6 +50,76 @@ public class MessageTests {
 		
 		m1.addSubMessage(new InfoReply(unicastLocators, multicastLocators));
 		
+		// Write Message to bytes1 array 
+		byte[] bytes1 = write(m1);
+		
+		// Read from bytes1 array - tests reading
+		Message m2 = read(bytes1);
+
+		// Write the message read to bytes2
+		byte[] bytes2 = write(m2);
+		
+		// Test, that bytes1 and bytes2 are equal
+		assertArrayEquals(bytes1, bytes2);
+	}
+
+	/**
+	 * Tests, that reading and writing of InfoReplyIp4 is symmetrical.
+	 */
+	@Test
+	public void testInfoReplyIp4() {
+		// Create a Message with InfoDestination
+		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+
+		LocatorUDPv4_t lc1 = LocatorUDPv4_t.LOCATORUDPv4_INVALID;
+		LocatorUDPv4_t lc2 = LocatorUDPv4_t.LOCATORUDPv4_INVALID;
+		
+		m1.addSubMessage(new InfoReplyIp4(lc1, lc2));
+		
+		// Write Message to bytes1 array 
+		byte[] bytes1 = write(m1);
+		
+		// Read from bytes1 array - tests reading
+		Message m2 = read(bytes1);
+
+		// Write the message read to bytes2
+		byte[] bytes2 = write(m2);
+		
+		// Test, that bytes1 and bytes2 are equal
+		assertArrayEquals(bytes1, bytes2);
+	}
+
+	/**
+	 * Tests, that reading and writing of InfoSource is symmetrical.
+	 */
+	@Test
+	public void testInfoSource() {
+		// Create a Message with InfoDestination
+		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+		m1.addSubMessage(new InfoSource(GuidPrefix_t.GUIDPREFIX_UNKNOWN));
+		
+		// Write Message to bytes1 array 
+		byte[] bytes1 = write(m1);
+		
+		// Read from bytes1 array - tests reading
+		Message m2 = read(bytes1);
+
+		// Write the message read to bytes2
+		byte[] bytes2 = write(m2);
+		
+		// Test, that bytes1 and bytes2 are equal
+		assertArrayEquals(bytes1, bytes2);
+	}
+	
+	/**
+	 * Tests, that reading and writing of InfoTimestamp is symmetrical.
+	 */
+	@Test
+	public void testInfoTimestamp() {
+		// Create a Message with InfoDestination
+		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+		m1.addSubMessage(new InfoTimestamp(123));
+
 		// Write Message to bytes1 array 
 		byte[] bytes1 = write(m1);
 		
