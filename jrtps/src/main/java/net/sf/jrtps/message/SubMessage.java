@@ -9,7 +9,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  *
  */
 public abstract class SubMessage {
-	
 	protected final SubMessageHeader header;
 
 	/**

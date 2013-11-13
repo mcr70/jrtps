@@ -16,7 +16,7 @@ public class HelloDisposer {
 		
 		List<HelloMessage> msgs = new LinkedList<>();
 		for (int i = 0; i < 5; i++) {
-			msgs.add(new HelloMessage(i, "hello " + i));
+			msgs.add(new HelloMessage(i, "hello_" + i));
 		}
 		
 		dw.dispose(msgs); // Dispose all the HelloMessages on one call

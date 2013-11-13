@@ -8,6 +8,7 @@
 	</parent>
 
 	<artifactId>jrtps</artifactId>
+	<!--  <packaging>bundle</packaging> -->
 	<name>jRTPS</name>
 	<description>An implementation of RTPS protocol defined by OMG</description>
 

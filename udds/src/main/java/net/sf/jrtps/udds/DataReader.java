@@ -18,7 +18,6 @@ import net.sf.jrtps.SampleListener;
  * IDL compiler, or it may be more dynamically constructed Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity {
-	private List<DataListenerAdapter<T>> dataListeners = new LinkedList<>();
 	private RTPSReader<T> rtps_reader;
 
 	/**

@@ -1,3 +1,5 @@
+o QoS
+	- missing EntityFactoryQos, ReaderDataLifeCycle, WriterDataLifecycle
 o Domain ID & participant ID
 	- Domain ID is encoded in GuidPrefix	
 o types

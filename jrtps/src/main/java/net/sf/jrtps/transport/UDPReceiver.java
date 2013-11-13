@@ -6,6 +6,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.nio.BufferUnderflowException;
 import java.util.concurrent.Semaphore;
 
 import net.sf.jrtps.message.Message;
@@ -34,9 +35,12 @@ public class UDPReceiver implements Runnable {
 	private boolean running = true;
 	DatagramSocket socket = null;
 
-	public UDPReceiver(Locator_t locator, MessageHandler handler) throws SocketException {
+	private int bufferSize;
+
+	public UDPReceiver(Locator_t locator, MessageHandler handler, int bufferSize) throws SocketException {
 		this.locator = locator;
 		this.handler = handler;
+		this.bufferSize = bufferSize;
 	}
 
 	public void run() {
@@ -65,7 +69,7 @@ public class UDPReceiver implements Runnable {
 		initLock.release();
 
 
-		byte[] buf = new byte[16384];
+		byte[] buf = new byte[bufferSize];
 
 		while(running) {
 			DatagramPacket p = new DatagramPacket(buf, buf.length);
@@ -86,10 +90,13 @@ public class UDPReceiver implements Runnable {
 			catch(SocketException se) {
 				// Ignore. If we are still running, try to receive again
 			}
+			catch(BufferUnderflowException bue) {
+				log.warn("Got BufferUnderflowException on reception. Buffer size is {}. Consider increasing.", bufferSize);
+			}
 			catch(Exception e) {
 				log.warn("Failed to parse message of length " + p.getLength(), e);
 			}
-		}
+		} // while(...)
 	}
 
 
@@ -121,8 +128,7 @@ public class UDPReceiver implements Runnable {
 			fos.write(msgBytes, 0, msgBytes.length);
 			fos.close();
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			log.error("Failed to write message to {}", string, e);
 		} 
 	}
 }

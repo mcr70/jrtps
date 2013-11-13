@@ -21,7 +21,10 @@ public class Duration_t {
 		return "[" + sec + ":" + nano + "]";
 	}
 
-
+	public long asMillis() {
+		return (sec * 1000) + (nano / 1000000);
+	}
+	
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_long(sec);
 		buffer.write_long(nano);

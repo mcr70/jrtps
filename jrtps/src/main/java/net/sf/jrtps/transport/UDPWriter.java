@@ -18,15 +18,17 @@ public class UDPWriter {
 	private static final Logger log = LoggerFactory.getLogger(UDPWriter.class);
 	private final Locator_t locator;
 	private DatagramChannel channel;
+	private int bufferSize;
 	
-	public UDPWriter(Locator_t locator) throws IOException {
-		this.locator = locator;		
+	public UDPWriter(Locator_t locator, int bufferSize) throws IOException {
+		this.locator = locator;
+		this.bufferSize = bufferSize;		
 		channel = DatagramChannel.open();
 		channel.connect(locator.getSocketAddress());
 	}
 	
 	public boolean sendMessage(Message m) {
-		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(1024)); // TODO: hardcoded
+		RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(bufferSize));
 		buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
 		boolean overFlowed = m.writeTo(buffer);
 		buffer.getBuffer().flip();

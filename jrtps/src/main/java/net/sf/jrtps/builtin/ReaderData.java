@@ -5,7 +5,7 @@ import java.util.Iterator;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
-import net.sf.jrtps.message.parameter.QualityOfService;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.types.ContentFilterProperty_t;
@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ReaderData extends DiscoveredData {
+	public static final String BUILTIN_TOPIC_NAME = "DCPSSubscription";
+	
 	private static final Logger log = LoggerFactory.getLogger(ReaderData.class);
 
 	private GUID_t participantGuid;
@@ -53,13 +55,17 @@ public class ReaderData extends DiscoveredData {
 				break;
 				
 			default:
-				if (param instanceof QualityOfService) {
-					addQualityOfService((QualityOfService) param);
+				if (param instanceof QosPolicy) {
+					addQosPolicy((QosPolicy) param);
 				}
 				else {
 					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
 				}
 			}
+		}
+		
+		if (super.typeName == null) { // Other vendors may use different typeName
+			super.typeName = ReaderData.class.getName();
 		}
 	}
 

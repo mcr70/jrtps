@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class TopicName extends Parameter {
+public class TopicName extends Parameter implements InlineParameter {
 	private String name;
 
 	public TopicName(String name) {

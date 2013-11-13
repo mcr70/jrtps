@@ -1,20 +1,32 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.types.Duration_t;
 
 
-public class QosLatencyBudget extends Parameter implements QualityOfService {
+public class QosLatencyBudget extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+	private Duration_t duration;
 	QosLatencyBudget() {
 		super(ParameterEnum.PID_LATENCY_BUDGET);
 	}
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+		this.duration = new Duration_t(bb);
 	}
 
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
-		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+		duration.writeTo(bb);
+	}
+
+	@Override
+	public boolean isCompatible(QosPolicy other) {
+		if (other instanceof QosLatencyBudget) {
+			QosLatencyBudget qOther = (QosLatencyBudget) other;
+			return duration.asMillis() <= qOther.duration.asMillis();
+		}
+		
+		return false;
 	}
 }

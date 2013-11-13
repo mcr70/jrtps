@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class CoherentSet extends Parameter {
+public class CoherentSet extends Parameter implements InlineParameter {
 	CoherentSet() {
 		super(ParameterEnum.PID_COHERENT_SET);
 	}

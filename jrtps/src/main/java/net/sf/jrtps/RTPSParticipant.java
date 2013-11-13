@@ -41,11 +41,8 @@ import org.slf4j.LoggerFactory;
 public class RTPSParticipant {
 	private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
-	private static final String BUILTIN_TOPICNAME_PARTICIPANT = "DCPSParticipant";
-	private static final String BUILTIN_TOPICNAME_PUBLICATION = "DCPSPublication";
-	private static final String BUILTIN_TOPICNAME_SUBSCRIPTION = "DCPSSubscription";
-	private static final String BUILTIN_TOPICNAME_TOPIC = "DCPSTopic";
-
+	private final Configuration config = new Configuration();
+	
 	private int CORE_POOL_SIZE = 10; // TODO: configurable
 	private int MAX_POOL_SIZE = 2 * CORE_POOL_SIZE;
 
@@ -56,6 +53,7 @@ public class RTPSParticipant {
 	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants =  new HashMap<>();
 	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
 	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
+	@SuppressWarnings("unused")
 	private final HashMap<GUID_t, TopicData> discoveredTopics = new HashMap<>();
 	
 	/**
@@ -121,34 +119,34 @@ public class RTPSParticipant {
 
 		// ----  Create a Writers for SEDP  ---------
 		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
-				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
-				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(), rdm);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
 
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader<ParticipantData> partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
-				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm);
 		partReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader<WriterData> pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
-				BUILTIN_TOPICNAME_PUBLICATION, WriterData.class.getName(), wdm);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm);
 		pubReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 
 		RTPSReader<ReaderData> subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
-				BUILTIN_TOPICNAME_SUBSCRIPTION, ReaderData.class.getName(),rdm);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(),rdm);
 		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
 		RTPSReader<TopicData> topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
-				BUILTIN_TOPICNAME_TOPIC, TopicData.class.getName(), tdm);
+				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm);
 		topicReader.addListener(new BuiltinTopicDataListener(this));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-				BUILTIN_TOPICNAME_PARTICIPANT, ParticipantData.class.getName(), pdm);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm);
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
@@ -168,10 +166,10 @@ public class RTPSParticipant {
 		// TODO: We should have endpoints for TCP, InMemory, What else? encrypted?, signed? 
 		// UDP is required by the specification. 
 		// TODO: should we have just one RTPSMessageHandler
-		receivers.add(new UDPReceiver(meta_mcLoc, new RTPSMessageHandler(this)));
-		receivers.add(new UDPReceiver(meta_ucLoc, new RTPSMessageHandler(this)));
-		receivers.add(new UDPReceiver(mcLoc, new RTPSMessageHandler(this)));			
-		receivers.add(new UDPReceiver(ucLoc, new RTPSMessageHandler(this)));		
+		receivers.add(new UDPReceiver(meta_mcLoc, new RTPSMessageHandler(this), config.getBufferSize()));
+		receivers.add(new UDPReceiver(meta_ucLoc, new RTPSMessageHandler(this), config.getBufferSize()));
+		receivers.add(new UDPReceiver(mcLoc, new RTPSMessageHandler(this), config.getBufferSize()));			
+		receivers.add(new UDPReceiver(ucLoc, new RTPSMessageHandler(this), config.getBufferSize()));		
 
 		for (UDPReceiver receiver : receivers) {
 			threadPoolExecutor.execute(receiver);
@@ -234,12 +232,13 @@ public class RTPSParticipant {
 	 * @return RTPSWriter
 	 */
 	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
-		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller);
+		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);
 
-		RTPSWriter<WriterData> pw = getWriterForTopic(BUILTIN_TOPICNAME_PUBLICATION);
+		@SuppressWarnings("unchecked")
+		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		pw.createChange(wd);
 
@@ -295,12 +294,13 @@ public class RTPSParticipant {
 	 * @return RTPSReader
 	 */
 	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
-		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller);
+		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
 		readerEndpoints.add(reader);
 
-		RTPSWriter<ReaderData> sw = getWriterForTopic(BUILTIN_TOPICNAME_SUBSCRIPTION);
+		@SuppressWarnings("unchecked")
+		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
 		sw.createChange(rd);
 
@@ -310,24 +310,26 @@ public class RTPSParticipant {
 
 
 
-	RTPSWriter getWriterForTopic(String topicName) {
-		for (RTPSWriter w : writerEndpoints) {
+	List<RTPSWriter<?>> getWritersForTopic(String topicName) {
+		List<RTPSWriter<?>> writers = new LinkedList<>();
+		for (RTPSWriter<?> w : writerEndpoints) {
 			if (w.getTopicName().equals(topicName)) {
-				return w;
+				writers.add(w);
 			}
 		}
 
-		return null;
+		return writers;
 	}
 
-	RTPSReader getReaderForTopic(String topicName) {
-		for (RTPSReader r : readerEndpoints) {
+	List<RTPSReader<?>> getReadersForTopic(String topicName) {
+		List<RTPSReader<?>> readers = new LinkedList<>();
+		for (RTPSReader<?> r : readerEndpoints) {
 			if (r.getTopicName().equals(topicName)) {
-				return r;
+				readers.add(r);
 			}
 		}
 
-		return null;
+		return readers;
 	}
 
 
@@ -337,8 +339,8 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return RTPSReader
 	 */
-	private RTPSReader getReader(EntityId_t readerId) {
-		for (RTPSReader reader : readerEndpoints) {
+	private RTPSReader<?> getReader(EntityId_t readerId) {
+		for (RTPSReader<?> reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
 			}
@@ -356,7 +358,7 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSReader
 	 */
-	RTPSReader getReader(EntityId_t readerId, EntityId_t writerId) {
+	RTPSReader<?> getReader(EntityId_t readerId, EntityId_t writerId) {
 		if (readerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(readerId)) {
 			return getReader(readerId);
 		}
@@ -388,8 +390,8 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSWriter
 	 */
-	RTPSWriter getWriter(EntityId_t writerId) {
-		for (RTPSWriter writer : writerEndpoints) {
+	RTPSWriter<?> getWriter(EntityId_t writerId) {
+		for (RTPSWriter<?> writer : writerEndpoints) {
 			if (writer.getGuid().entityId.equals(writerId)) {
 				return writer;
 			}
@@ -399,7 +401,7 @@ public class RTPSParticipant {
 	}
 
 
-	RTPSWriter getWriter(EntityId_t writerId, EntityId_t readerId) {
+	RTPSWriter<?> getWriter(EntityId_t writerId, EntityId_t readerId) {
 		if (writerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(writerId)) {
 			return getWriter(writerId);
 		}
@@ -437,10 +439,10 @@ public class RTPSParticipant {
 
 	private int createEndpointSet() {
 		int eps = 0;
-		for (RTPSReader r : readerEndpoints) {
+		for (RTPSReader<?> r : readerEndpoints) {
 			eps |= r.endpointSetId();
 		}
-		for (RTPSWriter w : writerEndpoints) {
+		for (RTPSWriter<?> w : writerEndpoints) {
 			eps |= w.endpointSetId();
 		}
 
@@ -464,10 +466,10 @@ public class RTPSParticipant {
 		}
 
 		// Then entities
-		for (RTPSReader r : readerEndpoints) {
+		for (RTPSReader<?> r : readerEndpoints) {
 			r.close();
 		}
-		for (RTPSWriter w : writerEndpoints) {
+		for (RTPSWriter<?> w : writerEndpoints) {
 			w.close();
 		}
 	}

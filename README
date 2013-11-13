@@ -1,5 +1,6 @@
-jrtps-0.3.0
+jrtps-0.3.1
 	This release is provided as-is. In short, one can get started by using 
 	classes in net.sf.udds package, which is a minimalistic set of classes 
 	that can be used to start communicating over RTPS.
-	In this release, SampleListener is added to RTPS layer. 
+	In this release, an endianess bug is fixed and some simple junit
+	tests were added. 
