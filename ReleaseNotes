@@ -1,3 +1,8 @@
+0.3.1
+	- FIX: set endianness correctly according to sub-message header
+	- Added some simple tests
+	- buffer size is configurable
+	
 0.3.0
 	- RTPSReader produces Samples to SampleListener
 	- Fine tuned visibility.
