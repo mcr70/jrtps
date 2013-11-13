@@ -6,6 +6,9 @@ import java.util.List;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Locator_t;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This message is sent from an RTPS Reader to an RTPS Writer. It contains explicit information on where 
  * to send a reply to the Submessages that follow it within the same message.
@@ -16,6 +19,8 @@ import net.sf.jrtps.types.Locator_t;
  * 
  */
 public class InfoReply extends SubMessage {
+	private static final Logger log = LoggerFactory.getLogger(InfoReply.class);
+	
 	public static final int KIND = 0x0f;
 	
 	private List<Locator_t> unicastLocatorList = new LinkedList<Locator_t>();
@@ -36,6 +41,7 @@ public class InfoReply extends SubMessage {
 		super(smh);
 		
 		long numLocators = bb.read_long(); // ulong
+		log.trace("Reading {}(0x{}) locators", numLocators, String.format("%08x", numLocators));
 		for (int i = 0; i < numLocators; i++) {
 			Locator_t loc = new Locator_t(bb);
 			
