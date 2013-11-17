@@ -21,6 +21,11 @@ public class QosDeadline extends Parameter implements DataReaderPolicy, DataWrit
 	QosDeadline() {
 		super(ParameterEnum.PID_DEADLINE);
 	}
+	
+	public QosDeadline(Duration_t period) {
+		super(ParameterEnum.PID_DEADLINE);
+		this.period = period;
+	}
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
@@ -39,5 +44,13 @@ public class QosDeadline extends Parameter implements DataReaderPolicy, DataWrit
 			return period.asMillis() <= qOther.period.asMillis();
 		}
 		return false;
+	}
+
+	/**
+	 * Gets a default QosDeadline with period Duration_t.INFINITE
+	 * @return default QosDeadline
+	 */
+	public static QosDeadline defaultDeadline() {
+		return new QosDeadline(Duration_t.INFINITE);
 	}
 }

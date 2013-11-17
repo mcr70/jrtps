@@ -52,4 +52,12 @@ public class QosPartition extends Parameter implements SubscriberPolicy, Publish
 	public boolean isCompatible(QosPolicy other) {
 		return true; // TODO: Partition matching is done differently
 	}
+
+	/**
+	 * Default partition.
+	 * @return
+	 */
+	public static QosPartition defaultPartition() {
+		return new QosPartition(new String[0]); // TODO: check default
+	}
 }

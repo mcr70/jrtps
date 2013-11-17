@@ -38,7 +38,7 @@ public class ParameterFactory {
 		case 0x002d: param = new QosGroupData(); break;
 		case 0x002e: param = new QosTopicData(); break;
 		case 0x001d: param = new QosDurability(); break;
-		case 0x001e: param = new QoSDurabilityService(); break;
+		case 0x001e: param = new QosDurabilityService(); break;
 		case 0x0023: param = new QosDeadline(); break;
 		case 0x0027: param = new QosLatencyBudget(); break;
 		case 0x001b: param = new QosLiveliness(); break;
@@ -51,7 +51,7 @@ public class ParameterFactory {
 		case 0x0006: param = new QosOwnershipStrength(); break;
 		case 0x0021: param = new QosPresentation(); break;
 		case 0x0029: param = new QosPartition(); break;
-		case 0x0004: param = new QosTimebasedFilter(); break;
+		case 0x0004: param = new QosTimeBasedFilter(); break;
 		case 0x0049: param = new QosTransportPriority(); break;
 		case 0x0015: param = new ProtocolVersion(); break;
 		case 0x0016: param = new VendorId(); break;

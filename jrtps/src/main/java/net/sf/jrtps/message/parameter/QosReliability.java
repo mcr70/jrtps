@@ -9,19 +9,22 @@ public class QosReliability extends Parameter implements DataReaderPolicy, DataW
 	private Duration_t max_blocking_time;
 	
 	public enum Kind {
-		BEST_EFFORT, RELIABLE, UNKNOWN_RELIABILITY_KIND;
+		BEST_EFFORT, RELIABLE;
 	}
 
-	public QosReliability(Kind kind, Duration_t max_blocking_time) {
-		super(ParameterEnum.PID_RELIABILITY);
-		this.max_blocking_time = max_blocking_time;
-		this.kind = kind.ordinal() + 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
-	}
-	
 	QosReliability() {
 		super(ParameterEnum.PID_RELIABILITY);
 	}
 
+	public QosReliability(Kind kind, Duration_t max_blocking_time) {
+		super(ParameterEnum.PID_RELIABILITY);
+		switch(kind) {
+		case BEST_EFFORT: this.kind = 0; break;
+		case RELIABLE: this.kind = 1;
+		}
+		this.max_blocking_time = max_blocking_time;
+		//this.kind = kind.ordinal() + 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
+	}
 
 	public Duration_t getMaxBlockingTime() {
 		return max_blocking_time;
@@ -33,7 +36,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy, DataW
 		case 1: return Kind.RELIABLE; 
 		}
 
-		return Kind.UNKNOWN_RELIABILITY_KIND;
+		return null;
 	}
 
 
@@ -61,5 +64,14 @@ public class QosReliability extends Parameter implements DataReaderPolicy, DataW
 			return kind >= qOther.kind;
 		}
 		return false;
+	}
+
+	/**
+	 * get the default QosReliability: BEST_EFFORT, 0
+	 * 
+	 * @return default QosReliability
+	 */
+	public static QosReliability defaultReliability() {
+		return new QosReliability(Kind.BEST_EFFORT, new Duration_t(0, 0)); // TODO: check default
 	}
 }
