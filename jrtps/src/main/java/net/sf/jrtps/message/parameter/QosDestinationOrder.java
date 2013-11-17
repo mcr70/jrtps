@@ -14,21 +14,28 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy, 
 	private int kind;
 	
 	public enum Kind {
-		BY_RECEPTION_TIMESTAMP, BY_SOURCE_TIMESTAMP, ILLEGAL_KIND
+		BY_RECEPTION_TIMESTAMP, BY_SOURCE_TIMESTAMP
 	}
 	
+	/**
+	 * Constructor used when reading from RTPSByteBuffer.
+	 */
 	QosDestinationOrder() {
 		super(ParameterEnum.PID_DESTINATION_ORDER);
 	}
 
-	public Kind getKind() {
+	/**
+	 * Create a QosDestinationOrder.
+	 * @param kind
+	 */
+	public QosDestinationOrder(Kind kind) {
+		super(ParameterEnum.PID_DESTINATION_ORDER);
 		switch(kind) {
-		case 0: return Kind.BY_RECEPTION_TIMESTAMP;
-		case 1: return Kind.BY_SOURCE_TIMESTAMP;
+		case BY_RECEPTION_TIMESTAMP: this.kind = 0; break;
+		case BY_SOURCE_TIMESTAMP: this.kind = 1; break;
 		}
-		
-		return Kind.ILLEGAL_KIND;
 	}
+
 	
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
@@ -52,5 +59,14 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy, 
 		}
 		
 		return false;
+	}
+
+	/**
+	 * Get the default QosDestinationOrder BY_RECEPTION_TIMESTAMP.
+	 * 
+	 * @return default QosDestinationOrder
+	 */
+	public static QosDestinationOrder defaultDestinationOrder() {
+		return new QosDestinationOrder(Kind.BY_RECEPTION_TIMESTAMP);
 	}
 }

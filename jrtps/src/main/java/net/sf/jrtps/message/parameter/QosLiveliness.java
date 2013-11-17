@@ -17,26 +17,37 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy, DataWr
 	private Duration_t lease_duration;
 
 	public enum Kind {
-		AUTOMATIC, MANUAL_BY_PARTICIPANT, MANUAL_BY_TOPIC, UNKNOWN_LIVELINESS_KIND;
+		AUTOMATIC, MANUAL_BY_PARTICIPANT, MANUAL_BY_TOPIC
 	}
 
-	
+
 	QosLiveliness() {
 		super(ParameterEnum.PID_LIVELINESS);
+	}
+
+	QosLiveliness(Kind kind, Duration_t lease_duration) {
+		super(ParameterEnum.PID_LIVELINESS);
+		switch(kind) {
+		case AUTOMATIC: this.kind = 0; break;
+		case MANUAL_BY_PARTICIPANT: this.kind = 1; break;
+		case MANUAL_BY_TOPIC: this.kind = 2; break;
+		}
+
+		this.lease_duration = lease_duration;
 	}
 
 	public Duration_t getLeaseDuration() {
 		return lease_duration;
 	}
-	
+
 	public Kind getKind() {
 		switch(kind) {
 		case 0: return Kind.AUTOMATIC;
 		case 1: return Kind.MANUAL_BY_PARTICIPANT;
 		case 2: return Kind.MANUAL_BY_TOPIC;
 		}
-		
-		return Kind.UNKNOWN_LIVELINESS_KIND;
+
+		return null;
 	}
 
 
@@ -45,7 +56,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy, DataWr
 		this.kind = bb.read_long();
 		lease_duration = new Duration_t(bb);
 	}
-	
+
 	@Override
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_long(kind);
@@ -61,10 +72,14 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy, DataWr
 		if (other instanceof QosLiveliness) {
 			QosLiveliness qOther = (QosLiveliness) other;
 			if ((kind >= qOther.kind) && 
-				(lease_duration.asMillis() <= qOther.lease_duration.asMillis())) {
+					(lease_duration.asMillis() <= qOther.lease_duration.asMillis())) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public static QosLiveliness defaultLiveliness() {
+		return new QosLiveliness(Kind.AUTOMATIC, new Duration_t(10, 0)); // TODO: check defaults
 	}
 }

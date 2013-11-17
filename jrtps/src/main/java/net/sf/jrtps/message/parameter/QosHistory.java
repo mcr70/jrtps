@@ -22,4 +22,9 @@ public class QosHistory extends Parameter implements DataReaderPolicy, TopicPoli
 	public boolean isCompatible(QosPolicy other) {
 		return true; // Always true. TODO: check this
 	}
+
+	public static QosPolicy defaultHistory() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

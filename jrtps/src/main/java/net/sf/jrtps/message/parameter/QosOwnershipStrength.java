@@ -10,6 +10,19 @@ public class QosOwnershipStrength extends Parameter implements DataWriterPolicy,
 		super(ParameterEnum.PID_OWNERSHIP_STRENGTH);
 	}
 
+	/**
+	 * Constructor
+	 * @param strength
+	 */
+	public QosOwnershipStrength(int strength) {
+		super(ParameterEnum.PID_OWNERSHIP_STRENGTH);
+		this.strength = strength;
+	}
+
+	/**
+	 * Get the strength.
+	 * @return
+	 */
 	public int getStrength() {
 		return strength;
 	}
@@ -27,5 +40,13 @@ public class QosOwnershipStrength extends Parameter implements DataWriterPolicy,
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		return true; // Always true
+	}
+	
+	/**
+	 * Get the default QosOwnershipStrength: 0
+	 * @return default QosOwnershipStrength
+	 */
+	public static QosOwnershipStrength defaultOwnershipStrength() {
+		return new QosOwnershipStrength(0);
 	}
 }

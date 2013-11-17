@@ -16,6 +16,15 @@ public class QosLifespan extends Parameter implements DataReaderPolicy, DataWrit
 		super(ParameterEnum.PID_LIFESPAN);
 	}
 
+	/**
+	 * Constructor for QosLifespan.
+	 * @param duration
+	 */
+	public QosLifespan(Duration_t duration) {
+		super(ParameterEnum.PID_LIFESPAN);
+		this.duration = duration;
+	}
+
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
 		this.duration = new Duration_t(bb);
@@ -29,5 +38,14 @@ public class QosLifespan extends Parameter implements DataReaderPolicy, DataWrit
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		return true; // Always true. TODO: check this
+	}
+
+	/**
+	 * Get the default QosLifespan with infinite duration.
+	 * 
+	 * @return default QosLifespan
+	 */
+	public static QosLifespan defaultLifespan() {
+		return new QosLifespan(Duration_t.INFINITE);
 	}
 }

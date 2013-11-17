@@ -12,6 +12,13 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy, To
 		super(ParameterEnum.PID_RESOURCE_LIMITS);
 	}
 
+	public QosResourceLimits(int max_samples, int max_instances, int max_samples_per_instance) {
+		super(ParameterEnum.PID_RESOURCE_LIMITS);
+		this.max_samples = max_samples;
+		this.max_instances = max_instances;
+		this.max_samples_per_instance = max_samples_per_instance;
+	}
+
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
 		max_samples = bb.read_long();
@@ -21,9 +28,9 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy, To
 
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
-		bb.write_long(getMaxSamples());
-		bb.write_long(getMaxInstances());
-		bb.write_long(getMaxSamplesPerInstance());
+		bb.write_long(max_samples);
+		bb.write_long(max_instances);
+		bb.write_long(max_samples_per_instance);
 	}
 
 	public int getMaxSamples() {
@@ -41,5 +48,13 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy, To
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		return true; // Always true. TODO: must be consistent with QosHistory
+	}
+
+	/**
+	 * Get the default QosResouceLimits: LENGTH_UNLIMITED, LENGTH_UNLIMITED, LENGTH_UNLIMITED
+	 * @return default QosResouceLimits
+	 */
+	public static QosResourceLimits defaultResourceLimits() {
+		return new QosResourceLimits(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
 }

@@ -14,18 +14,27 @@ public class QosDurability extends Parameter implements DataReaderPolicy, DataWr
 	private int kind;
 
 	public enum Kind {
-		VOLATILE(0), TRANSIENT_LOCAL(1), TRANSIENT(2), PERSISTENT(3), UNKNOWN_DURABILITY_KIND(99);
-
-		private int __kind;
-		private Kind(int kind) {
-			__kind = kind;
-		}
+		VOLATILE, TRANSIENT_LOCAL, TRANSIENT, PERSISTENT;
 	}
 	
 	QosDurability() {
 		super(ParameterEnum.PID_DURABILITY);
 	}
 	
+	/**
+	 * Constructor for QosDurability.
+	 * @param kind
+	 */
+	public QosDurability(Kind kind) {
+		super(ParameterEnum.PID_DURABILITY);
+		switch(kind) {
+		case VOLATILE: this.kind = 0; break;
+		case TRANSIENT_LOCAL: this.kind = 1; break;
+		case TRANSIENT: this.kind = 2; break;
+		case PERSISTENT: this.kind = 3; break;
+		}
+	}
+
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
 		this.kind = bb.read_long();
@@ -44,7 +53,7 @@ public class QosDurability extends Parameter implements DataReaderPolicy, DataWr
 		case 3: return Kind.PERSISTENT;
 		}
 		
-		return Kind.UNKNOWN_DURABILITY_KIND;
+		return null;
 	}
 	
 	public String toString() {
@@ -59,5 +68,14 @@ public class QosDurability extends Parameter implements DataReaderPolicy, DataWr
 		}
 		
 		return false;
+	}
+
+	/**
+	 * Get the default QosDurability: VOLATILE
+	 * 
+	 * @return default QosDurability
+	 */
+	public static QosDurability defaultDurability() {
+		return new QosDurability(Kind.VOLATILE);
 	}
 }

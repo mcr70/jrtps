@@ -3,6 +3,7 @@ package net.sf.jrtps.types;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class Duration_t {
+	public static final Duration_t INFINITE = new Duration_t(Integer.MAX_VALUE, 0);
 	public int sec;
 	public int nano;
 
@@ -22,7 +23,12 @@ public class Duration_t {
 	}
 
 	public long asMillis() {
-		return (sec * 1000) + (nano / 1000000);
+		long n = 0;
+		if (nano != 0) {
+			n = nano / 1000000;
+		}
+		
+		return (sec * 1000) + n;
 	}
 	
 	public void writeTo(RTPSByteBuffer buffer) {

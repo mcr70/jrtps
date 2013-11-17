@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosPresentation extends Parameter implements PublisherPolicy, SubscriberPolicy, InlineParameter {
 	public enum Kind {
-		INSTANCE, TOPIC, GROUP, ILLEGAL
+		INSTANCE, TOPIC, GROUP
 	};
 
 	private int access_scope;
@@ -49,7 +49,7 @@ public class QosPresentation extends Parameter implements PublisherPolicy, Subsc
 		case 2: return Kind.GROUP;
 		}
 
-		return Kind.ILLEGAL;
+		return null;
 	}
 
 	public String toString() {
@@ -73,5 +73,14 @@ public class QosPresentation extends Parameter implements PublisherPolicy, Subsc
 		}
 		
 		return false;
+	}
+
+	/**
+	 * Get the default QosPresentation: INSTANCE, false, false
+	 * 
+	 * @return default QosPresentation
+	 */
+	public static QosPresentation defaultPresentation() {
+		return new QosPresentation(Kind.INSTANCE, false, false);
 	}
 }

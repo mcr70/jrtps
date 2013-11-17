@@ -10,6 +10,11 @@ public class QosTransportPriority extends Parameter implements TopicPolicy, Data
 		super(ParameterEnum.PID_TRANSPORT_PRIORITY);
 	}
 
+	QosTransportPriority(int value) {
+		super(ParameterEnum.PID_TRANSPORT_PRIORITY);
+		this.value = value;
+	}
+
 	public int getValue() {
 		return value;
 	}
@@ -27,5 +32,13 @@ public class QosTransportPriority extends Parameter implements TopicPolicy, Data
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		return true; // Always true
+	}
+
+	/**
+	 * Get the default QosTransportPriority: 0
+	 * @return default QosTransportPriority
+	 */
+	public static QosPolicy defaultTransportPriority() {
+		return new QosTransportPriority(0);
 	}
 }
