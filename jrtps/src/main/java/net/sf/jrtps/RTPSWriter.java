@@ -303,6 +303,7 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
 		ParameterList inlineQos = new ParameterList();
@@ -314,8 +315,7 @@ public class RTPSWriter<T> extends Endpoint {
 			}
 			
 			byte[] bytes = null;
-			if (key.length < 16) {
-				
+			if (key.length < 16) {			
 				bytes = new byte[16];
 				System.arraycopy(key, 0, bytes, 0, key.length);
 			}
