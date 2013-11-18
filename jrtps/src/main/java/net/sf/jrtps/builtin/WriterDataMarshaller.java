@@ -1,5 +1,6 @@
 package net.sf.jrtps.builtin;
 
+import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.data.ParameterListEncapsulation;
@@ -9,6 +10,9 @@ import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Marshaller for builtin data for topic DCPSPublication.
  * With jRTPS, instances of this topic is of type WriterData.
@@ -17,6 +21,7 @@ import net.sf.jrtps.message.parameter.TypeName;
  *
  */
 public class WriterDataMarshaller extends Marshaller<WriterData> {
+	private static final Logger log = LoggerFactory.getLogger(WriterDataMarshaller.class);
 
 	@Override
 	public boolean hasKey(Class<?> data) {
@@ -31,7 +36,12 @@ public class WriterDataMarshaller extends Marshaller<WriterData> {
 	@Override
 	public WriterData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
-		WriterData wd = new WriterData(plEnc.getParameterList());
+		WriterData wd = null;
+		try {
+			wd = new WriterData(plEnc.getParameterList());
+		} catch (InconsistentPolicy e) {
+			log.error("Could not resolve inconsistent policies for WriterData", e);
+		}
 		
 		return wd;
 	}

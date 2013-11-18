@@ -1,5 +1,9 @@
 package net.sf.jrtps.builtin;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.data.ParameterListEncapsulation;
@@ -17,6 +21,7 @@ import net.sf.jrtps.message.parameter.TypeName;
  *
  */
 public class ReaderDataMarshaller extends Marshaller<ReaderData> {
+	private static final Logger log = LoggerFactory.getLogger(ReaderDataMarshaller.class);
 
 	@Override
 	public boolean hasKey(Class<?> data) {
@@ -31,7 +36,12 @@ public class ReaderDataMarshaller extends Marshaller<ReaderData> {
 	@Override
 	public ReaderData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
-		ReaderData rd = new ReaderData(plEnc.getParameterList());
+		ReaderData rd = null;
+		try {
+			rd = new ReaderData(plEnc.getParameterList());
+		} catch (InconsistentPolicy e) {
+			log.error("Could not resolve inconsistent policies for ReaderData", e);
+		}
 		
 		return rd;
 	}

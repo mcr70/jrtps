@@ -2,12 +2,19 @@ package net.sf.jrtps.builtin;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
+import net.sf.jrtps.InconsistentPolicy;
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.InlineParameter;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.GUID_t;
 
 public class DiscoveredData {
+	// While reading data from stream, qos policies might come in 'wrong' order.
+	// This list keeps track of inconsistencies occured
+	private List<QosPolicy> inconsistenPolicies = new LinkedList<>(); 
+	
 	protected String typeName;
 	protected String topicName;
 	// On spec, key is BuiltinTopicKey_t (4 bytes), but KeyHash Parameter is 16 bytes.
@@ -15,7 +22,7 @@ public class DiscoveredData {
 	// interpretation is, for builtin topics, key is 
 	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
 	protected GUID_t key;  
-	protected List<QosPolicy> qosPolicyList = new LinkedList<>();
+	protected QualityOfService qos = new QualityOfService();
 	
 	/**
 	 * This constructor is used when DiscoveredData is being created from 
@@ -35,6 +42,42 @@ public class DiscoveredData {
 		this.typeName = typeName;
 		this.topicName = topicName;
 		this.key = key;
+	}
+	
+	/**
+	 * This method must be called after all the Parameters have been read from the stream to
+	 * resolve possible inconsistent policies. 
+	 * 
+	 * @throws InconsistentPolicy if discovered data would contain inconsistent policies. 
+	 */
+	protected void resolveInconsistencies() throws InconsistentPolicy {
+		if (inconsistenPolicies.size() > 0) {
+			resolveInconsistencies(inconsistenPolicies);
+		}
+	}
+	
+	private void resolveInconsistencies(List<QosPolicy> inconsistentPolicies) throws InconsistentPolicy {
+		int size = inconsistenPolicies.size();
+		
+		for (QosPolicy qp : inconsistentPolicies) {
+			try {
+				qos.setPolicy(qp);
+				inconsistenPolicies.remove(qp);
+			} catch (InconsistentPolicy e) {
+				// Ignore during resolve
+			}
+		}
+		
+		int __size = inconsistenPolicies.size();
+		
+		if (size != __size) {
+			resolveInconsistencies(inconsistentPolicies);
+		}
+		else {
+			if (inconsistentPolicies.size() > 0) {
+				throw new InconsistentPolicy(inconsistenPolicies.toString());
+			}
+		}
 	}
 	
 	/**
@@ -69,22 +112,16 @@ public class DiscoveredData {
 	
 	/**
 	 * Adds a QosPolicy.
-	 * @param qos
+	 * @param policy
 	 */
-	protected void addQosPolicy(QosPolicy qos) {
-		// TODO: reader, writer & topics have different set of QualityOfServices.
-		//       create tagging interfaces: Reader/Writer/TopicPolicy extends QosPolicy
-		qosPolicyList.add(qos);
+	protected void addQosPolicy(QosPolicy policy) {
+		try {
+			qos.setPolicy(policy);
+		} catch (InconsistentPolicy e) {
+			inconsistenPolicies.add(policy);
+		}
 	}
 	
-	/**
-	 * Get the QosPolicies.
-	 * @return a List of QosPolicies
-	 */
-	public List<QosPolicy> getQosPolicies() {
-		return qosPolicyList;
-	}
-
 	/**
 	 * Get inlineable Qos policies. Such policies implement InlineParameter.
 	 * 
@@ -92,18 +129,11 @@ public class DiscoveredData {
 	 * @see net.sf.jrtps.message.Data#getInlineQos()
 	 * @see InlineParameter
 	 */
-	public List<QosPolicy> getInlineableQosPolicies() {
-		List<QosPolicy> inlineQos = new LinkedList<>();
-		for (QosPolicy qp : qosPolicyList) {
-			if (qp instanceof InlineParameter) {
-				inlineQos.add(qp);
-			}
-		}
-		
-		return inlineQos;
+	public Set<QosPolicy> getInlineableQosPolicies() {
+		return qos.getInlinePolicies();
 	}
 	
 	public String toString() {
-		return topicName + "(" + typeName + "): " + key  + ", QoS: " + getQosPolicies();
+		return topicName + "(" + typeName + "): " + key  + ", QoS: " + qos;
 	}
 }
