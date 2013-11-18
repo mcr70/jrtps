@@ -24,16 +24,20 @@ public class Endpoint {
 
 	private final Configuration configuration;
 
+	private QualityOfService qos;
+
 
 	/**
 	 * 
 	 * @param prefix prefix from the participant that creates this endpoint.
 	 * @param entityId
 	 * @param topicName
+	 * @param qos 
 	 */
-	protected Endpoint(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Configuration configuration) {
+	protected Endpoint(GuidPrefix_t prefix, EntityId_t entityId, String topicName, QualityOfService qos, Configuration configuration) {
 		this.guid = new GUID_t(prefix, entityId);
 		this.topicName = topicName;
+		this.qos = qos;
 		this.configuration = configuration;
 	}
 
@@ -78,6 +82,13 @@ public class Endpoint {
 		this.discoveredParticipants = discoveredParticipants;
 	}
 
+	/**
+	 * Gets the QualityOfService associated with this entity.
+	 * @return QualityOfService
+	 */
+	protected QualityOfService getQualityOfService() {
+		return qos;
+	}
 
 	protected boolean sendMessage(Message m, GuidPrefix_t targetPrefix) {
 		// TODO: we should check, that there is a recipient we need in each Locator.

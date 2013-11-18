@@ -235,7 +235,7 @@ public class RTPSParticipant {
 	 * @return RTPSWriter
 	 */
 	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
-		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, config);
+		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);
@@ -298,8 +298,9 @@ public class RTPSParticipant {
 	 * @param qos 
 	 * @return RTPSReader
 	 */
-	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
-		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, config);
+	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
+			QualityOfService qos) {
+		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, qos, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
 		readerEndpoints.add(reader);
