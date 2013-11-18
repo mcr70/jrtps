@@ -10,6 +10,8 @@ import net.sf.jrtps.types.Duration_t;
  * On the subscribing side the setting establishes a minimum requirement for the remote publishers 
  * that are expected to supply the data values. <p>
  * 
+ * This policy must be consistent with QosTimeBasedFilter, so that period <= minimum_separation.
+ * 
  * See 7.1.3.7 DEADLINE
  * 
  * @author mcr70
@@ -37,6 +39,10 @@ public class QosDeadline extends Parameter implements DataReaderPolicy, DataWrit
 		period.writeTo(bb);
 	}
 
+	public Duration_t getPeriod() {
+		return period;
+	}
+	
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		if (other instanceof QosDeadline) {
