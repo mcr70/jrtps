@@ -2,6 +2,7 @@ package net.sf.jrtps.builtin;
 
 import java.util.Iterator;
 
+import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
@@ -17,7 +18,7 @@ public class WriterData extends DiscoveredData {
 	
 	private static final Logger log = LoggerFactory.getLogger(WriterData.class);
 	
-	public WriterData(ParameterList parameterList) {
+	public WriterData(ParameterList parameterList) throws InconsistentPolicy {
 		Iterator<Parameter> iter = parameterList.getParameters().iterator();
 		while (iter.hasNext()) {
 			Parameter param = iter.next();
@@ -54,6 +55,9 @@ public class WriterData extends DiscoveredData {
 		if (super.typeName == null) { // Other vendors may use different typeName
 			super.typeName = WriterData.class.getName();
 		}
+		
+		// Resolve possible inconsistencies
+		resolveInconsistencies();
 	}
 	
 	public WriterData(String topicName, String typeName, GUID_t key) {

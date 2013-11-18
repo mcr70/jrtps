@@ -61,8 +61,10 @@ class HistoryCache {
 
 	long getSeqNumMin() {
 		if (seqNumMin == 0) { // 0 means not set. 
-			CacheChange cc = changes.get(0); // Get first one. TODO: IndexOutOfBounds
-			seqNumMin = cc.getSequenceNumber();
+			if (changes.size() > 0) {
+				CacheChange cc = changes.get(0); // Get first one. TODO: IndexOutOfBounds
+				seqNumMin = cc.getSequenceNumber();
+			}
 		}
 
 		return seqNumMin;

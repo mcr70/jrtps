@@ -37,21 +37,6 @@ import net.sf.jrtps.message.parameter.TopicPolicy;
 public class QualityOfService {
 	private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
 
-	/**
-	 * InconsistentPolicy exception. This exception gets thrown by setPolicy method,
-	 * if the policy being set is somehow insconsistent.
-	 * 
-	 * @author mcr70
-	 *
-	 */
-	public class InconsistentPolicy extends Exception {
-		private static final long serialVersionUID = 1L;
-
-		public InconsistentPolicy(String msg) {
-			super(msg);
-		}
-	}
-
 	private HashMap<Class<? extends QosPolicy>, QosPolicy> policies = new HashMap<>();
 
 	/**
