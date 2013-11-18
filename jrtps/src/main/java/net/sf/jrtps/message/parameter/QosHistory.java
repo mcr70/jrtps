@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * QosHistory.
- * This policy must be consistent with QosResoruceLimits, so that HISTORY.depth <= RESOURCE_LIMITS.max_samples_per_instance
+ * This policy must be consistent with QosResourceLimits, so that HISTORY.depth <= RESOURCE_LIMITS.max_samples_per_instance
  * 
  * @author mcr70
  *
