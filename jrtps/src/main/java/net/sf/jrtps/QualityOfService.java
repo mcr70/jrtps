@@ -4,12 +4,16 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.InlineParameter;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDestinationOrder;
 import net.sf.jrtps.message.parameter.QosDurability;
+import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosLatencyBudget;
 import net.sf.jrtps.message.parameter.QosLifespan;
 import net.sf.jrtps.message.parameter.QosLiveliness;
@@ -31,23 +35,87 @@ import net.sf.jrtps.message.parameter.TopicPolicy;
  *
  */
 public class QualityOfService {
+	private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
+
+	/**
+	 * InconsistentPolicy exception. This exception gets thrown by setPolicy method,
+	 * if the policy being set is somehow insconsistent.
+	 * 
+	 * @author mcr70
+	 *
+	 */
+	public class InconsistentPolicy extends Exception {
+		private static final long serialVersionUID = 1L;
+
+		public InconsistentPolicy(String msg) {
+			super(msg);
+		}
+	}
+
 	private HashMap<Class<? extends QosPolicy>, QosPolicy> policies = new HashMap<>();
-	
+
 	/**
 	 * Constructor with default QosPolicies.
 	 */
 	public QualityOfService() {
 		createDefaultPolicies();
 	}
-	
+
 	/**
-	 * Sets a given QosPolicy.
-	 * @param policy
+	 * Sets a given QosPolicy. Old value will be overridden. 
+	 *  
+	 * @param policy QosPolicy to set.
+	 * @throws InconsistentPolicy is thrown if there is some inconsistent value with the policy
 	 */
-	public void setPolicy(QosPolicy policy) {
+	public void setPolicy(QosPolicy policy) throws InconsistentPolicy {
+		checkForInconsistencies(policy);
+
 		policies.put(policy.getClass(), policy);
 	}
-	
+
+	private void checkForInconsistencies(QosPolicy policy) throws InconsistentPolicy {
+		if (policy instanceof QosDeadline) { // ----------------------  DEADLINE  -----------------
+			QosTimeBasedFilter tbf = (QosTimeBasedFilter) policies.get(QosTimeBasedFilter.class);
+			if (tbf != null) {
+				QosDeadline dl = (QosDeadline) policy;
+				if (dl.getPeriod().asMillis() < tbf.getMinimumSeparation().asMillis()) {
+					throw new InconsistentPolicy("DEADLINE.period must be >= TIME_BASED_FILTER.minimum_separation");
+				}
+			}
+		}
+		else if (policy instanceof QosTimeBasedFilter) { // ----------  TIME_BASED_FILTER  --------
+			QosDeadline dl = (QosDeadline) policies.get(QosDeadline.class);
+			if (dl != null) {
+				QosTimeBasedFilter tbf = (QosTimeBasedFilter) policy;
+				if (dl.getPeriod().asMillis() < tbf.getMinimumSeparation().asMillis()) {
+					throw new InconsistentPolicy("DEADLINE.period must be >= TIME_BASED_FILTER.minimum_separation");
+				}
+			}
+		}
+		else if (policy instanceof QosHistory) { // ------------------  HISTORY  ------------------
+			QosResourceLimits rl = (QosResourceLimits) policies.get(QosResourceLimits.class);
+			if (rl != null) {
+				QosHistory h = (QosHistory) policy;
+				if (rl.getMaxSamplesPerInstance() < h.getDepth()) {
+					throw new InconsistentPolicy("HISTORY.depth must be <= RESOURCE_LIMITS.max_samples_per_instance");
+				}
+			}
+		}
+		else if (policy instanceof QosResourceLimits) { // ----------  RESOURCE_LIMITS  ----------
+			QosResourceLimits rl = (QosResourceLimits) policy;
+			if (rl.getMaxSamples() < rl.getMaxSamplesPerInstance()) {
+				throw new InconsistentPolicy("RESOURCE_LIMITS.max_samples must be >= RESOURCE_LIMITS.max_samples_per_instance");				
+			}
+
+			QosHistory h = (QosHistory) policies.get(QosHistory.class);
+			if (h != null) {
+				if (rl.getMaxSamplesPerInstance() < h.getDepth()) {
+					throw new InconsistentPolicy("HISTORY.depth must be <= RESOURCE_LIMITS.max_samples_per_instance");
+				}				
+			}
+		}
+	}
+
 	/**
 	 * Gets all the DataReaderPolicies from this QualityOfService.
 	 * A new Set is always created when calling this method. Changes to returned
@@ -66,7 +134,7 @@ public class QualityOfService {
 
 		return readerPolicies;
 	}
-	
+
 	/**
 	 * Gets all the DataWriterPolicies from this QualityOfService.
 	 * A new Set is always created when calling this method. Changes to returned
@@ -85,7 +153,7 @@ public class QualityOfService {
 
 		return writerPolicies;
 	}
-	
+
 	/**
 	 * Gets all the TopicPolicies from this QualityOfService.
 	 * A new Set is always created when calling this method. Changes to returned
@@ -138,23 +206,28 @@ public class QualityOfService {
 	 * Create default QosPolicies.
 	 */
 	private void createDefaultPolicies() {
-		policies.put(QosDeadline.class, QosDeadline.defaultDeadline());
-		policies.put(QosDestinationOrder.class, QosDestinationOrder.defaultDestinationOrder());
-		policies.put(QosDurability.class, QosDurability.defaultDurability());
-		//policies.put(QosDurabilityService.class, QosDurabilityService.defaultDurabilityService());
-		//policies.put(QosHistory.class, QosHistory.defaultHistory());
-		policies.put(QosLatencyBudget.class, QosLatencyBudget.defaultLatencyBudget());
-		policies.put(QosLifespan.class, QosLifespan.defaultLifespan());
-		policies.put(QosLiveliness.class, QosLiveliness.defaultLiveliness()); // TODO: check default
-		policies.put(QosOwnership.class, QosOwnership.defaultOwnership()); // TODO: check default
-		policies.put(QosOwnershipStrength.class, QosOwnershipStrength.defaultOwnershipStrength()); // TODO: check default
-		policies.put(QosPartition.class, QosPartition.defaultPartition()); // TODO: check default
-		policies.put(QosPresentation.class, QosPresentation.defaultPresentation()); // TODO: check default
-		policies.put(QosReliability.class, QosReliability.defaultReliability()); // TODO: check default
-		policies.put(QosResourceLimits.class, QosResourceLimits.defaultResourceLimits()); // TODO: check default
-		policies.put(QosTransportPriority.class, QosTransportPriority.defaultTransportPriority()); // TODO: check default
-		policies.put(QosTimeBasedFilter.class, QosTimeBasedFilter.defaultTimeBasedFilter()); // TODO: check default
-		
+		try {
+			setPolicy(QosDeadline.defaultDeadline());
+			setPolicy(QosDestinationOrder.defaultDestinationOrder());
+			setPolicy(QosDurability.defaultDurability());
+			//policies.put(QosDurabilityService.class, QosDurabilityService.defaultDurabilityService());
+			setPolicy(QosHistory.defaultHistory());
+			setPolicy(QosLatencyBudget.defaultLatencyBudget());
+			setPolicy(QosLifespan.defaultLifespan());
+			setPolicy(QosLiveliness.defaultLiveliness()); // TODO: check default
+			setPolicy(QosOwnership.defaultOwnership()); // TODO: check default
+			setPolicy(QosOwnershipStrength.defaultOwnershipStrength()); // TODO: check default
+			setPolicy(QosPartition.defaultPartition()); // TODO: check default
+			setPolicy(QosPresentation.defaultPresentation()); // TODO: check default
+			setPolicy(QosReliability.defaultReliability()); // TODO: check default
+			setPolicy(QosResourceLimits.defaultResourceLimits()); // TODO: check default
+			setPolicy(QosTransportPriority.defaultTransportPriority()); // TODO: check default
+			setPolicy(QosTimeBasedFilter.defaultTimeBasedFilter()); // TODO: check default
+		} catch (InconsistentPolicy e) {
+			log.error("Internal error", e);
+			throw new RuntimeException(e);
+		} 
+
 		// QosUserData, QosGroupData, QosTopicData is omitted. 		
 	}
 }

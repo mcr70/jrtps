@@ -5,7 +5,13 @@ import java.util.Arrays;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
-
+/**
+ * QosTimeBasedFilter.
+ * This policy must be consistent with QosDeadline, so that period <= minimum_separation.
+ * 
+ * @author mcr70
+ *
+ */
 public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy {
 	private Duration_t minimum_separation;
 

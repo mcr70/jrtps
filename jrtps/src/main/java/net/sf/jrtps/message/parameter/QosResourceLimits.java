@@ -2,7 +2,13 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-
+/**
+ * QosResourceLimits.
+ * This policy must be consistent with QosHistory, so that HISTORY.depth <= RESOURCE_LIMITS.max_samples_per_instance.
+ * Also, max_samples >= max_samples_per_instance
+ * 
+ * @author mcr70
+ */
 public class QosResourceLimits extends Parameter implements DataReaderPolicy, TopicPolicy, DataWriterPolicy {
 	private int max_samples;
 	private int max_instances;
