@@ -79,7 +79,8 @@ public class QualityOfService {
 			if (tbf != null) {
 				QosDeadline dl = (QosDeadline) policy;
 				if (dl.getPeriod().asMillis() < tbf.getMinimumSeparation().asMillis()) {
-					throw new InconsistentPolicy("DEADLINE.period must be >= TIME_BASED_FILTER.minimum_separation");
+					throw new InconsistentPolicy("DEADLINE.period(" + dl.getPeriod() + 
+							") must be >= TIME_BASED_FILTER.minimum_separation(" + tbf.getMinimumSeparation() + ")");
 				}
 			}
 		}
@@ -88,7 +89,9 @@ public class QualityOfService {
 			if (dl != null) {
 				QosTimeBasedFilter tbf = (QosTimeBasedFilter) policy;
 				if (dl.getPeriod().asMillis() < tbf.getMinimumSeparation().asMillis()) {
-					throw new InconsistentPolicy("DEADLINE.period must be >= TIME_BASED_FILTER.minimum_separation");
+					System.out.println("** " + dl.getPeriod().asMillis() + ", " + tbf.getMinimumSeparation().asMillis());
+					throw new InconsistentPolicy("DEADLINE.period(" + dl.getPeriod() + 
+							") must be >= TIME_BASED_FILTER.minimum_separation(" + tbf.getMinimumSeparation() + ")");
 				}
 			}
 		}

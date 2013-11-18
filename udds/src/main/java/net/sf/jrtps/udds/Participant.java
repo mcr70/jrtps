@@ -4,6 +4,7 @@ import java.net.SocketException;
 import java.util.HashMap;
 
 import net.sf.jrtps.Marshaller;
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
@@ -75,7 +76,7 @@ public class Participant {
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName) {
 		Marshaller<?> m = getMarshaller(typeName);
-		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m);
+		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, new QualityOfService());
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
 		return new DataReader<T>(topicName, rtps_reader);
@@ -103,7 +104,7 @@ public class Participant {
 	 */
 	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName) {
 		Marshaller<?> m = getMarshaller(typeName);
-		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m);
+		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m, new QualityOfService());
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
 		return new DataWriter<T>(topicName, rtps_writer);

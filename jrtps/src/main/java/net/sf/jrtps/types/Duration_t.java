@@ -27,8 +27,7 @@ public class Duration_t {
 		if (nano != 0) {
 			n = nano / 1000000;
 		}
-		
-		return (sec * 1000) + n;
+		return (long)sec * 1000 + n;
 	}
 	
 	public void writeTo(RTPSByteBuffer buffer) {

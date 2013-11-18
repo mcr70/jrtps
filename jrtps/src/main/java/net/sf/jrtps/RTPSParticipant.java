@@ -116,37 +116,37 @@ public class RTPSParticipant {
 		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
 		TopicDataMarshaller tdm = new TopicDataMarshaller();
 
-
+		QualityOfService qos = new QualityOfService();
 		// ----  Create a Writers for SEDP  ---------
 		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
 
 
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader<ParticipantData> partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
-				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, qos);
 		partReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader<WriterData> pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
 		pubReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 
 		RTPSReader<ReaderData> subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(),rdm);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
 		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
 		RTPSReader<TopicData> topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
-				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm);
+				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, qos);
 		topicReader.addListener(new BuiltinTopicDataListener(this));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, qos);
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
@@ -186,7 +186,8 @@ public class RTPSParticipant {
 
 	/**
 	 * Creates an user defined writer. Topic name is the simple name of Class given.
-	 * and type name is the fully qualified class name of the class given.
+	 * and type name is the fully qualified class name of the class given. QualityOfService
+	 * is default.
 	 * 
 	 * @param c
 	 * @param marshaller
@@ -195,7 +196,7 @@ public class RTPSParticipant {
 	 * @see java.lang.Class#getName()
 	 */
 	public <T> RTPSWriter<T> createWriter(Class<T> c, Marshaller<?> marshaller) {
-		return createWriter(c.getSimpleName(), c, c.getName(), marshaller);
+		return createWriter(c.getSimpleName(), c, c.getName(), marshaller, new QualityOfService());
 	}
 	
 	/**
@@ -205,9 +206,10 @@ public class RTPSParticipant {
 	 * @param type
 	 * @param typeName
 	 * @param marshaller
+	 * @param qos QualityOfService
 	 * @return RTPSWriter
 	 */
-	public <T>RTPSWriter<T> createWriter(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller) {
+	public <T>RTPSWriter<T> createWriter(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
 		int myIdx = userEntityIdx++;
 		byte[] myKey = new byte[3];
 		myKey[0] = (byte) (myIdx & 0xff);
@@ -219,7 +221,7 @@ public class RTPSParticipant {
 			kind = 0x03; // User defined writer, no key
 		}
 		
-		return createWriter(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
+		return createWriter(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
 	}
 
 	/**
@@ -229,9 +231,10 @@ public class RTPSParticipant {
 	 * @param topicName
 	 * @param typeName
 	 * @param marshaller
+	 * @param qos
 	 * @return RTPSWriter
 	 */
-	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
+	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
 		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
@@ -256,7 +259,7 @@ public class RTPSParticipant {
 	 * @see java.lang.Class#getName()
 	 */
 	public <T> RTPSReader<T> createReader(Class<T> c, Marshaller<?> marshaller) {
-		return createReader(c.getSimpleName(), c, c.getName(), marshaller);
+		return createReader(c.getSimpleName(), c, c.getName(), marshaller, new QualityOfService());
 	}
 	
 	/**
@@ -268,7 +271,8 @@ public class RTPSParticipant {
 	 * @param marshaller
 	 * @return RTPSReader
 	 */
-	public <T> RTPSReader<T> createReader(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller) {
+	public <T> RTPSReader<T> createReader(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller, 
+			QualityOfService qos) {
 		int myIdx = userEntityIdx++;
 		byte[] myKey = new byte[3];
 		myKey[0] = (byte) (myIdx & 0xff);
@@ -280,7 +284,7 @@ public class RTPSParticipant {
 			kind = 0x04; // User defined reader, no key
 		}
 		
-		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller);
+		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
 	}
 
 	
@@ -291,9 +295,10 @@ public class RTPSParticipant {
 	 * @param topicName
 	 * @param typeName
 	 * @param marshaller
+	 * @param qos 
 	 * @return RTPSReader
 	 */
-	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller) {
+	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
 		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
