@@ -37,7 +37,7 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy {
 
 	/**
 	 * Get the minimum separation.
-	 * @return
+	 * @return minimum separation
 	 */
 	public Duration_t getMinimumSeparation() {
 		return minimum_separation;

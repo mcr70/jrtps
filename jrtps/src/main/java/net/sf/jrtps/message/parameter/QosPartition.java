@@ -55,7 +55,7 @@ public class QosPartition extends Parameter implements SubscriberPolicy, Publish
 
 	/**
 	 * Default partition.
-	 * @return
+	 * @return QosPartition
 	 */
 	public static QosPartition defaultPartition() {
 		return new QosPartition(new String[0]); // TODO: check default
