@@ -21,7 +21,7 @@ public class QosOwnershipStrength extends Parameter implements DataWriterPolicy,
 
 	/**
 	 * Get the strength.
-	 * @return
+	 * @return strength
 	 */
 	public int getStrength() {
 		return strength;

@@ -8,12 +8,6 @@ import org.junit.Test;
 public class RTPSByteBufferTest {
 	@Test
 	public void testAlign() {
-		System.out.println("0 % 4 == " + (0%4));
-		System.out.println("1 % 4 == " + (1%4));
-		System.out.println("2 % 4 == " + (2%4));
-		System.out.println("3 % 4 == " + (3%4));
-		System.out.println("4 % 4 == " + (4%4));
-		
 		byte[] bytes = new byte[10];
 		RTPSByteBuffer bb = new RTPSByteBuffer(bytes);
 		int pos1 = bb.getBuffer().position();		
