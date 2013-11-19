@@ -4,8 +4,8 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
 /**
- * This policy controls the mechanism and parameters used by the Service to ensure that particular entities on the network
- * are still “alive.”<p>
+ * This policy controls the mechanism and parameters used by the Service to ensure that particular 
+ * entities on the network are still “alive.”<p>
  * 
  * See DDS specification v1.2, 7.1.3.11 Liveliness
  * 
@@ -17,7 +17,21 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	private Duration_t lease_duration;
 
 	public enum Kind {
-		AUTOMATIC, MANUAL_BY_PARTICIPANT, MANUAL_BY_TOPIC
+		/**
+		 * With this Kind, Participant automatically manages liveliness of Writers having this
+		 * Kind.
+		 */
+		AUTOMATIC, 
+		/**
+		 * With this Kind, it is sufficient that one Writer within Participant asserts 
+		 * its liveliness. 
+		 */
+		MANUAL_BY_PARTICIPANT, 
+		/**
+		 * Writer that has this kind of Liveliness, has to manage liveliness by itself
+		 * by writing some samples, or by calling assertLiveliness explicitly.
+		 */
+		MANUAL_BY_TOPIC
 	}
 
 
@@ -25,7 +39,14 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 		super(ParameterEnum.PID_LIVELINESS);
 	}
 
-	QosLiveliness(Kind kind, Duration_t lease_duration) {
+	/**
+	 * Constructor of QosLiveliness.
+	 * @param kind Kind of liveliness
+	 * @param lease_duration Duration of the lease. If a Writer fails to assert liveliness with 
+	 *        lease_duration, it is assumed 'dead'
+	 * @see Kind
+	 */
+	public QosLiveliness(Kind kind, Duration_t lease_duration) {
 		super(ParameterEnum.PID_LIVELINESS);
 		switch(kind) {
 		case AUTOMATIC: this.kind = 0; break;
@@ -36,6 +57,10 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 		this.lease_duration = lease_duration;
 	}
 
+	/**
+	 * Get the lease_duration
+	 * @return lease_duration
+	 */
 	public Duration_t getLeaseDuration() {
 		return lease_duration;
 	}
@@ -47,14 +72,14 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 		case 2: return Kind.MANUAL_BY_TOPIC;
 		}
 
-		return null;
+		return null; 
 	}
 
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.kind = bb.read_long();
-		lease_duration = new Duration_t(bb);
+		this.kind = bb.read_long(); // TODO: we should throw an exception, if kind is illegal
+		this.lease_duration = new Duration_t(bb);
 	}
 
 	@Override
@@ -67,10 +92,24 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 		return super.toString() + "(" + getKind() + ", " + lease_duration + ")";
 	}
 
+	/**
+	 * Check if this QosLiveliness is compatible with requested.
+	 * It is considered compatible, if <p>
+	 * 
+	 * <blockquote>
+	 * <i>this.kind >= requested.kind</i> <b>AND</b><br> 
+	 * <i>this.lease_duration <= requested.lease_duration</i>
+	 * </blockquote>
+	 * 
+	 * For the comparison, Kind is ordered like AUTOMATIC < MANUAL_BY_PARTICIPANT < MANUAL_BY_TOPIC
+	 * 
+	 * @see Kind
+	 * @return true, if compatible
+	 */
 	@Override
-	public boolean isCompatible(QosLiveliness other) {
-		if ((kind >= other.kind) && 
-				(lease_duration.asMillis() <= other.lease_duration.asMillis())) {
+	public boolean isCompatible(QosLiveliness requested) {
+		if ((kind >= requested.kind) && 
+				(lease_duration.asMillis() <= requested.lease_duration.asMillis())) {
 			return true;
 		}
 		return false;
