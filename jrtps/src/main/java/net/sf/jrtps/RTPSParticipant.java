@@ -122,7 +122,7 @@ public class RTPSParticipant {
 				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
 				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
-		// NOTE: 
+		// NOTE: It is not mandatory to publish TopicData
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
 
@@ -141,6 +141,7 @@ public class RTPSParticipant {
 				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
 		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
+		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		RTPSReader<TopicData> topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
 				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, qos);
 		topicReader.addListener(new BuiltinTopicDataListener(this));
