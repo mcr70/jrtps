@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosTransportPriority extends Parameter implements TopicPolicy, DataWriterPolicy, InlineParameter {
+public class QosTransportPriority extends Parameter implements TopicPolicy<QosTransportPriority>, DataWriterPolicy<QosTransportPriority>, InlineParameter {
 	private int value;
 
 	QosTransportPriority() {
@@ -30,7 +30,7 @@ public class QosTransportPriority extends Parameter implements TopicPolicy, Data
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosTransportPriority other) {
 		return true; // Always true
 	}
 

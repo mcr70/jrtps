@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
 
-public class QosReliability extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosReliability extends Parameter implements DataReaderPolicy<QosReliability>, DataWriterPolicy<QosReliability>, TopicPolicy<QosReliability>, InlineParameter {
 	private int kind;
 	private Duration_t max_blocking_time;
 	
@@ -57,13 +57,8 @@ public class QosReliability extends Parameter implements DataReaderPolicy, DataW
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosReliability) {
-			QosReliability qOther = (QosReliability) other;
-			
-			return kind >= qOther.kind;
-		}
-		return false;
+	public boolean isCompatible(QosReliability other) {
+		return kind >= other.kind;
 	}
 
 	/**

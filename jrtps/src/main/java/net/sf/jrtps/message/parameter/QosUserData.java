@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosUserData extends Parameter implements DataReaderPolicy, DataWriterPolicy {
+public class QosUserData extends Parameter implements DataReaderPolicy<QosUserData>, DataWriterPolicy<QosUserData> {
 	QosUserData() {
 		super(ParameterEnum.PID_USER_DATA);
 	}
@@ -19,7 +19,7 @@ public class QosUserData extends Parameter implements DataReaderPolicy, DataWrit
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosUserData other) {
 		return true; // Always true
 	}
 }

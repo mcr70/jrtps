@@ -9,7 +9,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class QosHistory extends Parameter implements DataReaderPolicy, TopicPolicy, DataWriterPolicy {
+public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory>, TopicPolicy<QosHistory>, DataWriterPolicy<QosHistory> {
 	private int kind;
 	private int depth;
 	
@@ -54,7 +54,7 @@ public class QosHistory extends Parameter implements DataReaderPolicy, TopicPoli
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosHistory other) {
 		return true; // Always true. TODO: check this
 	}
 

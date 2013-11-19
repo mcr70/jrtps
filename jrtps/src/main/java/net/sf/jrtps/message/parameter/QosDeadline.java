@@ -17,13 +17,13 @@ import net.sf.jrtps.types.Duration_t;
  * @author mcr70
  *
  */
-public class QosDeadline extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadline>, DataWriterPolicy<QosDeadline>, TopicPolicy<QosDeadline>, InlineParameter {
 	private Duration_t period;
-	
+
 	QosDeadline() {
 		super(ParameterEnum.PID_DEADLINE);
 	}
-	
+
 	public QosDeadline(Duration_t period) {
 		super(ParameterEnum.PID_DEADLINE);
 		this.period = period;
@@ -46,20 +46,16 @@ public class QosDeadline extends Parameter implements DataReaderPolicy, DataWrit
 	public Duration_t getPeriod() {
 		return period;
 	}
-	
+
 	/**
 	 * Checks, if this QosDeadline is compatible with the other QosPolicy.
 	 * 
 	 * @return true, if this.period <= other.period
 	 */
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosDeadline) {
-			QosDeadline qOther = (QosDeadline) other;
-			return period.asMillis() <= qOther.period.asMillis();
-		}
-		
-		return false;
+	public boolean isCompatible(QosDeadline other) {
+		QosDeadline qOther = (QosDeadline) other;
+		return period.asMillis() <= qOther.period.asMillis();
 	}
 
 	/**

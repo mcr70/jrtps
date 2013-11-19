@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosPresentation extends Parameter implements PublisherPolicy, SubscriberPolicy, InlineParameter {
+public class QosPresentation extends Parameter implements PublisherPolicy<QosPresentation>, SubscriberPolicy<QosPresentation>, InlineParameter {
 	public enum Kind {
 		INSTANCE, TOPIC, GROUP
 	};
@@ -57,21 +57,17 @@ public class QosPresentation extends Parameter implements PublisherPolicy, Subsc
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosPresentation) {
-			QosPresentation qOther = (QosPresentation) other;
-
-			if (access_scope >= qOther.access_scope) {
-				if ((qOther.coherent_access == false) ||
-						(coherent_access == true && qOther.coherent_access == true)) {
-					if ((qOther.ordered_access == false) ||
-							(ordered_access == true && qOther.ordered_access == true)) {
-						return true;
-					}
+	public boolean isCompatible(QosPresentation other) {
+		if (access_scope >= other.access_scope) {
+			if ((other.coherent_access == false) ||
+					(coherent_access == true && other.coherent_access == true)) {
+				if ((other.ordered_access == false) ||
+						(ordered_access == true && other.ordered_access == true)) {
+					return true;
 				}
 			}
 		}
-		
+
 		return false;
 	}
 
