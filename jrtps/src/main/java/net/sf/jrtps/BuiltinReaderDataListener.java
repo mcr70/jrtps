@@ -47,7 +47,15 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 					w.removeMatchedReader(readerData);
 				}
 				else { // TODO: check QoS compatibility
-					w.addMatchedReader(readerData);
+					QualityOfService requested = readerData.getQualityOfService();
+					QualityOfService offered = w.getQualityOfService();
+					log.debug("Check for compatible QoS for {}", w.getGuid().entityId);
+					if (offered.isCompatibleWith(requested)) {
+						w.addMatchedReader(readerData);
+					}
+					else {
+						log.warn("Discovered reader had incompatible QoS with writer. {}, {}", readerData, w);
+					}					
 				}
 
 				// builtin entities are handled with SEDP in ParticipantData reception

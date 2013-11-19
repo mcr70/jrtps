@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * @see SampleListener
  */
 public class RTPSReader<T> extends Endpoint {
-	private static final Logger logger = LoggerFactory.getLogger(RTPSReader.class);
+	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
 	private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
@@ -55,7 +55,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param listener SampleListener to add.
 	 */
 	public void addListener(SampleListener<T> listener) {
-		logger.debug("Adding SampleListener {} for topic {}", listener, getTopicName());
+		log.debug("Adding SampleListener {} for topic {}", listener, getTopicName());
 		sampleListeners.add(listener);
 	}
 
@@ -65,7 +65,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param listener SampleListener to remove
 	 */
 	public void removeListener(SampleListener<T> listener) {
-		logger.debug("Removing SampleListener {} from topic {}", listener, getTopicName());
+		log.debug("Removing SampleListener {} from topic {}", listener, getTopicName());
 		sampleListeners.remove(listener);
 	}
 
@@ -86,7 +86,7 @@ public class RTPSReader<T> extends Endpoint {
 
 		if (wp.acceptData(data.getWriterSequenceNumber())) {
 			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
-			logger.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
+			log.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 
 			synchronized (pendingSamples) {
@@ -94,7 +94,7 @@ public class RTPSReader<T> extends Endpoint {
 			}
 		}
 		else {
-			logger.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+			log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
 					data.getWriterSequenceNumber(), wp.getSeqNumMax());
 		}
 	}
@@ -106,7 +106,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param hb
 	 */
 	void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
-		logger.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 		boolean doSend = false;
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 			doSend = true;
@@ -117,7 +117,7 @@ public class RTPSReader<T> extends Endpoint {
 				doSend = true;
 			}
 			else {
-				logger.trace("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
+				log.trace("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
 			}
 		}
 
@@ -126,7 +126,7 @@ public class RTPSReader<T> extends Endpoint {
 			//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
 			AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 			m.addSubMessage(an);
-			logger.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
+			log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
 			sendMessage(m, senderGuidPrefix);
 		}
 	}
@@ -172,8 +172,10 @@ public class RTPSReader<T> extends Endpoint {
 
 	void addMatchedWriter(WriterData writerData) {
 		matchedWriters.add(writerData);
+		log.debug("Adding matchedWriter {}", writerData);
 	}
 	void removeMatchedWriter(WriterData writerData) {
+		log.debug("Removing matchedWriter {}", writerData);
 		matchedWriters.remove(writerData);
 	}
 

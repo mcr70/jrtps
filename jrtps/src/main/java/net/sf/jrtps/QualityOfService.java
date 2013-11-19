@@ -190,6 +190,21 @@ public class QualityOfService {
 		return policies.get(policyClass);
 	}
 
+	
+	public boolean isCompatibleWith(QualityOfService other) {
+		boolean compatible = true;
+		
+		for (QosPolicy qp : policies.values()) {
+			QosPolicy qpOther = other.getPolicy(qp.getClass());
+			if (!qp.isCompatible(qpOther)) {
+				compatible = false;
+				log.debug("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
+				// Don't break from the loop. Report every incompatible QoS policy.
+			}
+		}
+		
+		return compatible;
+	}
 	/**
 	 * Create default QosPolicies.
 	 */
@@ -218,4 +233,6 @@ public class QualityOfService {
 
 		// QosUserData, QosGroupData, QosTopicData is omitted. 		
 	}
+	
+	
 }

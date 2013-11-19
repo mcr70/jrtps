@@ -179,6 +179,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 
 	void removeMatchedReader(ReaderData readerData) {
+		log.debug("Removing matchedReader {}", readerData);
 		matchedReaders.remove(readerData);
 	}
 	
