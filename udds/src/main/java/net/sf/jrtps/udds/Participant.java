@@ -63,7 +63,11 @@ public class Participant {
 	 * @return a DataReader<T>
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> c) {
-		return createDataReader(c.getSimpleName(), c, c.getName());
+		return createDataReader(c, new QualityOfService());
+	} 
+
+	public <T> DataReader<T> createDataReader(Class<T> c, QualityOfService qos) {
+		return createDataReader(c.getSimpleName(), c, c.getName(), qos);
 	} 
 
 	/**
@@ -72,16 +76,18 @@ public class Participant {
 	 * @param topicName name of the topic
 	 * @param type type of the DataReader
 	 * @param typeName name of the type
+	 * @param qos QualityOfService
 	 * @return a DataReader<T>
 	 */
-	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName) {
+	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		Marshaller<?> m = getMarshaller(typeName);
-		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, new QualityOfService());
+		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, qos);
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
 		return new DataReader<T>(topicName, rtps_reader);
 	} 
 
+	
 	/**
 	 * Creates a new DataWriter of given type. DataWriter is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
@@ -91,20 +97,25 @@ public class Participant {
 	 * @return a DataWriter<T>
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> c) {
-		return createDataWriter(c.getSimpleName(), c, c.getName());
+		return createDataWriter(c, new QualityOfService());
 	} 
 
+	public <T> DataWriter<T> createDataWriter(Class<T> c, QualityOfService qos) {
+		return createDataWriter(c.getSimpleName(), c, c.getName(), qos);
+	} 
+	
 	/**
 	 * Create DataWriter with given topicName and typeName.
 	 * 
 	 * @param topicName name of the topic
 	 * @param type type of the DataWriter
 	 * @param typeName name of the type
+	 * @param qos QualityOfService
 	 * @return a DataWriter<T>
-	 */
-	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName) {
+	 */	
+	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		Marshaller<?> m = getMarshaller(typeName);
-		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m, new QualityOfService());
+		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m, qos);
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
 		return new DataWriter<T>(topicName, rtps_writer);
