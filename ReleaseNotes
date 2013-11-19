@@ -1,7 +1,7 @@
 0.4.0
 	- Added skeletal QualityOfService at RTPS/udds layer. Entities are checked for compatible QoS
 	  before adding corresponding matched entity. QualityOfService is initialized with default 
-	  values.
+	  values. Note, that actual Quality of Service policies are not utilized in any way.
 	  
 0.3.1
 	- FIX: set endianness correctly according to sub-message header
@@ -29,5 +29,6 @@
 	- Turned into multi module build; jrtps & udds separated.
 	  udds likely needs to be moved to another package. 
 	- hello world sample in udds/src/test
+
 0.1.0	
 	- Initial import

@@ -39,16 +39,26 @@ public class QosDeadline extends Parameter implements DataReaderPolicy, DataWrit
 		period.writeTo(bb);
 	}
 
+	/**
+	 * Get the period of this DEADLINE policy.
+	 * @return deadline
+	 */
 	public Duration_t getPeriod() {
 		return period;
 	}
 	
+	/**
+	 * Checks, if this QosDeadline is compatible with the other QosPolicy.
+	 * 
+	 * @return true, if this.period <= other.period
+	 */
 	@Override
 	public boolean isCompatible(QosPolicy other) {
 		if (other instanceof QosDeadline) {
 			QosDeadline qOther = (QosDeadline) other;
 			return period.asMillis() <= qOther.period.asMillis();
 		}
+		
 		return false;
 	}
 

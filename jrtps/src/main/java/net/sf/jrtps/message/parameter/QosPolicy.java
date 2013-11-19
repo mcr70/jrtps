@@ -8,10 +8,12 @@ package net.sf.jrtps.message.parameter;
  */
 public interface QosPolicy {
 	/**
-	 * Checks, if this QosPolicy is compatible with other QosPolicy
+	 * Checks, if this QosPolicy is compatible with other QosPolicy.
+	 * 'this' QosPolicy should be considered as 'offered' policy, and
+	 * 'other' should be considered as 'requested' policy.
 	 * 
-	 * @param other
+	 * @param requested Requested QosPolicy
 	 * @return true, if QosPolicy is compatible
 	 */
-	public boolean isCompatible(QosPolicy other);
+	public boolean isCompatible(QosPolicy requested);
 }
