@@ -10,13 +10,13 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class QosDestinationOrder extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosDestinationOrder extends Parameter implements DataReaderPolicy<QosDestinationOrder>, DataWriterPolicy<QosDestinationOrder>, TopicPolicy<QosDestinationOrder>, InlineParameter {
 	private int kind;
-	
+
 	public enum Kind {
 		BY_RECEPTION_TIMESTAMP, BY_SOURCE_TIMESTAMP
 	}
-	
+
 	/**
 	 * Constructor used when reading from RTPSByteBuffer.
 	 */
@@ -36,7 +36,7 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy, 
 		}
 	}
 
-	
+
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
 		this.kind = bb.read_long();
@@ -51,14 +51,10 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy, 
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosDestinationOrder) {
-			QosDestinationOrder qOther = (QosDestinationOrder) other;
-			
-			return kind >= qOther.kind;
-		}
-		
-		return false;
+	public boolean isCompatible(QosDestinationOrder other) {
+		QosDestinationOrder qOther = (QosDestinationOrder) other;
+
+		return kind >= qOther.kind;
 	}
 
 	/**

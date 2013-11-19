@@ -12,7 +12,7 @@ import net.sf.jrtps.types.Duration_t;
  * @author mcr70
  *
  */
-public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy {
+public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<QosTimeBasedFilter> {
 	private Duration_t minimum_separation;
 
 	public QosTimeBasedFilter(Duration_t minimum_separation) {
@@ -48,7 +48,7 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy {
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosTimeBasedFilter other) {
 		return true; // Always true. TODO: must be consistent with QosDeadline
 	}
 

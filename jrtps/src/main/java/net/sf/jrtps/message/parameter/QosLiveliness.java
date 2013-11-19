@@ -12,7 +12,7 @@ import net.sf.jrtps.types.Duration_t;
  * @author mcr70
  *
  */
-public class QosLiveliness extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLiveliness>, DataWriterPolicy<QosLiveliness>, TopicPolicy<QosLiveliness>, InlineParameter {
 	private int kind;
 	private Duration_t lease_duration;
 
@@ -68,13 +68,10 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy, DataWr
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosLiveliness) {
-			QosLiveliness qOther = (QosLiveliness) other;
-			if ((kind >= qOther.kind) && 
-					(lease_duration.asMillis() <= qOther.lease_duration.asMillis())) {
-				return true;
-			}
+	public boolean isCompatible(QosLiveliness other) {
+		if ((kind >= other.kind) && 
+				(lease_duration.asMillis() <= other.lease_duration.asMillis())) {
+			return true;
 		}
 		return false;
 	}

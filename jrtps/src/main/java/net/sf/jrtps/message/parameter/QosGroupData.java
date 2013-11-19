@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosGroupData extends Parameter implements SubscriberPolicy, PublisherPolicy {
+public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroupData>, PublisherPolicy<QosGroupData> {
 	QosGroupData() {
 		super(ParameterEnum.PID_GROUP_DATA);
 	}
@@ -19,7 +19,7 @@ public class QosGroupData extends Parameter implements SubscriberPolicy, Publish
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosGroupData other) {
 		return true; // Always true
 	}
 }

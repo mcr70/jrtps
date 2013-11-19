@@ -4,9 +4,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
 
-public class QosLatencyBudget extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosLatencyBudget>, DataWriterPolicy<QosLatencyBudget>, TopicPolicy<QosLatencyBudget>, InlineParameter {
 	private Duration_t duration;
-	
+
 	QosLatencyBudget() {
 		super(ParameterEnum.PID_LATENCY_BUDGET);
 	}
@@ -20,7 +20,7 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy, Dat
 		super(ParameterEnum.PID_LATENCY_BUDGET);
 		this.duration = duration;
 	}
-	
+
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
 		this.duration = new Duration_t(bb);
@@ -32,13 +32,9 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy, Dat
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosLatencyBudget) {
-			QosLatencyBudget qOther = (QosLatencyBudget) other;
-			return duration.asMillis() <= qOther.duration.asMillis();
-		}
-		
-		return false;
+	public boolean isCompatible(QosLatencyBudget other) {
+		QosLatencyBudget qOther = (QosLatencyBudget) other;
+		return duration.asMillis() <= qOther.duration.asMillis();
 	}
 
 	/**

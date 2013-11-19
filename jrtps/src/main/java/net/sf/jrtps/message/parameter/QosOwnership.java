@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosOwnership extends Parameter implements DataReaderPolicy, TopicPolicy, DataWriterPolicy, InlineParameter {
+public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwnership>, TopicPolicy<QosOwnership>, DataWriterPolicy<QosOwnership>, InlineParameter {
 	private int kind;
 
 	public enum Kind {
@@ -37,13 +37,8 @@ public class QosOwnership extends Parameter implements DataReaderPolicy, TopicPo
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosOwnership) {
-			QosOwnership qOther = (QosOwnership) other;
-			return kind == qOther.kind;
-		}
-
-		return false;
+	public boolean isCompatible(QosOwnership other) {
+		return kind == other.kind;
 	}
 
 	/**

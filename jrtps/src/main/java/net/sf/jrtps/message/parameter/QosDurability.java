@@ -10,17 +10,17 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class QosDurability extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosDurability extends Parameter implements DataReaderPolicy<QosDurability>, DataWriterPolicy<QosDurability>, TopicPolicy<QosDurability>, InlineParameter {
 	private int kind;
 
 	public enum Kind {
 		VOLATILE, TRANSIENT_LOCAL, TRANSIENT, PERSISTENT;
 	}
-	
+
 	QosDurability() {
 		super(ParameterEnum.PID_DURABILITY);
 	}
-	
+
 	/**
 	 * Constructor for QosDurability.
 	 * @param kind
@@ -39,12 +39,12 @@ public class QosDurability extends Parameter implements DataReaderPolicy, DataWr
 	public void read(RTPSByteBuffer bb, int length)  {
 		this.kind = bb.read_long();
 	}
-	
+
 	@Override
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_long(kind);
 	}
-	
+
 	public Kind getKind() {
 		switch(kind) {
 		case 0: return Kind.VOLATILE;
@@ -52,22 +52,18 @@ public class QosDurability extends Parameter implements DataReaderPolicy, DataWr
 		case 2: return Kind.TRANSIENT;
 		case 3: return Kind.PERSISTENT;
 		}
-		
+
 		return null;
 	}
-	
+
 	public String toString() {
 		return super.toString() + "(" + getKind() + ")";
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
-		if (other instanceof QosDurability) {
-			QosDurability qOther = (QosDurability) other;
-			return kind >= qOther.kind;
-		}
-		
-		return false;
+	public boolean isCompatible(QosDurability other) {
+		QosDurability qOther = (QosDurability) other;
+		return kind >= qOther.kind;
 	}
 
 	/**

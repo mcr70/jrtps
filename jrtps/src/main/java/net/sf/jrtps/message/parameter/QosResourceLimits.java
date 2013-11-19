@@ -9,7 +9,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-public class QosResourceLimits extends Parameter implements DataReaderPolicy, TopicPolicy, DataWriterPolicy {
+public class QosResourceLimits extends Parameter implements DataReaderPolicy<QosResourceLimits>, TopicPolicy<QosResourceLimits>, DataWriterPolicy<QosResourceLimits> {
 	private int max_samples;
 	private int max_instances;
 	private int max_samples_per_instance;
@@ -52,7 +52,7 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy, To
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosResourceLimits other) {
 		return true; // Always true. TODO: must be consistent with QosHistory
 	}
 

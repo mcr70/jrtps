@@ -9,7 +9,7 @@ import net.sf.jrtps.types.Duration_t;
  * @author mcr70
  *
  */
-public class QosLifespan extends Parameter implements DataReaderPolicy, DataWriterPolicy, TopicPolicy, InlineParameter {
+public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifespan>, DataWriterPolicy<QosLifespan>, TopicPolicy<QosLifespan>, InlineParameter {
 	private Duration_t duration;
 	
 	QosLifespan() {
@@ -36,7 +36,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy, DataWrit
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosLifespan other) {
 		return true; // Always true. TODO: check this
 	}
 

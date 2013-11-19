@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
-public class QosPartition extends Parameter implements SubscriberPolicy, PublisherPolicy, InlineParameter {
+public class QosPartition extends Parameter implements SubscriberPolicy<QosPartition>, PublisherPolicy<QosPartition>, InlineParameter {
 	private String[] partitions;
 	
 	QosPartition() {
@@ -49,7 +49,7 @@ public class QosPartition extends Parameter implements SubscriberPolicy, Publish
 	}
 
 	@Override
-	public boolean isCompatible(QosPolicy other) {
+	public boolean isCompatible(QosPartition other) {
 		return true; // TODO: Partition matching is done differently
 	}
 
