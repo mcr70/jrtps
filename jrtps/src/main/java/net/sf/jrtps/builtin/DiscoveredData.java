@@ -14,6 +14,7 @@ public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
 	// This list keeps track of inconsistencies occured
 	private List<QosPolicy> inconsistenPolicies = new LinkedList<>(); 
+	private QualityOfService qos = new QualityOfService();
 	
 	protected String typeName;
 	protected String topicName;
@@ -22,7 +23,7 @@ public class DiscoveredData {
 	// interpretation is, for builtin topics, key is 
 	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
 	protected GUID_t key;  
-	protected QualityOfService qos = new QualityOfService();
+
 	
 	/**
 	 * This constructor is used when DiscoveredData is being created from 
@@ -108,6 +109,15 @@ public class DiscoveredData {
 	 */
 	public GUID_t getKey() {
 		return key;
+	}
+	
+	/**
+	 * Gets the QualityOfService of this DiscoveredData.
+	 * 
+	 * @return QualityOfService
+	 */
+	public QualityOfService getQualityOfService() {
+		return qos;
 	}
 	
 	/**

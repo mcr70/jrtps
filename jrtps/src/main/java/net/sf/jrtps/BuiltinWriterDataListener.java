@@ -37,7 +37,15 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 						r.removeMatchedWriter(writerData);
 					}
 					else { // TODO: check compatible QoS
-						r.addMatchedWriter(writerData);
+						QualityOfService offered = writerData.getQualityOfService();
+						QualityOfService requested = r.getQualityOfService();
+						log.debug("Check for compatible QoS for {}", r.getGuid().entityId);
+						if (offered.isCompatibleWith(requested)) {
+							r.addMatchedWriter(writerData);
+						}
+						else {
+							log.warn("Discovered writer had incompatible QoS with reader. {}, {}", writerData, r);
+						}
 					}
 				}
 			}

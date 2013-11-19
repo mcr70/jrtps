@@ -122,7 +122,8 @@ public class RTPSParticipant {
 				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
 				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
-		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, "DCPSTopic", tMarshaller);
+		// NOTE: 
+		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
 
 		// ----  Create a Reader for SPDP  -----------------------
