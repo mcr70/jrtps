@@ -41,7 +41,7 @@ public class RTPSReader<T> extends Endpoint {
 
 	private List<Sample<T>> pendingSamples = new LinkedList<>();
 
-	public RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(prefix, entityId, topicName, qos, configuration);
 
@@ -107,12 +107,17 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
 		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+
+		WriterProxy wp = getWriterProxy(new GUID_t(senderGuidPrefix, hb.getWriterId()));
+		if (hb.livelinessFlag()) {
+			// TODO: implement liveliness
+		}
+		
 		boolean doSend = false;
 		if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 			doSend = true;
 		}
 		else {
-			WriterProxy wp = getWriterProxy(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 			if (wp.acceptHeartbeat(hb.getLastSequenceNumber())) {
 				doSend = true;
 			}
