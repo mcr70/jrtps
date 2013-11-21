@@ -93,8 +93,8 @@ public abstract class EntityId_t  {
 			case  (4 << 8) | 0xc7: entityId = new SEDPbuiltinSubscriptionsReader(); break;
 			case (1 << 16) | 0xc2: entityId = new SPDPbuiltinParticipantWriter(); break;
 			case (1 << 16) | 0xc7: entityId = new SPDPbuiltinParticipantReader(); break;
-			case (2 << 16) | 0xc2: entityId = new BuiltinParticipantMessageWriter(); break; // liveliness protocol?
-			case (2 << 16) | 0xc7: entityId = new BuiltinParticipantMessageReader(); break; // liveliness protocol?
+			case (2 << 16) | 0xc2: entityId = new BuiltinParticipantMessageWriter(); break; // liveliness protocol
+			case (2 << 16) | 0xc7: entityId = new BuiltinParticipantMessageReader(); break; // liveliness protocol
 			default:
 				if ((kind & 0x40) == 0x40) { // two most signicant bits equals '01' -> vendor specific entities
 					entityId = new VendorSpecificEntityId(eKey, (byte) kind);
