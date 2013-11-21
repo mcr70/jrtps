@@ -161,12 +161,42 @@ public class RTPSWriter<T> extends Endpoint {
 		createChange(ChangeKind.WRITE, obj);	
 	}
 
+	/**
+	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, 
+	 * remote readers know about Data samples available on this writer.<p>
+	 * 
+	 * Heartbeat is not sent automatically. This provides means to create multiple changes,
+	 * before announcing the state to readers.
+	 * 
+	 */
+	public void sendHeartbeat() {		
+		log.debug("[{}] Sending Heartbeat to {} matched readers", getGuid().entityId, matchedReaders.size());
+		for (ReaderData rd : matchedReaders) {
+			GUID_t guid = rd.getKey();
+			sendHeartbeat(guid.prefix, guid.entityId);
+		}
+	}
+
+	/**
+	 * Assert liveliness of this writer. Matched readers are notified via
+	 * Heartbeat message of the liveliness of this writer.
+	 */
+	public void assertLiveliness() {
+		for (ReaderData rd : matchedReaders) {
+			GUID_t guid = rd.getKey();
+			sendHeartbeat(guid.prefix, guid.entityId, true);
+		}
+	}
+	
+	/**
+	 * Close this writer.
+	 */
 	public void close() {
 		if (barrier != null) {
 			try {
 				barrier.await(15, TimeUnit.SECONDS);
 			} catch (Exception e) {
-				log.warn("Exception ", e);
+				log.warn("Got Exception on close()", e);
 			}
 
 			if (running) {
@@ -186,7 +216,8 @@ public class RTPSWriter<T> extends Endpoint {
 	void addMatchedReader(ReaderData readerData) {
 		matchedReaders.add(readerData);
 		log.debug("Adding matchedReader {}", readerData);
-		sendHeartbeat(readerData.getKey());
+		GUID_t guid = readerData.getKey();
+		sendHeartbeat(guid.prefix, guid.entityId);
 	}
 
 	/**
@@ -259,12 +290,17 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
+		sendHeartbeat(senderPrefix, readerId, false);
+	}
+	
+	private void sendHeartbeat(GuidPrefix_t targetPrefix, EntityId_t readerId, boolean livelinessFlag) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat(readerId);
+		hb.livelinessFlag(livelinessFlag);
 		m.addSubMessage(hb);
 
 		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
-		sendMessage(m, senderPrefix);
+		sendMessage(m, targetPrefix);
 	}
 
 	private Heartbeat createHeartbeat(EntityId_t entityId) {
@@ -278,30 +314,6 @@ public class RTPSWriter<T> extends Endpoint {
 		return hb;
 	}
 
-	/**
-	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, 
-	 * remote readers know about Data samples available on this writer.<p>
-	 * 
-	 * Heartbeat is not sent automatically. This provides means to create multiple changes,
-	 * before announcing the state to readers.
-	 * 
-	 */
-	public void sendHeartbeat() {		
-		log.debug("[{}] Sending Heartbeat to {} matched readers", getGuid().entityId, matchedReaders.size());
-		for (ReaderData rd : matchedReaders) {
-			sendHeartbeat(rd.getKey());
-		}
-	}
-
-	private void sendHeartbeat(GUID_t readerGuid) {
-		log.debug("[{}] Sending Heartbeat to {}", getGuid().entityId, readerGuid);
-		
-		Message m = new Message(getGuid().prefix);
-		Heartbeat hb = createHeartbeat(readerGuid.entityId); 
-		m.addSubMessage(hb);
-
-		sendMessage(m, readerGuid.prefix);
-	}
 
 	
 	@SuppressWarnings("unchecked")
