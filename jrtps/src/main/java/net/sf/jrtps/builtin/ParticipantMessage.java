@@ -9,6 +9,9 @@ import net.sf.jrtps.types.GuidPrefix_t;
  */
 public class ParticipantMessage {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSParticipantMessage";
+	public static final byte[] AUTOMATIC_LIVELINESS_KIND = new byte[] {0, 0, 0, 1};
+	public static final byte[] MANUAL_LIVELINESS_KIND = new byte[] {0, 0, 0, 2};
+	
 	private final GuidPrefix_t prefix;
 	private final byte[] data;
 	private final byte[] kind;
