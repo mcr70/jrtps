@@ -8,7 +8,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class Duration_t {
+public class Duration_t implements Comparable<Duration_t> {
 	// TODO: check infinite duration
 	public static final Duration_t INFINITE = new Duration_t(Integer.MAX_VALUE, 0);
 	public int sec;
@@ -62,5 +62,22 @@ public class Duration_t {
 
 	public String toString() {
 		return "[" + sec + ":" + nano + "]";
-	}	
+	}
+
+	@Override
+	public int compareTo(Duration_t o) {
+		return (int) (asMillis() - o.asMillis());
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Duration_t) {
+			Duration_t other = (Duration_t) o;
+			if (sec == other.sec && nano == other.nano) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
 }

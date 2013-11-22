@@ -78,6 +78,8 @@ public class RTPSParticipant {
 	private final int domainId;
 	private final int participantId;
 
+	private final LivelinessManager livelinessManager;
+
 	/**
 	 * 
 	 */
@@ -114,8 +116,10 @@ public class RTPSParticipant {
 		ParticipantDataMarshaller pdm = new ParticipantDataMarshaller();
 		WriterDataMarshaller wdm = new WriterDataMarshaller();		
 		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
-		TopicDataMarshaller tdm = new TopicDataMarshaller();
+		TopicDataMarshaller tdm = new TopicDataMarshaller();		
 
+		livelinessManager = new LivelinessManager(this);
+		
 		QualityOfService qos = new QualityOfService();
 		// ----  Create a Writers for SEDP  ---------
 		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
@@ -153,8 +157,9 @@ public class RTPSParticipant {
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
 		spdp_w.setResendDataPeriod(new Duration_t(10, 0), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER); // Starts a resender thread
-		//spdp_w.addMatchedEndpointLocator(Locator_t.defaultDiscoveryMulticastLocator(domainId));
 
+		livelinessManager.start();
+		
 		participantId++;
 	}
 
@@ -186,6 +191,15 @@ public class RTPSParticipant {
 	 */
 	private volatile int userEntityIdx = 1;
 
+	/**
+	 * Asserts liveliness of RTPSWriters, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
+	 * 
+	 * @see net.sf.jrtps.message.parameter.QosLiveliness
+	 */
+	public void assertLiveliness() {
+		livelinessManager.assertLiveliness();
+	}
+	
 	/**
 	 * Creates an user defined writer. Topic name is the simple name of Class given.
 	 * and type name is the fully qualified class name of the class given. QualityOfService
@@ -246,7 +260,10 @@ public class RTPSParticipant {
 		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
 		pw.createChange(wd);
-
+		pw.sendHeartbeat();
+		
+		livelinessManager.registerWriter(writer);
+		
 		return writer;
 	}
 
@@ -480,5 +497,7 @@ public class RTPSParticipant {
 		for (RTPSWriter<?> w : writerEndpoints) {
 			w.close();
 		}
+		
+		livelinessManager.stop();
 	}
 }
