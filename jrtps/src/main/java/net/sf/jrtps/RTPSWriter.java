@@ -347,4 +347,14 @@ public class RTPSWriter<T> extends Endpoint {
 
 		return data;
 	}
+
+	/**
+	 * Sets the maximum history cache size.
+	 * TODO: history cache handling is likely to change
+	 * 
+	 * @param maxSize
+	 */
+	void setMaxHistorySize(int maxSize) {
+		writer_cache.setMaxSize(maxSize);
+	}
 }

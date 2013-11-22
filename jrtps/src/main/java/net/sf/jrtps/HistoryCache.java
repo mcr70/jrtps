@@ -36,6 +36,9 @@ class HistoryCache {
 		return guid;
 	}
 
+	void setMaxSize(int maxSize) {
+		this.maxSize = maxSize;
+	}
 
 	long getSeqNumMax() {
 		return seqNumMax;

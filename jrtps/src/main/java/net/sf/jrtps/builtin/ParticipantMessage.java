@@ -1,5 +1,7 @@
 package net.sf.jrtps.builtin;
 
+import java.util.Arrays;
+
 import net.sf.jrtps.types.GuidPrefix_t;
 
 /**
@@ -16,7 +18,7 @@ public class ParticipantMessage {
 	private final byte[] data;
 	private final byte[] kind;
 	
-	ParticipantMessage(GuidPrefix_t prefix, byte[] kind, byte[] data) {
+	public ParticipantMessage(GuidPrefix_t prefix, byte[] kind, byte[] data) {
 		this.prefix = prefix;
 		this.kind = kind;
 		this.data = data;
@@ -32,5 +34,13 @@ public class ParticipantMessage {
 	
 	public byte[] getData() {
 		return data;
+	}
+
+	public boolean isAutomaticLivelinessKind() {
+		return Arrays.equals(AUTOMATIC_LIVELINESS_KIND, kind);
+	}
+
+	public boolean isManualLivelinessKind() {
+		return Arrays.equals(MANUAL_LIVELINESS_KIND, kind);
 	}
 }
