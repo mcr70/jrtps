@@ -53,11 +53,7 @@ public class QosDurability extends Parameter implements DataReaderPolicy<QosDura
 		case 3: return Kind.PERSISTENT;
 		}
 
-		return null;
-	}
-
-	public String toString() {
-		return super.toString() + "(" + getKind() + ")";
+		throw new IllegalArgumentException("Unknown kind " + kind + " for QosDurability");
 	}
 
 	@Override
@@ -73,5 +69,9 @@ public class QosDurability extends Parameter implements DataReaderPolicy<QosDura
 	 */
 	public static QosDurability defaultDurability() {
 		return new QosDurability(Kind.VOLATILE);
+	}
+
+	public String toString() {
+		return super.toString() + "(" + getKind() + ")";
 	}
 }

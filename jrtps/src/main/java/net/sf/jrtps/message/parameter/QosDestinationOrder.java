@@ -57,6 +57,15 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy<Q
 		return kind >= qOther.kind;
 	}
 
+	public Kind getKind() {
+		switch(kind) {
+		case 0: return Kind.BY_RECEPTION_TIMESTAMP;
+		case 1: return Kind.BY_SOURCE_TIMESTAMP;
+		}
+		
+		throw new IllegalArgumentException("Illegal kind " + kind + " for QosDestinationOrder");
+	}
+	
 	/**
 	 * Get the default QosDestinationOrder BY_RECEPTION_TIMESTAMP.
 	 * 
@@ -64,5 +73,9 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy<Q
 	 */
 	public static QosDestinationOrder defaultDestinationOrder() {
 		return new QosDestinationOrder(Kind.BY_RECEPTION_TIMESTAMP);
+	}
+
+	public String toString() {
+		return super.toString() + "(" + getKind() + ")";
 	}
 }

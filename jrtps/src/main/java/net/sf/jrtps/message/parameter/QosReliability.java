@@ -52,10 +52,6 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		max_blocking_time.writeTo(buffer);
 	}
 
-	public String toString() {	
-		return super.toString() + "(" + getKind() + max_blocking_time + ")";
-	}
-
 	@Override
 	public boolean isCompatible(QosReliability other) {
 		return kind >= other.kind;
@@ -68,5 +64,9 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	 */
 	public static QosReliability defaultReliability() {
 		return new QosReliability(Kind.BEST_EFFORT, new Duration_t(0, 0)); // TODO: check default
+	}
+
+	public String toString() {	
+		return super.toString() + "(" + getKind() + ", "+ max_blocking_time + ")";
 	}
 }

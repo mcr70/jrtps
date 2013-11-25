@@ -234,5 +234,7 @@ public class QualityOfService {
 		// QosUserData, QosGroupData, QosTopicData is omitted. 		
 	}
 	
-	
+	public String toString() {
+		return policies.values().toString();
+	}
 }

@@ -63,4 +63,9 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy<Qos
 	public static QosResourceLimits defaultResourceLimits() {
 		return new QosResourceLimits(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
 	}
+
+	public String toString() {
+		return super.toString() + "(max_instances " + max_instances + ", max_samples " + max_samples + 
+				", max_samples_per_instance " + max_samples_per_instance + ")";
+	}
 }

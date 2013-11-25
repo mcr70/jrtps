@@ -250,7 +250,7 @@ public class RTPSParticipant {
 	 * @param qos
 	 * @return RTPSWriter
 	 */
-	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
+	<T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
 		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
@@ -258,7 +258,7 @@ public class RTPSParticipant {
 
 		@SuppressWarnings("unchecked")
 		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
-		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
+		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid(), qos);
 		pw.createChange(wd);
 		pw.sendHeartbeat();
 		
@@ -317,7 +317,7 @@ public class RTPSParticipant {
 	 * @param qos 
 	 * @return RTPSReader
 	 */
-	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
+	<T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
 			QualityOfService qos) {
 		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, qos, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
@@ -326,7 +326,7 @@ public class RTPSParticipant {
 
 		@SuppressWarnings("unchecked")
 		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
-		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
+		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid(), qos);
 		sw.createChange(rd);
 
 		return reader;

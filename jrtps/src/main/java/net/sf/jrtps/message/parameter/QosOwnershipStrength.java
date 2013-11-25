@@ -49,4 +49,8 @@ public class QosOwnershipStrength extends Parameter implements DataWriterPolicy<
 	public static QosOwnershipStrength defaultOwnershipStrength() {
 		return new QosOwnershipStrength(0);
 	}
+
+	public String toString() {
+		return super.toString() + "(" + strength + ")";
+	}
 }

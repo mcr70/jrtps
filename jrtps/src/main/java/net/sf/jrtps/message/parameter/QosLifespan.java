@@ -48,4 +48,8 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
 	public static QosLifespan defaultLifespan() {
 		return new QosLifespan(Duration_t.INFINITE);
 	}
+
+	public String toString() {
+		return super.toString() + "(" + duration + ")";
+	}
 }
