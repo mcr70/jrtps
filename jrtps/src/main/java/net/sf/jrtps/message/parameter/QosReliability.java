@@ -20,10 +20,10 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		super(ParameterEnum.PID_RELIABILITY);
 		switch(kind) {
 		case BEST_EFFORT: this.kind = 0; break;
-		case RELIABLE: this.kind = 1;
+		case RELIABLE: this.kind = 1; break;
 		}
+		
 		this.max_blocking_time = max_blocking_time;
-		//this.kind = kind.ordinal() + 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
 	}
 
 	public Duration_t getMaxBlockingTime() {
@@ -36,7 +36,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		case 1: return Kind.RELIABLE; 
 		}
 
-		return null;
+		throw new IllegalArgumentException("Illegal kind " + kind + " for QosReliability");
 	}
 
 
