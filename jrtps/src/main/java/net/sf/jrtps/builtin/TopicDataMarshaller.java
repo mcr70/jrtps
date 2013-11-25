@@ -66,7 +66,7 @@ public class TopicDataMarshaller extends Marshaller<TopicData> {
 	
 	
 	private void addQoS(TopicData td, ParameterList payloadParams) {
-		Set<QosPolicy> inlineableQosPolicies = td.getInlineableQosPolicies();
+		Set<QosPolicy<?>> inlineableQosPolicies = td.getInlineableQosPolicies();
 		for (QosPolicy<?> qp : inlineableQosPolicies) {
 			payloadParams.add((Parameter) qp);
 		}

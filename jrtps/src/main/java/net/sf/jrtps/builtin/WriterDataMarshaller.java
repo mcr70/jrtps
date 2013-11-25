@@ -65,7 +65,7 @@ public class WriterDataMarshaller extends Marshaller<WriterData> {
 	}
 
 	private void addQoS(WriterData wd, ParameterList payloadParams) {
-		Set<QosPolicy> inlineableQosPolicies = wd.getInlineableQosPolicies();
+		Set<QosPolicy<?>> inlineableQosPolicies = wd.getInlineableQosPolicies();
 		for (QosPolicy<?> qp : inlineableQosPolicies) {
 			payloadParams.add((Parameter) qp);
 		}
