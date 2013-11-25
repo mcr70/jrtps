@@ -20,6 +20,7 @@ import net.sf.jrtps.builtin.TopicDataMarshaller;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.builtin.WriterDataMarshaller;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.transport.UDPReceiver;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
@@ -120,39 +121,46 @@ public class RTPSParticipant {
 
 		livelinessManager = new LivelinessManager(this);
 		
-		QualityOfService qos = new QualityOfService();
+		QualityOfService spdpQoS = new QualityOfService();
+		QualityOfService sedpQoS = new QualityOfService();
+		try {
+			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+		} catch (InconsistentPolicy e) {
+			log.error("Got InconsistentPolicy exception. This is an internal error", e);
+		}
+
 		// ----  Create a Writers for SEDP  ---------
 		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
 		// NOTE: It is not mandatory to publish TopicData
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
 
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader<ParticipantData> partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
-				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, qos);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 		partReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader<WriterData> pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
 		pubReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 
 		RTPSReader<ReaderData> subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
 		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		RTPSReader<TopicData> topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
-				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, qos);
+				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, sedpQoS);
 		topicReader.addListener(new BuiltinTopicDataListener(this));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, qos);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
@@ -260,7 +268,7 @@ public class RTPSParticipant {
 		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid(), qos);
 		pw.createChange(wd);
-		pw.sendHeartbeat();
+		pw.notifyReaders();
 		
 		livelinessManager.registerWriter(writer);
 		

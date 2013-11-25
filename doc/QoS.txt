@@ -1,0 +1,16 @@
+QosLiveliness
+=============
+	o LivelinessManager
+		- creates reader and writer for liveliness messages (ParticipantMessage)
+		- MANUAL_BY_TOPIC: writer has assertLiveliness() method, that 
+		  sends a Heartbeat message to reader
+
+QosReliability
+==============
+		/ 8.4.2.3 Required RTPS Reader Behavior                                   /
+		/ A best-effort Reader is completely passive as it only receives data and /
+		/ does not send messages itself.                                          /
+	o RTPSReader
+		- reader sends AckNack only if reliable.
+	o RTPSWriter
+		- Liveliness Heartbeat is sent regardless of readers reliability kind.
