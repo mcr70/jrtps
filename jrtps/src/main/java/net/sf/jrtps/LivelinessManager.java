@@ -11,6 +11,7 @@ import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.EntityId_t;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,7 +43,6 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	private final ParticipantMessage manualSample;
 	private final ParticipantMessage automaticSample;
 
-	private QualityOfService qos;
 	
 	public LivelinessManager(RTPSParticipant participant) {
 		this.participant = participant;
@@ -52,17 +52,6 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		
 		livelinessThread = new Thread(this);
 		livelinessThread.setName("liveliness");
-		
-		// ---  Create QualityOfService used with entities  ----- 
-		qos = new QualityOfService();
-		try {
-			qos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
-			qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
-			qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
-		} catch (InconsistentPolicy e) {
-			log.error("Got InconsistentPolicy. This is an internal error", e);
-			throw new RuntimeException(e);
-		}
 	}
 	
 	/**
@@ -110,13 +99,25 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	 * Starts livelinessThread.
 	 */
 	void start() {
-		writer = participant.createWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, 
-				ParticipantMessage.class.getName(), new ParticipantMessageMarshaller(), qos);
+		// ---  Create QualityOfService used with entities  ----- 
+		QualityOfService qos = new QualityOfService();
+		try {
+			qos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+			qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
+			qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
+		} catch (InconsistentPolicy e) {
+			log.error("Got InconsistentPolicy. This is an internal error", e);
+			throw new RuntimeException(e);
+		}
+		
+		writer = participant.createWriter(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_WRITER, 
+				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
+				new ParticipantMessageMarshaller(), qos);
 		writer.setMaxHistorySize(2); // We have two instances: manual & automatic and history depth of 1	
 		
-
-		reader = participant.createReader(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, 
-				ParticipantMessage.class.getName(), new ParticipantMessageMarshaller(), qos);
+		reader = participant.createReader(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_READER, 
+				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
+				new ParticipantMessageMarshaller(), qos);
 		reader.addListener(this);
 
 		log.debug("Startin liveliness thread");

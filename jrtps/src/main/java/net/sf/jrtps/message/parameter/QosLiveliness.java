@@ -72,7 +72,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 		case 2: return Kind.MANUAL_BY_TOPIC;
 		}
 
-		return null; 
+		throw new IllegalArgumentException("Illegal kind " + kind + " for QosLiveliness");
 	}
 
 
@@ -86,10 +86,6 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_long(kind);
 		lease_duration.writeTo(buffer);
-	}
-
-	public String toString() {	
-		return super.toString() + "(" + getKind() + ", " + lease_duration + ")";
 	}
 
 	/**
@@ -117,5 +113,9 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 
 	public static QosLiveliness defaultLiveliness() {
 		return new QosLiveliness(Kind.AUTOMATIC, new Duration_t(10, 0)); // TODO: check defaults
+	}
+
+	public String toString() {	
+		return super.toString() + "(" + getKind() + ", " + lease_duration + ")";
 	}
 }

@@ -38,7 +38,11 @@ public class QosTransportPriority extends Parameter implements TopicPolicy<QosTr
 	 * Get the default QosTransportPriority: 0
 	 * @return default QosTransportPriority
 	 */
-	public static QosPolicy defaultTransportPriority() {
+	public static QosTransportPriority defaultTransportPriority() {
 		return new QosTransportPriority(0);
+	}
+
+	public String toString() {
+		return super.toString() + "(" + value + ")";
 	}
 }

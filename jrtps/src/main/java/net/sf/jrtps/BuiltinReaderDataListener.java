@@ -49,7 +49,7 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 				else { // TODO: check QoS compatibility
 					QualityOfService requested = readerData.getQualityOfService();
 					QualityOfService offered = w.getQualityOfService();
-					log.debug("Check for compatible QoS for {}", w.getGuid().entityId);
+					log.debug("Check for compatible QoS for {} and {}", w.getGuid().entityId, readerData.getKey().entityId);
 					if (offered.isCompatibleWith(requested)) {
 						w.addMatchedReader(readerData);
 					}

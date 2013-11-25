@@ -1,7 +1,5 @@
 package net.sf.jrtps.message.parameter;
 
-import java.util.Arrays;
-
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration_t;
 
@@ -43,10 +41,6 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
 		return minimum_separation;
 	}
 	
-	public String toString() {	
-		return super.toString() + "(" + Arrays.toString(getBytes()) + ")";
-	}
-
 	@Override
 	public boolean isCompatible(QosTimeBasedFilter other) {
 		return true; // Always true. TODO: must be consistent with QosDeadline
@@ -59,5 +53,9 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
 	 */
 	public static QosTimeBasedFilter defaultTimeBasedFilter() {
 		return new QosTimeBasedFilter(new Duration_t(0, 0));
+	}
+
+	public String toString() {	
+		return super.toString() + "(" + minimum_separation + ")";
 	}
 }

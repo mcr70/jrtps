@@ -14,7 +14,7 @@ public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
 	// This list keeps track of inconsistencies occured
 	private List<QosPolicy> inconsistenPolicies = new LinkedList<>(); 
-	private QualityOfService qos = new QualityOfService();
+	private final QualityOfService qos;
 	
 	protected String typeName;
 	protected String topicName;
@@ -30,6 +30,7 @@ public class DiscoveredData {
 	 * RTPSByteBuffer
 	 */
 	protected DiscoveredData() {
+		qos = new QualityOfService(); // Initialize QoS with default policies.
 	}
 	
 	/**
@@ -38,11 +39,13 @@ public class DiscoveredData {
 	 * @param typeName
 	 * @param topicName
 	 * @param key
+	 * @param qos2 
 	 */
-	protected DiscoveredData(String typeName, String topicName, GUID_t key) {
+	protected DiscoveredData(String typeName, String topicName, GUID_t key, QualityOfService qos) {
 		this.typeName = typeName;
 		this.topicName = topicName;
 		this.key = key;
+		this.qos = qos;
 	}
 	
 	/**
