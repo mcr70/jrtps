@@ -13,7 +13,7 @@ import net.sf.jrtps.types.GUID_t;
 public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
 	// This list keeps track of inconsistencies occured
-	private List<QosPolicy> inconsistenPolicies = new LinkedList<>(); 
+	private List<QosPolicy<?>> inconsistenPolicies = new LinkedList<>(); 
 	private final QualityOfService qos;
 	
 	protected String typeName;
@@ -36,10 +36,10 @@ public class DiscoveredData {
 	/**
 	 * This constructor is used when DiscoveredData is being created from scratch
 	 * 
-	 * @param typeName
-	 * @param topicName
-	 * @param key
-	 * @param qos2 
+	 * @param typeName Type name of the data
+	 * @param topicName name of the topic
+	 * @param key guid of the remote entity, which acts as a key for topic
+	 * @param qos QualityOfService of discovered entity
 	 */
 	protected DiscoveredData(String typeName, String topicName, GUID_t key, QualityOfService qos) {
 		this.typeName = typeName;
@@ -60,10 +60,10 @@ public class DiscoveredData {
 		}
 	}
 	
-	private void resolveInconsistencies(List<QosPolicy> inconsistentPolicies) throws InconsistentPolicy {
+	private void resolveInconsistencies(List<QosPolicy<?>> inconsistentPolicies) throws InconsistentPolicy {
 		int size = inconsistenPolicies.size();
 		
-		for (QosPolicy qp : inconsistentPolicies) {
+		for (QosPolicy<?> qp : inconsistentPolicies) {
 			try {
 				qos.setPolicy(qp);
 				inconsistenPolicies.remove(qp);
@@ -127,7 +127,7 @@ public class DiscoveredData {
 	 * Adds a QosPolicy.
 	 * @param policy
 	 */
-	protected void addQosPolicy(QosPolicy policy) {
+	protected void addQosPolicy(QosPolicy<?> policy) {
 		try {
 			qos.setPolicy(policy);
 		} catch (InconsistentPolicy e) {
@@ -142,7 +142,7 @@ public class DiscoveredData {
 	 * @see net.sf.jrtps.message.Data#getInlineQos()
 	 * @see InlineParameter
 	 */
-	public Set<QosPolicy> getInlineableQosPolicies() {
+	public Set<QosPolicy<?>> getInlineableQosPolicies() {
 		return qos.getInlinePolicies();
 	}
 

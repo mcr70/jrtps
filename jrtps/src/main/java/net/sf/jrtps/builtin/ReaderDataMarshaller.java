@@ -65,7 +65,7 @@ public class ReaderDataMarshaller extends Marshaller<ReaderData> {
 	}
 	
 	private void addQoS(ReaderData rd, ParameterList payloadParams) {
-		Set<QosPolicy> inlineableQosPolicies = rd.getInlineableQosPolicies();
+		Set<QosPolicy<?>> inlineableQosPolicies = rd.getInlineableQosPolicies();
 		for (QosPolicy<?> qp : inlineableQosPolicies) {
 			payloadParams.add((Parameter) qp);
 		}
