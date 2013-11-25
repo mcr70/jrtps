@@ -145,7 +145,7 @@ public class DiscoveredData {
 	public Set<QosPolicy> getInlineableQosPolicies() {
 		return qos.getInlinePolicies();
 	}
-	
+
 	public String toString() {
 		return topicName + "(" + typeName + "): " + key  + ", QoS: " + qos;
 	}
