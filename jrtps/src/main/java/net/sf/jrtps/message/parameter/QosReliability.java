@@ -20,7 +20,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		super(ParameterEnum.PID_RELIABILITY);
 		switch(kind) {
 		case BEST_EFFORT: this.kind = 0; break;
-		case RELIABLE: this.kind = 1; break;
+		case RELIABLE: this.kind = 3; break; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire
 		}
 		
 		this.max_blocking_time = max_blocking_time;
@@ -33,7 +33,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	public Kind getKind() {
 		switch(kind) {
 		case 0: return Kind.BEST_EFFORT;
-		case 1: return Kind.RELIABLE; 
+		case 3: return Kind.RELIABLE; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire 
 		}
 
 		throw new IllegalArgumentException("Illegal kind " + kind + " for QosReliability");
