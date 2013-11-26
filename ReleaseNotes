@@ -4,7 +4,7 @@
 	- QosReliability
 	- FIX: QoS is marshalled/unmarshalled during discovery. Improved logging of QoS of 
 	  discovered entities.
-	- FIX: mapping of RELIABLE value on the wire
+	- FIX: mapping of Reliabilitykind_t on the wire
 
 0.4.0
 	- Added skeletal QualityOfService at RTPS/udds layer. Entities are 
