@@ -38,7 +38,7 @@ public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
 	
-	private HashSet<ReaderData> matchedReaders = new HashSet<>();
+	private HashSet<ReaderProxy> matchedReaders = new HashSet<>();
 	private Thread resendThread;
 	private boolean running;
 	private CyclicBarrier barrier;
@@ -151,7 +151,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * 
 	 * @param kind
 	 * @param obj
-	 * @see #sendHeartbeat()
+	 * @see #notifyReaders()
 	 */
 	public void createChange(ChangeKind kind, T obj) {
 		writer_cache.createChange(kind, obj);	
@@ -161,12 +161,47 @@ public class RTPSWriter<T> extends Endpoint {
 		createChange(ChangeKind.WRITE, obj);	
 	}
 
+	/**
+	 * Notify every matched RTPSReader. 
+	 * For reliable readers, a Heartbeat is sent. For best effort readers Data is sent.
+	 * This provides means to create multiple changes, before announcing the state to readers.
+	 */
+	public void notifyReaders() {		
+		log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
+		for (ReaderProxy proxy : matchedReaders) {
+			GUID_t guid = proxy.getReaderData().getKey();
+			// TODO: heartbeat should be sent only to reliable readers.
+			//       8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
+			if (proxy.isReliable()) {
+				sendHeartbeat(guid.prefix, guid.entityId);
+			}
+			else {
+				sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+			}
+		}
+	}
+
+	/**
+	 * Assert liveliness of this writer. Matched readers are notified via
+	 * Heartbeat message of the liveliness of this writer.
+	 */
+	public void assertLiveliness() {
+		for (ReaderProxy rp : matchedReaders) {
+			GUID_t guid = rp.getReaderData().getKey();
+			sendHeartbeat(guid.prefix, guid.entityId, true); // Send Heartbeat regardless of readers QosReliability
+		}
+	}
+	
+	/**
+	 * Close this writer.
+	 */
 	public void close() {
 		if (barrier != null) {
 			try {
 				barrier.await(15, TimeUnit.SECONDS);
 			} catch (Exception e) {
-				log.warn("Exception ", e);
+				log.warn("Got Exception on close()", e);
 			}
 
 			if (running) {
@@ -184,9 +219,19 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 	
 	void addMatchedReader(ReaderData readerData) {
-		matchedReaders.add(readerData);
+		ReaderProxy proxy = new ReaderProxy(readerData);
+		matchedReaders.add(proxy);
 		log.debug("Adding matchedReader {}", readerData);
-		sendHeartbeat(readerData.getKey());
+		GUID_t guid = readerData.getKey();
+		
+		// TODO: heartbeat should be sent only to reliable readers.
+		if (proxy.isReliable()) {
+			sendHeartbeat(guid.prefix, guid.entityId);
+		}
+		else {
+			sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+		}
 	}
 
 	/**
@@ -211,13 +256,13 @@ public class RTPSWriter<T> extends Endpoint {
 
 	/**
 	 * Send data to given participant & reader. readersHighestSeqNum specifies
-	 * Which is the first data to be sent.
+	 * which is the first data to be sent.
 	 * 
-	 * @param senderPrefix
+	 * @param targetPrefix
 	 * @param readerId
 	 * @param readersHighestSeqNum
 	 */
-	void sendData(GuidPrefix_t senderPrefix, EntityId_t readerId, long readersHighestSeqNum) {
+	void sendData(GuidPrefix_t targetPrefix, EntityId_t readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
 		List<CacheChange> changes = writer_cache.getChanges();
 		long lastSeqNum = 0;
@@ -232,7 +277,6 @@ public class RTPSWriter<T> extends Endpoint {
 					long timeStamp = cc.getTimeStamp();
 					if (timeStamp > prevTimeStamp) {
 						InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
-						log.debug("Adding {}", infoTS);
 						m.addSubMessage(infoTS);
 					}
 					prevTimeStamp = timeStamp;
@@ -252,19 +296,24 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 
 		log.debug("[{}] Sending Data: {}-{}", getGuid().entityId, firstSeqNum, lastSeqNum);
-		boolean overFlowed = sendMessage(m, senderPrefix); 
+		boolean overFlowed = sendMessage(m, targetPrefix); 
 		if (overFlowed) {
-			sendHeartbeat(senderPrefix, readerId);
+			sendHeartbeat(targetPrefix, readerId);
 		}
 	}
 
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
+		sendHeartbeat(senderPrefix, readerId, false);
+	}
+	
+	private void sendHeartbeat(GuidPrefix_t targetPrefix, EntityId_t readerId, boolean livelinessFlag) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat(readerId);
+		hb.livelinessFlag(livelinessFlag);
 		m.addSubMessage(hb);
 
 		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
-		sendMessage(m, senderPrefix);
+		sendMessage(m, targetPrefix);
 	}
 
 	private Heartbeat createHeartbeat(EntityId_t entityId) {
@@ -278,30 +327,6 @@ public class RTPSWriter<T> extends Endpoint {
 		return hb;
 	}
 
-	/**
-	 * Sends a Heartbeat message to every matched RTPSReader. By sending a Heartbeat message, 
-	 * remote readers know about Data samples available on this writer.<p>
-	 * 
-	 * Heartbeat is not sent automatically. This provides means to create multiple changes,
-	 * before announcing the state to readers.
-	 * 
-	 */
-	public void sendHeartbeat() {		
-		log.debug("[{}] Sending Heartbeat to {} matched readers", getGuid().entityId, matchedReaders.size());
-		for (ReaderData rd : matchedReaders) {
-			sendHeartbeat(rd.getKey());
-		}
-	}
-
-	private void sendHeartbeat(GUID_t readerGuid) {
-		log.debug("[{}] Sending Heartbeat to {}", getGuid().entityId, readerGuid);
-		
-		Message m = new Message(getGuid().prefix);
-		Heartbeat hb = createHeartbeat(readerGuid.entityId); 
-		m.addSubMessage(hb);
-
-		sendMessage(m, readerGuid.prefix);
-	}
 
 	
 	@SuppressWarnings("unchecked")
@@ -334,5 +359,15 @@ public class RTPSWriter<T> extends Endpoint {
 		Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), inlineQos, dEnc);
 
 		return data;
+	}
+
+	/**
+	 * Sets the maximum history cache size.
+	 * TODO: history cache handling is likely to change
+	 * 
+	 * @param maxSize
+	 */
+	void setMaxHistorySize(int maxSize) {
+		writer_cache.setMaxSize(maxSize);
 	}
 }

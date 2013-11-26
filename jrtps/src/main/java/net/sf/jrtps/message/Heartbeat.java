@@ -56,8 +56,7 @@ public class Heartbeat extends SubMessage {
 			header.flags |= 0x2;
 		}
 		else {
-			header.flags |= 0x2;
-			header.flags ^= 0x2;
+			header.flags &= ~0x2;
 		}
 	}
 
@@ -71,6 +70,14 @@ public class Heartbeat extends SubMessage {
 		return (header.flags & 0x4) != 0;
 	}
 	
+	public void livelinessFlag(boolean livelinessFlag) {
+		if (livelinessFlag) {
+			header.flags |= 0x4;
+		}
+		else {
+			header.flags &= ~0x4;
+		}
+	}
 	/**
 	 * Identifies the Reader Entity that is being informed of the availability of a set of sequence numbers.
 	 * Can be set to ENTITYID_UNKNOWN to indicate all readers for the writer that sent the message.

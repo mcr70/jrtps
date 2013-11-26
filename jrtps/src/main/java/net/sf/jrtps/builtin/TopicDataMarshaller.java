@@ -1,5 +1,7 @@
 package net.sf.jrtps.builtin;
 
+import java.util.Set;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -8,7 +10,9 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.data.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
@@ -54,9 +58,17 @@ public class TopicDataMarshaller extends Marshaller<TopicData> {
 		payloadParams.add(new TypeName(td.getTypeName()));
 		payloadParams.add(new KeyHash(td.getKey().getBytes()));
 		
-		// addQos(wd, payLoadParams);
+		addQoS(td, payloadParams);
 		payloadParams.add(new Sentinel());
 
 		return new ParameterListEncapsulation(payloadParams);
+	}
+	
+	
+	private void addQoS(TopicData td, ParameterList payloadParams) {
+		Set<QosPolicy<?>> inlineableQosPolicies = td.getInlineableQosPolicies();
+		for (QosPolicy<?> qp : inlineableQosPolicies) {
+			payloadParams.add((Parameter) qp);
+		}
 	}
 }

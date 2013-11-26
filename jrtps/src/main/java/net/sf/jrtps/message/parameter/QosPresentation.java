@@ -49,11 +49,7 @@ public class QosPresentation extends Parameter implements PublisherPolicy<QosPre
 		case 2: return Kind.GROUP;
 		}
 
-		return null;
-	}
-
-	public String toString() {
-		return super.toString() + "(" + getKind() + ", coherent=" + coherent_access + ", ordered=" + ordered_access + ")";
+		throw new IllegalArgumentException("Illegal kind " + access_scope + " for QosPresentation");
 	}
 
 	@Override
@@ -78,5 +74,9 @@ public class QosPresentation extends Parameter implements PublisherPolicy<QosPre
 	 */
 	public static QosPresentation defaultPresentation() {
 		return new QosPresentation(Kind.INSTANCE, false, false);
+	}
+
+	public String toString() {
+		return super.toString() + "(" + getKind() + ", coherent=" + coherent_access + ", ordered=" + ordered_access + ")";
 	}
 }

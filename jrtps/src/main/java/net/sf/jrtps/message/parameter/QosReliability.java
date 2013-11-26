@@ -20,10 +20,10 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		super(ParameterEnum.PID_RELIABILITY);
 		switch(kind) {
 		case BEST_EFFORT: this.kind = 0; break;
-		case RELIABLE: this.kind = 1;
+		case RELIABLE: this.kind = 3; break; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire
 		}
+		
 		this.max_blocking_time = max_blocking_time;
-		//this.kind = kind.ordinal() + 1; // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
 	}
 
 	public Duration_t getMaxBlockingTime() {
@@ -33,10 +33,10 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	public Kind getKind() {
 		switch(kind) {
 		case 0: return Kind.BEST_EFFORT;
-		case 1: return Kind.RELIABLE; 
+		case 3: return Kind.RELIABLE; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire 
 		}
 
-		return null;
+		throw new IllegalArgumentException("Illegal kind " + kind + " for QosReliability");
 	}
 
 
@@ -52,10 +52,6 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		max_blocking_time.writeTo(buffer);
 	}
 
-	public String toString() {	
-		return super.toString() + "(" + getKind() + max_blocking_time + ")";
-	}
-
 	@Override
 	public boolean isCompatible(QosReliability other) {
 		return kind >= other.kind;
@@ -68,5 +64,9 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	 */
 	public static QosReliability defaultReliability() {
 		return new QosReliability(Kind.BEST_EFFORT, new Duration_t(0, 0)); // TODO: check default
+	}
+
+	public String toString() {	
+		return super.toString() + "(" + getKind() + ", "+ max_blocking_time + ")";
 	}
 }

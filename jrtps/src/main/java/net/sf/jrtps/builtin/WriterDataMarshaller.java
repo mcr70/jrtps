@@ -1,11 +1,15 @@
 package net.sf.jrtps.builtin;
 
+import java.util.Set;
+
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.data.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
@@ -54,9 +58,16 @@ public class WriterDataMarshaller extends Marshaller<WriterData> {
 		payloadParams.add(new TypeName(wd.getTypeName()));
 		payloadParams.add(new KeyHash(wd.getKey().getBytes()));
 		
-		// addQos(wd, payLoadParams);
+		addQoS(wd, payloadParams);
 		payloadParams.add(new Sentinel());
 
 		return new ParameterListEncapsulation(payloadParams);
+	}
+
+	private void addQoS(WriterData wd, ParameterList payloadParams) {
+		Set<QosPolicy<?>> inlineableQosPolicies = wd.getInlineableQosPolicies();
+		for (QosPolicy<?> qp : inlineableQosPolicies) {
+			payloadParams.add((Parameter) qp);
+		}
 	}
 }

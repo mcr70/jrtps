@@ -1,5 +1,6 @@
 package net.sf.jrtps;
 
+import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.types.GUID_t;
 
 
@@ -11,12 +12,18 @@ import net.sf.jrtps.types.GUID_t;
  *
  */
 class WriterProxy {
-	private final GUID_t writerGuid;
+	private GUID_t writerGuid;
+	private WriterData wd;
 	
 	private volatile long seqNumMax = 0;
+
 	
 	
-	public WriterProxy(GUID_t writerGuid) {
+	WriterProxy(WriterData wd) {
+		this.wd = wd;
+	}
+	
+	WriterProxy(GUID_t writerGuid) {
 		this.writerGuid = writerGuid;
 	}
 	
