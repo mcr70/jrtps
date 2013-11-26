@@ -34,6 +34,7 @@ import net.sf.jrtps.message.parameter.TopicPolicy;
  * @author mcr70
  *
  */
+@SuppressWarnings("rawtypes")
 public class QualityOfService {
 	private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
 
@@ -168,8 +169,8 @@ public class QualityOfService {
 	 * 
 	 * @return Set<QosPolicy>
 	 */
-	public Set<QosPolicy> getInlinePolicies() {
-		Set<QosPolicy> inlinePolicies = new HashSet<>();
+	public Set<QosPolicy<?>> getInlinePolicies() {
+		Set<QosPolicy<?>> inlinePolicies = new HashSet<>();
 
 		for (QosPolicy qp : policies.values()) {
 			if (qp instanceof InlineParameter) {
@@ -191,6 +192,7 @@ public class QualityOfService {
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	public boolean isCompatibleWith(QualityOfService other) {
 		boolean compatible = true;
 		
@@ -234,5 +236,7 @@ public class QualityOfService {
 		// QosUserData, QosGroupData, QosTopicData is omitted. 		
 	}
 	
-	
+	public String toString() {
+		return policies.values().toString();
+	}
 }

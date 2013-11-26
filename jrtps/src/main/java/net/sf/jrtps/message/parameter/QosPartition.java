@@ -37,17 +37,6 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
 		}
 	}
 	
-	public String toString() {
-		StringBuffer sb = new StringBuffer();
-		for (int i = 0; i < partitions.length; i++) {
-			sb.append(partitions[i]);
-			if (i < partitions.length - 1) {
-				sb.append(",");
-			}
-		}
-		return super.toString() + "([" + sb + "])";
-	}
-
 	@Override
 	public boolean isCompatible(QosPartition other) {
 		return true; // TODO: Partition matching is done differently
@@ -59,5 +48,16 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
 	 */
 	public static QosPartition defaultPartition() {
 		return new QosPartition(new String[0]); // TODO: check default
+	}
+
+	public String toString() {
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < partitions.length; i++) {
+			sb.append(partitions[i]);
+			if (i < partitions.length - 1) {
+				sb.append(",");
+			}
+		}
+		return super.toString() + "([" + sb + "])";
 	}
 }

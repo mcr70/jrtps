@@ -1,6 +1,7 @@
-jrtps-0.4.0
-	This release is provided as-is. In short, one can get started by using 
-	classes in net.sf.udds package, which is a minimalistic set of classes 
-	that can be used to start communicating over RTPS.
+jrtps-0.4.1
+	This release is provided as-is. In short, one can get started 
+	by using classes in net.sf.jrtps.udds package, which is a minimalistic 
+	set of classes that can be used to start communicating over RTPS.
 	
-	In this release,  a skeletal Quality of Service is presented.
+	In this release, initial implementation of Liveliness and Reliability
+	QoS is presented. 

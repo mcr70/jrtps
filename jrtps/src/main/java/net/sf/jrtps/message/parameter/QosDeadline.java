@@ -65,4 +65,8 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
 	public static QosDeadline defaultDeadline() {
 		return new QosDeadline(Duration_t.INFINITE);
 	}
+
+	public String toString() {
+		return super.toString() + "(" + period + ")";
+	}	
 }

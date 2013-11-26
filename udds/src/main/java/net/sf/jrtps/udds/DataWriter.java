@@ -39,7 +39,7 @@ public class DataWriter<T> extends Entity {
 	 */
 	public void write(T instance) {
 		rtps_writer.createChange(instance);
-		rtps_writer.sendHeartbeat();
+		rtps_writer.notifyReaders();
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class DataWriter<T> extends Entity {
 			rtps_writer.createChange(t);
 		}
 		
-		rtps_writer.sendHeartbeat();
+		rtps_writer.notifyReaders();
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class DataWriter<T> extends Entity {
 		// TODO: see 8.7.4 Changes in the Instance Lifecycle State
 		//       see 9.6.3.4 StatusInfo_t (PID_STATUS_INFO)
 		rtps_writer.createChange(ChangeKind.DISPOSE, instance);
-		rtps_writer.sendHeartbeat();
+		rtps_writer.notifyReaders();
 	}
 	
 	/**
@@ -75,6 +75,6 @@ public class DataWriter<T> extends Entity {
 			rtps_writer.createChange(ChangeKind.DISPOSE, t);
 		}
 		
-		rtps_writer.sendHeartbeat();
+		rtps_writer.notifyReaders();
 	}
 }

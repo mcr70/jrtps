@@ -53,6 +53,15 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
 		bb.write_long(depth);
 	}
 
+	public Kind getKind() {
+		switch(kind) {
+		case 0: return Kind.KEEP_LAST;
+		case 1: return Kind.KEEP_ALL;
+		}
+
+		throw new IllegalArgumentException("Unknown kind " + kind + " for QosHistory");
+	}
+	
 	@Override
 	public boolean isCompatible(QosHistory other) {
 		return true; // Always true. TODO: check this
@@ -65,5 +74,9 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
 	 */
 	public static QosHistory defaultHistory() {
 		return new QosHistory(Kind.KEEP_LAST, 1);
+	}
+
+	public String toString() {
+		return super.toString() + "(" + getKind() + ", " + depth + ")";
 	}
 }

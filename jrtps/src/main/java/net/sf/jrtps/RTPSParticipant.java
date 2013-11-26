@@ -20,6 +20,7 @@ import net.sf.jrtps.builtin.TopicDataMarshaller;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.builtin.WriterDataMarshaller;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.transport.UDPReceiver;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
@@ -78,6 +79,8 @@ public class RTPSParticipant {
 	private final int domainId;
 	private final int participantId;
 
+	private final LivelinessManager livelinessManager;
+
 	/**
 	 * 
 	 */
@@ -114,47 +117,57 @@ public class RTPSParticipant {
 		ParticipantDataMarshaller pdm = new ParticipantDataMarshaller();
 		WriterDataMarshaller wdm = new WriterDataMarshaller();		
 		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
-		TopicDataMarshaller tdm = new TopicDataMarshaller();
+		TopicDataMarshaller tdm = new TopicDataMarshaller();		
 
-		QualityOfService qos = new QualityOfService();
+		livelinessManager = new LivelinessManager(this);
+		
+		QualityOfService spdpQoS = new QualityOfService();
+		QualityOfService sedpQoS = new QualityOfService();
+		try {
+			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+		} catch (InconsistentPolicy e) {
+			log.error("Got InconsistentPolicy exception. This is an internal error", e);
+		}
+
 		// ----  Create a Writers for SEDP  ---------
 		createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
 		createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
 		// NOTE: It is not mandatory to publish TopicData
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
 
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader<ParticipantData> partReader = createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
-				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, qos);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 		partReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader<WriterData> pubReader = createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, qos);
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
 		pubReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 
 		RTPSReader<ReaderData> subReader = createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, qos);
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
 		subReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		RTPSReader<TopicData> topicReader = createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
-				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, qos);
+				TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, sedpQoS);
 		topicReader.addListener(new BuiltinTopicDataListener(this));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, qos);
+				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
 		spdp_w.setResendDataPeriod(new Duration_t(10, 0), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER); // Starts a resender thread
-		//spdp_w.addMatchedEndpointLocator(Locator_t.defaultDiscoveryMulticastLocator(domainId));
 
+		livelinessManager.start();
+		
 		participantId++;
 	}
 
@@ -186,6 +199,15 @@ public class RTPSParticipant {
 	 */
 	private volatile int userEntityIdx = 1;
 
+	/**
+	 * Asserts liveliness of RTPSWriters, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
+	 * 
+	 * @see net.sf.jrtps.message.parameter.QosLiveliness
+	 */
+	public void assertLiveliness() {
+		livelinessManager.assertLiveliness();
+	}
+	
 	/**
 	 * Creates an user defined writer. Topic name is the simple name of Class given.
 	 * and type name is the fully qualified class name of the class given. QualityOfService
@@ -236,7 +258,7 @@ public class RTPSParticipant {
 	 * @param qos
 	 * @return RTPSWriter
 	 */
-	private <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
+	<T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
 		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
@@ -244,9 +266,12 @@ public class RTPSParticipant {
 
 		@SuppressWarnings("unchecked")
 		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
-		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid());
+		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid(), qos);
 		pw.createChange(wd);
-
+		pw.notifyReaders();
+		
+		livelinessManager.registerWriter(writer);
+		
 		return writer;
 	}
 
@@ -300,7 +325,7 @@ public class RTPSParticipant {
 	 * @param qos 
 	 * @return RTPSReader
 	 */
-	private <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
+	<T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
 			QualityOfService qos) {
 		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, qos, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
@@ -309,7 +334,7 @@ public class RTPSParticipant {
 
 		@SuppressWarnings("unchecked")
 		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
-		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid());
+		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid(), qos);
 		sw.createChange(rd);
 
 		return reader;
@@ -480,5 +505,7 @@ public class RTPSParticipant {
 		for (RTPSWriter<?> w : writerEndpoints) {
 			w.close();
 		}
+		
+		livelinessManager.stop();
 	}
 }

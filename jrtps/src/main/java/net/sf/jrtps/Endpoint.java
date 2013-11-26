@@ -91,16 +91,6 @@ public class Endpoint {
 	}
 
 	protected boolean sendMessage(Message m, GuidPrefix_t targetPrefix) {
-		// TODO: we should check, that there is a recipient we need in each Locator.
-		//       now we just assume remote participant will ignore if there isn't
-		// we should have sendMessage(Messagem, GuidPrefix_t remoteParticipant, EntityId_t remoteEntity)
-		// - RTPSReader.onHeartbeat : sendMessage(m, senderGuidPrefix, hb.getWriterId())
-		// - RTPSWriter.sendData : sendMessage(m, senderPrefix, ackNack.getReaderId())
-		// - RTPSWriter.sendHeartbeat : sendMessage(m, senderPrefix, ackNack.getReaderId())
-		// - Writer.setResendDataPeriod : sendMessage(m, senderPrefix, null) // or new EntityId::Participant();
-		//
-		// getParticipantLocators should be changed to getLocator(new Guid(prefix, entityId))
-		// Q: prefer multicast?
 		Locator_t locator = getParticipantLocators(targetPrefix);
 		boolean overFlowed = true;
 		try {

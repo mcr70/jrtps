@@ -45,4 +45,8 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
 	public static QosLatencyBudget defaultLatencyBudget() {
 		return new QosLatencyBudget(new Duration_t(0, 0));
 	}
+
+	public String toString() {
+		return super.toString() + "(" + duration + ")";
+	}
 }

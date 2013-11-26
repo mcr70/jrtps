@@ -3,6 +3,7 @@ package net.sf.jrtps.builtin;
 import java.util.Iterator;
 
 import net.sf.jrtps.InconsistentPolicy;
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
@@ -48,7 +49,7 @@ public class TopicData extends DiscoveredData {
 		resolveInconsistencies();
 	}
 
-	public TopicData(String typeName, String topicName, GUID_t key) {
-		super(typeName, topicName, key);
+	public TopicData(String typeName, String topicName, GUID_t key, QualityOfService qos) {
+		super(typeName, topicName, key, qos);
 	}
 }
