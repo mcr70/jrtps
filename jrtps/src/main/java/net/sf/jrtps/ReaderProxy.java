@@ -9,10 +9,11 @@ import net.sf.jrtps.message.parameter.QosReliability;
  * @author mcr70
  */
 class ReaderProxy {
-	private boolean expectsInlineQoS = false;
 	private final ReaderData rd;
+	private boolean expectsInlineQoS = false;
 	private long readersHighestSeqNum = 0;
-	
+	private boolean isAlive = true;
+	private long heartbeatSentTime = 0; // set to 0 after acknack
 	
 	ReaderProxy(ReaderData readerData) {
 		this(readerData, false);
@@ -48,11 +49,30 @@ class ReaderProxy {
 		return rd;
 	}
 
-	public long getReadersHighestSeqNum() {
+	long getReadersHighestSeqNum() {
 		return readersHighestSeqNum;
 	}
 
-	public void setReadersHighestSeqNum(long l) {
+	void setReadersHighestSeqNum(long l) {
 		this.readersHighestSeqNum = l;
+	}
+
+	boolean isAlive() {
+		return isAlive;
+	}
+
+	
+	void heartbeatSent() {
+		if (heartbeatSentTime != 0) {
+			this.heartbeatSentTime = System.currentTimeMillis();
+		}
+		else {
+			isAlive = false;
+		}
+	}
+	
+	void ackNackReceived() {
+		this.heartbeatSentTime = 0;
+		isAlive = true;
 	}
 }

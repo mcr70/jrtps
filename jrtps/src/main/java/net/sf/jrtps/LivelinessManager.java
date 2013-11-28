@@ -34,7 +34,6 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	private static final Logger log = LoggerFactory.getLogger(LivelinessManager.class);
 	
 	private final List<Duration_t> alDurations = new LinkedList<>();
-	private final Thread livelinessThread;
 	
 	private final RTPSParticipant participant;
 	private RTPSWriter<ParticipantMessage> writer;
@@ -47,11 +46,8 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	public LivelinessManager(RTPSParticipant participant) {
 		this.participant = participant;
 		// Create samples used with liveliness protocol
-		manualSample = new ParticipantMessage(participant.guid.prefix, ParticipantMessage.MANUAL_LIVELINESS_KIND, new byte[0]);
-		automaticSample = new ParticipantMessage(participant.guid.prefix, ParticipantMessage.AUTOMATIC_LIVELINESS_KIND, new byte[0]);
-		
-		livelinessThread = new Thread(this);
-		livelinessThread.setName("liveliness");
+		manualSample = new ParticipantMessage(participant.getGuid().prefix, ParticipantMessage.MANUAL_LIVELINESS_KIND, new byte[0]);
+		automaticSample = new ParticipantMessage(participant.getGuid().prefix, ParticipantMessage.AUTOMATIC_LIVELINESS_KIND, new byte[0]);
 	}
 	
 	/**
@@ -121,7 +117,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		reader.addListener(this);
 
 		log.debug("Startin liveliness thread");
-		livelinessThread.start();
+		participant.addRunnable(this);
 	}
 	
 	/**
@@ -129,7 +125,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	 */
 	void stop() {
 		log.debug("Stopping liveliness thread");
-		livelinessThread.interrupt();
+		//livelinessThread.interrupt();
 		if (writer != null) {
 			writer.close();
 			writer = null;

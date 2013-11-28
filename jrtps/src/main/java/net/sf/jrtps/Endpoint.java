@@ -26,16 +26,20 @@ public class Endpoint {
 
 	private QualityOfService qos;
 
+	private RTPSParticipant participant;
+
 
 	/**
 	 * 
+	 * @param participant 
 	 * @param prefix prefix from the participant that creates this endpoint.
 	 * @param entityId
 	 * @param topicName
 	 * @param qos 
 	 */
-	protected Endpoint(GuidPrefix_t prefix, EntityId_t entityId, String topicName, QualityOfService qos, Configuration configuration) {
-		this.guid = new GUID_t(prefix, entityId);
+	protected Endpoint(RTPSParticipant participant, EntityId_t entityId, String topicName, QualityOfService qos, Configuration configuration) {
+		this.participant = participant;
+		this.guid = new GUID_t(participant.getGuid().prefix, entityId);
 		this.topicName = topicName;
 		this.qos = qos;
 		this.configuration = configuration;
@@ -106,5 +110,13 @@ public class Endpoint {
 		}
 
 		return overFlowed;
+	}
+
+	/**
+	 * Get the RTPSParticipant, that created this entity. 
+	 * @return RTPSParticipant
+	 */
+	protected RTPSParticipant getParticipant() {
+		return participant;
 	}
 }

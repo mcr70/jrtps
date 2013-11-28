@@ -42,9 +42,9 @@ public class RTPSReader<T> extends Endpoint {
 
 	private List<Sample<T>> pendingSamples = new LinkedList<>();
 
-	RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	RTPSReader(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
-		super(prefix, entityId, topicName, qos, configuration);
+		super(participant, entityId, topicName, qos, configuration);
 
 		this.marshaller = marshaller;
 	}
