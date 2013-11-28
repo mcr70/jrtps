@@ -19,7 +19,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	public QosReliability(Kind kind, Duration_t max_blocking_time) {
 		super(ParameterEnum.PID_RELIABILITY);
 		switch(kind) {
-		case BEST_EFFORT: this.kind = 0; break;
+		case BEST_EFFORT: this.kind = 1; break;
 		case RELIABLE: this.kind = 3; break; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire
 		}
 		
@@ -32,7 +32,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	
 	public Kind getKind() {
 		switch(kind) {
-		case 0: return Kind.BEST_EFFORT;
+		case 1: return Kind.BEST_EFFORT;
 		case 3: return Kind.RELIABLE; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire 
 		}
 
