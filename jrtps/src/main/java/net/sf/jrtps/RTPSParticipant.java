@@ -317,6 +317,47 @@ public class RTPSParticipant {
 		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
 	}
 
+	/**
+	 * Close this RTPSParticipant. All the network listeners will be stopped 
+	 * and all the history caches of all entities will be cleared.
+	 */
+	public void close() {
+		log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
+
+		threadPoolExecutor.shutdown();
+		
+//		// First, close network receivers
+		for (UDPReceiver r : receivers) {
+			r.close();
+		}
+
+		// Then entities
+		for (RTPSReader<?> r : readerEndpoints) {
+			r.close();
+		}
+		for (RTPSWriter<?> w : writerEndpoints) {
+			w.close();
+		}
+		
+		livelinessManager.stop();
+		
+		try {
+			boolean terminated = threadPoolExecutor.awaitTermination(1, TimeUnit.SECONDS);
+			if (!terminated) {
+				threadPoolExecutor.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+		}
+	}
+
+	/**
+	 * Gets the guid of this participant.
+	 * @return guid
+	 */
+	public GUID_t getGuid() {
+		return guid;
+	}
+
 	
 	/**
 	 * Creates a new RTPSReader.
@@ -489,47 +530,6 @@ public class RTPSParticipant {
 
 
 	/**
-	 * Close this RTPSParticipant. All the network listeners will be stopped 
-	 * and all the history caches of all entities will be cleared.
-	 */
-	public void close() {
-		log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
-
-		threadPoolExecutor.shutdown();
-		
-//		// First, close network receivers
-		for (UDPReceiver r : receivers) {
-			r.close();
-		}
-
-		// Then entities
-		for (RTPSReader<?> r : readerEndpoints) {
-			r.close();
-		}
-		for (RTPSWriter<?> w : writerEndpoints) {
-			w.close();
-		}
-		
-		livelinessManager.stop();
-		
-		try {
-			boolean terminated = threadPoolExecutor.awaitTermination(1, TimeUnit.SECONDS);
-			if (!terminated) {
-				threadPoolExecutor.shutdownNow();
-			}
-		} catch (InterruptedException e) {
-		}
-	}
-
-	/**
-	 * Gets the guid of this participant.
-	 * @return guid
-	 */
-	public GUID_t getGuid() {
-		return guid;
-	}
-
-	/**
 	 * Adds a runnable to be run with this participants thread pool.
 	 * @param runnable
 	 */
@@ -539,9 +539,6 @@ public class RTPSParticipant {
 
 
 	private void createSPDPResender(final Duration_t period, final RTPSWriter<ParticipantData> spdp_w) {
-		// TODO: This is used by SPDP to announce republish ParticipantData periodically.
-		//       Should this be removed from RTPSWriter? I think so.
-		//       SPDPClient?, SEDPClient?
 		Runnable resendRunnable = new Runnable() {
 		    @Override
 			public void run() {
@@ -557,8 +554,7 @@ public class RTPSParticipant {
 			}
 		};
 
-		threadPoolExecutor.execute(resendRunnable);
-		
 		log.debug("[{}] Starting resend thread with period {}", getGuid().entityId, period);		
+		threadPoolExecutor.execute(resendRunnable);
 	}
 }
