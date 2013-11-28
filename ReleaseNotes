@@ -1,3 +1,6 @@
+0.4.2
+	- Thread pool can be tuned with jrtps.properties
+
 0.4.1
 	- QosLiveliness. Partly implemented. Writer side is implemented but readers don't
 	  react on liveliness of the writers. 
