@@ -1,5 +1,6 @@
 0.4.2
 	- Thread pool can be tuned with jrtps.properties
+	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
 
 0.4.1
 	- QosLiveliness. Partly implemented. Writer side is implemented but readers don't
