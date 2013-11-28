@@ -166,9 +166,8 @@ public class RTPSParticipant {
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
-		createSPDPResender(new Duration_t(5, 0), spdp_w);
-		//HistoryCache writerCache = spdp_w.getWriterCache();
-		//spdp_w.setResendDataPeriod(new Duration_t(10, 0), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER); // Starts a resender thread
+		
+		createSPDPResender(config.getSPDPResendPeriod(), spdp_w);
 		
 		livelinessManager.start();
 		

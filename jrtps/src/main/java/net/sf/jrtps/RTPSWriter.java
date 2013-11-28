@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
-	
+
 	private HashSet<ReaderProxy> matchedReaders = new HashSet<>();
 
 	/**
@@ -56,7 +56,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 		this.writer_cache = new HistoryCache(getGuid()); // TODO: GUID is not used by HistoryCache
 		this.marshaller = marshaller;
-		
+
 		try {
 			this.md5 = MessageDigest.getInstance("MD5");
 		} 
@@ -102,17 +102,20 @@ public class RTPSWriter<T> extends Endpoint {
 	 * This provides means to create multiple changes, before announcing the state to readers.
 	 */
 	public void notifyReaders() {		
-		log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
-		for (ReaderProxy proxy : matchedReaders) {
-			GUID_t guid = proxy.getReaderData().getKey();
-			// TODO: heartbeat should be sent only to reliable readers.
-			//       8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
-			if (proxy.isReliable()) {
-				sendHeartbeat(guid.prefix, guid.entityId);
-			}
-			else {
-				sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
-				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+		if (matchedReaders.size() > 0) {
+			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
+
+			for (ReaderProxy proxy : matchedReaders) {
+				GUID_t guid = proxy.getReaderData().getKey();
+				// TODO: heartbeat should be sent only to reliable readers.
+				//       8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
+				if (proxy.isReliable()) {
+					sendHeartbeat(guid.prefix, guid.entityId);
+				}
+				else {
+					sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+					proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+				}
 			}
 		}
 	}
@@ -127,7 +130,7 @@ public class RTPSWriter<T> extends Endpoint {
 			sendHeartbeat(guid.prefix, guid.entityId, true); // Send Heartbeat regardless of readers QosReliability
 		}
 	}
-	
+
 	/**
 	 * Close this writer. Closing a writer clears its cache of changes.
 	 */
@@ -140,13 +143,13 @@ public class RTPSWriter<T> extends Endpoint {
 		log.debug("Removing matchedReader {}", readerData);
 		matchedReaders.remove(readerData);
 	}
-	
+
 	void addMatchedReader(ReaderData readerData) {
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		matchedReaders.add(proxy);
 		log.debug("Adding matchedReader {}", readerData);
 		GUID_t guid = readerData.getKey();
-		
+
 		// TODO: heartbeat should be sent only to reliable readers.
 		if (proxy.isReliable()) {
 			sendHeartbeat(guid.prefix, guid.entityId);
@@ -196,7 +199,7 @@ public class RTPSWriter<T> extends Endpoint {
 		long lastSeqNum = 0;
 		long firstSeqNum = 0;
 		long prevTimeStamp = 0;
-		
+
 		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
@@ -212,7 +215,7 @@ public class RTPSWriter<T> extends Endpoint {
 					if (firstSeqNum == 0) {
 						firstSeqNum = lastSeqNum;
 					}
-					
+
 					log.trace("Marshalling {}", cc.getData());
 					Data data = createData(readerId, cc);
 					m.addSubMessage(data);
@@ -233,7 +236,7 @@ public class RTPSWriter<T> extends Endpoint {
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
 		sendHeartbeat(senderPrefix, readerId, false);
 	}
-	
+
 	private void sendHeartbeat(GuidPrefix_t targetPrefix, EntityId_t readerId, boolean livelinessFlag) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat(readerId);
@@ -261,18 +264,18 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-	
+
 	@SuppressWarnings("unchecked")
 	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
 		ParameterList inlineQos = new ParameterList();
-		
+
 		if (marshaller.hasKey(cc.getData().getClass())) { // Add KeyHash if present
 			byte[] key = marshaller.extractKey(cc.getData());
 			if (key == null) {
 				key = new byte[0];
 			}
-			
+
 			byte[] bytes = null;
 			if (key.length < 16) {			
 				bytes = new byte[16];
@@ -281,14 +284,14 @@ public class RTPSWriter<T> extends Endpoint {
 			else {
 				bytes = md5.digest(key);
 			}
-			
+
 			inlineQos.add(new KeyHash(bytes));
 		}
-		
+
 		if (!cc.getKind().equals(ChangeKind.WRITE)) { // Add status info for operations other than WRITE
 			inlineQos.add(new StatusInfo(cc.getKind()));
 		}
-		
+
 		Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), inlineQos, dEnc);
 
 		return data;
@@ -310,7 +313,7 @@ public class RTPSWriter<T> extends Endpoint {
 			guid.equals(proxy.getReaderData().getKey());
 			return proxy;
 		}
-		
+
 		return null;
 	}
 
