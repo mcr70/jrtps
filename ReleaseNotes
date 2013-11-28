@@ -1,4 +1,5 @@
 0.4.2
+	- SPDP resend data period configurable with jrtps.properties
 	- Thread pool can be tuned with jrtps.properties
 	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
 
