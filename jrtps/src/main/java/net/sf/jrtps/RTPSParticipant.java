@@ -358,6 +358,20 @@ public class RTPSParticipant {
 		return guid;
 	}
 
+	/**
+	 * Waits for a given amount of milliseconds.
+	 * @param millis
+	 */
+	void waitFor(int millis) {
+		if (millis > 0) {
+			try {
+				threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				log.debug("waitFor(...) was interrupted");
+			}
+		}
+	}
+	
 	
 	/**
 	 * Creates a new RTPSReader.
