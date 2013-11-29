@@ -19,7 +19,13 @@ class WriterCache<T> {
 	private final QosHistory history;
 	private final QosReliability reliability;
 	
+	// Main collection to hold instances. ResourceLimits is checked against this map
 	private Map<InstanceKey, Instance> instances = new LinkedHashMap<>();
+	
+	// This list keeps changes in linear order as they happen. It is used for
+	// Transmitting changes to remote readers.
+	private List<CacheChange> ccList = new LinkedList<>();
+	
 	private Marshaller<T> marshaller;
 
 	WriterCache(Marshaller<T> marshaller, QualityOfService qos) {
@@ -75,6 +81,7 @@ class WriterCache<T> {
 		}	
 
 		int write(T sample) {
+			history.add(sample);
 			return 0;
 		}
 	}
