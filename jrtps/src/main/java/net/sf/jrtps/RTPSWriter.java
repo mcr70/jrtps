@@ -46,8 +46,11 @@ public class RTPSWriter<T> extends Endpoint {
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
 	private final HistoryCache writer_cache;
+	private final int nackResponseDelay;
+	
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 	protected Object resend_lock = new Object();
+	
 
 
 	public RTPSWriter(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
@@ -56,7 +59,8 @@ public class RTPSWriter<T> extends Endpoint {
 
 		this.writer_cache = new HistoryCache(getGuid()); // TODO: GUID is not used by HistoryCache
 		this.marshaller = marshaller;
-
+		this.nackResponseDelay = configuration.getNackResponseDelay(); 
+		
 		try {
 			this.md5 = MessageDigest.getInstance("MD5");
 		} 
@@ -175,6 +179,9 @@ public class RTPSWriter<T> extends Endpoint {
 		} // Note: proxy could be null
 
 		if (writer_cache.size() > 0) {
+			log.debug("Wait for nack response delay: {} ms", nackResponseDelay);
+			getParticipant().waitFor(nackResponseDelay);
+			
 			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
 		}
 		else { // Send HB / GAP to reader so that it knows our state
