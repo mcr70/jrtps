@@ -47,9 +47,11 @@ public class RTPSWriter<T> extends Endpoint {
 	private final Marshaller marshaller;
 	private final HistoryCache writer_cache;
 	private final int nackResponseDelay;
+	private int heartbeatPeriod;
 	
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 	protected Object resend_lock = new Object();
+	
 	
 
 
@@ -60,6 +62,7 @@ public class RTPSWriter<T> extends Endpoint {
 		this.writer_cache = new HistoryCache(getGuid()); // TODO: GUID is not used by HistoryCache
 		this.marshaller = marshaller;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
+		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
 		
 		try {
 			this.md5 = MessageDigest.getInstance("MD5");
@@ -139,6 +142,8 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Close this writer. Closing a writer clears its cache of changes.
 	 */
 	public void close() {
+		heartbeatPeriod = 0; // Stops heartbeat thread gracefully 
+		matchedReaders.clear();
 		writer_cache.getChanges().clear();
 	}
 
