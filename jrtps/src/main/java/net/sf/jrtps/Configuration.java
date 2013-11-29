@@ -31,7 +31,7 @@ class Configuration {
 
 	// --- Reader configurations -------------
 	private long heartbeatSuppressionDuration = 0; // 0 ms
-	private long heartbeatResponseDelay = 500;     // 500 ms
+	private int heartbeatResponseDelay = 500;     // 500 ms
 
 	private final Properties props;
 
@@ -114,8 +114,8 @@ class Configuration {
 	 * positive or negative acknowledgment (seeSection 8.4.12.2)
 	 * @return heartbeat response delay
 	 */
-	long getHeartbeatResponseDelay() {
-		return heartbeatResponseDelay;
+	int getHeartbeatResponseDelay() {
+		return getIntProperty("rtps.reader.heartbeat-response-delay", 500);
 	}
 
 	public int getBufferSize() {
