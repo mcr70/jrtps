@@ -1,6 +1,6 @@
 0.4.2
-	- SPDP resend data period configurable with jrtps.properties
-	- Thread pool can be tuned with jrtps.properties
+	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, nackResponseDelay,
+	  SPDP resend data period.
 	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
 
 0.4.1
