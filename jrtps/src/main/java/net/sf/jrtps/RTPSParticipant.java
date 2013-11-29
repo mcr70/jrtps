@@ -361,15 +361,18 @@ public class RTPSParticipant {
 	/**
 	 * Waits for a given amount of milliseconds.
 	 * @param millis
+	 * @return true, if timeout occured normally
 	 */
-	void waitFor(int millis) {
+	boolean waitFor(int millis) {
 		if (millis > 0) {
 			try {
-				threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
+				return !threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
 				log.debug("waitFor(...) was interrupted");
 			}
 		}
+		
+		return false;
 	}
 	
 	

@@ -24,7 +24,6 @@ class Configuration {
 
 	// --- Writer configurations -------------
 	private boolean pushMode = true;	
-	private long heartbeatPeriod = 5000;           // 5 sec
 	private long nackSuppressionDuration = 0;      // 0
 
 
@@ -72,8 +71,8 @@ class Configuration {
 	 * availability of data by sending a Heartbeat Message.
 	 * @return heartbeat period
 	 */
-	long heartbeatPeriod() {
-		return heartbeatPeriod;
+	int getHeartbeatPeriod() {
+		return getIntProperty("rtps.writer.nack-response-delay", 0);
 	}
 
 	/**
