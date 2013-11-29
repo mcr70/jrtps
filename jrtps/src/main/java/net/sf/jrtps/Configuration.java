@@ -25,13 +25,11 @@ class Configuration {
 	// --- Writer configurations -------------
 	private boolean pushMode = true;	
 	private long heartbeatPeriod = 5000;           // 5 sec
-	private long nackResponseDelay = 200;          // 200 ms
 	private long nackSuppressionDuration = 0;      // 0
 
 
 	// --- Reader configurations -------------
 	private long heartbeatSuppressionDuration = 0; // 0 ms
-	private int heartbeatResponseDelay = 500;     // 500 ms
 
 	private final Properties props;
 
@@ -85,8 +83,8 @@ class Configuration {
 	 * See chapter 8.4.7.1.1 for default values 
 	 * @return Nack response delay
 	 */
-	long nackResponseDelay() {
-		return nackResponseDelay;
+	int getNackResponseDelay() {
+		return getIntProperty("rtps.writer.nack-response-delay", 200);
 	}
 
 	/**
