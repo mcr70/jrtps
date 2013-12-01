@@ -9,7 +9,7 @@
 
 	<groupId>net.sf.jrtps</groupId>
 	<artifactId>jrtps-parent</artifactId>
-	<version>0.4.2-SNAPSHOT</version>
+	<version>0.4.2</version>
 	<packaging>pom</packaging>
 
 	<name>jRTPS parent</name>
