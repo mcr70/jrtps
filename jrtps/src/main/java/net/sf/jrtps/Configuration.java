@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
+import net.sf.jrtps.types.Duration_t;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,14 +24,11 @@ class Configuration {
 
 	// --- Writer configurations -------------
 	private boolean pushMode = true;	
-	private long heartbeatPeriod = 5000;           // 5 sec
-	private long nackResponseDelay = 200;          // 200 ms
 	private long nackSuppressionDuration = 0;      // 0
 
 
 	// --- Reader configurations -------------
 	private long heartbeatSuppressionDuration = 0; // 0 ms
-	private long heartbeatResponseDelay = 500;     // 500 ms
 
 	private final Properties props;
 
@@ -72,8 +71,8 @@ class Configuration {
 	 * availability of data by sending a Heartbeat Message.
 	 * @return heartbeat period
 	 */
-	long heartbeatPeriod() {
-		return heartbeatPeriod;
+	int getHeartbeatPeriod() {
+		return getIntProperty("rtps.writer.nack-response-delay", 0);
 	}
 
 	/**
@@ -83,8 +82,8 @@ class Configuration {
 	 * See chapter 8.4.7.1.1 for default values 
 	 * @return Nack response delay
 	 */
-	long nackResponseDelay() {
-		return nackResponseDelay;
+	int getNackResponseDelay() {
+		return getIntProperty("rtps.writer.nack-response-delay", 200);
 	}
 
 	/**
@@ -112,8 +111,8 @@ class Configuration {
 	 * positive or negative acknowledgment (seeSection 8.4.12.2)
 	 * @return heartbeat response delay
 	 */
-	long getHeartbeatResponseDelay() {
-		return heartbeatResponseDelay;
+	int getHeartbeatResponseDelay() {
+		return getIntProperty("rtps.reader.heartbeat-response-delay", 500);
 	}
 
 	public int getBufferSize() {
@@ -134,5 +133,15 @@ class Configuration {
 		}
 		
 		return i;
+	}
+
+	/**
+	 * Get the default SPDP announcement rate. 
+	 * @return resend period.
+	 */
+	public Duration_t getSPDPResendPeriod() {
+		int millis = getIntProperty("rtps.spdp.resend-data-period", 30000); // see 9.6.1.4.2 Default announcement rate
+		
+		return new Duration_t(millis);
 	}
 }

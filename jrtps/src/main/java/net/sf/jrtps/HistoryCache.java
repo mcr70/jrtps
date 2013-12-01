@@ -28,13 +28,6 @@ class HistoryCache {
 		return changes; 
 	}
 
-	/**
-	 * Get the Guid_t that this history cache belongs to
-	 * @return
-	 */
-	GUID_t getGuid() {
-		return guid;
-	}
 
 	void setMaxSize(int maxSize) {
 		this.maxSize = maxSize;
