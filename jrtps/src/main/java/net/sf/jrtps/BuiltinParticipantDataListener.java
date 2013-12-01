@@ -37,7 +37,7 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
-				if (pd.getGuidPrefix().equals(participant.guid.prefix)) {
+				if (pd.getGuidPrefix().equals(participant.getGuid().prefix)) {
 					log.trace("Ignoring self");
 				}
 				else {

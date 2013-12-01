@@ -43,9 +43,8 @@ public class RTPSParticipant {
 	private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
 	private final Configuration config = new Configuration();
-	
-	private int CORE_POOL_SIZE = 10; // TODO: configurable
-	private int MAX_POOL_SIZE = 2 * CORE_POOL_SIZE;
+	private final ThreadPoolExecutor threadPoolExecutor;
+
 
 	/**
 	 * Maps that stores discovered participants. discovered participant is shared with
@@ -62,14 +61,10 @@ public class RTPSParticipant {
 	 */
 	private Set<UDPReceiver> receivers = new HashSet<UDPReceiver>();
 
-	private ThreadPoolExecutor threadPoolExecutor = 
-			new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, 5, TimeUnit.SECONDS, 
-					new LinkedBlockingQueue<Runnable>(50)); // TODO: check parameterization
-
 	private final List<RTPSReader<?>> readerEndpoints = new LinkedList<>();
 	private final List<RTPSWriter<?>> writerEndpoints = new LinkedList<>();
 
-	GUID_t guid;
+	private final GUID_t guid;
 
 	private Locator_t meta_mcLoc;
 	private Locator_t meta_ucLoc;
@@ -105,6 +100,13 @@ public class RTPSParticipant {
 		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, (byte) participantId, r.nextInt()), EntityId_t.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
+
+		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 10);
+		int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
+		threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 5, TimeUnit.SECONDS, 
+				new LinkedBlockingQueue<Runnable>(maxPoolSize));
+
+		log.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
 		meta_mcLoc = Locator_t.defaultDiscoveryMulticastLocator(domainId);
 		meta_ucLoc = Locator_t.defaultMetatrafficUnicastLocator(domainId, participantId);
@@ -164,8 +166,9 @@ public class RTPSParticipant {
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.createChange(pd);
-		spdp_w.setResendDataPeriod(new Duration_t(10, 0), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER); // Starts a resender thread
-
+		
+		createSPDPResender(config.getSPDPResendPeriod(), spdp_w);
+		
 		livelinessManager.start();
 		
 		participantId++;
@@ -259,7 +262,7 @@ public class RTPSParticipant {
 	 * @return RTPSWriter
 	 */
 	<T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
-		RTPSWriter<T> writer = new RTPSWriter<T>(guid.prefix, eId, topicName, marshaller, qos, config);
+		RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, marshaller, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);
@@ -314,6 +317,64 @@ public class RTPSParticipant {
 		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
 	}
 
+	/**
+	 * Close this RTPSParticipant. All the network listeners will be stopped 
+	 * and all the history caches of all entities will be cleared.
+	 */
+	public void close() {
+		log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
+
+		threadPoolExecutor.shutdown();
+		
+//		// First, close network receivers
+		for (UDPReceiver r : receivers) {
+			r.close();
+		}
+
+		// Then entities
+		for (RTPSReader<?> r : readerEndpoints) {
+			r.close();
+		}
+		for (RTPSWriter<?> w : writerEndpoints) {
+			w.close();
+		}
+		
+		livelinessManager.stop();
+		
+		try {
+			boolean terminated = threadPoolExecutor.awaitTermination(1, TimeUnit.SECONDS);
+			if (!terminated) {
+				threadPoolExecutor.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+		}
+	}
+
+	/**
+	 * Gets the guid of this participant.
+	 * @return guid
+	 */
+	public GUID_t getGuid() {
+		return guid;
+	}
+
+	/**
+	 * Waits for a given amount of milliseconds.
+	 * @param millis
+	 * @return true, if timeout occured normally
+	 */
+	boolean waitFor(int millis) {
+		if (millis > 0) {
+			try {
+				return !threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				log.debug("waitFor(...) was interrupted");
+			}
+		}
+		
+		return false;
+	}
+	
 	
 	/**
 	 * Creates a new RTPSReader.
@@ -327,7 +388,7 @@ public class RTPSParticipant {
 	 */
 	<T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
 			QualityOfService qos) {
-		RTPSReader<T> reader = new RTPSReader<T>(guid.prefix, eId, topicName, marshaller, qos, config);
+		RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, qos, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
 
 		readerEndpoints.add(reader);
@@ -486,26 +547,31 @@ public class RTPSParticipant {
 
 
 	/**
-	 * Close this RTPSParticipant. All the network listeners will be stopped 
-	 * and all the history caches of all entities will be cleared.
+	 * Adds a runnable to be run with this participants thread pool.
+	 * @param runnable
 	 */
-	public void close() {
-		log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
+	void addRunnable(Runnable runnable) {
+		threadPoolExecutor.execute(runnable);
+	}
 
-		threadPoolExecutor.shutdown();
-//		// First, close network receivers
-		for (UDPReceiver r : receivers) {
-			r.close();
-		}
 
-		// Then entities
-		for (RTPSReader<?> r : readerEndpoints) {
-			r.close();
-		}
-		for (RTPSWriter<?> w : writerEndpoints) {
-			w.close();
-		}
-		
-		livelinessManager.stop();
+	private void createSPDPResender(final Duration_t period, final RTPSWriter<ParticipantData> spdp_w) {
+		Runnable resendRunnable = new Runnable() {
+		    @Override
+			public void run() {
+				boolean running = true;
+				while (running) {
+					spdp_w.sendData(null, EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 0);
+					try {
+						running = !threadPoolExecutor.awaitTermination(period.asMillis(), TimeUnit.MILLISECONDS);
+					} catch (InterruptedException e) {
+						running = false;
+					}
+				}
+			}
+		};
+
+		log.debug("[{}] Starting resend thread with period {}", getGuid().entityId, period);		
+		threadPoolExecutor.execute(resendRunnable);
 	}
 }

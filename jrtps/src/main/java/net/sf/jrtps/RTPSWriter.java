@@ -5,9 +5,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CyclicBarrier;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.message.AckNack;
@@ -23,7 +20,6 @@ import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Time_t;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,11 +33,8 @@ import org.slf4j.LoggerFactory;
 public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
-	
+
 	private HashSet<ReaderProxy> matchedReaders = new HashSet<>();
-	private Thread resendThread;
-	private boolean running;
-	private CyclicBarrier barrier;
 
 	/**
 	 * Protocol tuning parameter that indicates that the StatelessWriter resends
@@ -53,16 +46,23 @@ public class RTPSWriter<T> extends Endpoint {
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
 	private final HistoryCache writer_cache;
+	private final int nackResponseDelay;
+	private int heartbeatPeriod;
+	
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 	protected Object resend_lock = new Object();
+	
+	
 
 
-	public RTPSWriter(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	public RTPSWriter(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
-		super(prefix, entityId, topicName, qos, configuration);
+		super(participant, entityId, topicName, qos, configuration);
 
-		this.writer_cache = new HistoryCache(new GUID_t(prefix, entityId));
+		this.writer_cache = new HistoryCache(getGuid()); // TODO: GUID is not used by HistoryCache
 		this.marshaller = marshaller;
+		this.nackResponseDelay = configuration.getNackResponseDelay(); 
+		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
 		
 		try {
 			this.md5 = MessageDigest.getInstance("MD5");
@@ -73,64 +73,6 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 	}
 
-
-	/**
-	 * Sets the period at which data gets resend to recipients
-	 * @param period
-	 * @param readerId
-	 */
-	void setResendDataPeriod(Duration_t period, final EntityId_t readerId) {
-		// TODO: This is used by SPDP to announce republish ParticipantData periodically.
-		//       Should this be removed from RTPSWriter? I think so.
-		//       SPDPClient?, SEDPClient?
-		resendDataPeriod = period;
-		barrier = new CyclicBarrier(2);
-
-		resendThread = new Thread() {
-			@Override
-			public void run() {
-				running = true;
-
-				while (running) {
-					List<CacheChange> changes = writer_cache.getChanges();
-
-					for (CacheChange cc : changes) { // TODO: ConcurrentModification
-						try {
-							Message m = new Message(getGuid().prefix);
-
-							InfoTimestamp iTime = new InfoTimestamp(new Time_t(System.currentTimeMillis()));
-							m.addSubMessage(iTime);
-
-							Data data = createData(readerId, cc);
-							m.addSubMessage(data);
-
-							log.debug("[{}] Send {}, {}: {}", getGuid().entityId, 
-									cc.getData().getClass().getSimpleName(), 
-									cc.getSequenceNumber(), cc.getData());
-
-							sendMessage(m, null);
-						}
-						catch(IOException ioe) {
-							log.warn("Failed to send cache change {}", cc);
-						}
-					}
-
-					try {
-						barrier.await(resendDataPeriod.sec, TimeUnit.SECONDS);
-					} catch (TimeoutException te) {
-						barrier.reset();
-					} catch (Exception e) {
-						running = false;
-					}
-				}
-
-				log.debug("[{}] Resend thread dying", getGuid().entityId);
-			}
-		};
-
-		log.debug("[{}] Starting resend thread with period {}", getGuid().entityId, period);
-		resendThread.start();
-	}
 
 	/**
 	 * Get the BuiltinEndpointSet ID of this RTPSWriter.
@@ -167,17 +109,20 @@ public class RTPSWriter<T> extends Endpoint {
 	 * This provides means to create multiple changes, before announcing the state to readers.
 	 */
 	public void notifyReaders() {		
-		log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
-		for (ReaderProxy proxy : matchedReaders) {
-			GUID_t guid = proxy.getReaderData().getKey();
-			// TODO: heartbeat should be sent only to reliable readers.
-			//       8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
-			if (proxy.isReliable()) {
-				sendHeartbeat(guid.prefix, guid.entityId);
-			}
-			else {
-				sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
-				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+		if (matchedReaders.size() > 0) {
+			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
+
+			for (ReaderProxy proxy : matchedReaders) {
+				GUID_t guid = proxy.getReaderData().getKey();
+				// TODO: heartbeat should be sent only to reliable readers.
+				//       8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
+				if (proxy.isReliable()) {
+					sendHeartbeat(guid.prefix, guid.entityId);
+				}
+				else {
+					sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+					proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+				}
 			}
 		}
 	}
@@ -192,23 +137,13 @@ public class RTPSWriter<T> extends Endpoint {
 			sendHeartbeat(guid.prefix, guid.entityId, true); // Send Heartbeat regardless of readers QosReliability
 		}
 	}
-	
+
 	/**
-	 * Close this writer.
+	 * Close this writer. Closing a writer clears its cache of changes.
 	 */
 	public void close() {
-		if (barrier != null) {
-			try {
-				barrier.await(15, TimeUnit.SECONDS);
-			} catch (Exception e) {
-				log.warn("Got Exception on close()", e);
-			}
-
-			if (running) {
-				resendThread.interrupt();
-			}
-		}
-
+		heartbeatPeriod = 0; // Stops heartbeat thread gracefully 
+		matchedReaders.clear();
 		writer_cache.getChanges().clear();
 	}
 
@@ -217,13 +152,13 @@ public class RTPSWriter<T> extends Endpoint {
 		log.debug("Removing matchedReader {}", readerData);
 		matchedReaders.remove(readerData);
 	}
-	
+
 	void addMatchedReader(ReaderData readerData) {
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		matchedReaders.add(proxy);
 		log.debug("Adding matchedReader {}", readerData);
 		GUID_t guid = readerData.getKey();
-		
+
 		// TODO: heartbeat should be sent only to reliable readers.
 		if (proxy.isReliable()) {
 			sendHeartbeat(guid.prefix, guid.entityId);
@@ -243,7 +178,15 @@ public class RTPSWriter<T> extends Endpoint {
 	void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
+		ReaderProxy proxy = getProxy(new GUID_t(senderPrefix, ackNack.getReaderId()));
+		if (proxy != null) {
+			proxy.ackNackReceived(); // Marks reader as being alive
+		} // Note: proxy could be null
+
 		if (writer_cache.size() > 0) {
+			log.debug("Wait for nack response delay: {} ms", nackResponseDelay);
+			getParticipant().waitFor(nackResponseDelay);
+			
 			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
 		}
 		else { // Send HB / GAP to reader so that it knows our state
@@ -268,7 +211,7 @@ public class RTPSWriter<T> extends Endpoint {
 		long lastSeqNum = 0;
 		long firstSeqNum = 0;
 		long prevTimeStamp = 0;
-		
+
 		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
@@ -284,7 +227,7 @@ public class RTPSWriter<T> extends Endpoint {
 					if (firstSeqNum == 0) {
 						firstSeqNum = lastSeqNum;
 					}
-					
+
 					log.trace("Marshalling {}", cc.getData());
 					Data data = createData(readerId, cc);
 					m.addSubMessage(data);
@@ -305,7 +248,7 @@ public class RTPSWriter<T> extends Endpoint {
 	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
 		sendHeartbeat(senderPrefix, readerId, false);
 	}
-	
+
 	private void sendHeartbeat(GuidPrefix_t targetPrefix, EntityId_t readerId, boolean livelinessFlag) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat(readerId);
@@ -314,6 +257,11 @@ public class RTPSWriter<T> extends Endpoint {
 
 		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 		sendMessage(m, targetPrefix);
+
+		if (!livelinessFlag) {
+			ReaderProxy proxy = getProxy(new GUID_t(targetPrefix, readerId));
+			proxy.heartbeatSent();
+		}		
 	}
 
 	private Heartbeat createHeartbeat(EntityId_t entityId) {
@@ -328,18 +276,18 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-	
+
 	@SuppressWarnings("unchecked")
 	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
 		ParameterList inlineQos = new ParameterList();
-		
+
 		if (marshaller.hasKey(cc.getData().getClass())) { // Add KeyHash if present
 			byte[] key = marshaller.extractKey(cc.getData());
 			if (key == null) {
 				key = new byte[0];
 			}
-			
+
 			byte[] bytes = null;
 			if (key.length < 16) {			
 				bytes = new byte[16];
@@ -348,14 +296,14 @@ public class RTPSWriter<T> extends Endpoint {
 			else {
 				bytes = md5.digest(key);
 			}
-			
+
 			inlineQos.add(new KeyHash(bytes));
 		}
-		
+
 		if (!cc.getKind().equals(ChangeKind.WRITE)) { // Add status info for operations other than WRITE
 			inlineQos.add(new StatusInfo(cc.getKind()));
 		}
-		
+
 		Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), inlineQos, dEnc);
 
 		return data;
@@ -369,5 +317,20 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	void setMaxHistorySize(int maxSize) {
 		writer_cache.setMaxSize(maxSize);
+	}
+
+
+	private ReaderProxy getProxy(GUID_t guid) {
+		for (ReaderProxy proxy : matchedReaders) {
+			guid.equals(proxy.getReaderData().getKey());
+			return proxy;
+		}
+
+		return null;
+	}
+
+
+	HistoryCache getWriterCache() {
+		return writer_cache;
 	}
 }

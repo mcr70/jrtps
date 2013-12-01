@@ -1,3 +1,8 @@
+0.4.2
+	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, nackResponseDelay,
+	  SPDP resend data period.
+	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
+
 0.4.1
 	- QosLiveliness. Partly implemented. Writer side is implemented but readers don't
 	  react on liveliness of the writers. 

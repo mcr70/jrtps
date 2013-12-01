@@ -42,11 +42,14 @@ public class RTPSReader<T> extends Endpoint {
 
 	private List<Sample<T>> pendingSamples = new LinkedList<>();
 
-	RTPSReader(GuidPrefix_t prefix, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	private final int heartbeatResponseDelay;
+
+	RTPSReader(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
-		super(prefix, entityId, topicName, qos, configuration);
+		super(participant, entityId, topicName, qos, configuration);
 
 		this.marshaller = marshaller;
+		this.heartbeatResponseDelay = configuration.getHeartbeatResponseDelay();
 	}
 
 
@@ -133,6 +136,10 @@ public class RTPSReader<T> extends Endpoint {
 				//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
 				AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 				m.addSubMessage(an);
+				
+				log.debug("Wait for heartbeat response delay: {} ms", heartbeatResponseDelay);
+				getParticipant().waitFor(heartbeatResponseDelay);
+
 				log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
 				sendMessage(m, senderGuidPrefix);
 			}
