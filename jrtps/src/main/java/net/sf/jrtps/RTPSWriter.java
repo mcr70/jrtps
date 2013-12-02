@@ -4,7 +4,9 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.SortedSet;
 
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.message.AckNack;
@@ -45,25 +47,25 @@ public class RTPSWriter<T> extends Endpoint {
 
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
-	private final HistoryCache writer_cache;
+	private final WriterCache<T> writer_cache;
 	private final int nackResponseDelay;
 	private int heartbeatPeriod;
-	
+
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 	protected Object resend_lock = new Object();
-	
-	
+
+
 
 
 	public RTPSWriter(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
-		this.writer_cache = new HistoryCache(getGuid()); // TODO: GUID is not used by HistoryCache
+		this.writer_cache = new WriterCache(marshaller, qos, this);
 		this.marshaller = marshaller;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
 		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
-		
+
 		try {
 			this.md5 = MessageDigest.getInstance("MD5");
 		} 
@@ -83,25 +85,6 @@ public class RTPSWriter<T> extends Endpoint {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
-	/**
-	 * Creates a new cache change to history cache. Note, that matched readers are not notified automatically
-	 * of changes in history cache. Use sendHeartbeat() method to notify remote readers of changes in history cache.
-	 * This way, multiple changes can be notified only once.
-	 * <p> 
-	 * As a side effect, Message sent as a response to readers AckNack message can (and will) contain 
-	 * multiple Data submessages in one UDP packet.
-	 * 
-	 * @param kind
-	 * @param obj
-	 * @see #notifyReaders()
-	 */
-	public void createChange(ChangeKind kind, T obj) {
-		writer_cache.createChange(kind, obj);	
-	}
-
-	public void createChange(T obj) {
-		createChange(ChangeKind.WRITE, obj);	
-	}
 
 	/**
 	 * Notify every matched RTPSReader. 
@@ -144,7 +127,7 @@ public class RTPSWriter<T> extends Endpoint {
 	public void close() {
 		heartbeatPeriod = 0; // Stops heartbeat thread gracefully 
 		matchedReaders.clear();
-		writer_cache.getChanges().clear();
+		writer_cache.clear();
 	}
 
 
@@ -183,17 +166,12 @@ public class RTPSWriter<T> extends Endpoint {
 			proxy.ackNackReceived(); // Marks reader as being alive
 		} // Note: proxy could be null
 
-		if (writer_cache.size() > 0) {
-			log.debug("Wait for nack response delay: {} ms", nackResponseDelay);
-			getParticipant().waitFor(nackResponseDelay);
-			
-			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
-		}
-		else { // Send HB / GAP to reader so that it knows our state
-			if (ackNack.finalFlag()) { // FinalFlag indicates whether a response by the Writer is expected
-				sendHeartbeat(senderPrefix, ackNack.getReaderId());
-			}
-		}
+		log.debug("Wait for nack response delay: {} ms", nackResponseDelay);
+		getParticipant().waitFor(nackResponseDelay);
+
+		SortedSet<CacheChange> changesForReader = writer_cache.getChangesSince(ackNack.getReaderSNState().getBitmapBase());
+
+		sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
 	}
 
 
@@ -207,7 +185,13 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	void sendData(GuidPrefix_t targetPrefix, EntityId_t readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
-		List<CacheChange> changes = writer_cache.getChanges();
+		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
+
+		if (changes.size() == 0) {
+			log.debug("sendData() called, but history cache is empty. returning.");
+			return;
+		}
+		
 		long lastSeqNum = 0;
 		long firstSeqNum = 0;
 		long prevTimeStamp = 0;
@@ -330,10 +314,6 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-	HistoryCache getWriterCache() {
-		return writer_cache;
-	}
-
 
 	/**
 	 * Checks, if a given change number has been acknowledged by every known
@@ -348,7 +328,24 @@ public class RTPSWriter<T> extends Endpoint {
 				return false;
 			}
 		}
-		
+
 		return true;
 	}
+
+
+	public void write(T obj) {
+		LinkedList<T> ll = new LinkedList<>();
+		ll.add(obj);
+		write(ll);
+	}
+	public void write(List<T> objs) {
+		writer_cache.write(objs);	
+	}
+	public void dispose(List<T> objs) {
+		writer_cache.dispose(objs);	
+	}
+	public void unregister(List<T> objs) {
+		writer_cache.unregister(objs);	
+	}
+
 }

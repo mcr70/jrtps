@@ -56,8 +56,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	 */
 	void assertLiveliness() {
 		log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind MANUAL_BY_PARTICIPANT");
-		writer.createChange(manualSample);
-		writer.notifyReaders();
+		writer.write(manualSample);
 	}
 	
 	/**
@@ -150,8 +149,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 				long sleepTime = 1000; // TODO: hardcoded. default sleep time if no writers present
 				if (nextLeaseWaitTime != null) { // We have at least one writer to assert liveliness for
 					log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
-					writer.createChange(automaticSample);
-					writer.notifyReaders();
+					writer.write(automaticSample);
 					sleepTime = nextLeaseWaitTime.asMillis();
 				}
 				
