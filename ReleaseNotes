@@ -1,6 +1,14 @@
+0.4.3
+	- History cache work. 
+	- QosResourceLimits: resource limits are checked. OutOfResources is thrown if exceeded.
+	- QosHistory: history depth may be given
+	- QosReliability: max_blocking_time. Writer blocks, if some of the reader has not 
+	  received a sample and addition would drop that sample. Works in conjunction with
+	  QosHistory. TimeoutException is thrown if a sample cannot be added reliably.
+	
 0.4.2
-	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, nackResponseDelay,
-	  SPDP resend data period.
+	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, 
+	  nackResponseDelay, SPDP resend data period.
 	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
 
 0.4.1
