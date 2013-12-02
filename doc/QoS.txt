@@ -1,3 +1,10 @@
+QosResourceLimits & QosHistory
+==============================
+	o HistoryCache
+		- managed solely by this class
+		- dropping a sample (oldest one) by QosHistory requires that there are no
+		  reliable readers who has not received it. See also notes for QosReliability.
+		  
 QosLiveliness
 =============
 	o LivelinessManager
@@ -17,3 +24,6 @@ QosReliability
 		  RELIABLE readers/writers rely solely on heartbeats/acknacks.
 		- Liveliness Heartbeat is sent regardless of readers reliability kind.
 		- addMatchedReader(...) sends either Heartbeat, or Data message to reader.
+	o HistoryCache
+		- blocks write(), if a sample would be dropped and not all the known reliable
+		  readers have received it.

@@ -47,7 +47,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
-	private final WriterCache<T> writer_cache;
+	private final HistoryCache<T> writer_cache;
 	private final int nackResponseDelay;
 	private int heartbeatPeriod;
 
@@ -61,7 +61,7 @@ public class RTPSWriter<T> extends Endpoint {
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
-		this.writer_cache = new WriterCache(marshaller, qos, this);
+		this.writer_cache = new HistoryCache(marshaller, qos, this);
 		this.marshaller = marshaller;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
 		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
