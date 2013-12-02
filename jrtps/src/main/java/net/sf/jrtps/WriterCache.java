@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -59,28 +60,27 @@ class WriterCache<T> {
 		reliability = (QosReliability) qos.getPolicy(QosReliability.class);
 	}
 
-	void dispose(T[] samples) {
+	void dispose(List<T> samples) {
 		addSample(ChangeKind.DISPOSE, samples);
 	}
 
-	void unregister(T[] samples) {
+	void unregister(List<T> samples) {
 		addSample(ChangeKind.UNREGISTER, samples);
 	}
 
-	void write(T[] samples) {
+	void write(List<T> samples) {
 		addSample(ChangeKind.WRITE, samples);
 	}
 
 
 
-	private void addSample(ChangeKind kind, T[] samples) {
+	private void addSample(ChangeKind kind, List<T> samples) {
 		try {
-			for (int i = 0; i < samples.length; i++) {
-				T sample = samples[i];
-
+			for (T sample : samples) {
 				InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
 				Instance inst = instances.get(key);
 				if (inst == null) {
+					log.debug("Creating new instance");
 					instanceCount++;
 					if (instanceCount > resource_limits.getMaxInstances()) {
 						instanceCount = resource_limits.getMaxInstances();
@@ -95,15 +95,15 @@ class WriterCache<T> {
 					throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
 				}
 				
-				CacheChange aChange = new CacheChange(kind, seqNum++, sample);
+				log.debug("[{}] Creating cache change {}", rtps_writer.getGuid().entityId, seqNum + 1);
+				CacheChange aChange = new CacheChange(kind, ++seqNum, sample);
 				sampleCount += inst.addSample(aChange);
 				if (sampleCount > resource_limits.getMaxSamples()) {
 					inst.history.removeLast();
 					sampleCount = resource_limits.getMaxSamples();
 					throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
 				}
-
-				//rtps_writer.createChange(aChange);
+				changes.add(aChange);
 			}
 		}
 		finally {
@@ -194,11 +194,38 @@ class WriterCache<T> {
 		synchronized (changes) {
 			for (CacheChange cc : changes) {
 				if (cc.getSequenceNumber() > sequenceNumber) {
-					return changes.tailSet(cc);
+					SortedSet<CacheChange> tailSet = changes.tailSet(cc);
+					log.debug("returning {}", tailSet);
+					return tailSet;
 				}
 			}
 		}
 
+		log.debug("No chances to return for seq num {}", sequenceNumber);
 		return new TreeSet<>();
 	}
+
+	public long getSeqNumMin() {
+		if (changes.size() == 0) {
+			return 0;
+		}
+		return changes.first().getSequenceNumber();
+	}
+	
+	public long getSeqNumMax() {
+		if (changes.size() == 0) {
+			return 0;
+		}
+		return changes.last().getSequenceNumber();
+	}
+
+	public void clear() {
+		instances.clear();
+		changes.clear();
+	}
+
+	public void setMaxSize(int maxSize) {
+		log.warn("setMaxSize() not used");
+	}
 }
+

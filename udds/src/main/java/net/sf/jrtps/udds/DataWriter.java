@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.ChangeKind;
@@ -38,8 +39,9 @@ public class DataWriter<T> extends Entity {
 	 * @param instance
 	 */
 	public void write(T instance) {
-		rtps_writer.createChange(instance);
-		rtps_writer.notifyReaders();
+		LinkedList<T> ll = new LinkedList<>();
+		ll.add(instance);
+		rtps_writer.write(ll);
 	}
 
 	/**
@@ -48,11 +50,7 @@ public class DataWriter<T> extends Entity {
 	 * @param instances a List of instances
 	 */
 	public void write(List<T> instances) {
-		for (T t : instances) { // TODO: this loop should be moved to HistoryCache for synchronization purposes
-			rtps_writer.createChange(t);
-		}
-		
-		rtps_writer.notifyReaders();
+		rtps_writer.write(instances);
 	}
 
 	/**
@@ -62,8 +60,9 @@ public class DataWriter<T> extends Entity {
 	public void dispose(T instance) {
 		// TODO: see 8.7.4 Changes in the Instance Lifecycle State
 		//       see 9.6.3.4 StatusInfo_t (PID_STATUS_INFO)
-		rtps_writer.createChange(ChangeKind.DISPOSE, instance);
-		rtps_writer.notifyReaders();
+		LinkedList<T> ll = new LinkedList<>();
+		ll.add(instance);
+		rtps_writer.dispose(ll);
 	}
 	
 	/**
@@ -71,10 +70,6 @@ public class DataWriter<T> extends Entity {
 	 * @param instances
 	 */
 	public void dispose(List<T> instances) {
-		for (T t : instances) { // TODO: this loop should be moved to HistoryCache for synchronization purposes
-			rtps_writer.createChange(ChangeKind.DISPOSE, t);
-		}
-		
-		rtps_writer.notifyReaders();
+		rtps_writer.dispose(instances);
 	}
 }
