@@ -333,4 +333,22 @@ public class RTPSWriter<T> extends Endpoint {
 	HistoryCache getWriterCache() {
 		return writer_cache;
 	}
+
+
+	/**
+	 * Checks, if a given change number has been acknowledged by every known
+	 * matched reader.
+	 * 
+	 * @param sequenceNumber sequenceNumber of a change to check
+	 * @return true, if every matched reader has acknowledged given change number
+	 */
+	boolean isAcknowledgedByAll(long sequenceNumber) {
+		for (ReaderProxy proxy : matchedReaders) {
+			if (proxy.isActive() && proxy.getReadersHighestSeqNum() < sequenceNumber) {
+				return false;
+			}
+		}
+		
+		return true;
+	}
 }
