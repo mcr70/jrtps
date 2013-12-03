@@ -2,7 +2,6 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,18 +31,15 @@ import org.slf4j.LoggerFactory;
 public class RTPSReader<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
-	private HashSet<WriterData> matchedWriters = new HashSet<>();
-	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
-
-	private List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
-
-	private int ackNackCount = 0;
-	private Marshaller<?> marshaller;
-
-	private List<Sample<T>> pendingSamples = new LinkedList<>();
-
+	//private HashSet<WriterData> matchedWriters = new HashSet<>();
+	private final HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
+	private final List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
+	private final Marshaller<?> marshaller;
+	private final List<Sample<T>> pendingSamples = new LinkedList<>();
 	private final int heartbeatResponseDelay;
-
+	
+	private int ackNackCount = 0;
+	
 	RTPSReader(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
@@ -59,7 +55,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param listener SampleListener to add.
 	 */
 	public void addListener(SampleListener<T> listener) {
-		log.debug("Adding SampleListener {} for topic {}", listener, getTopicName());
+		log.debug("[{}] Adding SampleListener {} for topic {}", getGuid().entityId, listener, getTopicName());
 		sampleListeners.add(listener);
 	}
 
@@ -69,7 +65,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param listener SampleListener to remove
 	 */
 	public void removeListener(SampleListener<T> listener) {
-		log.debug("Removing SampleListener {} from topic {}", listener, getTopicName());
+		log.debug("[{}] Removing SampleListener {} from topic {}", getGuid().entityId, listener, getTopicName());
 		sampleListeners.remove(listener);
 	}
 
@@ -98,7 +94,7 @@ public class RTPSReader<T> extends Endpoint {
 			}
 		}
 		else {
-			log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+			log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
 					data.getWriterSequenceNumber(), wp.getSeqNumMax());
 		}
 	}
@@ -117,7 +113,7 @@ public class RTPSReader<T> extends Endpoint {
 			// TODO: implement liveliness
 		}
 
-		if (true || isReliable()) { // Only reliable readers respond to heartbeat
+		if (isReliable()) { // Only reliable readers respond to heartbeat
 			boolean doSend = false;
 			if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 				doSend = true;
@@ -127,7 +123,8 @@ public class RTPSReader<T> extends Endpoint {
 					doSend = true;
 				}
 				else {
-					log.trace("Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", wp.getSeqNumMax(), hb.getLastSequenceNumber());
+					log.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", 
+							getGuid().entityId, wp.getSeqNumMax(), hb.getLastSequenceNumber());
 				}
 			}
 
@@ -137,7 +134,7 @@ public class RTPSReader<T> extends Endpoint {
 				AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
 				m.addSubMessage(an);
 				
-				log.debug("Wait for heartbeat response delay: {} ms", heartbeatResponseDelay);
+				log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().entityId, heartbeatResponseDelay);
 				getParticipant().waitFor(heartbeatResponseDelay);
 
 				log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
@@ -163,12 +160,12 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private WriterProxy getWriterProxy(GUID_t writerGuid) {
-		WriterProxy wp = writerProxies.get(writerGuid);;
+		WriterProxy wp = writerProxies.get(writerGuid);
 		if (wp == null) {
 			// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
 			//       Remote entities are assumed alive even though corresponding discovery data has not been
 			//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
-			log.debug("Creating proxy for {}", writerGuid); 
+			log.debug("[{}] Creating proxy for {}", getGuid().entityId, writerGuid); 
 			wp = new WriterProxy(writerGuid);
 			writerProxies.put(writerGuid, wp); 
 		}
@@ -190,15 +187,14 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	void addMatchedWriter(WriterData writerData) {
-		matchedWriters.add(writerData);
 		writerProxies.put(writerData.getKey(), new WriterProxy(writerData));
 
-		log.debug("Adding matchedWriter {}", writerData);
+		log.info("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
 	}
 	void removeMatchedWriter(WriterData writerData) {
-		log.debug("Removing matchedWriter {}", writerData);
+		log.info("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
+		
 		writerProxies.remove(writerData.getKey());
-		matchedWriters.remove(writerData);
 	}
 
 
@@ -216,6 +212,8 @@ public class RTPSReader<T> extends Endpoint {
 			pendingSamples.clear();
 		}
 
+		log.debug("[{}] Got {} samples", getGuid().entityId, ll.size());
+		
 		if (ll.size() > 0) {
 			for (SampleListener<T> sl: sampleListeners) {
 				sl.onSamples(ll);

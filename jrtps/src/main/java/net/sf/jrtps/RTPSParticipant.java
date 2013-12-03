@@ -165,7 +165,7 @@ public class RTPSParticipant {
 				ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 
 		ParticipantData pd = createSPDPParticipantData();
-		spdp_w.createChange(pd);
+		spdp_w.write(pd);
 		
 		createSPDPResender(config.getSPDPResendPeriod(), spdp_w);
 		
@@ -270,8 +270,7 @@ public class RTPSParticipant {
 		@SuppressWarnings("unchecked")
 		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
 		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid(), qos);
-		pw.createChange(wd);
-		pw.notifyReaders();
+		pw.write(wd);
 		
 		livelinessManager.registerWriter(writer);
 		
@@ -359,6 +358,14 @@ public class RTPSParticipant {
 	}
 
 	/**
+	 * Gets the domainId of this participant;
+	 * @return domainId
+	 */
+	public int getDomainId() {
+		return domainId;
+	}
+	
+	/**
 	 * Waits for a given amount of milliseconds.
 	 * @param millis
 	 * @return true, if timeout occured normally
@@ -396,7 +403,7 @@ public class RTPSParticipant {
 		@SuppressWarnings("unchecked")
 		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
 		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid(), qos);
-		sw.createChange(rd);
+		sw.write(rd);
 
 		return reader;
 	}
@@ -433,7 +440,7 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return RTPSReader
 	 */
-	private RTPSReader<?> getReader(EntityId_t readerId) {
+	RTPSReader<?> getReader(EntityId_t readerId) {
 		for (RTPSReader<?> reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
