@@ -38,6 +38,6 @@ public class Sample<T> {
 	}
 	
 	public String toString() {
-		return "Sample: " + obj + ", " + sInfo.getChangeKinds();
+		return obj.getClass().getSimpleName() + ", " + sInfo.getChangeKinds();
 	}
 }

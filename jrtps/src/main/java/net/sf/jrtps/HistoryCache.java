@@ -194,19 +194,19 @@ class HistoryCache<T> {
 	 * @return a SortedSet of changes
 	 */
 	SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
-		log.debug("getChangesSince({})", sequenceNumber);
+		log.debug("[{}] getChangesSince({})", rtps_writer.getGuid().entityId, sequenceNumber);
 
 		synchronized (changes) {
 			for (CacheChange cc : changes) {
 				if (cc.getSequenceNumber() > sequenceNumber) {
 					SortedSet<CacheChange> tailSet = changes.tailSet(cc);
-					log.debug("returning {}", tailSet);
+					log.debug("[{}] returning {}", rtps_writer.getGuid().entityId, tailSet);
 					return tailSet;
 				}
 			}
 		}
 
-		log.debug("No chances to return for seq num {}", sequenceNumber);
+		log.debug("[{}] No chances to return for seq num {}", rtps_writer.getGuid().entityId, sequenceNumber);
 		return new TreeSet<>();
 	}
 
@@ -227,10 +227,6 @@ class HistoryCache<T> {
 	public void clear() {
 		instances.clear();
 		changes.clear();
-	}
-
-	public void setMaxSize(int maxSize) {
-		log.warn("setMaxSize() not used");
 	}
 }
 
