@@ -1,6 +1,17 @@
+0.4.3
+	- History cache work.
+	- QosDurability. VOLATILE readers are sent only data after match making. For other readers,
+	  TRANSIENT_LOCAL behavior is presented.
+	- QosResourceLimits: resource limits are checked. OutOfResources is thrown if exceeded.
+	- QosHistory: history depth may be given. TimeoutException is thrown if a sample cannot 
+	  be added reliably.
+	- QosReliability: max_blocking_time. Writer blocks, if some of the reader has not 
+	  received a sample and addition would drop that sample. Works in conjunction with
+	  QosHistory. 
+	
 0.4.2
-	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, nackResponseDelay,
-	  SPDP resend data period.
+	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, 
+	  nackResponseDelay, SPDP resend data period.
 	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
 
 0.4.1
