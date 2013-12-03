@@ -12,7 +12,7 @@ class ReaderProxy {
 	private final ReaderData rd;
 	private boolean expectsInlineQoS = false;
 	private long readersHighestSeqNum = 0;
-	private boolean isAlive = true;
+	private boolean active = true;
 	private long heartbeatSentTime = 0; // set to 0 after acknack
 	
 	ReaderProxy(ReaderData readerData) {
@@ -57,8 +57,8 @@ class ReaderProxy {
 		this.readersHighestSeqNum = l;
 	}
 
-	boolean isAlive() {
-		return isAlive;
+	boolean isActive() {
+		return active;
 	}
 
 	
@@ -67,12 +67,12 @@ class ReaderProxy {
 			this.heartbeatSentTime = System.currentTimeMillis();
 		}
 		else {
-			isAlive = false;
+			active = false;
 		}
 	}
 	
 	void ackNackReceived() {
 		this.heartbeatSentTime = 0;
-		isAlive = true;
+		active = true;
 	}
 }

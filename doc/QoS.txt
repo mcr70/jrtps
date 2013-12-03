@@ -1,3 +1,20 @@
+QosDurability
+=============
+	o RTPSWriter 
+		- For VOLATILE reader, writer sets ReaderProxy.highestSegNum to match highest 
+		  seqNum of writers cache while adding a matched reader. This causes writer 
+		  to provide changes to reader that occur after match making.
+		- Otherwise, writer behaves like TRANSIENT_LOCAL. I.e. history will be available
+		  for late joining readers.
+
+QosResourceLimits & QosHistory
+==============================
+	o HistoryCache
+		- throws OutOfResources unconditionally, if resource limits are reached.
+		- managed solely by HistoryCache
+		- dropping a sample (oldest one) by QosHistory requires that there are no
+		  reliable readers who has not received it. See also notes for QosReliability.
+		  
 QosLiveliness
 =============
 	o LivelinessManager
@@ -13,7 +30,16 @@ QosReliability
 	o RTPSReader
 		- Reader sends AckNack only if reliable.
 	o RTPSWriter
-		- ReaderProxy keeps track of Readers highest seq num. Used with BEST_EFFORT readers.
-		  RELIABLE readers/writers rely solely on heartbeats/acknacks.
+		- ReaderProxy keeps track of Readers highest seq num. BEST_EFFORT readers
+		  assume messages get to destination. RELIABLE readers/writers rely on 
+		  heartbeats/acknacks.
 		- Liveliness Heartbeat is sent regardless of readers reliability kind.
-		- addMatchedReader(...) sends either Heartbeat, or Data message to reader.
+		- addMatchedReader(...) sends either Heartbeat or Data message to reader,
+		  if readers durability is other than VOLATILE. HB for RELIABLE, and Data
+		  for BEST_EFFORT.
+		  For readers with VOLATILE durability, HB/data is not sent, but reader 
+		  is marked as being received all the samples so far.
+		   
+	o HistoryCache
+		- blocks write(), if a sample would be dropped and not all known reliable
+		  readers have received it.

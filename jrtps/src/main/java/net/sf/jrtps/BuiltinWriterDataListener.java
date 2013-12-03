@@ -36,10 +36,11 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 					if (wdSample.isDisposed()) {
 						r.removeMatchedWriter(writerData);
 					}
-					else { // TODO: check compatible QoS
+					else {
 						QualityOfService offered = writerData.getQualityOfService();
 						QualityOfService requested = r.getQualityOfService();
 						log.debug("Check for compatible QoS for {} and {}", writerData.getKey().entityId, r.getGuid().entityId);
+						
 						if (offered.isCompatibleWith(requested)) {
 							r.addMatchedWriter(writerData);
 						}
