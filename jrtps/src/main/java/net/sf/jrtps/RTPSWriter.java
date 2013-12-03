@@ -17,6 +17,7 @@ import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
@@ -137,18 +138,32 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	void addMatchedReader(ReaderData readerData) {
+		log.debug("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
+
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		matchedReaders.add(proxy);
-		log.debug("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
-		GUID_t guid = readerData.getKey();
 
-		// TODO: heartbeat should be sent only to reliable readers.
-		if (proxy.isReliable()) {
-			sendHeartbeat(guid.prefix, guid.entityId);
-		}
-		else {
-			sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+		QosDurability readerDurability = 
+				(QosDurability) readerData.getQualityOfService().getPolicy(QosDurability.class);
+
+		if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
+			// VOLATILE readers are marked having received all the samples so far
+			log.debug("[{}] Setting highest seqNum to {} for VOLATILE reader", getGuid().entityId, 
+					writer_cache.getSeqNumMax());
+
 			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+		}
+		else { 
+			// Otherwise, send either HB, or our history
+			GUID_t guid = readerData.getKey();
+
+			if (proxy.isReliable()) {
+				sendHeartbeat(guid.prefix, guid.entityId);
+			}
+			else {
+				sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+			}
 		}
 	}
 
@@ -191,7 +206,7 @@ public class RTPSWriter<T> extends Endpoint {
 			log.debug("[{}] sendData() called, but history cache is empty. returning.", getGuid().entityId);
 			return;
 		}
-		
+
 		long lastSeqNum = 0;
 		long firstSeqNum = 0;
 		long prevTimeStamp = 0;

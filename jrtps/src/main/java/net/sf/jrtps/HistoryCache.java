@@ -218,23 +218,36 @@ class HistoryCache<T> {
 		return new TreeSet<>();
 	}
 
-	public long getSeqNumMin() {
+
+	/**
+	 * Gets the smallest sequence number this HistoryCache has.
+	 * 
+	 * @return seqNumMin
+	 */
+	long getSeqNumMin() {
 		if (changes.size() == 0) {
 			return 0;
 		}
 		return changes.first().getSequenceNumber();
 	}
 	
-	public long getSeqNumMax() {
+	/**
+	 * Gets the biggest sequence number this HistoryCache has.
+	 * 
+	 * @return seqNumMax
+	 */
+	long getSeqNumMax() {
 		if (changes.size() == 0) {
 			return 0;
 		}
 		return changes.last().getSequenceNumber();
 	}
 
-	public void clear() {
+	/**
+	 * Clears all the references to data in this HistoryCache
+	 */
+	void clear() {
 		instances.clear();
 		changes.clear();
 	}
 }
-
