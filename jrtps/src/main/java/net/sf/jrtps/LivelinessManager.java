@@ -56,8 +56,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	 */
 	void assertLiveliness() {
 		log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind MANUAL_BY_PARTICIPANT");
-		writer.createChange(manualSample);
-		writer.notifyReaders();
+		writer.write(manualSample);
 	}
 	
 	/**
@@ -108,15 +107,14 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		
 		writer = participant.createWriter(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_WRITER, 
 				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
-				new ParticipantMessageMarshaller(), qos);
-		writer.setMaxHistorySize(2); // We have two instances: manual & automatic and history depth of 1	
+				new ParticipantMessageMarshaller(), qos);	
 		
 		reader = participant.createReader(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_READER, 
 				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
 				new ParticipantMessageMarshaller(), qos);
 		reader.addListener(this);
 
-		log.debug("Startin liveliness thread");
+		log.debug("Starting liveliness thread");
 		participant.addRunnable(this);
 	}
 	
@@ -150,8 +148,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 				long sleepTime = 1000; // TODO: hardcoded. default sleep time if no writers present
 				if (nextLeaseWaitTime != null) { // We have at least one writer to assert liveliness for
 					log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
-					writer.createChange(automaticSample);
-					writer.notifyReaders();
+					writer.write(automaticSample);
 					sleepTime = nextLeaseWaitTime.asMillis();
 				}
 				
@@ -168,6 +165,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		for (Sample<ParticipantMessage> sample : samples) {
 			ParticipantMessage pm = sample.getData();
 			// TODO: assert liveliness of remote writers
+			log.warn("Liveliness message not handled");
 		}
 	}
 }

@@ -4,8 +4,13 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jrtps.builtin.ParticipantData;
+import net.sf.jrtps.builtin.ReaderData;
+import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
+import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
 
 import org.slf4j.Logger;
@@ -63,14 +68,46 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 	 * @param builtinEndpoints
 	 */
 	private void handleBuiltinEnpointSet(GuidPrefix_t prefix, int builtinEndpoints) {
+		QualityOfService sedpQoS = new QualityOfService();
+		try {
+			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+		} catch (InconsistentPolicy e) {
+			log.error("Got InconsistentPolicy exception. This is an internal error", e);
+		}
+
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
+		
 		if (eps.hasPublicationDetector()) {
 			RTPSWriter<?> pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+			
+			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+			ReaderData rd = new ReaderData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
+			pw.addMatchedReader(rd);
+			
 			pw.sendData(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 0L);
 		}
+		if (eps.hasPublicationAnnouncer()) {
+			RTPSReader<?> pr = participant.getReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+
+			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+			WriterData wd = new WriterData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
+			pr.addMatchedWriter(wd);
+		}
 		if (eps.hasSubscriptionDetector()) {
-			RTPSWriter<?> pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
-			pw.sendData(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
+			RTPSWriter<?> sw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+			
+			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+			ReaderData rd = new ReaderData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
+			sw.addMatchedReader(rd);
+			
+			sw.sendData(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
+		}
+		if (eps.hasSubscriptionAnnouncer()) {
+			RTPSReader<?> pr = participant.getReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+
+			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+			WriterData wd = new WriterData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
+			pr.addMatchedWriter(wd);
 		}
 	}
 }

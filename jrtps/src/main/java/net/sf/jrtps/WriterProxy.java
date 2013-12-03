@@ -1,5 +1,8 @@
 package net.sf.jrtps;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.types.GUID_t;
 
@@ -12,6 +15,7 @@ import net.sf.jrtps.types.GUID_t;
  *
  */
 class WriterProxy {
+	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 	private GUID_t writerGuid;
 	private WriterData wd;
 	
@@ -42,8 +46,12 @@ class WriterProxy {
 		// Data must come in order. If not, drop it. Manage out-of-order data with 
 		// HeartBeat & AckNack messages
 
-		if (sequenceNumber == seqNumMax + 1) { 
-			seqNumMax++;
+		if (sequenceNumber > seqNumMax) { 
+			if (sequenceNumber > seqNumMax + 1) {
+				log.warn("Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}", sequenceNumber, seqNumMax);
+			}
+
+			seqNumMax = sequenceNumber;
 			
 			return true;
 		}
