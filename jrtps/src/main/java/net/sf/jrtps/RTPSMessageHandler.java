@@ -46,7 +46,11 @@ class RTPSMessageHandler implements MessageHandler {
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		
 		log.debug("Got Message from {}", sourceGuidPrefix);
-		
+		if (participant.getGuid().prefix.equals(sourceGuidPrefix)) {
+			log.debug("Discarding message from originating from this participant");
+			return;
+		}
+			
 		List<SubMessage> subMessages = msg.getSubMessages();
 
 		Set<RTPSReader<?>> dataReceivers = new HashSet<>();

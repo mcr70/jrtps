@@ -358,6 +358,14 @@ public class RTPSParticipant {
 	}
 
 	/**
+	 * Gets the domainId of this participant;
+	 * @return domainId
+	 */
+	public int getDomainId() {
+		return domainId;
+	}
+	
+	/**
 	 * Waits for a given amount of milliseconds.
 	 * @param millis
 	 * @return true, if timeout occured normally
@@ -432,7 +440,7 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return RTPSReader
 	 */
-	private RTPSReader<?> getReader(EntityId_t readerId) {
+	RTPSReader<?> getReader(EntityId_t readerId) {
 		for (RTPSReader<?> reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
