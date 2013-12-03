@@ -187,16 +187,14 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	void addMatchedWriter(WriterData writerData) {
-		//matchedWriters.add(writerData);
 		writerProxies.put(writerData.getKey(), new WriterProxy(writerData));
 
-		log.debug("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
+		log.info("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
 	}
 	void removeMatchedWriter(WriterData writerData) {
-		log.debug("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
+		log.info("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
 		
 		writerProxies.remove(writerData.getKey());
-		//matchedWriters.remove(writerData);
 	}
 
 

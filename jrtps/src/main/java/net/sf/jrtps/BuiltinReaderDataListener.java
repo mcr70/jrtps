@@ -46,10 +46,11 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 				if (rdSample.isDisposed()) {
 					w.removeMatchedReader(readerData);
 				}
-				else { // TODO: check QoS compatibility
+				else {
 					QualityOfService requested = readerData.getQualityOfService();
 					QualityOfService offered = w.getQualityOfService();
 					log.debug("Check for compatible QoS for {} and {}", w.getGuid().entityId, readerData.getKey().entityId);
+
 					if (offered.isCompatibleWith(requested)) {
 						w.addMatchedReader(readerData);
 					}
