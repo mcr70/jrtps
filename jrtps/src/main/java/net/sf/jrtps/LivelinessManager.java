@@ -107,8 +107,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		
 		writer = participant.createWriter(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_WRITER, 
 				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
-				new ParticipantMessageMarshaller(), qos);
-		writer.setMaxHistorySize(2); // We have two instances: manual & automatic and history depth of 1	
+				new ParticipantMessageMarshaller(), qos);	
 		
 		reader = participant.createReader(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_READER, 
 				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
@@ -166,6 +165,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		for (Sample<ParticipantMessage> sample : samples) {
 			ParticipantMessage pm = sample.getData();
 			// TODO: assert liveliness of remote writers
+			log.warn("Liveliness message not handled");
 		}
 	}
 }

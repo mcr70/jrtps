@@ -1,3 +1,7 @@
+QosDurability
+=============
+	o RTPSWriter behaves as TRANSIENT_LOCAL. VOLATILE behaves the same.
+
 QosResourceLimits & QosHistory
 ==============================
 	o HistoryCache

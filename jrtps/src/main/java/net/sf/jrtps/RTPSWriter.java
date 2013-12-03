@@ -132,14 +132,14 @@ public class RTPSWriter<T> extends Endpoint {
 
 
 	void removeMatchedReader(ReaderData readerData) {
-		log.debug("Removing matchedReader {}", readerData);
+		log.debug("[{}] Removing matchedReader {}", getGuid().entityId, readerData);
 		matchedReaders.remove(readerData);
 	}
 
 	void addMatchedReader(ReaderData readerData) {
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		matchedReaders.add(proxy);
-		log.debug("Adding matchedReader {}", readerData);
+		log.debug("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
 		GUID_t guid = readerData.getKey();
 
 		// TODO: heartbeat should be sent only to reliable readers.
@@ -166,12 +166,12 @@ public class RTPSWriter<T> extends Endpoint {
 			proxy.ackNackReceived(); // Marks reader as being alive
 		} // Note: proxy could be null
 
-		log.debug("Wait for nack response delay: {} ms", nackResponseDelay);
+		log.debug("[{}] Wait for nack response delay: {} ms", getGuid().entityId, nackResponseDelay);
 		getParticipant().waitFor(nackResponseDelay);
 
-		SortedSet<CacheChange> changesForReader = writer_cache.getChangesSince(ackNack.getReaderSNState().getBitmapBase());
+		SortedSet<CacheChange> changesForReader = writer_cache.getChangesSince(ackNack.getReaderSNState().getBitmapBase() - 1);
 
-		sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase());
+		sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
 	}
 
 
@@ -188,7 +188,7 @@ public class RTPSWriter<T> extends Endpoint {
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
 		if (changes.size() == 0) {
-			log.debug("sendData() called, but history cache is empty. returning.");
+			log.debug("[{}] sendData() called, but history cache is empty. returning.", getGuid().entityId);
 			return;
 		}
 		
@@ -218,7 +218,7 @@ public class RTPSWriter<T> extends Endpoint {
 				}
 			}
 			catch(IOException ioe) {
-				log.warn("Failed to add cache change to message", ioe);
+				log.warn("[{}] Failed to add cache change to message", getGuid().entityId, ioe);
 			}
 		}
 
@@ -291,16 +291,6 @@ public class RTPSWriter<T> extends Endpoint {
 		Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), inlineQos, dEnc);
 
 		return data;
-	}
-
-	/**
-	 * Sets the maximum history cache size.
-	 * TODO: history cache handling is likely to change
-	 * 
-	 * @param maxSize
-	 */
-	void setMaxHistorySize(int maxSize) {
-		writer_cache.setMaxSize(maxSize);
 	}
 
 
