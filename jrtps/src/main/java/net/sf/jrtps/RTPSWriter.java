@@ -3,7 +3,7 @@ package net.sf.jrtps;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
@@ -19,7 +19,6 @@ import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.StatusInfo;
-import net.sf.jrtps.types.Duration_t;
 import net.sf.jrtps.types.EntityId_t;
 import net.sf.jrtps.types.GUID_t;
 import net.sf.jrtps.types.GuidPrefix_t;
@@ -37,14 +36,7 @@ public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
 
-	private HashSet<ReaderProxy> matchedReaders = new HashSet<>();
-
-	/**
-	 * Protocol tuning parameter that indicates that the StatelessWriter resends
-	 * all the changes in the writer's HistoryCache to all the Locators
-	 * periodically each resendPeriod.
-	 */
-	private Duration_t resendDataPeriod = null;//new Duration_t(30, 0);
+	private HashMap<GUID_t, ReaderProxy> matchedReaders = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
@@ -53,12 +45,9 @@ public class RTPSWriter<T> extends Endpoint {
 	private int heartbeatPeriod;
 
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
-	protected Object resend_lock = new Object();
 
 
-
-
-	public RTPSWriter(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	RTPSWriter(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
@@ -96,10 +85,9 @@ public class RTPSWriter<T> extends Endpoint {
 		if (matchedReaders.size() > 0) {
 			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
 
-			for (ReaderProxy proxy : matchedReaders) {
+			for (ReaderProxy proxy : matchedReaders.values()) {
 				GUID_t guid = proxy.getReaderData().getKey();
-				// TODO: heartbeat should be sent only to reliable readers.
-				//       8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
+				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
 				if (proxy.isReliable()) {
 					sendHeartbeat(guid.prefix, guid.entityId);
 				}
@@ -116,8 +104,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Heartbeat message of the liveliness of this writer.
 	 */
 	public void assertLiveliness() {
-		for (ReaderProxy rp : matchedReaders) {
-			GUID_t guid = rp.getReaderData().getKey();
+		for (GUID_t guid : matchedReaders.keySet()) {
 			sendHeartbeat(guid.prefix, guid.entityId, true); // Send Heartbeat regardless of readers QosReliability
 		}
 	}
@@ -133,15 +120,15 @@ public class RTPSWriter<T> extends Endpoint {
 
 
 	void removeMatchedReader(ReaderData readerData) {
-		log.debug("[{}] Removing matchedReader {}", getGuid().entityId, readerData);
+		log.info("[{}] Removing matchedReader {}", getGuid().entityId, readerData);
 		matchedReaders.remove(readerData);
 	}
 
 	void addMatchedReader(ReaderData readerData) {
-		log.debug("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
+		log.info("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
 
 		ReaderProxy proxy = new ReaderProxy(readerData);
-		matchedReaders.add(proxy);
+		matchedReaders.put(readerData.getKey(), proxy);
 
 		QosDurability readerDurability = 
 				(QosDurability) readerData.getQualityOfService().getPolicy(QosDurability.class);
@@ -176,15 +163,13 @@ public class RTPSWriter<T> extends Endpoint {
 	void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
-		ReaderProxy proxy = getProxy(new GUID_t(senderPrefix, ackNack.getReaderId()));
+		ReaderProxy proxy = matchedReaders.get(new GUID_t(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
 			proxy.ackNackReceived(); // Marks reader as being alive
 		} // Note: proxy could be null
 
 		log.debug("[{}] Wait for nack response delay: {} ms", getGuid().entityId, nackResponseDelay);
 		getParticipant().waitFor(nackResponseDelay);
-
-		SortedSet<CacheChange> changesForReader = writer_cache.getChangesSince(ackNack.getReaderSNState().getBitmapBase() - 1);
 
 		sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
 	}
@@ -214,7 +199,7 @@ public class RTPSWriter<T> extends Endpoint {
 		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
-				//if (lastSeqNum >= ackNack.getReaderSNState().getBitmapBase()) {
+
 				if (lastSeqNum >= readersHighestSeqNum) {
 					long timeStamp = cc.getTimeStamp();
 					if (timeStamp > prevTimeStamp) {
@@ -258,7 +243,7 @@ public class RTPSWriter<T> extends Endpoint {
 		sendMessage(m, targetPrefix);
 
 		if (!livelinessFlag) {
-			ReaderProxy proxy = getProxy(new GUID_t(targetPrefix, readerId));
+			ReaderProxy proxy = matchedReaders.get(new GUID_t(targetPrefix, readerId));
 			proxy.heartbeatSent();
 		}		
 	}
@@ -309,17 +294,6 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-	private ReaderProxy getProxy(GUID_t guid) {
-		for (ReaderProxy proxy : matchedReaders) {
-			guid.equals(proxy.getReaderData().getKey());
-			return proxy;
-		}
-
-		return null;
-	}
-
-
-
 	/**
 	 * Checks, if a given change number has been acknowledged by every known
 	 * matched reader.
@@ -328,7 +302,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @return true, if every matched reader has acknowledged given change number
 	 */
 	boolean isAcknowledgedByAll(long sequenceNumber) {
-		for (ReaderProxy proxy : matchedReaders) {
+		for (ReaderProxy proxy : matchedReaders.values()) {
 			if (proxy.isActive() && proxy.getReadersHighestSeqNum() < sequenceNumber) {
 				return false;
 			}

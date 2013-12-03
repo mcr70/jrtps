@@ -47,7 +47,7 @@ class RTPSMessageHandler implements MessageHandler {
 		
 		log.debug("Got Message from {}", sourceGuidPrefix);
 		if (participant.getGuid().prefix.equals(sourceGuidPrefix)) {
-			log.debug("Discarding message from originating from this participant");
+			log.debug("Discarding message originating from this participant");
 			return;
 		}
 			
