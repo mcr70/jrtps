@@ -114,7 +114,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 				new ParticipantMessageMarshaller(), qos);
 		reader.addListener(this);
 
-		log.debug("Startin liveliness thread");
+		log.debug("Starting liveliness thread");
 		participant.addRunnable(this);
 	}
 	

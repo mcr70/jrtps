@@ -75,12 +75,13 @@ class HistoryCache<T> {
 
 
 	private void addSample(ChangeKind kind, List<T> samples) {
+		log.debug("[{}] add {} samples of kind {}", rtps_writer.getGuid().entityId, samples.size(), kind);
 		try {
 			for (T sample : samples) {
 				InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
 				Instance inst = instances.get(key);
 				if (inst == null) {
-					log.trace("[{}] Creating new instance", rtps_writer.getGuid().entityId);
+					log.debug("[{}] Creating new instance {}", rtps_writer.getGuid().entityId, key);
 					instanceCount++;
 					if (instanceCount > resource_limits.getMaxInstances()) {
 						instanceCount = resource_limits.getMaxInstances();
@@ -130,18 +131,20 @@ class HistoryCache<T> {
 		// TODO: CacheChange.sequenceNumber must be set only if it is succesfully 
 		//       inserted into cache
 		int addSample(CacheChange aChange) {
+			log.debug("[{}] Adding sample {}", rtps_writer.getGuid().entityId, aChange.getSequenceNumber());
 			int historySizeChange = 1;
 			history.add(aChange);
 			if (history.size() > maxSize) {
 				if (reliability.getKind() == QosReliability.Kind.RELIABLE) {
 					CacheChange oldestChange = history.getFirst();
-					if (!rtps_writer.isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
+					if (reliability.getMaxBlockingTime().asMillis() > 0 &&
+							!rtps_writer.isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
 						// Block the writer and hope that readers acknowledge all the changes
 						
 						// TODO: during acknack, we should check if there is no need to block anymore.
 						//       I.e. we should notify blocked thread.
 						
-						log.debug("Blocking the writer for {} ms", reliability.getMaxBlockingTime().asMillis());
+						log.debug("[{}] Blocking the writer for {} ms", rtps_writer.getGuid().entityId, reliability.getMaxBlockingTime().asMillis());
 						rtps_writer.getParticipant().waitFor((int) reliability.getMaxBlockingTime().asMillis());
 						
 						if (!rtps_writer.isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
@@ -169,10 +172,11 @@ class HistoryCache<T> {
 		}
 
 		@Override
-		public boolean equals(Object other) {
-			if (other instanceof byte[]) {
-				byte[] otherArray = (byte[]) other;
-				return Arrays.equals(key, otherArray);
+		public boolean equals(Object o) {
+			if (o instanceof HistoryCache<?>.InstanceKey) {
+				InstanceKey other = (InstanceKey) o;
+				
+				return Arrays.equals(key, other.key);
 			}
 
 			return false;
@@ -181,6 +185,10 @@ class HistoryCache<T> {
 		@Override
 		public int hashCode() {
 			return Arrays.hashCode(key);
+		}
+		
+		public String toString() {
+			return "Key: " + Arrays.toString(key);
 		}
 	}
 

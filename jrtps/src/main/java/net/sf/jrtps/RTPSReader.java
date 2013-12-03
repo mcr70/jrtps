@@ -2,7 +2,6 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,18 +31,15 @@ import org.slf4j.LoggerFactory;
 public class RTPSReader<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
-	private HashSet<WriterData> matchedWriters = new HashSet<>();
-	private HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
-
-	private List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
-
-	private int ackNackCount = 0;
-	private Marshaller<?> marshaller;
-
-	private List<Sample<T>> pendingSamples = new LinkedList<>();
-
+	//private HashSet<WriterData> matchedWriters = new HashSet<>();
+	private final HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
+	private final List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
+	private final Marshaller<?> marshaller;
+	private final List<Sample<T>> pendingSamples = new LinkedList<>();
 	private final int heartbeatResponseDelay;
-
+	
+	private int ackNackCount = 0;
+	
 	RTPSReader(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
@@ -90,7 +86,7 @@ public class RTPSReader<T> extends Endpoint {
 
 		if (wp.acceptData(data.getWriterSequenceNumber())) {
 			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
-			log.trace("[{}] Got Data: {}, {}", getGuid().entityId, 
+			log.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
 					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 
 			synchronized (pendingSamples) {
@@ -98,7 +94,7 @@ public class RTPSReader<T> extends Endpoint {
 			}
 		}
 		else {
-			log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+			log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
 					data.getWriterSequenceNumber(), wp.getSeqNumMax());
 		}
 	}
@@ -117,7 +113,7 @@ public class RTPSReader<T> extends Endpoint {
 			// TODO: implement liveliness
 		}
 
-		if (true || isReliable()) { // Only reliable readers respond to heartbeat
+		if (isReliable()) { // Only reliable readers respond to heartbeat
 			boolean doSend = false;
 			if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 				doSend = true;
@@ -164,7 +160,7 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private WriterProxy getWriterProxy(GUID_t writerGuid) {
-		WriterProxy wp = writerProxies.get(writerGuid);;
+		WriterProxy wp = writerProxies.get(writerGuid);
 		if (wp == null) {
 			// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
 			//       Remote entities are assumed alive even though corresponding discovery data has not been
@@ -191,15 +187,16 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	void addMatchedWriter(WriterData writerData) {
-		matchedWriters.add(writerData);
+		//matchedWriters.add(writerData);
 		writerProxies.put(writerData.getKey(), new WriterProxy(writerData));
 
 		log.debug("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
 	}
 	void removeMatchedWriter(WriterData writerData) {
 		log.debug("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
+		
 		writerProxies.remove(writerData.getKey());
-		matchedWriters.remove(writerData);
+		//matchedWriters.remove(writerData);
 	}
 
 
