@@ -6,10 +6,9 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.MulticastSocket;
 import java.net.SocketException;
-import java.nio.BufferUnderflowException;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Semaphore;
 
-import net.sf.jrtps.message.Message;
 import net.sf.jrtps.types.Locator_t;
 
 import org.slf4j.Logger;
@@ -28,8 +27,7 @@ public class UDPReceiver implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
 
 	private final Semaphore initLock = new Semaphore(1);
-
-	private final MessageHandler handler;
+	private final BlockingQueue<byte[]> queue;
 	private final Locator_t locator;
 
 	private boolean running = true;
@@ -37,9 +35,10 @@ public class UDPReceiver implements Runnable {
 
 	private int bufferSize;
 
-	public UDPReceiver(Locator_t locator, MessageHandler handler, int bufferSize) throws SocketException {
+
+	public UDPReceiver(Locator_t locator, BlockingQueue<byte[]> queue, int bufferSize) throws SocketException {
 		this.locator = locator;
-		this.handler = handler;
+		this.queue = queue;
 		this.bufferSize = bufferSize;
 	}
 
@@ -76,25 +75,17 @@ public class UDPReceiver implements Runnable {
 			try {	
 				socket.receive(p);
 
-				byte[] msgBytes = new byte[p.getLength()];
-				System.arraycopy(p.getData(), 0, msgBytes, 0, msgBytes.length);
-
-				//writeMessage("c:/tmp/jrtps-received.bin", msgBytes);
-
-				// TODO: We could put msgBytes into BlockingQueue and go back to receiving
-				Message msg = new Message(new RTPSByteBuffer(msgBytes));
-
-				log.debug("Parsed RTPS message from {}: {}", locator, msg);
-				handler.handleMessage(msg);
+				byte[] bytes = new byte[p.getLength()];
+				System.arraycopy(p.getData(), 0, bytes, 0, bytes.length);
+				log.debug("Received {} bytes from {}", bytes.length, locator);
+				
+				queue.put(bytes);
 			}
-			catch(SocketException se) {
+			catch(IOException se) {
 				// Ignore. If we are still running, try to receive again
 			}
-			catch(BufferUnderflowException bue) {
-				log.warn("Got BufferUnderflowException on reception. Buffer size is {}. Consider increasing.", bufferSize);
-			}
-			catch(Exception e) {
-				log.warn("Failed to parse message of length " + p.getLength(), e);
+			catch(InterruptedException ie) {
+				running = false;
 			}
 		} // while(...)
 	}

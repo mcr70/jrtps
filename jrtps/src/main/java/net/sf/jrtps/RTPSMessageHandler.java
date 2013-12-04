@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
@@ -13,7 +14,7 @@ import net.sf.jrtps.message.InfoSource;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
-import net.sf.jrtps.transport.MessageHandler;
+import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix_t;
 import net.sf.jrtps.types.Time_t;
 
@@ -21,18 +22,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSMessageHandler.
+ * RTPSMessageHandler is a consumer to BlockingQueue.
+ * Queue contains byte[] entries, which is parsed to RTPS Messages.
+ * Successfully parsed messages are split into submessages, which are passed
+ * to corresponding RTPS reader entities.
  * 
  * @author mcr70
- *
  */
-class RTPSMessageHandler implements MessageHandler {
+class RTPSMessageHandler implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(RTPSMessageHandler.class);
 
 	private final RTPSParticipant participant;
+	private final BlockingQueue<byte[]> queue;
 
-	RTPSMessageHandler(RTPSParticipant p) {
+	private boolean running = true;
+
+	RTPSMessageHandler(RTPSParticipant p, BlockingQueue<byte[]> queue) {
 		this.participant = p;
+		this.queue = queue;
 	}
 
 	/**
@@ -40,7 +47,7 @@ class RTPSMessageHandler implements MessageHandler {
 	 * reader.
 	 * @param msg
 	 */
-	public void handleMessage(Message msg) {
+	private void handleMessage(Message msg) {
 		Time_t timestamp = null;
 		GuidPrefix_t destGuidPrefix = GuidPrefix_t.GUIDPREFIX_UNKNOWN;
 		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
@@ -125,5 +132,22 @@ class RTPSMessageHandler implements MessageHandler {
 		else {
 			log.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
 		}
+	}
+
+	@Override
+	public void run() {
+		while(running) {
+			try {
+				byte[] bytes = queue.take();
+				Message msg = new Message(new RTPSByteBuffer(bytes));
+				log.debug("Parsed RTPS message {}", msg);
+
+				handleMessage(msg);
+			} catch (InterruptedException e) {
+				running = false;
+			}
+		}
+		
+		log.debug("Handler exiting");
 	}
 }

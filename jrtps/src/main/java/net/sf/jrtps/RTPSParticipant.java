@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -183,11 +184,18 @@ public class RTPSParticipant {
 	public void start() throws SocketException {
 		// TODO: We should have endpoints for TCP, InMemory, What else? encrypted?, signed? 
 		// UDP is required by the specification. 
-		// TODO: should we have just one RTPSMessageHandler
-		receivers.add(new UDPReceiver(meta_mcLoc, new RTPSMessageHandler(this), config.getBufferSize()));
-		receivers.add(new UDPReceiver(meta_ucLoc, new RTPSMessageHandler(this), config.getBufferSize()));
-		receivers.add(new UDPReceiver(mcLoc, new RTPSMessageHandler(this), config.getBufferSize()));			
-		receivers.add(new UDPReceiver(ucLoc, new RTPSMessageHandler(this), config.getBufferSize()));		
+
+		// TODO: should we have more than just one RTPSMessageHandler
+		//       It might cause problems during message processing.
+		BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
+		RTPSMessageHandler handler = new RTPSMessageHandler(this, queue);
+		
+		threadPoolExecutor.execute(handler);
+		
+		receivers.add(new UDPReceiver(meta_mcLoc, queue, config.getBufferSize()));
+		receivers.add(new UDPReceiver(meta_ucLoc, queue, config.getBufferSize()));
+		receivers.add(new UDPReceiver(mcLoc, queue, config.getBufferSize()));			
+		receivers.add(new UDPReceiver(ucLoc, queue, config.getBufferSize()));		
 
 		for (UDPReceiver receiver : receivers) {
 			threadPoolExecutor.execute(receiver);
@@ -201,6 +209,8 @@ public class RTPSParticipant {
 	 * Each user entity is assigned a unique number, this field is used for that purpose
 	 */
 	private volatile int userEntityIdx = 1;
+
+	private LinkedBlockingQueue<byte[]> queue;
 
 	/**
 	 * Asserts liveliness of RTPSWriters, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.

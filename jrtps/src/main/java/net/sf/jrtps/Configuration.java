@@ -144,4 +144,8 @@ class Configuration {
 		
 		return new Duration_t(millis);
 	}
+
+	public int getMessageQueueSize() {
+		return getIntProperty("jrtps.message-queue.size", 10);
+	}
 }
