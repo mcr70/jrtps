@@ -2,12 +2,34 @@ package net.sf.jrtps.udds;
 
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
+import net.sf.jrtps.Configuration;
+import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.builtin.ParticipantData;
+import net.sf.jrtps.builtin.ParticipantDataMarshaller;
+import net.sf.jrtps.builtin.ReaderData;
+import net.sf.jrtps.builtin.ReaderDataMarshaller;
+import net.sf.jrtps.builtin.TopicData;
+import net.sf.jrtps.builtin.TopicDataMarshaller;
+import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.WriterDataMarshaller;
+import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.EntityId_t;
+import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.Locator_t;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +44,34 @@ import org.slf4j.LoggerFactory;
 public class Participant {
 	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
 	
+	private final ThreadPoolExecutor threadPoolExecutor;
+
+	private final Configuration config = new Configuration();
 	private Marshaller<?> defaultMarshaller;
 	private final HashMap<String, Marshaller<?>> marshallers = new HashMap<>();
 	private final RTPSParticipant rtps_participant;
+	
+	private List<DataReader> readers = new LinkedList<>();
+	private List<DataWriter> writers = new LinkedList<>();
+	
+	/**
+	 * Maps that stores discovered participants. discovered participant is shared with
+	 * all entities created by this participant. 
+	 */
+	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants =  new HashMap<>();
+	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
+	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
+	
+	
+	private final LivelinessManager livelinessManager;
+
+	private Locator_t meta_mcLoc;
+
+	private Locator_t meta_ucLoc;
+
+	private Locator_t mcLoc;
+
+	private Locator_t ucLoc;
 	
 
 	/**
@@ -49,12 +96,96 @@ public class Participant {
 	public Participant(int domainId, int participantId) throws SocketException {
 		defaultMarshaller = new JavaSerializableMarshaller();
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
+
+		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 10);
+		int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
+		threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 5, TimeUnit.SECONDS, 
+				new LinkedBlockingQueue<Runnable>(maxPoolSize));
+
+		logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
+
+		meta_mcLoc = Locator_t.defaultDiscoveryMulticastLocator(domainId);
+		meta_ucLoc = Locator_t.defaultMetatrafficUnicastLocator(domainId, participantId);
+		mcLoc = Locator_t.defaultUserMulticastLocator(domainId);
+		ucLoc = Locator_t.defaultUserUnicastLocator(domainId, participantId);
 		
-		rtps_participant = new RTPSParticipant(domainId, participantId);
+		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor,
+				meta_mcLoc, meta_ucLoc, mcLoc, ucLoc);
 		rtps_participant.start();
+		
+		createBuiltinEntities();
+		
+		this.livelinessManager = new LivelinessManager(this);
+		livelinessManager.start();
 	}
 	
 	
+	private void createBuiltinEntities() {
+		// ----  Builtin marshallers  ---------------
+		ParticipantDataMarshaller pdm = new ParticipantDataMarshaller();
+		WriterDataMarshaller wdm = new WriterDataMarshaller();		
+		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
+		TopicDataMarshaller tdm = new TopicDataMarshaller();		
+
+		//livelinessManager = new LivelinessManager(this);
+		
+		QualityOfService spdpQoS = new QualityOfService();
+		QualityOfService sedpQoS = new QualityOfService();
+		try {
+			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+		} catch (InconsistentPolicy e) {
+			logger.error("Got InconsistentPolicy exception. This is an internal error", e);
+		}
+
+		// ----  Create a Writers for SEDP  ---------
+		rtps_participant.createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
+				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
+		rtps_participant.createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
+				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
+
+		// NOTE: It is not mandatory to publish TopicData
+		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
+
+
+		// ----  Create a Reader for SPDP  -----------------------
+		RTPSReader<ParticipantData> partReader = 
+				rtps_participant.createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
+						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
+		partReader.addListener(new BuiltinParticipantDataListener(rtps_participant, discoveredParticipants));
+		readers.add(new DataReader<>(partReader));
+
+		// ----  Create a Readers for SEDP  ---------
+		RTPSReader<WriterData> pubReader = 
+				rtps_participant.createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
+						WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
+		pubReader.addListener(new BuiltinWriterDataListener(rtps_participant, discoveredWriters));
+		readers.add(new DataReader<>(pubReader));
+		
+		RTPSReader<ReaderData> subReader = 
+				rtps_participant.createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
+						ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
+		subReader.addListener(new BuiltinReaderDataListener(rtps_participant, discoveredParticipants, discoveredReaders));
+		readers.add(new DataReader<>(subReader));
+		
+		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
+		RTPSReader<TopicData> topicReader = 
+				rtps_participant.createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
+						TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, sedpQoS);
+		topicReader.addListener(new BuiltinTopicDataListener(rtps_participant));
+		readers.add(new DataReader<>(topicReader));
+
+		// ----  Create a Writer for SPDP  -----------------------
+		RTPSWriter<ParticipantData> spdp_w = 
+				rtps_participant.createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
+						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
+		writers.add(new DataWriter<>(spdp_w));
+
+		ParticipantData pd = createSPDPParticipantData();
+		spdp_w.write(pd);
+		createSPDPResender(config.getSPDPResendPeriod(), spdp_w);
+
+	}
+
 	/**
 	 * Create a new DataReader for given type T. DataReader is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
@@ -82,9 +213,13 @@ public class Participant {
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		Marshaller<?> m = getMarshaller(typeName);
 		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, qos);
+		
+		DataReader<T> dr = new DataReader<T>(rtps_reader);
+		readers.add(dr);
+		
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
-		return new DataReader<T>(rtps_reader);
+		return dr;
 	} 
 
 	
@@ -118,7 +253,12 @@ public class Participant {
 		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m, qos);
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
-		return new DataWriter<T>(rtps_writer);
+		DataWriter<T> writer = new DataWriter<T>(rtps_writer);
+		writers.add(writer);
+		
+		livelinessManager.registerWriter(writer);
+		
+		return writer;
 	}
 
 	
@@ -143,12 +283,30 @@ public class Participant {
 		marshallers.put(typeName, m);
 	}
 	
+	/**
+	 * Asserts liveliness of RTPSWriters, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
+	 * 
+	 * @see net.sf.jrtps.message.parameter.QosLiveliness
+	 */
+	public void assertLiveliness() {
+		livelinessManager.assertLiveliness();
+	}
 	
 	/**
 	 * Close this participant.
 	 */
 	public void close() {
+		threadPoolExecutor.shutdown();
+
 		rtps_participant.close();
+
+		try {
+			boolean terminated = threadPoolExecutor.awaitTermination(1, TimeUnit.SECONDS);
+			if (!terminated) {
+				threadPoolExecutor.shutdownNow();
+			}
+		} catch (InterruptedException e) {
+		}
 	} 
 
 	/**
@@ -166,4 +324,57 @@ public class Participant {
 		
 		return m;
 	}
+
+
+	RTPSParticipant getRTPSParticipant() {
+		return rtps_participant;
+	}
+
+
+	private ParticipantData createSPDPParticipantData() {
+		int epSet = createEndpointSet();
+		ParticipantData pd = new ParticipantData(rtps_participant.getGuid().prefix, 
+				epSet, ucLoc,  mcLoc,  meta_ucLoc, meta_mcLoc);
+
+		logger.debug("Created ParticipantData: {}", pd);
+
+		return pd;
+	}
+	
+	private int createEndpointSet() {
+		int eps = 0;
+		for (DataReader dr : readers) {
+			eps |= dr.getRTPSReader().endpointSetId();
+		}
+		for (DataWriter dw : writers) {
+			eps |= dw.getRTPSWriter().endpointSetId();
+		}
+
+		logger.debug("{}", new BuiltinEndpointSet(eps));
+
+		return eps;
+	}
+
+	private void createSPDPResender(final Duration_t period, final RTPSWriter<ParticipantData> spdp_w) {
+		Runnable resendRunnable = new Runnable() {
+		    @Override
+			public void run() {
+				boolean running = true;
+				while (running) {
+					spdp_w.sendData(null, EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 0);
+					try {
+						running = !threadPoolExecutor.awaitTermination(period.asMillis(), TimeUnit.MILLISECONDS);
+					} catch (InterruptedException e) {
+						running = false;
+					}
+				}
+			}
+		};
+
+		logger.debug("[{}] Starting resend thread with period {}", 
+				rtps_participant.getGuid().entityId, period);		
+		
+		threadPoolExecutor.execute(resendRunnable);
+	}
+
 }

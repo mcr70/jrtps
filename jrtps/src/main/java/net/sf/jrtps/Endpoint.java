@@ -91,7 +91,7 @@ public class Endpoint {
 	 * Gets the QualityOfService associated with this entity.
 	 * @return QualityOfService
 	 */
-	QualityOfService getQualityOfService() {
+	public QualityOfService getQualityOfService() {
 		return qos;
 	}
 

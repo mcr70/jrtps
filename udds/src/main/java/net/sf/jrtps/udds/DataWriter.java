@@ -71,4 +71,9 @@ public class DataWriter<T> extends Entity {
 	public void dispose(List<T> instances) {
 		rtps_writer.dispose(instances);
 	}
+
+
+	RTPSWriter getRTPSWriter() {
+		return rtps_writer;
+	}
 }

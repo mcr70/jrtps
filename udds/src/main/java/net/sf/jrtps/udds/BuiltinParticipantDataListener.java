@@ -1,8 +1,15 @@
-package net.sf.jrtps;
+package net.sf.jrtps.udds;
 
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jrtps.InconsistentPolicy;
+import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.RTPSParticipant;
+import net.sf.jrtps.RTPSReader;
+import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.Sample;
+import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.builtin.WriterData;
@@ -46,7 +53,7 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 					log.trace("Ignoring self");
 				}
 				else {
-					log.debug("A new Participant detected: {}", pd); //.getGuidPrefix() + ", " + pd.getAllLocators());
+					log.debug("A new Participant detected: {}", pd);
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
 					// First, make sure remote participant knows about us.
@@ -68,6 +75,7 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 	 * @param builtinEndpoints
 	 */
 	private void handleBuiltinEnpointSet(GuidPrefix_t prefix, int builtinEndpoints) {
+		log.debug("handleBuiltinEndpointSet {}", builtinEndpoints);
 		QualityOfService sedpQoS = new QualityOfService();
 		try {
 			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
@@ -78,6 +86,7 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
 		
 		if (eps.hasPublicationDetector()) {
+			log.debug("Notifying remote publications reader of our publications");
 			RTPSWriter<?> pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 			
 			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
@@ -94,6 +103,7 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 			pr.addMatchedWriter(wd);
 		}
 		if (eps.hasSubscriptionDetector()) {
+			log.debug("Notifying remote subscriptions reader of our subscriptions");
 			RTPSWriter<?> sw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 			
 			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
