@@ -9,7 +9,7 @@ import java.net.SocketException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Semaphore;
 
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class UDPReceiver implements Runnable {
 
 	private final Semaphore initLock = new Semaphore(1);
 	private final BlockingQueue<byte[]> queue;
-	private final Locator_t locator;
+	private final Locator locator;
 
 	private boolean running = true;
 	DatagramSocket socket = null;
@@ -36,7 +36,7 @@ public class UDPReceiver implements Runnable {
 	private int bufferSize;
 
 
-	public UDPReceiver(Locator_t locator, BlockingQueue<byte[]> queue, int bufferSize) throws SocketException {
+	public UDPReceiver(Locator locator, BlockingQueue<byte[]> queue, int bufferSize) throws SocketException {
 		this.locator = locator;
 		this.queue = queue;
 		this.bufferSize = bufferSize;
@@ -107,7 +107,7 @@ public class UDPReceiver implements Runnable {
 	}
 
 
-	public Locator_t getLocator() {
+	public Locator getLocator() {
 		return locator;
 	}
 

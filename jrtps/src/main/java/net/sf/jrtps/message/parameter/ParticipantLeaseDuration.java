@@ -1,12 +1,12 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 public class ParticipantLeaseDuration extends Parameter {
-	private Duration_t duration;
+	private Duration duration;
 
-	public ParticipantLeaseDuration(Duration_t duration) {
+	public ParticipantLeaseDuration(Duration duration) {
 		super(ParameterEnum.PID_PARTICIPANT_LEASE_DURATION);
 		this.duration = duration;
 	}
@@ -17,7 +17,7 @@ public class ParticipantLeaseDuration extends Parameter {
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.duration = new Duration_t(bb);
+		this.duration = new Duration(bb);
 	}
 
 	@Override
@@ -25,7 +25,7 @@ public class ParticipantLeaseDuration extends Parameter {
 		duration.writeTo(buffer);
 	}
 	
-	public Duration_t getDuration() {
+	public Duration getDuration() {
 		return duration;
 	}
 	

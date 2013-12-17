@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +23,10 @@ public class InfoReply extends SubMessage {
 	
 	public static final int KIND = 0x0f;
 	
-	private List<Locator_t> unicastLocatorList = new LinkedList<Locator_t>();
-	private List<Locator_t> multicastLocatorList = new LinkedList<Locator_t>();
+	private List<Locator> unicastLocatorList = new LinkedList<Locator>();
+	private List<Locator> multicastLocatorList = new LinkedList<Locator>();
 
-	public InfoReply(List<Locator_t> unicastLocators, List<Locator_t>multicastLocators) {
+	public InfoReply(List<Locator> unicastLocators, List<Locator>multicastLocators) {
 		super(new SubMessageHeader(KIND));
 		
 		this.unicastLocatorList = unicastLocators;
@@ -43,7 +43,7 @@ public class InfoReply extends SubMessage {
 		long numLocators = bb.read_long(); // ulong
 		log.trace("Reading {}(0x{}) locators", numLocators, String.format("%08x", numLocators));
 		for (int i = 0; i < numLocators; i++) {
-			Locator_t loc = new Locator_t(bb);
+			Locator loc = new Locator(bb);
 			
 			unicastLocatorList.add(loc);
 		}
@@ -51,7 +51,7 @@ public class InfoReply extends SubMessage {
 		if (multicastFlag()) {
 			numLocators = bb.read_long(); // ulong
 			for (int i = 0; i < numLocators; i++) {
-				Locator_t loc = new Locator_t(bb);
+				Locator loc = new Locator(bb);
 				
 				multicastLocatorList.add(loc);
 			}			
@@ -70,7 +70,7 @@ public class InfoReply extends SubMessage {
 	 * Indicates an alternative set of unicast addresses that the Writer
 	 * should use to reach the Readers when replying to the Submessages that follow.
 	 */
-	public List<Locator_t> getUnicastLocatorList() {
+	public List<Locator> getUnicastLocatorList() {
 		return unicastLocatorList;
 	}
 	
@@ -79,7 +79,7 @@ public class InfoReply extends SubMessage {
 	 * should use to reach the Readers when replying to the Submessages that follow.
 	 * Only present when the MulticastFlag is set.
 	 */
-	public List<Locator_t> getMulticastLocatorList() {
+	public List<Locator> getMulticastLocatorList() {
 		return multicastLocatorList;
 	}
 
@@ -87,13 +87,13 @@ public class InfoReply extends SubMessage {
 	@Override
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_long(unicastLocatorList.size());
-		for (Locator_t loc : unicastLocatorList) {
+		for (Locator loc : unicastLocatorList) {
 			loc.writeTo(buffer);
 		}
 		
 		if (multicastFlag()) {
 			buffer.write_long(multicastLocatorList.size());
-			for (Locator_t loc : multicastLocatorList) {
+			for (Locator loc : multicastLocatorList) {
 				loc.writeTo(buffer);
 			}			
 		}

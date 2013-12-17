@@ -10,8 +10,8 @@ import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,10 +20,10 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
 
 	private final RTPSParticipant participant;
-	private HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
-	private HashMap<GUID_t, ReaderData> discoveredReaders;
+	private HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
+	private HashMap<Guid, ReaderData> discoveredReaders;
 
-	BuiltinReaderDataListener(RTPSParticipant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants, HashMap<GUID_t, ReaderData> discoveredReaders) {
+	BuiltinReaderDataListener(RTPSParticipant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants, HashMap<Guid, ReaderData> discoveredReaders) {
 		this.participant = p;
 		this.discoveredParticipants = discoveredParticipants;
 		this.discoveredReaders = discoveredReaders;
@@ -41,7 +41,7 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 		for (Sample<ReaderData> rdSample : samples) {
 			ReaderData readerData = rdSample.getData();
 			//discoveredReaders.put(readerData.getParticipantGuid(), readerData);
-			GUID_t key = readerData.getKey();
+			Guid key = readerData.getKey();
 			if (discoveredReaders.put(key, readerData) == null) {
 				log.debug("Discovered a new reader {} for topic {}, type {}", key, readerData.getTopicName(), readerData.getTypeName());
 			}

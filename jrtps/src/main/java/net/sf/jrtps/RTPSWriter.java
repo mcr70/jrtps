@@ -19,9 +19,9 @@ import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.StatusInfo;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
 
-	private HashMap<GUID_t, ReaderProxy> matchedReaders = new HashMap<>();
+	private HashMap<Guid, ReaderProxy> matchedReaders = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
@@ -47,7 +47,7 @@ public class RTPSWriter<T> extends Endpoint {
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 
 
-	RTPSWriter(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
@@ -86,7 +86,7 @@ public class RTPSWriter<T> extends Endpoint {
 			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
 
 			for (ReaderProxy proxy : matchedReaders.values()) {
-				GUID_t guid = proxy.getReaderData().getKey();
+				Guid guid = proxy.getReaderData().getKey();
 				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
 				if (proxy.isReliable()) {
 					sendHeartbeat(guid.prefix, guid.entityId);
@@ -104,7 +104,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Heartbeat message of the liveliness of this writer.
 	 */
 	public void assertLiveliness() {
-		for (GUID_t guid : matchedReaders.keySet()) {
+		for (Guid guid : matchedReaders.keySet()) {
 			sendHeartbeat(guid.prefix, guid.entityId, true); // Send Heartbeat regardless of readers QosReliability
 		}
 	}
@@ -142,7 +142,7 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 		else { 
 			// Otherwise, send either HB, or our history
-			GUID_t guid = readerData.getKey();
+			Guid guid = readerData.getKey();
 
 			if (proxy.isReliable()) {
 				sendHeartbeat(guid.prefix, guid.entityId);
@@ -160,10 +160,10 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param senderPrefix
 	 * @param ackNack
 	 */
-	void onAckNack(GuidPrefix_t senderPrefix, AckNack ackNack) {
+	void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
 		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
 
-		ReaderProxy proxy = matchedReaders.get(new GUID_t(senderPrefix, ackNack.getReaderId()));
+		ReaderProxy proxy = matchedReaders.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
 			proxy.ackNackReceived(); // Marks reader as being alive
 		} // Note: proxy could be null
@@ -183,7 +183,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param readerId
 	 * @param readersHighestSeqNum
 	 */
-	public void sendData(GuidPrefix_t targetPrefix, EntityId_t readerId, long readersHighestSeqNum) {
+	public void sendData(GuidPrefix targetPrefix, EntityId readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
@@ -229,11 +229,11 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 	}
 
-	private void sendHeartbeat(GuidPrefix_t senderPrefix, EntityId_t readerId) {
+	private void sendHeartbeat(GuidPrefix senderPrefix, EntityId readerId) {
 		sendHeartbeat(senderPrefix, readerId, false);
 	}
 
-	private void sendHeartbeat(GuidPrefix_t targetPrefix, EntityId_t readerId, boolean livelinessFlag) {
+	private void sendHeartbeat(GuidPrefix targetPrefix, EntityId readerId, boolean livelinessFlag) {
 		Message m = new Message(getGuid().prefix);
 		Heartbeat hb = createHeartbeat(readerId);
 		hb.livelinessFlag(livelinessFlag);
@@ -243,14 +243,14 @@ public class RTPSWriter<T> extends Endpoint {
 		sendMessage(m, targetPrefix);
 
 		if (!livelinessFlag) {
-			ReaderProxy proxy = matchedReaders.get(new GUID_t(targetPrefix, readerId));
+			ReaderProxy proxy = matchedReaders.get(new Guid(targetPrefix, readerId));
 			proxy.heartbeatSent();
 		}		
 	}
 
-	private Heartbeat createHeartbeat(EntityId_t entityId) {
+	private Heartbeat createHeartbeat(EntityId entityId) {
 		if (entityId == null) {
-			entityId = EntityId_t.UNKNOWN_ENTITY;
+			entityId = EntityId.UNKNOWN_ENTITY;
 		}
 
 		Heartbeat hb = new Heartbeat(entityId, getGuid().entityId,
@@ -262,7 +262,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 
 	@SuppressWarnings("unchecked")
-	private Data createData(EntityId_t readerId, CacheChange cc) throws IOException {		
+	private Data createData(EntityId readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
 		ParameterList inlineQos = new ParameterList();
 

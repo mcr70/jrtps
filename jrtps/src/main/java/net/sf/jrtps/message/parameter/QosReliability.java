@@ -1,12 +1,12 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 
 public class QosReliability extends Parameter implements DataReaderPolicy<QosReliability>, DataWriterPolicy<QosReliability>, TopicPolicy<QosReliability>, InlineParameter {
 	private int kind;
-	private Duration_t max_blocking_time;
+	private Duration max_blocking_time;
 	
 	public enum Kind {
 		BEST_EFFORT, RELIABLE;
@@ -16,7 +16,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		super(ParameterEnum.PID_RELIABILITY);
 	}
 
-	public QosReliability(Kind kind, Duration_t max_blocking_time) {
+	public QosReliability(Kind kind, Duration max_blocking_time) {
 		super(ParameterEnum.PID_RELIABILITY);
 		switch(kind) {
 		case BEST_EFFORT: this.kind = 1; break;
@@ -26,7 +26,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 		this.max_blocking_time = max_blocking_time;
 	}
 
-	public Duration_t getMaxBlockingTime() {
+	public Duration getMaxBlockingTime() {
 		return max_blocking_time;
 	}
 	
@@ -43,7 +43,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
 		this.kind = bb.read_long(); // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE 
-		max_blocking_time = new Duration_t(bb);
+		max_blocking_time = new Duration(bb);
 	}
 	
 	@Override
@@ -63,7 +63,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	 * @return default QosReliability
 	 */
 	public static QosReliability defaultReliability() {
-		return new QosReliability(Kind.BEST_EFFORT, new Duration_t(0, 0)); // TODO: check default
+		return new QosReliability(Kind.BEST_EFFORT, new Duration(0, 0)); // TODO: check default
 	}
 
 	public String toString() {	

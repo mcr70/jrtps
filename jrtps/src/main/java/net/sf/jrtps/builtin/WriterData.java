@@ -9,7 +9,7 @@ import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
-import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public class WriterData extends DiscoveredData {
 			case PID_TYPE_NAME:
 				super.typeName = ((TypeName)param).getTypeName(); break;
 			case PID_KEY_HASH: 
-				super.key = new GUID_t(param.getBytes()); break;
+				super.key = new Guid(param.getBytes()); break;
 			case PID_SENTINEL:
 				break;
 			case PID_PAD:
@@ -61,7 +61,7 @@ public class WriterData extends DiscoveredData {
 		resolveInconsistencies();
 	}
 	
-	public WriterData(String topicName, String typeName, GUID_t key, QualityOfService qos) {
+	public WriterData(String topicName, String typeName, Guid key, QualityOfService qos) {
 		super(typeName, topicName, key, qos);
 	}
 }

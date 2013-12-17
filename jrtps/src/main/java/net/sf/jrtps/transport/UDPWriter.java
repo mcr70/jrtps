@@ -9,18 +9,18 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class UDPWriter {
 	private static final Logger log = LoggerFactory.getLogger(UDPWriter.class);
-	private final Locator_t locator;
+	private final Locator locator;
 	private DatagramChannel channel;
 	private int bufferSize;
 	
-	public UDPWriter(Locator_t locator, int bufferSize) throws IOException {
+	public UDPWriter(Locator locator, int bufferSize) throws IOException {
 		this.locator = locator;
 		this.bufferSize = bufferSize;		
 		channel = DatagramChannel.open();

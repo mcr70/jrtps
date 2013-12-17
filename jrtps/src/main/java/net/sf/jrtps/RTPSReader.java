@@ -11,11 +11,11 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.SequenceNumberSet;
-import net.sf.jrtps.types.Time_t;
+import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class RTPSReader<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
 	//private HashSet<WriterData> matchedWriters = new HashSet<>();
-	private final HashMap<GUID_t, WriterProxy> writerProxies = new HashMap<>();
+	private final HashMap<Guid, WriterProxy> writerProxies = new HashMap<>();
 	private final List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
 	private final Marshaller<?> marshaller;
 	private final List<Sample<T>> pendingSamples = new LinkedList<>();
@@ -40,7 +40,7 @@ public class RTPSReader<T> extends Endpoint {
 	
 	private int ackNackCount = 0;
 	
-	RTPSReader(RTPSParticipant participant, EntityId_t entityId, String topicName, Marshaller<?> marshaller, 
+	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
@@ -78,9 +78,9 @@ public class RTPSReader<T> extends Endpoint {
 	 * @throws IOException
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void createSample(GuidPrefix_t sourcePrefix, Data data, Time_t timestamp) throws IOException {
+	void createSample(GuidPrefix sourcePrefix, Data data, Time timestamp) throws IOException {
 
-		GUID_t writerGuid = new GUID_t(sourcePrefix, data.getWriterId()); 
+		Guid writerGuid = new Guid(sourcePrefix, data.getWriterId()); 
 
 		WriterProxy wp = getWriterProxy(writerGuid);
 
@@ -105,10 +105,10 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param senderGuidPrefix
 	 * @param hb
 	 */
-	void onHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {
+	void onHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {
 		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 
-		WriterProxy wp = getWriterProxy(new GUID_t(senderGuidPrefix, hb.getWriterId()));
+		WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
 		if (hb.livelinessFlag()) {
 			// TODO: implement liveliness
 		}
@@ -131,7 +131,7 @@ public class RTPSReader<T> extends Endpoint {
 			if (doSend) {
 				Message m = new Message(getGuid().prefix);
 				//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
-				AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()));
+				AckNack an = createAckNack(new Guid(senderGuidPrefix, hb.getWriterId()));
 				m.addSubMessage(an);
 				
 				log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().entityId, heartbeatResponseDelay);
@@ -144,7 +144,7 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 
-	private AckNack createAckNack(GUID_t writerGuid) {
+	private AckNack createAckNack(Guid writerGuid) {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
@@ -159,7 +159,7 @@ public class RTPSReader<T> extends Endpoint {
 		return an;
 	}
 
-	private WriterProxy getWriterProxy(GUID_t writerGuid) {
+	private WriterProxy getWriterProxy(Guid writerGuid) {
 		WriterProxy wp = writerProxies.get(writerGuid);
 		if (wp == null) {
 			// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:

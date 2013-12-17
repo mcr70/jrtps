@@ -1,11 +1,11 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 
 public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosLatencyBudget>, DataWriterPolicy<QosLatencyBudget>, TopicPolicy<QosLatencyBudget>, InlineParameter {
-	private Duration_t duration;
+	private Duration duration;
 
 	QosLatencyBudget() {
 		super(ParameterEnum.PID_LATENCY_BUDGET);
@@ -16,14 +16,14 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
 	 * 
 	 * @param duration
 	 */
-	public QosLatencyBudget(Duration_t duration) {
+	public QosLatencyBudget(Duration duration) {
 		super(ParameterEnum.PID_LATENCY_BUDGET);
 		this.duration = duration;
 	}
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		this.duration = new Duration_t(bb);
+		this.duration = new Duration(bb);
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
 	 * @return Default QosLatencyBudget
 	 */
 	public static QosLatencyBudget defaultLatencyBudget() {
-		return new QosLatencyBudget(new Duration_t(0, 0));
+		return new QosLatencyBudget(new Duration(0, 0));
 	}
 
 	public String toString() {

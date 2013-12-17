@@ -6,9 +6,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.LocatorUDPv4_t;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 import org.junit.Test;
 
@@ -19,8 +19,8 @@ public class MessageTests {
 	@Test
 	public void testInfoDestination() {
 		// Create a Message with InfoDestination
-		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
-		m1.addSubMessage(new InfoDestination(GuidPrefix_t.GUIDPREFIX_UNKNOWN));
+		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
+		m1.addSubMessage(new InfoDestination(GuidPrefix.GUIDPREFIX_UNKNOWN));
 		
 		// Write Message to bytes1 array 
 		byte[] bytes1 = write(m1);
@@ -41,12 +41,12 @@ public class MessageTests {
 	@Test
 	public void testInfoReply() {
 		// Create a Message with InfoDestination
-		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 
-		List<Locator_t> unicastLocators = new LinkedList<>();
-		unicastLocators.add(Locator_t.defaultMetatrafficUnicastLocator(0, 0));
-		List<Locator_t> multicastLocators = new LinkedList<>();
-		multicastLocators.add(Locator_t.defaultDiscoveryMulticastLocator(0));
+		List<Locator> unicastLocators = new LinkedList<>();
+		unicastLocators.add(Locator.defaultMetatrafficUnicastLocator(0, 0));
+		List<Locator> multicastLocators = new LinkedList<>();
+		multicastLocators.add(Locator.defaultDiscoveryMulticastLocator(0));
 		
 		m1.addSubMessage(new InfoReply(unicastLocators, multicastLocators));
 		
@@ -69,7 +69,7 @@ public class MessageTests {
 	@Test
 	public void testInfoReplyIp4() {
 		// Create a Message with InfoDestination
-		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 
 		LocatorUDPv4_t lc1 = LocatorUDPv4_t.LOCATORUDPv4_INVALID;
 		LocatorUDPv4_t lc2 = LocatorUDPv4_t.LOCATORUDPv4_INVALID;
@@ -95,8 +95,8 @@ public class MessageTests {
 	@Test
 	public void testInfoSource() {
 		// Create a Message with InfoDestination
-		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
-		m1.addSubMessage(new InfoSource(GuidPrefix_t.GUIDPREFIX_UNKNOWN));
+		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
+		m1.addSubMessage(new InfoSource(GuidPrefix.GUIDPREFIX_UNKNOWN));
 		
 		// Write Message to bytes1 array 
 		byte[] bytes1 = write(m1);
@@ -117,7 +117,7 @@ public class MessageTests {
 	@Test
 	public void testInfoTimestamp() {
 		// Create a Message with InfoDestination
-		Message m1 = new Message(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 		m1.addSubMessage(new InfoTimestamp(123));
 
 		// Write Message to bytes1 array 

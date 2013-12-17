@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -139,10 +139,10 @@ public class Configuration {
 	 * Get the default SPDP announcement rate. 
 	 * @return resend period.
 	 */
-	public Duration_t getSPDPResendPeriod() {
+	public Duration getSPDPResendPeriod() {
 		int millis = getIntProperty("rtps.spdp.resend-data-period", 30000); // see 9.6.1.4.2 Default announcement rate
 		
-		return new Duration_t(millis);
+		return new Duration(millis);
 	}
 
 	public int getMessageQueueSize() {
