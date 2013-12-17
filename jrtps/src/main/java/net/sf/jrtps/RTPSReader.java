@@ -178,7 +178,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * 
 	 * @return 0, if this RTPSReader is not builtin endpoint
 	 */
-	int endpointSetId() {
+	public int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
@@ -186,12 +186,12 @@ public class RTPSReader<T> extends Endpoint {
 		// TODO: No use for this
 	}
 
-	void addMatchedWriter(WriterData writerData) {
+	public void addMatchedWriter(WriterData writerData) {
 		writerProxies.put(writerData.getKey(), new WriterProxy(writerData));
 
 		log.info("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
 	}
-	void removeMatchedWriter(WriterData writerData) {
+	public void removeMatchedWriter(WriterData writerData) {
 		log.info("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
 		
 		writerProxies.remove(writerData.getKey());

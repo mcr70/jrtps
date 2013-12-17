@@ -66,4 +66,9 @@ public class DataReader<T> extends Entity {
 	public void removeListener(SampleListener<T> listener) {
 		rtps_reader.removeListener(listener);
 	}
+
+
+	RTPSReader getRTPSReader() {
+		return rtps_reader;
+	}
 }

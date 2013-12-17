@@ -71,7 +71,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * 
 	 * @return 0, if this RTPSWriter is not builtin endpoint
 	 */
-	int endpointSetId() {
+	public int endpointSetId() {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
@@ -119,12 +119,12 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-	void removeMatchedReader(ReaderData readerData) {
+	public void removeMatchedReader(ReaderData readerData) {
 		log.info("[{}] Removing matchedReader {}", getGuid().entityId, readerData);
 		matchedReaders.remove(readerData);
 	}
 
-	void addMatchedReader(ReaderData readerData) {
+	public void addMatchedReader(ReaderData readerData) {
 		log.info("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
 
 		ReaderProxy proxy = new ReaderProxy(readerData);
@@ -183,7 +183,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param readerId
 	 * @param readersHighestSeqNum
 	 */
-	void sendData(GuidPrefix_t targetPrefix, EntityId_t readerId, long readersHighestSeqNum) {
+	public void sendData(GuidPrefix_t targetPrefix, EntityId_t readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().prefix);
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 

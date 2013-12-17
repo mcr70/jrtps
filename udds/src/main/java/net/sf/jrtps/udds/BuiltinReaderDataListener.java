@@ -1,8 +1,13 @@
-package net.sf.jrtps;
+package net.sf.jrtps.udds;
 
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.RTPSParticipant;
+import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.Sample;
+import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.types.GUID_t;

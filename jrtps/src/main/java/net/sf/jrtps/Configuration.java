@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  * 
  */
-class Configuration {
+public class Configuration {
 	private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
 	// --- Writer configurations -------------
@@ -32,7 +32,7 @@ class Configuration {
 
 	private final Properties props;
 
-	Configuration() {
+	public Configuration() {
 		this("/jrtps.properties");
 	}
 
@@ -120,7 +120,7 @@ class Configuration {
 	}
 
 	// package access to ease unit tests
-	int getIntProperty(String key, int defltValue) {
+	public int getIntProperty(String key, int defltValue) {
 		String value = props.getProperty(key);
 		int i = defltValue;
 		if (value != null) {
