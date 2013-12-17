@@ -18,11 +18,11 @@ import net.sf.jrtps.message.parameter.ParticipantManualLivelinessCount;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.message.parameter.VendorId;
-import net.sf.jrtps.types.Duration_t;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Duration;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.ProtocolVersion_t;
 import net.sf.jrtps.types.VendorId_t;
 
@@ -41,20 +41,20 @@ public class ParticipantData extends DiscoveredData {
 	
 	private ProtocolVersion_t protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
 	private VendorId_t vendorId = VendorId_t.VENDORID_JRTPS;
-	private GuidPrefix_t guidPrefix; 	
+	private GuidPrefix guidPrefix; 	
 	private boolean expectsInlineQos = false; 
 
 	/**
 	 * List of unicast locators (transport, address, port combinations) that
 	 * can be used to send messages to the built-in Endpoints contained in the Participant.
 	 */
-	private Locator_t metatrafficUnicastLocator;
+	private Locator metatrafficUnicastLocator;
 
 	/**
 	 * List of multicast locators (transport, address, port combinations)
 	 * that can be used to send messages to the built-in Endpoints contained in the Participant.
 	 */
-	private Locator_t metatrafficMulticastLocator;
+	private Locator metatrafficMulticastLocator;
 
 	/**
 	 * Default list of unicast locators (transport, address, port combinations) that can be used 
@@ -67,7 +67,7 @@ public class ParticipantData extends DiscoveredData {
 	 * 
 	 * (to SPDPbuiltinParticipantWriter? or SPPDPbuiltinParticipantReader? or Participant?)
 	 */
-	private Locator_t unicastLocator; 
+	private Locator unicastLocator; 
 
 	/**
 	 * Default list of multicast locators (transport, address, port combinations) that can be used 
@@ -75,7 +75,7 @@ public class ParticipantData extends DiscoveredData {
 	 * These are the multicast locators that will be used in case the Endpoint does not specify its 
 	 * own set of Locators.
 	 */
-	private Locator_t multicastLocator;
+	private Locator multicastLocator;
 
 	/**
 	 * All Participants must support the SEDP. This attribute identifies the kinds of built-in 
@@ -97,7 +97,7 @@ public class ParticipantData extends DiscoveredData {
 	 * 
 	 * Default value is 100 seconds.
 	 */
-	private Duration_t leaseDuration = new Duration_t(15, 0); // TODO: 100 sec
+	private Duration leaseDuration = new Duration(15, 0); // TODO: 100 sec
 
 	/**
 	 * Used to implement MANUAL_BY_PARTICIPANT liveliness QoS.
@@ -107,9 +107,9 @@ public class ParticipantData extends DiscoveredData {
 	private int manualLivelinessCount = 0;
 
 
-	public ParticipantData(GuidPrefix_t prefix, int endpoints,
-			Locator_t u_ucLocator, Locator_t u_mcLocator, 
-			Locator_t m_ucLocator, Locator_t m_mcLocator) {
+	public ParticipantData(GuidPrefix prefix, int endpoints,
+			Locator u_ucLocator, Locator u_mcLocator, 
+			Locator m_ucLocator, Locator m_mcLocator) {
 		guidPrefix = prefix;
 		availableBuiltinEndpoints = endpoints;
 		
@@ -197,12 +197,12 @@ public class ParticipantData extends DiscoveredData {
 		return protocolVersion;
 	}
 
-	public GuidPrefix_t getGuidPrefix() {
+	public GuidPrefix getGuidPrefix() {
 		return guidPrefix;
 	}
 
-	public GUID_t getGuid() {
-		return new GUID_t(guidPrefix, EntityId_t.PARTICIPANT);
+	public Guid getGuid() {
+		return new Guid(guidPrefix, EntityId.PARTICIPANT);
 	}
 	
 	public VendorId_t getVendorId() {
@@ -213,18 +213,18 @@ public class ParticipantData extends DiscoveredData {
 		return expectsInlineQos;
 	}
 
-	public Locator_t getMetatrafficUnicastLocator() {
+	public Locator getMetatrafficUnicastLocator() {
 		return metatrafficUnicastLocator;
 	}
 
-	public Locator_t getMetatrafficMulticastLocator() {
+	public Locator getMetatrafficMulticastLocator() {
 		return metatrafficMulticastLocator;
 	}
-	public Locator_t getUnicastLocator() {
+	public Locator getUnicastLocator() {
 		return unicastLocator;
 	}
 
-	public Locator_t getMulticastLocator() {
+	public Locator getMulticastLocator() {
 		return multicastLocator;
 	}
 
@@ -232,7 +232,7 @@ public class ParticipantData extends DiscoveredData {
 		return availableBuiltinEndpoints;
 	}
 
-	public Duration_t getLeaseDuration() {
+	public Duration getLeaseDuration() {
 		return leaseDuration;
 	}
 
@@ -240,8 +240,8 @@ public class ParticipantData extends DiscoveredData {
 		return manualLivelinessCount;
 	}
 
-	public Set<Locator_t> getUserLocators() {
-		Set<Locator_t> userLocators = new HashSet<Locator_t>();
+	public Set<Locator> getUserLocators() {
+		Set<Locator> userLocators = new HashSet<Locator>();
 		userLocators.add(multicastLocator);
 		userLocators.add(unicastLocator);
 		
@@ -249,8 +249,8 @@ public class ParticipantData extends DiscoveredData {
 	}
 
 	
-	public Set<Locator_t> getMetatrafficLocators() {
-		Set<Locator_t> metaLocators = new HashSet<Locator_t>();
+	public Set<Locator> getMetatrafficLocators() {
+		Set<Locator> metaLocators = new HashSet<Locator>();
 		metaLocators.add(metatrafficMulticastLocator);
 		metaLocators.add(metatrafficUnicastLocator);
 		
@@ -258,8 +258,8 @@ public class ParticipantData extends DiscoveredData {
 	}
 	
 	
-	private Set<Locator_t> getAllLocators() {
-		Set<Locator_t> allLocators = new HashSet<Locator_t>();
+	private Set<Locator> getAllLocators() {
+		Set<Locator> allLocators = new HashSet<Locator>();
 		allLocators.add(multicastLocator);
 		allLocators.add(unicastLocator);
 		allLocators.add(metatrafficMulticastLocator);

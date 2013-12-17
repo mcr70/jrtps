@@ -7,10 +7,10 @@ import java.util.HashMap;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.transport.UDPWriter;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +19,8 @@ public class Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(Endpoint.class);
 
 	private final String topicName;
-	private final GUID_t guid;	
-	private HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
+	private final Guid guid;	
+	private HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
 
 	private final Configuration configuration;
 
@@ -37,9 +37,9 @@ public class Endpoint {
 	 * @param topicName
 	 * @param qos 
 	 */
-	protected Endpoint(RTPSParticipant participant, EntityId_t entityId, String topicName, QualityOfService qos, Configuration configuration) {
+	protected Endpoint(RTPSParticipant participant, EntityId entityId, String topicName, QualityOfService qos, Configuration configuration) {
 		this.participant = participant;
-		this.guid = new GUID_t(participant.getGuid().prefix, entityId);
+		this.guid = new Guid(participant.getGuid().prefix, entityId);
 		this.topicName = topicName;
 		this.qos = qos;
 		this.configuration = configuration;
@@ -50,7 +50,7 @@ public class Endpoint {
 		return topicName;
 	}
 
-	public GUID_t getGuid() {
+	public Guid getGuid() {
 		return guid;
 	}
 
@@ -64,7 +64,7 @@ public class Endpoint {
 	 * @param prefix GuidPrefix of the participant
 	 * @return Locator_t
 	 */
-	private Locator_t getParticipantLocators(GuidPrefix_t prefix) {
+	private Locator getParticipantLocators(GuidPrefix prefix) {
 		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().entityId, prefix, discoveredParticipants.keySet());
 		
 		ParticipantData pd = discoveredParticipants.get(prefix);
@@ -79,11 +79,11 @@ public class Endpoint {
 
 		log.trace("[{}] Unknown participant. Returning default metatraffic multicast locator for domain {}", getGuid().entityId, participant.getDomainId());
 
-		return Locator_t.defaultDiscoveryMulticastLocator(participant.getDomainId());
+		return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());
 	}
 
 
-	void setDiscoveredParticipants(HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
+	void setDiscoveredParticipants(HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.discoveredParticipants = discoveredParticipants;
 	}
 
@@ -95,8 +95,8 @@ public class Endpoint {
 		return qos;
 	}
 
-	protected boolean sendMessage(Message m, GuidPrefix_t targetPrefix) {
-		Locator_t locator = getParticipantLocators(targetPrefix);
+	protected boolean sendMessage(Message m, GuidPrefix targetPrefix) {
+		Locator locator = getParticipantLocators(targetPrefix);
 		boolean overFlowed = true;
 		try {
 			UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO: No need to create and close all the time

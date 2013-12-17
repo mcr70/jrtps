@@ -16,8 +16,8 @@ import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.types.Duration_t;
-import net.sf.jrtps.types.EntityId_t;
+import net.sf.jrtps.types.Duration;
+import net.sf.jrtps.types.EntityId;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> {
 	private static final Logger log = LoggerFactory.getLogger(LivelinessManager.class);
 	
-	private final List<Duration_t> alDurations = new LinkedList<>();
+	private final List<Duration> alDurations = new LinkedList<>();
 	
 	private final Participant participant;
 	private DataWriter<ParticipantMessage> writer;
@@ -108,7 +108,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		// ---  Create QualityOfService used with entities  ----- 
 		QualityOfService qos = new QualityOfService();
 		try {
-			qos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+			qos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
 			qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
 			qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
 		} catch (InconsistentPolicy e) {
@@ -117,14 +117,14 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		}
 		
 		RTPSWriter<ParticipantMessage> rtps_writer = 
-				participant.getRTPSParticipant().createWriter(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_WRITER, 
+				participant.getRTPSParticipant().createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, 
 				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
 				new ParticipantMessageMarshaller(), qos);	
 		
 		writer = new DataWriter<>(rtps_writer);
 		
 		RTPSReader<ParticipantMessage> rtps_reader = 
-				participant.getRTPSParticipant().createReader(EntityId_t.BUILTIN_PARTICIPANT_MESSAGE_READER, 
+				participant.getRTPSParticipant().createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, 
 				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
 				new ParticipantMessageMarshaller(), qos);
 		
@@ -146,7 +146,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	public void run() {
 		try {
 			while(true) {
-				Duration_t nextLeaseWaitTime = null;
+				Duration nextLeaseWaitTime = null;
 				synchronized (alDurations) {
 					if (alDurations.size() > 0) {
 						nextLeaseWaitTime = alDurations.get(0);

@@ -1,9 +1,9 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.EntityId_t;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.SequenceNumberSet;
-import net.sf.jrtps.types.SequenceNumber_t;
+import net.sf.jrtps.types.SequenceNumber;
 
 /**
  * This Submessage is sent from an RTPS Writer to an RTPS Reader and indicates to the RTPS Reader 
@@ -21,15 +21,15 @@ public class Gap extends SubMessage {
 	/**
 	 * Identifies the Reader Entity that is being informed of the irrelevance of a set of sequence numbers.
 	 */
-	private EntityId_t readerId;
+	private EntityId readerId;
 	/**
 	 * Identifies the Writer Entity to which the range of sequence numbers applies.
 	 */
-	private EntityId_t writerId;
+	private EntityId writerId;
 	/**
 	 * Identifies the first sequence number in the interval of irrelevant sequence numbers.
 	 */
-	private SequenceNumber_t gapStart;
+	private SequenceNumber gapStart;
 	/**
 	 * Serves two purposes:
 	 * (1) Identifies the last sequence number in the interval of irrelevant sequence numbers.
@@ -43,15 +43,15 @@ public class Gap extends SubMessage {
 		readMessage(bb);
 	}
 
-	public EntityId_t getReaderId() {
+	public EntityId getReaderId() {
 		return readerId;
 	}
 	
-	public EntityId_t getWriterId() {
+	public EntityId getWriterId() {
 		return writerId;
 	}
 
-	public SequenceNumber_t getGapStart() {
+	public SequenceNumber getGapStart() {
 		return gapStart;
 	}
 	
@@ -61,10 +61,10 @@ public class Gap extends SubMessage {
 	
 	
 	private void readMessage(RTPSByteBuffer bb) {
-		this.readerId = EntityId_t.readEntityId(bb);
-		this.writerId = EntityId_t.readEntityId(bb);
+		this.readerId = EntityId.readEntityId(bb);
+		this.writerId = EntityId.readEntityId(bb);
 		
-		this.gapStart = new SequenceNumber_t(bb);
+		this.gapStart = new SequenceNumber(bb);
 		this.gapList = new SequenceNumberSet(bb);
 	}
 

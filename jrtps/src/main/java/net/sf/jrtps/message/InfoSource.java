@@ -1,7 +1,7 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.ProtocolVersion_t;
 import net.sf.jrtps.types.VendorId_t;
 
@@ -18,9 +18,9 @@ public class InfoSource extends SubMessage {
 	
 	private ProtocolVersion_t protocolVersion;
 	private VendorId_t vendorId;
-	private GuidPrefix_t guidPrefix;
+	private GuidPrefix guidPrefix;
 
-	public InfoSource(GuidPrefix_t guidPrefix) {
+	public InfoSource(GuidPrefix guidPrefix) {
 		super(new SubMessageHeader(KIND));
 		
 		this.protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
@@ -52,7 +52,7 @@ public class InfoSource extends SubMessage {
 	 * Identifies the Participant that is the container of the RTPS Writer
 	 * entities that are the source of the Submessages that follow.
 	 */
-	public GuidPrefix_t getGuidPrefix() {
+	public GuidPrefix getGuidPrefix() {
 		return guidPrefix;
 	}
 	
@@ -62,7 +62,7 @@ public class InfoSource extends SubMessage {
 		
 		protocolVersion = new ProtocolVersion_t(bb);
 		vendorId = new VendorId_t(bb);
-		guidPrefix = new GuidPrefix_t(bb);
+		guidPrefix = new GuidPrefix(bb);
 	}
 
 	@Override

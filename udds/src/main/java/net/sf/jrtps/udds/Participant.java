@@ -25,11 +25,11 @@ import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.builtin.WriterDataMarshaller;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.types.Duration_t;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Duration;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,20 +58,20 @@ public class Participant {
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
 	 */
-	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants =  new HashMap<>();
-	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
-	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
+	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants =  new HashMap<>();
+	private final HashMap<Guid, ReaderData> discoveredReaders = new HashMap<>();
+	private final HashMap<Guid, WriterData> discoveredWriters = new HashMap<>();
 	
 	
 	private final LivelinessManager livelinessManager;
 
-	private Locator_t meta_mcLoc;
+	private Locator meta_mcLoc;
 
-	private Locator_t meta_ucLoc;
+	private Locator meta_ucLoc;
 
-	private Locator_t mcLoc;
+	private Locator mcLoc;
 
-	private Locator_t ucLoc;
+	private Locator ucLoc;
 	
 
 	/**
@@ -104,10 +104,10 @@ public class Participant {
 
 		logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
-		meta_mcLoc = Locator_t.defaultDiscoveryMulticastLocator(domainId);
-		meta_ucLoc = Locator_t.defaultMetatrafficUnicastLocator(domainId, participantId);
-		mcLoc = Locator_t.defaultUserMulticastLocator(domainId);
-		ucLoc = Locator_t.defaultUserUnicastLocator(domainId, participantId);
+		meta_mcLoc = Locator.defaultDiscoveryMulticastLocator(domainId);
+		meta_ucLoc = Locator.defaultMetatrafficUnicastLocator(domainId, participantId);
+		mcLoc = Locator.defaultUserMulticastLocator(domainId);
+		ucLoc = Locator.defaultUserUnicastLocator(domainId, participantId);
 		
 		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor,
 				meta_mcLoc, meta_ucLoc, mcLoc, ucLoc);
@@ -132,15 +132,15 @@ public class Participant {
 		QualityOfService spdpQoS = new QualityOfService();
 		QualityOfService sedpQoS = new QualityOfService();
 		try {
-			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
 		} catch (InconsistentPolicy e) {
 			logger.error("Got InconsistentPolicy exception. This is an internal error", e);
 		}
 
 		// ----  Create a Writers for SEDP  ---------
-		rtps_participant.createWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
+		rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
 				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
-		rtps_participant.createWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
+		rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
 				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
 
 		// NOTE: It is not mandatory to publish TopicData
@@ -149,34 +149,34 @@ public class Participant {
 
 		// ----  Create a Reader for SPDP  -----------------------
 		RTPSReader<ParticipantData> partReader = 
-				rtps_participant.createReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 
+				rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 
 						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 		partReader.addListener(new BuiltinParticipantDataListener(rtps_participant, discoveredParticipants));
 		readers.add(new DataReader<>(partReader));
 
 		// ----  Create a Readers for SEDP  ---------
 		RTPSReader<WriterData> pubReader = 
-				rtps_participant.createReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 
+				rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, 
 						WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
 		pubReader.addListener(new BuiltinWriterDataListener(rtps_participant, discoveredWriters));
 		readers.add(new DataReader<>(pubReader));
 		
 		RTPSReader<ReaderData> subReader = 
-				rtps_participant.createReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
+				rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
 						ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
 		subReader.addListener(new BuiltinReaderDataListener(rtps_participant, discoveredParticipants, discoveredReaders));
 		readers.add(new DataReader<>(subReader));
 		
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		RTPSReader<TopicData> topicReader = 
-				rtps_participant.createReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER, 
+				rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, 
 						TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, sedpQoS);
 		topicReader.addListener(new BuiltinTopicDataListener(rtps_participant));
 		readers.add(new DataReader<>(topicReader));
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = 
-				rtps_participant.createWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER, 
+				rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, 
 						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
 		writers.add(new DataWriter<>(spdp_w));
 
@@ -355,13 +355,13 @@ public class Participant {
 		return eps;
 	}
 
-	private void createSPDPResender(final Duration_t period, final RTPSWriter<ParticipantData> spdp_w) {
+	private void createSPDPResender(final Duration period, final RTPSWriter<ParticipantData> spdp_w) {
 		Runnable resendRunnable = new Runnable() {
 		    @Override
 			public void run() {
 				boolean running = true;
 				while (running) {
-					spdp_w.sendData(null, EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 0);
+					spdp_w.sendData(null, EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0);
 					try {
 						running = !threadPoolExecutor.awaitTermination(period.asMillis(), TimeUnit.MILLISECONDS);
 					} catch (InterruptedException e) {

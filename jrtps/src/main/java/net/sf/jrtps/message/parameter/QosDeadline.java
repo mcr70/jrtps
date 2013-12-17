@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 
 /**
@@ -18,20 +18,20 @@ import net.sf.jrtps.types.Duration_t;
  *
  */
 public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadline>, DataWriterPolicy<QosDeadline>, TopicPolicy<QosDeadline>, InlineParameter {
-	private Duration_t period;
+	private Duration period;
 
 	QosDeadline() {
 		super(ParameterEnum.PID_DEADLINE);
 	}
 
-	public QosDeadline(Duration_t period) {
+	public QosDeadline(Duration period) {
 		super(ParameterEnum.PID_DEADLINE);
 		this.period = period;
 	}
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		period = new Duration_t(bb);
+		period = new Duration(bb);
 	}
 
 	@Override
@@ -43,7 +43,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
 	 * Get the period of this DEADLINE policy.
 	 * @return deadline
 	 */
-	public Duration_t getPeriod() {
+	public Duration getPeriod() {
 		return period;
 	}
 
@@ -63,7 +63,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
 	 * @return default QosDeadline
 	 */
 	public static QosDeadline defaultDeadline() {
-		return new QosDeadline(Duration_t.INFINITE);
+		return new QosDeadline(Duration.INFINITE);
 	}
 
 	public String toString() {

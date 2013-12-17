@@ -12,16 +12,16 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class SequenceNumberSet {
-	private SequenceNumber_t bitmapBase;
+	private SequenceNumber bitmapBase;
 	private int[] bitmaps;
 
 	public SequenceNumberSet(long base, int[] bitmaps) {
-		this.bitmapBase = new SequenceNumber_t(base);
+		this.bitmapBase = new SequenceNumber(base);
 		this.bitmaps = bitmaps;
 	}
 	
 	public SequenceNumberSet(RTPSByteBuffer bb) {
-		bitmapBase = new SequenceNumber_t(bb);
+		bitmapBase = new SequenceNumber(bb);
 		
 		long count = bb.read_long();
 		assert count <= 8 && count >= 0;

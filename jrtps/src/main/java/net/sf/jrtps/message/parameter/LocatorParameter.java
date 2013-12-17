@@ -1,10 +1,10 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 public abstract class LocatorParameter extends Parameter {
-	private Locator_t locator;
+	private Locator locator;
 
 	/**
 	 * 
@@ -17,14 +17,14 @@ public abstract class LocatorParameter extends Parameter {
 	 * 
 	 * @param pe Must be one to define a locator. No check is made.
 	 */
-	protected LocatorParameter(ParameterEnum pe, Locator_t locator) {
+	protected LocatorParameter(ParameterEnum pe, Locator locator) {
 		super(pe);
 		this.locator = locator;
 	}
 	
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.locator = new Locator_t(bb);
+		this.locator = new Locator(bb);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public abstract class LocatorParameter extends Parameter {
 		locator.writeTo(bb);
 	}
 	
-	public Locator_t getLocator() {
+	public Locator getLocator() {
 		return locator;
 	}
 

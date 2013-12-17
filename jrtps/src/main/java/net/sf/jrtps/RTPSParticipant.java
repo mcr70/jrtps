@@ -17,10 +17,10 @@ import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.transport.UDPReceiver;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,11 +44,11 @@ public class RTPSParticipant {
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
 	 */
-	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants =  new HashMap<>();
-	private final HashMap<GUID_t, ReaderData> discoveredReaders = new HashMap<>();
-	private final HashMap<GUID_t, WriterData> discoveredWriters = new HashMap<>();
+	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants =  new HashMap<>();
+	private final HashMap<Guid, ReaderData> discoveredReaders = new HashMap<>();
+	private final HashMap<Guid, WriterData> discoveredWriters = new HashMap<>();
 	@SuppressWarnings("unused")
-	private final HashMap<GUID_t, TopicData> discoveredTopics = new HashMap<>();
+	private final HashMap<Guid, TopicData> discoveredTopics = new HashMap<>();
 	
 	/**
 	 * A map that stores network receivers for each locator we know. (For listening purposes)
@@ -58,20 +58,15 @@ public class RTPSParticipant {
 	private final List<RTPSReader<?>> readerEndpoints = new LinkedList<>();
 	private final List<RTPSWriter<?>> writerEndpoints = new LinkedList<>();
 
-	private final GUID_t guid;
+	private final Guid guid;
 
-	private Locator_t meta_mcLoc;
-	private Locator_t meta_ucLoc;
-	private Locator_t mcLoc;
-	private Locator_t ucLoc;
+	private Locator meta_mcLoc;
+	private Locator meta_ucLoc;
+	private Locator mcLoc;
+	private Locator ucLoc;
 
 	private final int domainId;
 	private final int participantId;
-	
-	
-	public HashMap<GuidPrefix_t, ParticipantData> getDiscoveredParticipants() {
-		return discoveredParticipants;
-	}
 	
 	/**
 	 * Creates a new participant with given domainId and participantId. Domain ID and particiapnt ID
@@ -85,10 +80,10 @@ public class RTPSParticipant {
 	 * @param mcLoc 
 	 * @param meta_ucLoc 
 	 * @param meta_mcLoc 
-	 * @see EntityId_t
+	 * @see EntityId
 	 */
 	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, 
-			Locator_t meta_mcLoc, Locator_t meta_ucLoc, Locator_t mcLoc, Locator_t ucLoc) {
+			Locator meta_mcLoc, Locator meta_ucLoc, Locator mcLoc, Locator ucLoc) {
 		this.domainId = domainId;
 		this.participantId = participantId; 
 		this.threadPoolExecutor = tpe;
@@ -99,7 +94,7 @@ public class RTPSParticipant {
 		this.ucLoc = ucLoc;
 		
 		Random r = new Random(System.currentTimeMillis());
-		this.guid = new GUID_t(new GuidPrefix_t((byte) domainId, (byte) participantId, r.nextInt()), EntityId_t.PARTICIPANT);
+		this.guid = new Guid(new GuidPrefix((byte) domainId, (byte) participantId, r.nextInt()), EntityId.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
 
@@ -182,7 +177,7 @@ public class RTPSParticipant {
 			kind = 0x03; // User defined writer, no key
 		}
 		
-		return createWriter(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
+		return createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
 	}
 
 	/**
@@ -195,7 +190,7 @@ public class RTPSParticipant {
 	 * @param qos
 	 * @return RTPSWriter
 	 */
-	public <T> RTPSWriter<T> createWriter(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
+	public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
 		RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, marshaller, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
@@ -224,7 +219,7 @@ public class RTPSParticipant {
 	}
 	
 	/**
-	 * Creates an user defined entity with given topic and type names.
+	 * Creates an user defined reader with given topic and type names.
 	 * 
 	 * @param topicName
 	 * @param type
@@ -245,7 +240,7 @@ public class RTPSParticipant {
 			kind = 0x04; // User defined reader, no key
 		}
 		
-		return createReader(new EntityId_t.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
+		return createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
 	}
 
 	/**
@@ -265,7 +260,7 @@ public class RTPSParticipant {
 	 * Gets the guid of this participant.
 	 * @return guid
 	 */
-	public GUID_t getGuid() {
+	public Guid getGuid() {
 		return guid;
 	}
 
@@ -305,7 +300,7 @@ public class RTPSParticipant {
 	 * @param qos 
 	 * @return RTPSReader
 	 */
-	public <T> RTPSReader<T> createReader(EntityId_t eId, String topicName, String typeName, Marshaller<?> marshaller, 
+	public <T> RTPSReader<T> createReader(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, 
 			QualityOfService qos) {
 		RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, qos, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
@@ -352,7 +347,7 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return RTPSReader
 	 */
-	public RTPSReader<?> getReader(EntityId_t readerId) {
+	public RTPSReader<?> getReader(EntityId readerId) {
 		for (RTPSReader<?> reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
@@ -371,25 +366,25 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSReader
 	 */
-	RTPSReader<?> getReader(EntityId_t readerId, EntityId_t writerId) {
-		if (readerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(readerId)) {
+	RTPSReader<?> getReader(EntityId readerId, EntityId writerId) {
+		if (readerId != null && !EntityId.UNKNOWN_ENTITY.equals(readerId)) {
 			return getReader(readerId);
 		}
 
-		if (writerId.equals(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER)) {
-			return getReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+		if (writerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER)) {
+			return getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
 		}
 
-		if (writerId.equals(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER)) {
-			return getReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+		if (writerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER)) {
+			return getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 		}
 
-		if (writerId.equals(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER)) {
-			return getReader(EntityId_t.SEDP_BUILTIN_TOPIC_READER);
+		if (writerId.equals(EntityId.SEDP_BUILTIN_TOPIC_WRITER)) {
+			return getReader(EntityId.SEDP_BUILTIN_TOPIC_READER);
 		}
 
-		if (writerId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER)) {
-			return getReader(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER);
+		if (writerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER)) {
+			return getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		}
 
 		log.warn("Failed to find RTPSReader for reader entity {} or matching writer entity {}", readerId, writerId);
@@ -403,7 +398,7 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSWriter
 	 */
-	public RTPSWriter<?> getWriter(EntityId_t writerId) {
+	public RTPSWriter<?> getWriter(EntityId writerId) {
 		for (RTPSWriter<?> writer : writerEndpoints) {
 			if (writer.getGuid().entityId.equals(writerId)) {
 				return writer;
@@ -414,25 +409,25 @@ public class RTPSParticipant {
 	}
 
 
-	RTPSWriter<?> getWriter(EntityId_t writerId, EntityId_t readerId) {
-		if (writerId != null && !EntityId_t.UNKNOWN_ENTITY.equals(writerId)) {
+	RTPSWriter<?> getWriter(EntityId writerId, EntityId readerId) {
+		if (writerId != null && !EntityId.UNKNOWN_ENTITY.equals(writerId)) {
 			return getWriter(writerId);
 		}
 
-		if (readerId.equals(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER)) {
-			return getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+		if (readerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER)) {
+			return getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 		}
 
-		if (readerId.equals(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER)) {
-			return getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+		if (readerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER)) {
+			return getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 		}
 
-		if (readerId.equals(EntityId_t.SEDP_BUILTIN_TOPIC_READER)) {
-			return getWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER);
+		if (readerId.equals(EntityId.SEDP_BUILTIN_TOPIC_READER)) {
+			return getWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER);
 		}
 
-		if (readerId.equals(EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER)) {
-			return getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
+		if (readerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_READER)) {
+			return getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
 		}
 
 		log.warn("Failed to find Writer for writer {} or matching reader {}",  writerId, readerId);

@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 /**
  * See DDS specification v1.2, ch 7.1.3.16
@@ -10,7 +10,7 @@ import net.sf.jrtps.types.Duration_t;
  *
  */
 public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifespan>, DataWriterPolicy<QosLifespan>, TopicPolicy<QosLifespan>, InlineParameter {
-	private Duration_t duration;
+	private Duration duration;
 	
 	QosLifespan() {
 		super(ParameterEnum.PID_LIFESPAN);
@@ -20,14 +20,14 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
 	 * Constructor for QosLifespan.
 	 * @param duration
 	 */
-	public QosLifespan(Duration_t duration) {
+	public QosLifespan(Duration duration) {
 		super(ParameterEnum.PID_LIFESPAN);
 		this.duration = duration;
 	}
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		this.duration = new Duration_t(bb);
+		this.duration = new Duration(bb);
 	}
 
 	@Override
@@ -46,7 +46,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
 	 * @return default QosLifespan
 	 */
 	public static QosLifespan defaultLifespan() {
-		return new QosLifespan(Duration_t.INFINITE);
+		return new QosLifespan(Duration.INFINITE);
 	}
 
 	public String toString() {

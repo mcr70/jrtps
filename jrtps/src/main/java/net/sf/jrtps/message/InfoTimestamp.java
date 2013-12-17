@@ -1,7 +1,7 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Time_t;
+import net.sf.jrtps.types.Time;
 
 /**
  * Provides a source timestamp for subsequent Entity Submessages.
@@ -20,7 +20,7 @@ public class InfoTimestamp extends SubMessage {
 	 * Present only if the InvalidateFlag is not set in the header.
 	 * Contains the timestamp that should be used to interpret the subsequent Submessages.
 	 */
-	private Time_t timestamp;
+	private Time timestamp;
 
 
 	public InfoTimestamp(SubMessageHeader smh, RTPSByteBuffer is) {
@@ -31,10 +31,10 @@ public class InfoTimestamp extends SubMessage {
 
 	public InfoTimestamp(long systemCurrentMillis) {
 		super(new SubMessageHeader(KIND));
-		this.timestamp = new Time_t(systemCurrentMillis);
+		this.timestamp = new Time(systemCurrentMillis);
 	}
 	
-	public InfoTimestamp(Time_t timestamp) {
+	public InfoTimestamp(Time timestamp) {
 		super(new SubMessageHeader(KIND));
 
 		this.timestamp = timestamp;
@@ -52,7 +52,7 @@ public class InfoTimestamp extends SubMessage {
 	
 	private void readMessage(RTPSByteBuffer bb) {
 		if (!invalidateFlag()) {
-			this.timestamp = new Time_t(bb);
+			this.timestamp = new Time(bb);
 		}
 	}
 
@@ -64,7 +64,7 @@ public class InfoTimestamp extends SubMessage {
 	}
 
 
-	public Time_t getTimeStamp() {
+	public Time getTimeStamp() {
 		return timestamp;
 	}
 	

@@ -9,7 +9,7 @@ import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.WriterData;
-import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +18,9 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 	private static final Logger log = LoggerFactory.getLogger(BuiltinWriterDataListener.class);
 
 	private final RTPSParticipant participant;
-	private HashMap<GUID_t, WriterData> discoveredWriters;
+	private HashMap<Guid, WriterData> discoveredWriters;
 
-	BuiltinWriterDataListener(RTPSParticipant p, HashMap<GUID_t, WriterData> discoveredWriters) {
+	BuiltinWriterDataListener(RTPSParticipant p, HashMap<Guid, WriterData> discoveredWriters) {
 		this.participant = p;
 		this.discoveredWriters = discoveredWriters;
 	}
@@ -30,7 +30,7 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 		for (Sample<WriterData> wdSample : samples) {
 			WriterData writerData = wdSample.getData();
 
-			GUID_t key = writerData.getKey();
+			Guid key = writerData.getKey();
 			if (discoveredWriters.put(key, writerData) == null) {
 				log.debug("Discovered a new writer {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
 			}

@@ -3,15 +3,17 @@ package net.sf.jrtps.types;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
+ * Guid uniquely represents an entity.
+ * 
  * see 9.3.1.5 Mapping of the GUID_t
  * @author mcr70
  * 
  */
-public class GUID_t {
-	public GuidPrefix_t prefix;
-	public EntityId_t entityId;
+public class Guid {
+	public GuidPrefix prefix;
+	public EntityId entityId;
 	
-	public GUID_t(GuidPrefix_t prefix, EntityId_t entityId) {
+	public Guid(GuidPrefix prefix, EntityId entityId) {
 		if (prefix == null || entityId == null) {
 			throw new IllegalArgumentException("prefix: " + prefix + ", entityId: " + entityId + ": null is not allowed");
 		}
@@ -20,31 +22,31 @@ public class GUID_t {
 		this.entityId = entityId;
 	}
 	
-	public GUID_t(RTPSByteBuffer bb) {
-		this.prefix = new GuidPrefix_t(bb);
-		this.entityId = EntityId_t.readEntityId(bb);
+	public Guid(RTPSByteBuffer bb) {
+		this.prefix = new GuidPrefix(bb);
+		this.entityId = EntityId.readEntityId(bb);
 	}
 	
-	public GUID_t(byte[] bytes) {
+	public Guid(byte[] bytes) {
 		if (bytes == null || bytes.length != 16) {
 			throw new IllegalArgumentException("Length of GUID_t must be 16");
 		}
 		
 		byte[] prefixBytes = new byte[12];
 		System.arraycopy(bytes, 0, prefixBytes, 0, 12);
-		this.prefix = new GuidPrefix_t(prefixBytes);
+		this.prefix = new GuidPrefix(prefixBytes);
 		
 		byte[] entityBytes = new byte[3];
 		System.arraycopy(bytes, 12, entityBytes, 0, 3);
 		byte entityKind = bytes[15];
 		
-		this.entityId = EntityId_t.readEntityId(entityBytes, entityKind);
+		this.entityId = EntityId.readEntityId(entityBytes, entityKind);
 	}
 
 	@Override
 	public boolean equals(Object other) {
-		if (other instanceof GUID_t) {
-			GUID_t o = (GUID_t) other;
+		if (other instanceof Guid) {
+			Guid o = (Guid) other;
 			return o != null && prefix.equals(o.prefix) && entityId.equals(o.entityId);	
 		}
 		return false;

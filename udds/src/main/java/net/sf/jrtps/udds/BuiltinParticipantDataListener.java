@@ -15,10 +15,10 @@ import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.types.Duration_t;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.Duration;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,10 +33,10 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 	private static final Logger log = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
 	private RTPSParticipant participant;
 
-	private final HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
+	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
 
 
-	BuiltinParticipantDataListener(RTPSParticipant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants) {
+	BuiltinParticipantDataListener(RTPSParticipant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.participant = p;
 		this.discoveredParticipants = discoveredParticipants;
 	}
@@ -57,8 +57,8 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
 					// First, make sure remote participant knows about us.
-					RTPSWriter<?> pw = participant.getWriter(EntityId_t.SPDP_BUILTIN_PARTICIPANT_WRITER);
-					pw.sendData(pd.getGuidPrefix(), EntityId_t.SPDP_BUILTIN_PARTICIPANT_READER, 0L);
+					RTPSWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
+					pw.sendData(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0L);
 
 					// Then, announce our builtin endpoints
 					handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
@@ -74,11 +74,11 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 	 * 
 	 * @param builtinEndpoints
 	 */
-	private void handleBuiltinEnpointSet(GuidPrefix_t prefix, int builtinEndpoints) {
+	private void handleBuiltinEnpointSet(GuidPrefix prefix, int builtinEndpoints) {
 		log.debug("handleBuiltinEndpointSet {}", builtinEndpoints);
 		QualityOfService sedpQoS = new QualityOfService();
 		try {
-			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration_t(0, 0)));
+			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
 		} catch (InconsistentPolicy e) {
 			log.error("Got InconsistentPolicy exception. This is an internal error", e);
 		}
@@ -87,35 +87,35 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 		
 		if (eps.hasPublicationDetector()) {
 			log.debug("Notifying remote publications reader of our publications");
-			RTPSWriter<?> pw = participant.getWriter(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+			RTPSWriter<?> pw = participant.getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 			
-			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
 			ReaderData rd = new ReaderData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
 			pw.addMatchedReader(rd);
 			
-			pw.sendData(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER, 0L);
+			pw.sendData(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, 0L);
 		}
 		if (eps.hasPublicationAnnouncer()) {
-			RTPSReader<?> pr = participant.getReader(EntityId_t.SEDP_BUILTIN_PUBLICATIONS_READER);
+			RTPSReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
 
-			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 			WriterData wd = new WriterData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
 			pr.addMatchedWriter(wd);
 		}
 		if (eps.hasSubscriptionDetector()) {
 			log.debug("Notifying remote subscriptions reader of our subscriptions");
-			RTPSWriter<?> sw = participant.getWriter(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+			RTPSWriter<?> sw = participant.getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 			
-			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 			ReaderData rd = new ReaderData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
 			sw.addMatchedReader(rd);
 			
-			sw.sendData(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
+			sw.sendData(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
 		}
 		if (eps.hasSubscriptionAnnouncer()) {
-			RTPSReader<?> pr = participant.getReader(EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+			RTPSReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 
-			GUID_t key = new GUID_t(prefix, EntityId_t.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 			WriterData wd = new WriterData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
 			pr.addMatchedWriter(wd);
 		}

@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.BuiltinEndpointSet_t;
+import net.sf.jrtps.types.BuiltinEndpointSet;
 
 /**
  * This Parameter identifies the kinds of built-in SEDP endpoints that are available in the Participant.
@@ -19,51 +19,51 @@ public class EndpointSet extends Parameter {
 	}
 	
 	public boolean hasParticipantAnnouncer() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER) != 0;
 	}
 	
 	public boolean hasParticipantDetector() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR) != 0;
 	}
 
 	public boolean hasPublicationAnnouncer() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER) != 0;
 	}
 	
 	public boolean hasPublicationDetector() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR) != 0;
 	}
 
 	public boolean hasSubscriptionAnnouncer() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER) != 0;
 	}
 	
 	public boolean hasSubscriptionDetector() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR) != 0;
 	}
 
 	public boolean hasParticipantProxyAnnouncer() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_ANNOUNCER) != 0;
 	}
 	
 	public boolean hasParticipantProxyDetector() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_PROXY_DETECTOR) != 0;
 	}
 
 	public boolean hasParticipantStateAnnouncer() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_ANNOUNCER) != 0;
 	}
 	
 	public boolean hasParticipantStateDetector() {
-		return (endpointSet &  BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR) != 0;
+		return (endpointSet &  BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR) != 0;
 	}
 	
 	public boolean hasParticipantMessageDataReader() {
-		return (endpointSet &  BuiltinEndpointSet_t.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) != 0;
 	}
 	
 	public boolean hasParticipantMessageDataWriter() {
-		return (endpointSet &  BuiltinEndpointSet_t.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) != 0;
+		return (endpointSet &  BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) != 0;
 	}
 
 	/**

@@ -9,7 +9,7 @@ import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
-import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,7 +49,7 @@ public class TopicData extends DiscoveredData {
 		resolveInconsistencies();
 	}
 
-	public TopicData(String typeName, String topicName, GUID_t key, QualityOfService qos) {
+	public TopicData(String typeName, String topicName, Guid key, QualityOfService qos) {
 		super(typeName, topicName, key, qos);
 	}
 }

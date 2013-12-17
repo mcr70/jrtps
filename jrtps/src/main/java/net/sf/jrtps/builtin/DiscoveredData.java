@@ -8,7 +8,7 @@ import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.InlineParameter;
 import net.sf.jrtps.message.parameter.QosPolicy;
-import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.Guid;
 
 public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
@@ -22,7 +22,7 @@ public class DiscoveredData {
 	// see table 9.10, 9.6.3.3 KeyHash.
 	// interpretation is, for builtin topics, key is 
 	//   guid_prefix(12) + builtin_topic_key(4), which is equal to prefix(12) + entityid(4), which is guid
-	protected GUID_t key;  
+	protected Guid key;  
 
 	
 	/**
@@ -41,7 +41,7 @@ public class DiscoveredData {
 	 * @param key guid of the remote entity, which acts as a key for topic
 	 * @param qos QualityOfService of discovered entity
 	 */
-	protected DiscoveredData(String typeName, String topicName, GUID_t key, QualityOfService qos) {
+	protected DiscoveredData(String typeName, String topicName, Guid key, QualityOfService qos) {
 		this.typeName = typeName;
 		this.topicName = topicName;
 		this.key = key;
@@ -110,7 +110,7 @@ public class DiscoveredData {
 	 * 
 	 * @return key as GUID_t
 	 */
-	public GUID_t getKey() {
+	public Guid getKey() {
 		return key;
 	}
 	
