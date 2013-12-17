@@ -184,6 +184,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param readersHighestSeqNum
 	 */
 	public void sendData(GuidPrefix targetPrefix, EntityId readerId, long readersHighestSeqNum) {
+		// TODO: This should not be public
 		Message m = new Message(getGuid().prefix);
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 

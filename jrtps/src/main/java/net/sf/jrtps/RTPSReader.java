@@ -70,6 +70,30 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	/**
+	 * Get the BuiltinEndpointSet ID of this RTPSReader.
+	 * 
+	 * @return 0, if this RTPSReader is not builtin endpoint
+	 */
+	public int endpointSetId() {
+		return getGuid().entityId.getEndpointSetId();
+	}
+
+	public void close() {
+		// TODO: No use for this
+	}
+
+	public void addMatchedWriter(WriterData writerData) {
+		writerProxies.put(writerData.getKey(), new WriterProxy(writerData));
+
+		log.info("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
+	}
+	public void removeMatchedWriter(WriterData writerData) {
+		log.info("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
+		
+		writerProxies.remove(writerData.getKey());
+	}
+
+	/**
 	 * Handle incoming Data message.
 	 * 
 	 * @param sourcePrefix GuidPrefix of the remote participant sending Data message 
@@ -173,29 +197,6 @@ public class RTPSReader<T> extends Endpoint {
 		return wp;
 	}
 
-	/**
-	 * Get the BuiltinEndpointSet ID of this RTPSReader.
-	 * 
-	 * @return 0, if this RTPSReader is not builtin endpoint
-	 */
-	public int endpointSetId() {
-		return getGuid().entityId.getEndpointSetId();
-	}
-
-	public void close() {
-		// TODO: No use for this
-	}
-
-	public void addMatchedWriter(WriterData writerData) {
-		writerProxies.put(writerData.getKey(), new WriterProxy(writerData));
-
-		log.info("[{}] Adding matchedWriter {}", getGuid().entityId, writerData);
-	}
-	public void removeMatchedWriter(WriterData writerData) {
-		log.info("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
-		
-		writerProxies.remove(writerData.getKey());
-	}
 
 
 	/**
