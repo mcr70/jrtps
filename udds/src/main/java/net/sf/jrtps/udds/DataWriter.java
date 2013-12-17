@@ -3,7 +3,6 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.RTPSWriter;
 
 
@@ -28,8 +27,8 @@ public class DataWriter<T> extends Entity {
 	 * 
 	 * @param topicName
 	 */
-	DataWriter(String topicName, RTPSWriter<T> writer) {
-		super(topicName);
+	DataWriter(RTPSWriter<T> writer) {
+		super(writer.getTopicName());
 		this.rtps_writer = writer;
 	}
 	

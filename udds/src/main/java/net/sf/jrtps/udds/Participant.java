@@ -84,7 +84,7 @@ public class Participant {
 		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, qos);
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
-		return new DataReader<T>(topicName, rtps_reader);
+		return new DataReader<T>(rtps_reader);
 	} 
 
 	
@@ -118,7 +118,7 @@ public class Participant {
 		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m, qos);
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 		
-		return new DataWriter<T>(topicName, rtps_writer);
+		return new DataWriter<T>(rtps_writer);
 	}
 
 	

@@ -24,8 +24,8 @@ public class DataReader<T> extends Entity {
 	 * Package access. This class is only instantiated by Participant class.
 	 * @param topicName
 	 */
-	DataReader(String topicName, RTPSReader<T> reader) {
-		super(topicName);
+	DataReader(RTPSReader<T> reader) {
+		super(reader.getTopicName());
 		this.rtps_reader = reader;
 	}
 	
