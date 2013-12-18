@@ -138,11 +138,14 @@ public class Participant {
 		}
 
 		// ----  Create a Writers for SEDP  ---------
-		rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
+		RTPSWriter<WriterData> pubWriter = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
 				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
-		rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
+		writers.add(new DataWriter<>(pubWriter));
+		
+		RTPSWriter<ReaderData> subWriter = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
 				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
-
+		writers.add(new DataWriter<>(subWriter));
+		
 		// NOTE: It is not mandatory to publish TopicData
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
