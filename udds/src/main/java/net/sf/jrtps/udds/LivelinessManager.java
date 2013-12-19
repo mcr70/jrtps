@@ -134,13 +134,6 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		log.debug("Starting liveliness thread");
 		participant.addRunnable(this);
 	}
-	
-	/**
-	 * Stops livelinessThread.
-	 */
-	void stop() {
-		log.debug("Stopping LivelinessManager");
-	}
 
 	@Override
 	public void run() {
