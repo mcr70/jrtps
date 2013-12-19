@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 class BuiltinWriterDataListener implements SampleListener<WriterData>{
 	private static final Logger log = LoggerFactory.getLogger(BuiltinWriterDataListener.class);
 
-	private final RTPSParticipant participant;
+	private final Participant participant;
 	private HashMap<Guid, WriterData> discoveredWriters;
 
-	BuiltinWriterDataListener(RTPSParticipant p, HashMap<Guid, WriterData> discoveredWriters) {
+	BuiltinWriterDataListener(Participant p, HashMap<Guid, WriterData> discoveredWriters) {
 		this.participant = p;
 		this.discoveredWriters = discoveredWriters;
 	}
@@ -35,19 +35,19 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 				log.debug("Discovered a new writer {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
 			}
 
-			List<RTPSReader<?>> readers = participant.getReadersForTopic(writerData.getTopicName());
-			for (RTPSReader<?> r : readers) {
+			List<DataReader<?>> readers = participant.getReadersForTopic(writerData.getTopicName());
+			for (DataReader<?> r : readers) {
 				if (r != null) {
 					if (wdSample.isDisposed()) {
-						r.removeMatchedWriter(writerData);
+						r.getRTPSReader().removeMatchedWriter(writerData);
 					}
 					else {
 						QualityOfService offered = writerData.getQualityOfService();
-						QualityOfService requested = r.getQualityOfService();
-						log.debug("Check for compatible QoS for {} and {}", writerData.getKey().entityId, r.getGuid().entityId);
+						QualityOfService requested = r.getRTPSReader().getQualityOfService();
+						log.debug("Check for compatible QoS for {} and {}", writerData.getKey().entityId, r.getRTPSReader().getGuid().entityId);
 						
 						if (offered.isCompatibleWith(requested)) {
-							r.addMatchedWriter(writerData);
+							r.getRTPSReader().addMatchedWriter(writerData);
 						}
 						else {
 							log.warn("Discovered writer had incompatible QoS with reader. {}, {}", writerData, r);
