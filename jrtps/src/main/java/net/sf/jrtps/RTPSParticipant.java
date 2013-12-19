@@ -433,13 +433,4 @@ public class RTPSParticipant {
 		log.warn("Failed to find Writer for writer {} or matching reader {}",  writerId, readerId);
 		return null;
 	}
-
-
-	/**
-	 * Adds a runnable to be run with this participants thread pool.
-	 * @param runnable
-	 */
-	public void addRunnable(Runnable runnable) {
-		threadPoolExecutor.execute(runnable);
-	}
 }
