@@ -99,6 +99,21 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 	}
 
+
+	public void notifyReader(Guid guid) {
+		ReaderProxy proxy = matchedReaders.get(guid);
+
+		// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
+		if (proxy.isReliable()) {
+			sendHeartbeat(guid.prefix, guid.entityId);
+		}
+		else {
+			sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+		}
+	}
+	
+	
 	/**
 	 * Assert liveliness of this writer. Matched readers are notified via
 	 * Heartbeat message of the liveliness of this writer.

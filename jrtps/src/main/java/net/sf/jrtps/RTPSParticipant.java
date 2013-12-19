@@ -13,9 +13,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.builtin.TopicData;
-import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.transport.UDPReceiver;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -45,13 +42,9 @@ public class RTPSParticipant {
 	 * all entities created by this participant. 
 	 */
 	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants =  new HashMap<>();
-	private final HashMap<Guid, ReaderData> discoveredReaders = new HashMap<>();
-	private final HashMap<Guid, WriterData> discoveredWriters = new HashMap<>();
-	@SuppressWarnings("unused")
-	private final HashMap<Guid, TopicData> discoveredTopics = new HashMap<>();
 	
 	/**
-	 * A map that stores network receivers for each locator we know. (For listening purposes)
+	 * A Set that stores network receivers for each locator we know. (For listening purposes)
 	 */
 	private Set<UDPReceiver> receivers = new HashSet<UDPReceiver>();
 
@@ -133,61 +126,36 @@ public class RTPSParticipant {
 	
 	
 	/**
-	 * Each user entity is assigned a unique number, this field is used for that purpose
-	 */
-	private volatile int userEntityIdx = 1;
-
-	private LinkedBlockingQueue<byte[]> queue;
-
-	
-	/**
-	 * Creates an user defined writer. Topic name is the simple name of Class given.
-	 * and type name is the fully qualified class name of the class given. QualityOfService
-	 * is default.
+	 * Creates a new RTPSReader.
 	 * 
-	 * @param c
-	 * @param marshaller
-	 * @return RTPSWriter
-	 * @see java.lang.Class#getSimpleName()
-	 * @see java.lang.Class#getName()
-	 */
-	public <T> RTPSWriter<T> createWriter(Class<T> c, Marshaller<?> marshaller) {
-		return createWriter(c.getSimpleName(), c, c.getName(), marshaller, new QualityOfService());
-	}
-	
-	/**
-	 * Creates an user defined entity with given topic and type names.
-	 * 
-	 * @param topicName
-	 * @param type
-	 * @param typeName
+	 * @param eId EntityId of the reader
+	 * @param topicName Name of the topic
+	 * @param typeName Type name associated with topic
 	 * @param marshaller
 	 * @param qos QualityOfService
-	 * @return RTPSWriter
+	 * 
+	 * @return RTPSReader
 	 */
-	public <T>RTPSWriter<T> createWriter(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
-		int myIdx = userEntityIdx++;
-		byte[] myKey = new byte[3];
-		myKey[0] = (byte) (myIdx & 0xff);
-		myKey[1] = (byte) (myIdx >> 8 & 0xff);
-		myKey[2] = (byte) (myIdx >> 16 & 0xff);
-		
-		int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
-		if (!marshaller.hasKey(type)) {
-			kind = 0x03; // User defined writer, no key
-		}
-		
-		return createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
+	public <T> RTPSReader<T> createReader(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, 
+			QualityOfService qos) {
+		RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, qos, config);
+		reader.setDiscoveredParticipants(discoveredParticipants);
+
+		readerEndpoints.add(reader);
+
+		return reader;
 	}
+
 
 	/**
 	 * Creates a new RTPSWriter.
 	 * 
-	 * @param eId
-	 * @param topicName
-	 * @param typeName
+	 * @param eId EntityId of the reader
+	 * @param topicName Name of the topic
+	 * @param typeName Type name associated with topic
 	 * @param marshaller
-	 * @param qos
+	 * @param qos QualityOfService
+	 *
 	 * @return RTPSWriter
 	 */
 	public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
@@ -196,11 +164,6 @@ public class RTPSParticipant {
 
 		writerEndpoints.add(writer);
 
-		@SuppressWarnings("unchecked")
-		RTPSWriter<WriterData> pw = (RTPSWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
-		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getGuid(), qos);
-		pw.write(wd);
-				
 		return writer;
 	}
 
@@ -251,57 +214,6 @@ public class RTPSParticipant {
 		return false;
 	}
 	
-	
-	/**
-	 * Creates a new RTPSReader.
-	 * 
-	 * @param eId EntityId of the reader
-	 * @param topicName Name of the topic
-	 * @param typeName Type name associated with topic
-	 * @param marshaller
-	 * @param qos QualityOfService
-	 * 
-	 * @return RTPSReader
-	 */
-	public <T> RTPSReader<T> createReader(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, 
-			QualityOfService qos) {
-		RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, qos, config);
-		reader.setDiscoveredParticipants(discoveredParticipants);
-
-		readerEndpoints.add(reader);
-
-		@SuppressWarnings("unchecked")
-		RTPSWriter<ReaderData> sw = (RTPSWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
-		ReaderData rd = new ReaderData(topicName, typeName, reader.getGuid(), qos);
-		sw.write(rd);
-
-		return reader;
-	}
-
-
-
-
-	public List<RTPSWriter<?>> getWritersForTopic(String topicName) {
-		List<RTPSWriter<?>> writers = new LinkedList<>();
-		for (RTPSWriter<?> w : writerEndpoints) {
-			if (w.getTopicName().equals(topicName)) {
-				writers.add(w);
-			}
-		}
-
-		return writers;
-	}
-
-	public List<RTPSReader<?>> getReadersForTopic(String topicName) {
-		List<RTPSReader<?>> readers = new LinkedList<>();
-		for (RTPSReader<?> r : readerEndpoints) {
-			if (r.getTopicName().equals(topicName)) {
-				readers.add(r);
-			}
-		}
-
-		return readers;
-	}
 
 
 
@@ -310,7 +222,7 @@ public class RTPSParticipant {
 	 * @param readerId
 	 * @return RTPSReader
 	 */
-	public RTPSReader<?> getReader(EntityId readerId) {
+	private RTPSReader<?> getReader(EntityId readerId) {
 		for (RTPSReader<?> reader : readerEndpoints) {
 			if (reader.getGuid().entityId.equals(readerId)) {
 				return reader;
@@ -361,7 +273,7 @@ public class RTPSParticipant {
 	 * @param writerId
 	 * @return RTPSWriter
 	 */
-	public RTPSWriter<?> getWriter(EntityId writerId) {
+	private RTPSWriter<?> getWriter(EntityId writerId) {
 		for (RTPSWriter<?> writer : writerEndpoints) {
 			if (writer.getGuid().entityId.equals(writerId)) {
 				return writer;

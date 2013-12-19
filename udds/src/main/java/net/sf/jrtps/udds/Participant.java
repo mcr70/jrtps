@@ -44,22 +44,22 @@ import org.slf4j.LoggerFactory;
  */
 public class Participant {
 	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
-	
+
 	private final ThreadPoolExecutor threadPoolExecutor;
 
 	private final Configuration config = new Configuration();
 	private Marshaller<?> defaultMarshaller;
 	private final HashMap<String, Marshaller<?>> marshallers = new HashMap<>();
 	private final RTPSParticipant rtps_participant;
-	
+
 	private List<DataReader> readers = new LinkedList<>();
 	private List<DataWriter> writers = new LinkedList<>();
-	
+
 	/**
 	 * Each user entity is assigned a unique number, this field is used for that purpose
 	 */
 	private volatile int userEntityIdx = 1;
-	
+
 	/**
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
@@ -67,8 +67,8 @@ public class Participant {
 	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants =  new HashMap<>();
 	private final HashMap<Guid, ReaderData> discoveredReaders = new HashMap<>();
 	private final HashMap<Guid, WriterData> discoveredWriters = new HashMap<>();
-	
-	
+
+
 	private final LivelinessManager livelinessManager;
 
 	private Locator meta_mcLoc;
@@ -78,7 +78,7 @@ public class Participant {
 	private Locator mcLoc;
 
 	private Locator ucLoc;
-	
+
 
 	/**
 	 * Create a Participant with domainId 0 and participantId 0.
@@ -87,7 +87,7 @@ public class Participant {
 	public Participant() throws SocketException {
 		this(0, 0);
 	} 
-	
+
 	/**
 	 * Create a Participant with given domainId and participantId.
 	 * Participants with same domainId are able to communicate with each other.
@@ -114,32 +114,28 @@ public class Participant {
 		meta_ucLoc = Locator.defaultMetatrafficUnicastLocator(domainId, participantId);
 		mcLoc = Locator.defaultUserMulticastLocator(domainId);
 		ucLoc = Locator.defaultUserUnicastLocator(domainId, participantId);
-		
+
 		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor,
 				meta_mcLoc, meta_ucLoc, mcLoc, ucLoc);
 		rtps_participant.start();
-		
-		createBuiltinEntities();
-		
+
 		this.livelinessManager = new LivelinessManager(this);
+		createBuiltinEntities();
+
 		livelinessManager.start();
 	}
-	
-	
+
+
 	private void createBuiltinEntities() {
 		// ----  Builtin marshallers  ---------------
 		setMarshaller(ParticipantData.class.getName(), new ParticipantDataMarshaller());
 		setMarshaller(WriterData.class.getName(), new WriterDataMarshaller());
 		setMarshaller(ReaderData.class.getName(), new ReaderDataMarshaller());
 		setMarshaller(TopicData.class.getName(), new TopicDataMarshaller());
-		
-		ParticipantDataMarshaller pdm = new ParticipantDataMarshaller();
-		WriterDataMarshaller wdm = new WriterDataMarshaller();		
-		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
-		TopicDataMarshaller tdm = new TopicDataMarshaller();		
-		
+
 		QualityOfService spdpQoS = new QualityOfService();
 		QualityOfService sedpQoS = new QualityOfService();
+
 		try {
 			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
 		} catch (InconsistentPolicy e) {
@@ -147,51 +143,54 @@ public class Participant {
 		}
 
 		// ----  Create a Writers for SEDP  ---------
-		RTPSWriter<WriterData> pubWriter = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, 
-				WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
-		writers.add(new DataWriter<>(pubWriter));
-		
-		RTPSWriter<ReaderData> subWriter = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, 
-				ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
-		writers.add(new DataWriter<>(subWriter));
-		
+		DataWriter<WriterData> wdWriter = 
+				createDataWriter(WriterData.BUILTIN_TOPIC_NAME, WriterData.class, WriterData.class.getName(), sedpQoS);
+		writers.add(wdWriter);
+
+		DataWriter<ReaderData> rdWriter = 
+				createDataWriter(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class, ReaderData.class.getName(), sedpQoS);
+		writers.add(rdWriter);
+
+
 		// NOTE: It is not mandatory to publish TopicData
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
 		// ----  Create a Reader for SPDP  -----------------------
 		DataReader<ParticipantData> pdReader = 
 				createDataReader(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
-		pdReader.addListener(new BuiltinParticipantDataListener(rtps_participant, discoveredParticipants));
+		pdReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 		readers.add(pdReader);
 
 		// ----  Create a Readers for SEDP  ---------
 		DataReader<WriterData> wdReader = 
 				createDataReader(WriterData.BUILTIN_TOPIC_NAME, WriterData.class, WriterData.class.getName(), sedpQoS);
-		wdReader.addListener(new BuiltinWriterDataListener(rtps_participant, discoveredWriters));
+		wdReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
 		readers.add(wdReader);
 
 		DataReader<ReaderData> rdReader = 
 				createDataReader(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class, ReaderData.class.getName(), sedpQoS);
-		rdReader.addListener(new BuiltinReaderDataListener(rtps_participant, discoveredParticipants, discoveredReaders));
+		rdReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
 		readers.add(rdReader);
-		
+
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		DataReader<TopicData> tReader = 
 				createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class, TopicData.class.getName(), sedpQoS);
-		tReader.addListener(new BuiltinTopicDataListener(rtps_participant));
+		tReader.addListener(new BuiltinTopicDataListener(this));
 		readers.add(tReader);
 
 
 		// ----  Create a Writer for SPDP  -----------------------
-		RTPSWriter<ParticipantData> spdp_w = 
-				rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
-		writers.add(new DataWriter<>(spdp_w));
+		DataWriter<ParticipantData> pdWriter = 
+				createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
+//		RTPSWriter<ParticipantData> spdp_w = 
+//				rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, 
+//						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
+		//writers.add(new DataWriter<>(pdWriter));
 
 		ParticipantData pd = createSPDPParticipantData();
-		spdp_w.write(pd);
-		
-		createSPDPResender(config.getSPDPResendPeriod(), spdp_w);
+		pdWriter.write(pd);
+
+		createSPDPResender(config.getSPDPResendPeriod(), pdWriter.getRTPSWriter());
 	}
 
 	/**
@@ -219,6 +218,8 @@ public class Participant {
 	 * @return a DataReader<T>
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
+		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
+		
 		Marshaller<?> m = getMarshaller(typeName);
 		RTPSReader<T> rtps_reader = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
@@ -242,7 +243,7 @@ public class Participant {
 			myKey[0] = (byte) (myIdx & 0xff);
 			myKey[1] = (byte) (myIdx >> 8 & 0xff);
 			myKey[2] = (byte) (myIdx >> 16 & 0xff);
-			
+
 			int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
 			if (!m.hasKey(type)) {
 				kind = 0x04; // User defined reader, no key
@@ -250,16 +251,19 @@ public class Participant {
 
 			rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, m, qos);			
 		}
-		
-		DataReader<T> dr = new DataReader<T>(rtps_reader);
-		readers.add(dr);
-		
-		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
-		
-		return dr;
+
+		DataReader<T> reader = new DataReader<T>(rtps_reader);
+		readers.add(reader);
+
+		@SuppressWarnings("unchecked")
+		DataWriter<ReaderData> sw = (DataWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
+		ReaderData rd = new ReaderData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
+		sw.write(rd);
+
+		return reader;
 	} 
 
-	
+
 	/**
 	 * Creates a new DataWriter of given type. DataWriter is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
@@ -275,7 +279,7 @@ public class Participant {
 	public <T> DataWriter<T> createDataWriter(Class<T> c, QualityOfService qos) {
 		return createDataWriter(c.getSimpleName(), c, c.getName(), qos);
 	} 
-	
+
 	/**
 	 * Create DataWriter with given topicName and typeName.
 	 * 
@@ -286,19 +290,54 @@ public class Participant {
 	 * @return a DataWriter<T>
 	 */	
 	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
-		Marshaller<?> m = getMarshaller(typeName);
-		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(topicName, type, typeName, m, qos);
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
+
+		Marshaller<?> m = getMarshaller(typeName);
+
+		RTPSWriter<T> rtps_writer = null;
+		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, typeName, m, qos);
+		}
+		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, typeName, m, qos);
+		}
+		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, typeName, m, qos);
+		}
+		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, typeName, m, qos);
+		}
+		else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, typeName, m, qos);
+		}
+		else {
+			int myIdx = userEntityIdx++;
+			byte[] myKey = new byte[3];
+			myKey[0] = (byte) (myIdx & 0xff);
+			myKey[1] = (byte) (myIdx >> 8 & 0xff);
+			myKey[2] = (byte) (myIdx >> 16 & 0xff);
+
+			int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
+			if (!m.hasKey(type)) {
+				kind = 0x03; // User defined writer, no key
+			}
+
+			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, m, qos);
+		}
 		
 		DataWriter<T> writer = new DataWriter<T>(rtps_writer);
 		writers.add(writer);
-		
 		livelinessManager.registerWriter(writer);
+
+		@SuppressWarnings("unchecked")
+		DataWriter<WriterData> pw = (DataWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
+		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
+		pw.write(wd);
 		
 		return writer;
 	}
 
-	
+
 	/**
 	 * Sets the default Marshaller. Default marshaller is used if no other Marshaller 
 	 * could not be used.
@@ -308,7 +347,7 @@ public class Participant {
 	public void setDefaultMarshaller(Marshaller<?> m) {
 		defaultMarshaller = m;
 	}
-	
+
 	/**
 	 * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is
 	 * preferred over default Marshaller.
@@ -319,7 +358,7 @@ public class Participant {
 	public void setMarshaller(String typeName, Marshaller<?> m) {
 		marshallers.put(typeName, m);
 	}
-	
+
 	/**
 	 * Asserts liveliness of RTPSWriters, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
 	 * 
@@ -328,7 +367,7 @@ public class Participant {
 	public void assertLiveliness() {
 		livelinessManager.assertLiveliness();
 	}
-	
+
 	/**
 	 * Close this participant.
 	 */
@@ -357,7 +396,7 @@ public class Participant {
 		if (m == null) {
 			m = defaultMarshaller;
 		}
-		
+
 		return m;
 	}
 
@@ -376,7 +415,7 @@ public class Participant {
 
 		return pd;
 	}
-	
+
 	private int createEndpointSet() {
 		int eps = 0;
 		for (DataReader dr : readers) {
@@ -393,7 +432,7 @@ public class Participant {
 
 	private void createSPDPResender(final Duration period, final RTPSWriter<ParticipantData> spdp_w) {
 		Runnable resendRunnable = new Runnable() {
-		    @Override
+			@Override
 			public void run() {
 				boolean running = true;
 				while (running) {
@@ -409,7 +448,7 @@ public class Participant {
 
 		logger.debug("[{}] Starting resend thread with period {}", 
 				rtps_participant.getGuid().entityId, period);		
-		
+
 		threadPoolExecutor.execute(resendRunnable);
 	}
 
@@ -421,4 +460,70 @@ public class Participant {
 	void addRunnable(Runnable runnable) {
 		threadPoolExecutor.execute(runnable);
 	}
+
+
+	/**
+	 * Finds a Reader with given entity id.
+	 * @param readerId
+	 * @return DataReader
+	 */
+	DataReader<?> getReader(EntityId readerId) {
+		for (DataReader<?> reader : readers) {
+			if (reader.getRTPSReader().getGuid().entityId.equals(readerId)) {
+				return reader;
+			}
+		}
+
+		return null;
+	}
+	
+	/**
+	 * Finds a Writer with given entity id.
+	 * @param writerId
+	 * @return DataWriter
+	 */
+	DataWriter<?> getWriter(EntityId writerId) {
+		for (DataWriter<?> writer : writers) {
+			if (writer.getRTPSWriter().getGuid().entityId.equals(writerId)) {
+				return writer;
+			}
+		}
+
+		logger.warn("Could not find a writer with entityId {}", writerId);
+		return null;
+	}
+
+	/**
+	 * Get local writers that write to a given topic.
+	 * 
+	 * @param topicName
+	 * @return a List of DataWriters, or empty List if no writers were found for given topic
+	 */
+	List<DataWriter<?>> getWritersForTopic(String topicName) {
+		List<DataWriter<?>> __writers = new LinkedList<>();
+		for (DataWriter<?> w : writers) {
+			if (w.getTopicName().equals(topicName)) {
+				__writers.add(w);
+			}
+		}
+
+		return __writers;
+	}
+	
+	/**
+	 * Get local readers that read from a given topic.
+	 * 
+	 * @param topicName
+	 * @return a List of DataReaderss, or empty List if no readers were found for given topic
+	 */
+	List<DataReader<?>> getReadersForTopic(String topicName) {
+		List<DataReader<?>> __readers = new LinkedList<>();
+		for (DataReader<?> r : readers) {
+			if (r.getTopicName().equals(topicName)) {
+				__readers.add(r);
+			}
+		}
+
+		return __readers;
+	}	
 }
