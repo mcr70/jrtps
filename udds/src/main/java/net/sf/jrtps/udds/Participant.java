@@ -380,4 +380,12 @@ public class Participant {
 		threadPoolExecutor.execute(resendRunnable);
 	}
 
+
+	/**
+	 * Adds a runnable to be run with this participants thread pool.
+	 * @param runnable
+	 */
+	void addRunnable(Runnable runnable) {
+		threadPoolExecutor.execute(runnable);
+	}
 }

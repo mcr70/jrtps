@@ -132,7 +132,7 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		reader.addListener(this);
 
 		log.debug("Starting liveliness thread");
-		participant.getRTPSParticipant().addRunnable(this);
+		participant.addRunnable(this);
 	}
 	
 	/**
