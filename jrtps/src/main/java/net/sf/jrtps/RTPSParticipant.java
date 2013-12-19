@@ -204,44 +204,6 @@ public class RTPSParticipant {
 		return writer;
 	}
 
-	/**
-	 * Creates an user defined reader. Topic name is the simple name of Class given.
-	 * and type name is the fully qualified class name of the class given.
-	 * 
-	 * @param c
-	 * @param marshaller
-	 * @return RTPSReader
-	 * @see java.lang.Class#getSimpleName()
-	 * @see java.lang.Class#getName()
-	 */
-	public <T> RTPSReader<T> createReader(Class<T> c, Marshaller<?> marshaller) {
-		return createReader(c.getSimpleName(), c, c.getName(), marshaller, new QualityOfService());
-	}
-	
-	/**
-	 * Creates an user defined reader with given topic and type names.
-	 * 
-	 * @param topicName
-	 * @param type
-	 * @param typeName
-	 * @param marshaller
-	 * @return RTPSReader
-	 */
-	public <T> RTPSReader<T> createReader(String topicName, Class<T> type, String typeName, Marshaller<?> marshaller, 
-			QualityOfService qos) {
-		int myIdx = userEntityIdx++;
-		byte[] myKey = new byte[3];
-		myKey[0] = (byte) (myIdx & 0xff);
-		myKey[1] = (byte) (myIdx >> 8 & 0xff);
-		myKey[2] = (byte) (myIdx >> 16 & 0xff);
-		
-		int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
-		if (!marshaller.hasKey(type)) {
-			kind = 0x04; // User defined reader, no key
-		}
-		
-		return createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, marshaller, qos);
-	}
 
 	/**
 	 * Close this RTPSParticipant. All the network listeners will be stopped 
@@ -293,11 +255,12 @@ public class RTPSParticipant {
 	/**
 	 * Creates a new RTPSReader.
 	 * 
-	 * @param eId
-	 * @param topicName
-	 * @param typeName
+	 * @param eId EntityId of the reader
+	 * @param topicName Name of the topic
+	 * @param typeName Type name associated with topic
 	 * @param marshaller
-	 * @param qos 
+	 * @param qos QualityOfService
+	 * 
 	 * @return RTPSReader
 	 */
 	public <T> RTPSReader<T> createReader(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, 

@@ -56,6 +56,11 @@ public class Participant {
 	private List<DataWriter> writers = new LinkedList<>();
 	
 	/**
+	 * Each user entity is assigned a unique number, this field is used for that purpose
+	 */
+	private volatile int userEntityIdx = 1;
+	
+	/**
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
 	 */
@@ -123,6 +128,11 @@ public class Participant {
 	
 	private void createBuiltinEntities() {
 		// ----  Builtin marshallers  ---------------
+		setMarshaller(ParticipantData.class.getName(), new ParticipantDataMarshaller());
+		setMarshaller(WriterData.class.getName(), new WriterDataMarshaller());
+		setMarshaller(ReaderData.class.getName(), new ReaderDataMarshaller());
+		setMarshaller(TopicData.class.getName(), new TopicDataMarshaller());
+		
 		ParticipantDataMarshaller pdm = new ParticipantDataMarshaller();
 		WriterDataMarshaller wdm = new WriterDataMarshaller();		
 		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
@@ -148,37 +158,29 @@ public class Participant {
 		// NOTE: It is not mandatory to publish TopicData
 		// createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
-
 		// ----  Create a Reader for SPDP  -----------------------
-		RTPSReader<ParticipantData> rtps_partReader = 
-				rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 
-						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
-		DataReader<ParticipantData> partReader = new DataReader<>(rtps_partReader);
-		partReader.addListener(new BuiltinParticipantDataListener(rtps_participant, discoveredParticipants));
-		readers.add(partReader);
+		DataReader<ParticipantData> pdReader = 
+				createDataReader(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
+		pdReader.addListener(new BuiltinParticipantDataListener(rtps_participant, discoveredParticipants));
+		readers.add(pdReader);
 
 		// ----  Create a Readers for SEDP  ---------
-		RTPSReader<WriterData> rtps_pubReader = 
-				rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, 
-						WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
-		DataReader<WriterData> pubReader = new DataReader<>(rtps_pubReader);
-		pubReader.addListener(new BuiltinWriterDataListener(rtps_participant, discoveredWriters));
-		readers.add(pubReader);
-		
-		RTPSReader<ReaderData> rtps_subReader = 
-				rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
-						ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
-		DataReader<ReaderData> subReader = new DataReader<>(rtps_subReader);
-		subReader.addListener(new BuiltinReaderDataListener(rtps_participant, discoveredParticipants, discoveredReaders));
-		readers.add(subReader);
+		DataReader<WriterData> wdReader = 
+				createDataReader(WriterData.BUILTIN_TOPIC_NAME, WriterData.class, WriterData.class.getName(), sedpQoS);
+		wdReader.addListener(new BuiltinWriterDataListener(rtps_participant, discoveredWriters));
+		readers.add(wdReader);
+
+		DataReader<ReaderData> rdReader = 
+				createDataReader(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class, ReaderData.class.getName(), sedpQoS);
+		rdReader.addListener(new BuiltinReaderDataListener(rtps_participant, discoveredParticipants, discoveredReaders));
+		readers.add(rdReader);
 		
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
-		RTPSReader<TopicData> rtps_topicReader = 
-				rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, 
-						TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, sedpQoS);
-		DataReader<TopicData> topicReader = new DataReader<>(rtps_topicReader);
-		topicReader.addListener(new BuiltinTopicDataListener(rtps_participant));
-		readers.add(topicReader);
+		DataReader<TopicData> tReader = 
+				createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class, TopicData.class.getName(), sedpQoS);
+		tReader.addListener(new BuiltinTopicDataListener(rtps_participant));
+		readers.add(tReader);
+
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = 
@@ -235,7 +237,18 @@ public class Participant {
 			rtps_reader = rtps_participant.createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, topicName, typeName, m, qos);
 		}
 		else {
-			rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, qos);			
+			int myIdx = userEntityIdx++;
+			byte[] myKey = new byte[3];
+			myKey[0] = (byte) (myIdx & 0xff);
+			myKey[1] = (byte) (myIdx >> 8 & 0xff);
+			myKey[2] = (byte) (myIdx >> 16 & 0xff);
+			
+			int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
+			if (!m.hasKey(type)) {
+				kind = 0x04; // User defined reader, no key
+			}
+
+			rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, m, qos);			
 		}
 		
 		DataReader<T> dr = new DataReader<T>(rtps_reader);
