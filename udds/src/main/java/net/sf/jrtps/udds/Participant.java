@@ -17,6 +17,7 @@ import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
+import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.builtin.ReaderDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
@@ -126,8 +127,6 @@ public class Participant {
 		WriterDataMarshaller wdm = new WriterDataMarshaller();		
 		ReaderDataMarshaller rdm = new ReaderDataMarshaller();
 		TopicDataMarshaller tdm = new TopicDataMarshaller();		
-
-		//livelinessManager = new LivelinessManager(this);
 		
 		QualityOfService spdpQoS = new QualityOfService();
 		QualityOfService sedpQoS = new QualityOfService();
@@ -151,31 +150,35 @@ public class Participant {
 
 
 		// ----  Create a Reader for SPDP  -----------------------
-		RTPSReader<ParticipantData> partReader = 
+		RTPSReader<ParticipantData> rtps_partReader = 
 				rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 
 						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
+		DataReader<ParticipantData> partReader = new DataReader<>(rtps_partReader);
 		partReader.addListener(new BuiltinParticipantDataListener(rtps_participant, discoveredParticipants));
-		readers.add(new DataReader<>(partReader));
+		readers.add(partReader);
 
 		// ----  Create a Readers for SEDP  ---------
-		RTPSReader<WriterData> pubReader = 
+		RTPSReader<WriterData> rtps_pubReader = 
 				rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, 
 						WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), wdm, sedpQoS);
+		DataReader<WriterData> pubReader = new DataReader<>(rtps_pubReader);
 		pubReader.addListener(new BuiltinWriterDataListener(rtps_participant, discoveredWriters));
-		readers.add(new DataReader<>(pubReader));
+		readers.add(pubReader);
 		
-		RTPSReader<ReaderData> subReader = 
+		RTPSReader<ReaderData> rtps_subReader = 
 				rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 
 						ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), rdm, sedpQoS);
+		DataReader<ReaderData> subReader = new DataReader<>(rtps_subReader);
 		subReader.addListener(new BuiltinReaderDataListener(rtps_participant, discoveredParticipants, discoveredReaders));
-		readers.add(new DataReader<>(subReader));
+		readers.add(subReader);
 		
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
-		RTPSReader<TopicData> topicReader = 
+		RTPSReader<TopicData> rtps_topicReader = 
 				rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, 
 						TopicData.BUILTIN_TOPIC_NAME, TopicData.class.getName(), tdm, sedpQoS);
+		DataReader<TopicData> topicReader = new DataReader<>(rtps_topicReader);
 		topicReader.addListener(new BuiltinTopicDataListener(rtps_participant));
-		readers.add(new DataReader<>(topicReader));
+		readers.add(topicReader);
 
 		// ----  Create a Writer for SPDP  -----------------------
 		RTPSWriter<ParticipantData> spdp_w = 
@@ -185,8 +188,8 @@ public class Participant {
 
 		ParticipantData pd = createSPDPParticipantData();
 		spdp_w.write(pd);
+		
 		createSPDPResender(config.getSPDPResendPeriod(), spdp_w);
-
 	}
 
 	/**
@@ -215,7 +218,25 @@ public class Participant {
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		Marshaller<?> m = getMarshaller(typeName);
-		RTPSReader<T> rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, qos);
+		RTPSReader<T> rtps_reader = null;
+		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, typeName, m, qos);
+		}
+		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, topicName, typeName, m, qos);
+		}
+		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, topicName, typeName, m, qos);
+		}
+		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_reader = rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, topicName, typeName, m, qos);
+		}
+		else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			rtps_reader = rtps_participant.createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, topicName, typeName, m, qos);
+		}
+		else {
+			rtps_reader = rtps_participant.createReader(topicName, type, typeName, m, qos);			
+		}
 		
 		DataReader<T> dr = new DataReader<T>(rtps_reader);
 		readers.add(dr);
@@ -300,7 +321,6 @@ public class Participant {
 	 */
 	public void close() {
 		threadPoolExecutor.shutdown();
-
 		rtps_participant.close();
 
 		try {
