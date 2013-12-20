@@ -105,10 +105,10 @@ public class DiscoveredData {
 	}
 
 	/**
-	 * Gets the GUID_t of the entity represented by this DiscoveredData.
-	 * GUID_t is formed from the PID_KEY_HASH parameter.
+	 * Gets the Guid of the entity represented by this DiscoveredData.
+	 * Guid is formed from the PID_KEY_HASH parameter.
 	 * 
-	 * @return key as GUID_t
+	 * @return key as Guid
 	 */
 	public Guid getKey() {
 		return key;

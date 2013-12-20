@@ -27,8 +27,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSWriter implements RTPS writer endpoint.
- * 
+ * RTPSWriter implements RTPS writer endpoint. 
+ * RTPSWriter does not keep track of remote readers on its own. It is expected that DDS implementations 
+ * explicitly call addMatchedReader(ReaderData) and removeMatchedReader(ReaderData). 
+ *  
  * @author mcr70
  *
  */
@@ -112,8 +114,8 @@ public class RTPSWriter<T> extends Endpoint {
 			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 		}
 	}
-	
-	
+
+
 	/**
 	 * Assert liveliness of this writer. Matched readers are notified via
 	 * Heartbeat message of the liveliness of this writer.
@@ -133,12 +135,19 @@ public class RTPSWriter<T> extends Endpoint {
 		writer_cache.clear();
 	}
 
-
+	/**
+	 * Remove a matched reader.
+	 * @param readerData
+	 */
 	public void removeMatchedReader(ReaderData readerData) {
 		log.info("[{}] Removing matchedReader {}", getGuid().entityId, readerData);
 		matchedReaders.remove(readerData);
 	}
 
+	/**
+	 * Add a matched reader.
+	 * @param readerData
+	 */
 	public void addMatchedReader(ReaderData readerData) {
 		log.info("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
 
@@ -181,12 +190,15 @@ public class RTPSWriter<T> extends Endpoint {
 		ReaderProxy proxy = matchedReaders.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
 			proxy.ackNackReceived(); // Marks reader as being alive
+
+			log.debug("[{}] Wait for nack response delay: {} ms", getGuid().entityId, nackResponseDelay);
+			getParticipant().waitFor(nackResponseDelay);
+
+			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
 		} // Note: proxy could be null
-
-		log.debug("[{}] Wait for nack response delay: {} ms", getGuid().entityId, nackResponseDelay);
-		getParticipant().waitFor(nackResponseDelay);
-
-		sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
+		else {
+			log.warn("[{}] Discarding AckNack from unknown reader {}", getGuid().entityId, ackNack.getReaderId());
+		}
 	}
 
 

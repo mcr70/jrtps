@@ -16,7 +16,7 @@ import net.sf.jrtps.types.Guid;
  */
 class WriterProxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
-	private Guid writerGuid;
+	private final Guid writerGuid;
 	private WriterData wd;
 	
 	private volatile long seqNumMax = 0;
@@ -25,12 +25,16 @@ class WriterProxy {
 	
 	WriterProxy(WriterData wd) {
 		this.wd = wd;
+		writerGuid = wd.getKey();
 	}
 	
 	WriterProxy(Guid writerGuid) {
 		this.writerGuid = writerGuid;
 	}
 	
+	Guid getGuid() {
+		return writerGuid;
+	}
 
 	long getSeqNumMax() {
 		return seqNumMax;

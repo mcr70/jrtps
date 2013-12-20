@@ -29,7 +29,7 @@ public class Guid {
 	
 	public Guid(byte[] bytes) {
 		if (bytes == null || bytes.length != 16) {
-			throw new IllegalArgumentException("Length of GUID_t must be 16");
+			throw new IllegalArgumentException("Length of Guid must be 16");
 		}
 		
 		byte[] prefixBytes = new byte[12];

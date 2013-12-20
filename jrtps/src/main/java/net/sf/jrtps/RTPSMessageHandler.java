@@ -70,7 +70,9 @@ class RTPSMessageHandler implements Runnable {
 			case DATA:
 				try {
 					RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
-					dataReceivers.add(r);
+					if (r != null) {
+						dataReceivers.add(r);
+					}
 				}
 				catch(IOException ioe) {
 					log.warn("Failed to handle data", ioe);
