@@ -2,8 +2,10 @@ package net.sf.jrtps.udds;
 
 import java.net.SocketException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -79,6 +81,8 @@ public class Participant {
 
 	private Locator ucLoc;
 
+	private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
+
 
 	/**
 	 * Create a Participant with domainId 0 and participantId 0.
@@ -115,8 +119,13 @@ public class Participant {
 		mcLoc = Locator.defaultUserMulticastLocator(domainId);
 		ucLoc = Locator.defaultUserUnicastLocator(domainId, participantId);
 
-		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor,
-				meta_mcLoc, meta_ucLoc, mcLoc, ucLoc);
+		HashSet<Locator> locators = new HashSet<>();
+		locators.add(meta_mcLoc);
+		locators.add(meta_ucLoc);
+		locators.add(mcLoc);
+		locators.add(ucLoc);
+		
+		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators);
 		rtps_participant.start();
 
 		this.livelinessManager = new LivelinessManager(this);
@@ -525,5 +534,21 @@ public class Participant {
 		}
 
 		return __readers;
+	}
+
+	/**
+	 * Adds a new EntityListener
+	 * @param el
+	 */
+	public void addEntityListener(EntityListener el) {
+		entityListeners.add(el);
 	}	
+
+	/**
+	 * Gets EntityListeners
+	 * @return a List of EntityListeners
+	 */
+	public List<EntityListener> getEntityListeners() {
+		return entityListeners;
+	}
 }

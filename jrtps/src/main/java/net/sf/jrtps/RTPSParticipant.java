@@ -53,10 +53,10 @@ public class RTPSParticipant {
 
 	private final Guid guid;
 
-	private Locator meta_mcLoc;
-	private Locator meta_ucLoc;
-	private Locator mcLoc;
-	private Locator ucLoc;
+	/**
+	 * Locators of this RTPSParticipant
+	 */
+	private final Set<Locator> locators;
 
 	private final int domainId;
 	private final int participantId;
@@ -75,16 +75,11 @@ public class RTPSParticipant {
 	 * @param meta_mcLoc 
 	 * @see EntityId
 	 */
-	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, 
-			Locator meta_mcLoc, Locator meta_ucLoc, Locator mcLoc, Locator ucLoc) {
+	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, Set<Locator> locators) { 
 		this.domainId = domainId;
 		this.participantId = participantId; 
 		this.threadPoolExecutor = tpe;
-		
-		this.meta_mcLoc = meta_mcLoc;
-		this.meta_ucLoc = meta_ucLoc;
-		this.mcLoc = mcLoc;
-		this.ucLoc = ucLoc;
+		this.locators = locators;
 		
 		Random r = new Random(System.currentTimeMillis());
 		this.guid = new Guid(new GuidPrefix((byte) domainId, (byte) participantId, r.nextInt()), EntityId.PARTICIPANT);
@@ -109,15 +104,12 @@ public class RTPSParticipant {
 		//       It might cause problems during message processing.
 		BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
 		RTPSMessageHandler handler = new RTPSMessageHandler(this, queue);
-		
 		threadPoolExecutor.execute(handler);
 		
-		receivers.add(new UDPReceiver(meta_mcLoc, queue, config.getBufferSize()));
-		receivers.add(new UDPReceiver(meta_ucLoc, queue, config.getBufferSize()));
-		receivers.add(new UDPReceiver(mcLoc, queue, config.getBufferSize()));			
-		receivers.add(new UDPReceiver(ucLoc, queue, config.getBufferSize()));		
-
-		for (UDPReceiver receiver : receivers) {
+		int bufferSize = config.getBufferSize();
+		for (Locator loc : locators) {
+			UDPReceiver receiver = new UDPReceiver(loc, queue, bufferSize);
+			receivers.add(receiver);
 			threadPoolExecutor.execute(receiver);
 		}
 		

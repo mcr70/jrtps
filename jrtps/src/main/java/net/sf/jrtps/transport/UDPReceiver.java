@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * This class receives network data. It is configured according to Locator_t given
+ * This class receives network data. It is configured according to Locator given
  * on constructor. <p> 
  * see 8.3.4 The RTPS Message Receiver
  * 
@@ -99,7 +99,6 @@ public class UDPReceiver implements Runnable {
 				socket.close();
 			}
 			running = false;
-
 		} 
 		catch (InterruptedException e) {
 			log.debug("close() was interrupted");

@@ -14,14 +14,13 @@ import net.sf.jrtps.types.Guid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BuiltinWriterDataListener implements SampleListener<WriterData>{
+class BuiltinWriterDataListener extends BuiltinListener implements SampleListener<WriterData>{
 	private static final Logger log = LoggerFactory.getLogger(BuiltinWriterDataListener.class);
 
-	private final Participant participant;
 	private HashMap<Guid, WriterData> discoveredWriters;
 
 	BuiltinWriterDataListener(Participant p, HashMap<Guid, WriterData> discoveredWriters) {
-		this.participant = p;
+		super(p); 
 		this.discoveredWriters = discoveredWriters;
 	}
 
@@ -33,6 +32,7 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 			Guid key = writerData.getKey();
 			if (discoveredWriters.put(key, writerData) == null) {
 				log.debug("Discovered a new writer {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
+				fireWriterDetected(writerData);
 			}
 
 			List<DataReader<?>> readers = participant.getReadersForTopic(writerData.getTopicName());
@@ -48,13 +48,16 @@ class BuiltinWriterDataListener implements SampleListener<WriterData>{
 						
 						if (offered.isCompatibleWith(requested)) {
 							r.getRTPSReader().addMatchedWriter(writerData);
+							fireWriterMatched(r, writerData);
 						}
 						else {
 							log.warn("Discovered writer had incompatible QoS with reader. {}, {}", writerData, r);
+							fireInconsistentQoS(r, writerData);
 						}
 					}
 				}
 			}
 		}
 	}
+
 }

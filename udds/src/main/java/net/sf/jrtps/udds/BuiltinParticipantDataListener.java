@@ -5,9 +5,6 @@ import java.util.List;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.RTPSParticipant;
-import net.sf.jrtps.RTPSReader;
-import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -29,15 +26,14 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-class BuiltinParticipantDataListener implements SampleListener<ParticipantData> {
+class BuiltinParticipantDataListener extends BuiltinListener implements SampleListener<ParticipantData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
-	private Participant participant;
 
 	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
 
 
 	BuiltinParticipantDataListener(Participant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
-		this.participant = p;
+		super(p);
 		this.discoveredParticipants = discoveredParticipants;
 	}
 
@@ -55,7 +51,8 @@ class BuiltinParticipantDataListener implements SampleListener<ParticipantData> 
 				else {
 					log.debug("A new Participant detected: {}", pd);
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
-
+					fireParticipantDetected(pd);
+					
 					// First, make sure remote participant knows about us.
 					DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
 					pw.getRTPSWriter().sendData(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0L);

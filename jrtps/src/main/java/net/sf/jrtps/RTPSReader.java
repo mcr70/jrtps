@@ -37,9 +37,9 @@ public class RTPSReader<T> extends Endpoint {
 	private final Marshaller<?> marshaller;
 	private final List<Sample<T>> pendingSamples = new LinkedList<>();
 	private final int heartbeatResponseDelay;
-	
+
 	private int ackNackCount = 0;
-	
+
 	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
@@ -70,7 +70,10 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	/**
-	 * Get the BuiltinEndpointSet ID of this RTPSReader.
+	 * Get the BuiltinEndpointSet ID of this RTPSReader. endpointSetId represents a bit in 
+	 * BuiltinEndpointSet_t, found during discovery. Each bit represents an existence of a predefined 
+	 * builtin entity.<p>
+	 * See 8.5.4.3 Built-in Endpoints required by the Simple Endpoint Discovery Protocol and table 9.4 BuiltinEndpointSet_t.
 	 * 
 	 * @return 0, if this RTPSReader is not builtin endpoint
 	 */
@@ -78,6 +81,9 @@ public class RTPSReader<T> extends Endpoint {
 		return getGuid().entityId.getEndpointSetId();
 	}
 
+	/**
+	 * Closes this RTPSReader.
+	 */
 	public void close() {
 		// TODO: No use for this
 	}
@@ -89,7 +95,7 @@ public class RTPSReader<T> extends Endpoint {
 	}
 	public void removeMatchedWriter(WriterData writerData) {
 		log.info("[{}] Removing matchedWriter {}", getGuid().entityId, writerData);
-		
+
 		writerProxies.remove(writerData.getKey());
 	}
 
@@ -107,19 +113,23 @@ public class RTPSReader<T> extends Endpoint {
 		Guid writerGuid = new Guid(sourcePrefix, data.getWriterId()); 
 
 		WriterProxy wp = getWriterProxy(writerGuid);
+		if (wp != null) {
+			if (wp.acceptData(data.getWriterSequenceNumber())) {
+				Object obj = marshaller.unmarshall(data.getDataEncapsulation());
+				log.trace("[{}] Got Data: {}, {}", getGuid().entityId, 
+						obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 
-		if (wp.acceptData(data.getWriterSequenceNumber())) {
-			Object obj = marshaller.unmarshall(data.getDataEncapsulation());
-			log.debug("[{}] Got Data: {}, {}", getGuid().entityId, 
-					obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
-
-			synchronized (pendingSamples) {
-				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
+				synchronized (pendingSamples) {
+					pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
+				}
+			}
+			else {
+				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
+						data.getWriterSequenceNumber(), wp.getSeqNumMax());
 			}
 		}
 		else {
-			log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().entityId, 
-					data.getWriterSequenceNumber(), wp.getSeqNumMax());
+			log.warn("[{}] Discarding Data from unknown writer {}", getGuid().entityId, data.getWriterId());
 		}
 	}
 
@@ -133,52 +143,54 @@ public class RTPSReader<T> extends Endpoint {
 		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 
 		WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
-		if (hb.livelinessFlag()) {
-			// TODO: implement liveliness
-		}
-
-		if (isReliable()) { // Only reliable readers respond to heartbeat
-			boolean doSend = false;
-			if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
-				doSend = true;
+		if (wp != null) {
+			if (hb.livelinessFlag()) {
+				// TODO: implement liveliness
 			}
-			else {
-				if (wp.acceptHeartbeat(hb.getLastSequenceNumber())) {
+
+			if (isReliable()) { // Only reliable readers respond to heartbeat
+				boolean doSend = false;
+				if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 					doSend = true;
 				}
 				else {
-					log.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", 
-							getGuid().entityId, wp.getSeqNumMax(), hb.getLastSequenceNumber());
+					if (wp.acceptHeartbeat(hb.getLastSequenceNumber())) {
+						doSend = true;
+					}
+					else {
+						log.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", 
+								getGuid().entityId, wp.getSeqNumMax(), hb.getLastSequenceNumber());
+					}
+				}
+
+				if (doSend) {
+					Message m = new Message(getGuid().prefix);
+					AckNack an = createAckNack(wp);
+					m.addSubMessage(an);
+
+					log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().entityId, heartbeatResponseDelay);
+					getParticipant().waitFor(heartbeatResponseDelay);
+
+					log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
+					sendMessage(m, senderGuidPrefix);
 				}
 			}
-
-			if (doSend) {
-				Message m = new Message(getGuid().prefix);
-				//AckNack an = createAckNack(new GUID_t(senderGuidPrefix, hb.getWriterId()), hb.getFirstSequenceNumber().getAsLong(), hb.getLastSequenceNumber().getAsLong());
-				AckNack an = createAckNack(new Guid(senderGuidPrefix, hb.getWriterId()));
-				m.addSubMessage(an);
-				
-				log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().entityId, heartbeatResponseDelay);
-				getParticipant().waitFor(heartbeatResponseDelay);
-
-				log.debug("[{}] Sending AckNack: {}", getGuid().entityId, an.getReaderSNState());
-				sendMessage(m, senderGuidPrefix);
-			}
+		}
+		else {
+			log.warn("[{}] Discarding Heartbeat from unknown writer {}", getGuid().entityId, hb.getWriterId());
 		}
 	}
 
 
-	private AckNack createAckNack(Guid writerGuid) {
+	private AckNack createAckNack(WriterProxy wp) {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		WriterProxy wp = getWriterProxy(writerGuid);
 		long seqNumFirst = wp.getSeqNumMax(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
-
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
 
-		AckNack an = new AckNack(getGuid().entityId, writerGuid.entityId, snSet, ackNackCount++);
+		AckNack an = new AckNack(getGuid().entityId, wp.getGuid().entityId, snSet, ackNackCount++);
 
 		return an;
 	}
@@ -186,12 +198,14 @@ public class RTPSReader<T> extends Endpoint {
 	private WriterProxy getWriterProxy(Guid writerGuid) {
 		WriterProxy wp = writerProxies.get(writerGuid);
 		if (wp == null) {
-			// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
-			//       Remote entities are assumed alive even though corresponding discovery data has not been
-			//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
-			log.debug("[{}] Creating proxy for {}", getGuid().entityId, writerGuid); 
-			wp = new WriterProxy(writerGuid);
-			writerProxies.put(writerGuid, wp); 
+			if (writerGuid.entityId.isBuiltinEntity()) {
+				// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
+				//       Remote entities are assumed alive even though corresponding discovery data has not been
+				//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
+				log.debug("[{}] Creating proxy for {}", getGuid().entityId, writerGuid); 
+				wp = new WriterProxy(writerGuid);
+				writerProxies.put(writerGuid, wp); 
+			}
 		}
 
 		return wp;
@@ -214,7 +228,7 @@ public class RTPSReader<T> extends Endpoint {
 		}
 
 		log.debug("[{}] Got {} samples", getGuid().entityId, ll.size());
-		
+
 		if (ll.size() > 0) {
 			for (SampleListener<T> sl: sampleListeners) {
 				sl.onSamples(ll);

@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.RTPSParticipant;
-import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -16,15 +14,14 @@ import net.sf.jrtps.types.GuidPrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BuiltinReaderDataListener implements SampleListener<ReaderData> {
+class BuiltinReaderDataListener extends BuiltinListener implements SampleListener<ReaderData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
 
-	private final Participant participant;
 	private HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
 	private HashMap<Guid, ReaderData> discoveredReaders;
 
 	BuiltinReaderDataListener(Participant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants, HashMap<Guid, ReaderData> discoveredReaders) {
-		this.participant = p;
+		super(p);
 		this.discoveredParticipants = discoveredParticipants;
 		this.discoveredReaders = discoveredReaders;
 	}
@@ -44,6 +41,7 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 			Guid key = readerData.getKey();
 			if (discoveredReaders.put(key, readerData) == null) {
 				log.debug("Discovered a new reader {} for topic {}, type {}", key, readerData.getTopicName(), readerData.getTypeName());
+				fireReaderDetected(readerData);
 			}
 
 			List<DataWriter<?>> writers = participant.getWritersForTopic(readerData.getTopicName());
@@ -58,9 +56,11 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 
 					if (offered.isCompatibleWith(requested)) {
 						w.getRTPSWriter().addMatchedReader(readerData);
+						fireReaderMatched(w, readerData);
 					}
 					else {
 						log.warn("Discovered reader had incompatible QoS with writer. {}, {}", readerData, w);
+						fireInconsistentQoS(w, readerData);
 					}					
 				}
 
