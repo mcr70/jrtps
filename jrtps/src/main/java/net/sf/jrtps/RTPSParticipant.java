@@ -122,13 +122,12 @@ public class RTPSParticipant {
 	 * 
 	 * @param eId EntityId of the reader
 	 * @param topicName Name of the topic
-	 * @param typeName Type name associated with topic
 	 * @param marshaller
 	 * @param qos QualityOfService
 	 * 
 	 * @return RTPSReader
 	 */
-	public <T> RTPSReader<T> createReader(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, 
+	public <T> RTPSReader<T> createReader(EntityId eId, String topicName, Marshaller<?> marshaller, 
 			QualityOfService qos) {
 		RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, qos, config);
 		reader.setDiscoveredParticipants(discoveredParticipants);
@@ -144,13 +143,12 @@ public class RTPSParticipant {
 	 * 
 	 * @param eId EntityId of the reader
 	 * @param topicName Name of the topic
-	 * @param typeName Type name associated with topic
 	 * @param marshaller
 	 * @param qos QualityOfService
 	 *
 	 * @return RTPSWriter
 	 */
-	public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, String typeName, Marshaller<?> marshaller, QualityOfService qos) {
+	public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, Marshaller<?> marshaller, QualityOfService qos) {
 		RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, marshaller, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
