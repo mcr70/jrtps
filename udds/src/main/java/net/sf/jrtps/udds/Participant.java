@@ -20,6 +20,7 @@ import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
+import net.sf.jrtps.builtin.ParticipantMessageMarshaller;
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.builtin.ReaderDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
@@ -138,6 +139,7 @@ public class Participant {
 	private void createBuiltinEntities() {
 		// ----  Builtin marshallers  ---------------
 		setMarshaller(ParticipantData.class.getName(), new ParticipantDataMarshaller());
+		setMarshaller(ParticipantMessage.class.getName(), new ParticipantMessageMarshaller());
 		setMarshaller(WriterData.class.getName(), new WriterDataMarshaller());
 		setMarshaller(ReaderData.class.getName(), new ReaderDataMarshaller());
 		setMarshaller(TopicData.class.getName(), new TopicDataMarshaller());
@@ -232,19 +234,19 @@ public class Participant {
 		Marshaller<?> m = getMarshaller(typeName);
 		RTPSReader<T> rtps_reader = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, typeName, m, qos);
+			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, m, qos);
 		}
 		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, topicName, typeName, m, qos);
+			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, topicName, m, qos);
 		}
 		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, topicName, typeName, m, qos);
+			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, topicName, m, qos);
 		}
 		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_reader = rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, topicName, typeName, m, qos);
+			rtps_reader = rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, topicName, m, qos);
 		}
 		else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_reader = rtps_participant.createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, topicName, typeName, m, qos);
+			rtps_reader = rtps_participant.createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, topicName, m, qos);
 		}
 		else {
 			int myIdx = userEntityIdx++;
@@ -258,7 +260,7 @@ public class Participant {
 				kind = 0x04; // User defined reader, no key
 			}
 
-			rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, m, qos);			
+			rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, qos);			
 		}
 
 		DataReader<T> reader = new DataReader<T>(rtps_reader);
@@ -305,19 +307,19 @@ public class Participant {
 
 		RTPSWriter<T> rtps_writer = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, typeName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, m, qos);
 		}
 		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, typeName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, m, qos);
 		}
 		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, typeName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, m, qos);
 		}
 		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, typeName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, m, qos);
 		}
 		else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, typeName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, m, qos);
 		}
 		else {
 			int myIdx = userEntityIdx++;
@@ -331,7 +333,7 @@ public class Participant {
 				kind = 0x03; // User defined writer, no key
 			}
 
-			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, typeName, m, qos);
+			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, qos);
 		}
 		
 		DataWriter<T> writer = new DataWriter<T>(rtps_writer);

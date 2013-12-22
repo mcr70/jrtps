@@ -116,19 +116,11 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 			throw new RuntimeException(e);
 		}
 		
-		RTPSWriter<ParticipantMessage> rtps_writer = 
-				participant.getRTPSParticipant().createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, 
-				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
-				new ParticipantMessageMarshaller(), qos);	
-		
-		writer = new DataWriter<>(rtps_writer);
-		
-		RTPSReader<ParticipantMessage> rtps_reader = 
-				participant.getRTPSParticipant().createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, 
-				ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class.getName(), 
-				new ParticipantMessageMarshaller(), qos);
-		
-		reader = new DataReader<>(rtps_reader);
+		writer = participant.createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, 
+				ParticipantMessage.class.getName(), qos);
+
+		reader = participant.createDataReader(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, 
+				ParticipantMessage.class.getName(), qos);
 		reader.addListener(this);
 
 		log.debug("Starting liveliness thread");
