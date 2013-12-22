@@ -55,8 +55,8 @@ public class Participant {
 	private final HashMap<String, Marshaller<?>> marshallers = new HashMap<>();
 	private final RTPSParticipant rtps_participant;
 
-	private List<DataReader> readers = new LinkedList<>();
-	private List<DataWriter> writers = new LinkedList<>();
+	private List<DataReader<?>> readers = new LinkedList<>();
+	private List<DataWriter<?>> writers = new LinkedList<>();
 
 	/**
 	 * Each user entity is assigned a unique number, this field is used for that purpose
@@ -75,11 +75,8 @@ public class Participant {
 	private final LivelinessManager livelinessManager;
 
 	private Locator meta_mcLoc;
-
 	private Locator meta_ucLoc;
-
 	private Locator mcLoc;
-
 	private Locator ucLoc;
 
 	private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
@@ -193,11 +190,6 @@ public class Participant {
 		// ----  Create a Writer for SPDP  -----------------------
 		DataWriter<ParticipantData> pdWriter = 
 				createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
-//		RTPSWriter<ParticipantData> spdp_w = 
-//				rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, 
-//						ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), pdm, spdpQoS);
-		//writers.add(new DataWriter<>(pdWriter));
-
 		ParticipantData pd = createSPDPParticipantData();
 		pdWriter.write(pd);
 
@@ -279,6 +271,7 @@ public class Participant {
 	 * Creates a new DataWriter of given type. DataWriter is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
 	 * Typename of the DataWriter is set to fully qualified class name.
+	 * A default QualityOfService is used. 
 	 * 
 	 * @param c A class, that is used with created DataWriter.
 	 * @return a DataWriter<T>
@@ -287,6 +280,15 @@ public class Participant {
 		return createDataWriter(c, new QualityOfService());
 	} 
 
+	/**
+	 * Creates a new DataWriter of given type. DataWriter is bound to a topic
+	 * named c.getSimpleName(), which corresponds to class name of the argument. 
+	 * Typename of the DataWriter is set to fully qualified class name.
+	 * 
+	 * @param c A class, that is used with created DataWriter.
+	 * @param qos QualityOfService
+	 * @return a DataWriter<T>
+	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> c, QualityOfService qos) {
 		return createDataWriter(c.getSimpleName(), c, c.getName(), qos);
 	} 
@@ -411,7 +413,10 @@ public class Participant {
 		return m;
 	}
 
-
+	/**
+	 * Get the RTPSParticipant
+	 * @return RTPSParticipant
+	 */
 	RTPSParticipant getRTPSParticipant() {
 		return rtps_participant;
 	}
@@ -429,10 +434,10 @@ public class Participant {
 
 	private int createEndpointSet() {
 		int eps = 0;
-		for (DataReader dr : readers) {
+		for (DataReader<?> dr : readers) {
 			eps |= dr.getRTPSReader().endpointSetId();
 		}
-		for (DataWriter dw : writers) {
+		for (DataWriter<?> dw : writers) {
 			eps |= dw.getRTPSWriter().endpointSetId();
 		}
 

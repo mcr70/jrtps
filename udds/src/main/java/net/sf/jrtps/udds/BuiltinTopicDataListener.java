@@ -2,7 +2,6 @@ package net.sf.jrtps.udds;
 
 import java.util.List;
 
-import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.TopicData;
