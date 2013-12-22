@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.RTPSParticipant;
-import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.WriterData;

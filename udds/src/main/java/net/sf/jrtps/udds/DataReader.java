@@ -68,7 +68,7 @@ public class DataReader<T> extends Entity {
 	}
 
 
-	RTPSReader getRTPSReader() {
+	RTPSReader<T> getRTPSReader() {
 		return rtps_reader;
 	}
 }

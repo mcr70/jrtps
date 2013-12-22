@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.RTPSWriter;
-import net.sf.jrtps.builtin.ReaderData;
 
 
 
@@ -74,7 +73,7 @@ public class DataWriter<T> extends Entity {
 	}
 
 
-	RTPSWriter getRTPSWriter() {
+	RTPSWriter<T> getRTPSWriter() {
 		return rtps_writer;
 	}
 }

@@ -6,18 +6,15 @@ import java.util.List;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.builtin.ParticipantMessageMarshaller;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Duration;
-import net.sf.jrtps.types.EntityId;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
