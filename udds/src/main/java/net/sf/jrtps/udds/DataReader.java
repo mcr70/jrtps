@@ -1,10 +1,6 @@
 package net.sf.jrtps.udds;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.sf.jrtps.RTPSReader;
-import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 
 
@@ -29,25 +25,6 @@ public class DataReader<T> extends Entity {
 		this.rtps_reader = reader;
 	}
 	
-	/**
-	 * Read samples.
-	 * 
-	 * @return a List of Sample<T>
-	 */
-	public List<Sample<T>> read() {
-		//rtps_reader.getHistoryCache();
-		
-		LinkedList<Sample<T>> l = new LinkedList<>();
-		return l;
-	}
-	
-	/**
-	 * Take samples.
-	 * @return a List of Sample<T>
-	 */
-	public List<Sample<T>> take() {
-		return null;
-	}
 
 	/**
 	 * Adds a new listener for this DataReader.

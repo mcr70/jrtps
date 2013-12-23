@@ -199,15 +199,16 @@ public class Participant {
 	 * Create a new DataReader for given type T. DataReader is bound to a topic
 	 * named c.getSimpleName(), which corresponds to class name of the argument. 
 	 * Typename of the DataReader is set to fully qualified class name.
-	 * @param c 
+	 * 
+	 * @param type 
 	 * @return a DataReader<T>
 	 */
-	public <T> DataReader<T> createDataReader(Class<T> c) {
-		return createDataReader(c, new QualityOfService());
+	public <T> DataReader<T> createDataReader(Class<T> type) {
+		return createDataReader(type, new QualityOfService());
 	} 
 
-	public <T> DataReader<T> createDataReader(Class<T> c, QualityOfService qos) {
-		return createDataReader(c.getSimpleName(), c, c.getName(), qos);
+	public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
+		return createDataReader(type.getSimpleName(), type, type.getName(), qos);
 	} 
 
 	/**
@@ -367,11 +368,11 @@ public class Participant {
 	 * 
 	 * @see JavaSerializableMarshaller
 	 * 
-	 * @param c
+	 * @param type
 	 * @param m
 	 */
-	public void setMarshaller(Class<?> c, Marshaller<?> m) {
-		marshallers.put(c, m);
+	public void setMarshaller(Class<?> type, Marshaller<?> m) {
+		marshallers.put(type, m);
 	}
 
 	/**
