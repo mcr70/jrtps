@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.udds;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;

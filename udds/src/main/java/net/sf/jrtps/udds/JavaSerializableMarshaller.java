@@ -10,7 +10,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedList;
 
-import net.sf.jrtps.Key;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.CDREncapsulation;
 import net.sf.jrtps.message.data.DataEncapsulation;
@@ -35,7 +34,6 @@ import org.slf4j.LoggerFactory;
 public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 	private static final Logger log = LoggerFactory.getLogger(JavaSerializableMarshaller.class);
 
-	private final Class<?> type;
 	private final int bufferSize;
 	private final Field[] keyFields;
 	private final boolean hasKey;
@@ -56,7 +54,6 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 	 * @param bufferSize the size of the buffer that is used during marshall and unmarshall
 	 */
 	public JavaSerializableMarshaller(Class<?> type, int bufferSize) {
-		this.type = type;
 		this.bufferSize = bufferSize;
 		this.keyFields = getKeyFields(type);
 		this.hasKey = keyFields.length > 0;
@@ -135,12 +132,9 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 	}
 
 	/**
-	 * Determines whether or not a key is associated with type T.
-	 * Classes fields are examined for annotation Key. If one is found,
-	 * true is returned.
-	 * @return 
-	 *  
-	 * @return true, if type T has a key
+	 * Get all the keyFields found from given type. If no key fields are found, an array of length 0 is returned.
+	 * 
+	 * @return an array of key fields
 	 */
 	private Field[] getKeyFields(final Class<?> type) {			
 		Field[] fields = type.getDeclaredFields();

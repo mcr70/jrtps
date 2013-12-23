@@ -69,10 +69,8 @@ public class RTPSParticipant {
 	 *  
 	 * @param domainId Domain ID of the participant
 	 * @param participantId Participant ID 
-	 * @param ucLoc 
-	 * @param mcLoc 
-	 * @param meta_ucLoc 
-	 * @param meta_mcLoc 
+	 * @param locators a Set of Locators
+	 * 
 	 * @see EntityId
 	 */
 	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, Set<Locator> locators) { 
@@ -85,9 +83,6 @@ public class RTPSParticipant {
 		this.guid = new Guid(new GuidPrefix((byte) domainId, (byte) participantId, r.nextInt()), EntityId.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
-
-				
-		participantId++;
 	}
 
 
