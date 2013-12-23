@@ -42,18 +42,18 @@ public class RTPSWriter<T> extends Endpoint {
 
 	@SuppressWarnings("rawtypes")
 	private final Marshaller marshaller;
-	private final HistoryCache<T> writer_cache;
+	private final WriterCache writer_cache;
 	private final int nackResponseDelay;
 	private int heartbeatPeriod;
 
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 
 
-	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller, 
+	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller, WriterCache wCache, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
-		this.writer_cache = new HistoryCache(marshaller, qos, this);
+		this.writer_cache = wCache;
 		this.marshaller = marshaller;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
 		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
@@ -338,22 +338,4 @@ public class RTPSWriter<T> extends Endpoint {
 
 		return true;
 	}
-
-
-	public void write(T obj) {
-		LinkedList<T> ll = new LinkedList<>();
-		ll.add(obj);
-		write(ll);
-	}
-
-	public void write(List<T> objs) {
-		writer_cache.write(objs);	
-	}
-	public void dispose(List<T> objs) {
-		writer_cache.dispose(objs);	
-	}
-	public void unregister(List<T> objs) {
-		writer_cache.unregister(objs);	
-	}
-
 }

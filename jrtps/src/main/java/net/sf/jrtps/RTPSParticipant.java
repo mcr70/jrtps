@@ -148,8 +148,8 @@ public class RTPSParticipant {
 	 *
 	 * @return RTPSWriter
 	 */
-	public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, Marshaller<?> marshaller, QualityOfService qos) {
-		RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, marshaller, qos, config);
+	public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, Marshaller<?> marshaller, WriterCache wCache, QualityOfService qos) {
+		RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, marshaller, wCache, qos, config);
 		writer.setDiscoveredParticipants(discoveredParticipants);
 
 		writerEndpoints.add(writer);

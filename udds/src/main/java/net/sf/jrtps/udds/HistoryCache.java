@@ -55,17 +55,21 @@ class HistoryCache<T> implements WriterCache {
 			}));
 
 	private final Marshaller<T> marshaller;
-	private final DataWriter<T> writer;
+	private DataWriter<T> writer;
 
 
-	HistoryCache(Marshaller<T> marshaller, QualityOfService qos, DataWriter<T> writer) {
+	HistoryCache(Marshaller<T> marshaller, QualityOfService qos) {
 		this.marshaller = marshaller;
-		this.writer = writer;
 
 		resource_limits = (QosResourceLimits) qos.getPolicy(QosResourceLimits.class);
 		history = (QosHistory) qos.getPolicy(QosHistory.class);
 		reliability = (QosReliability) qos.getPolicy(QosReliability.class);
 	}
+
+	void setDataWriter(DataWriter<T> dw) {
+		this.writer = dw;
+	}
+
 
 	void dispose(List<T> samples) {
 		addSample(ChangeKind.DISPOSE, samples);
@@ -83,39 +87,35 @@ class HistoryCache<T> implements WriterCache {
 
 	private void addSample(ChangeKind kind, List<T> samples) {
 		log.debug("[{}] add {} samples of kind {}", writer.getGuid().entityId, samples.size(), kind);
-		try {
-			for (T sample : samples) {
-				InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
-				Instance inst = instances.get(key);
-				if (inst == null) {
-					log.debug("[{}] Creating new instance {}", writer.getGuid().entityId, key);
-					instanceCount++;
-					if (instanceCount > resource_limits.getMaxInstances()) {
-						instanceCount = resource_limits.getMaxInstances();
-						throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
-					}
 
-					inst = new Instance(key, history.getDepth());
-					instances.put(key, inst);
+		for (T sample : samples) {
+			InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
+			Instance inst = instances.get(key);
+			if (inst == null) {
+				log.debug("[{}] Creating new instance {}", writer.getGuid().entityId, key);
+				instanceCount++;
+				if (instanceCount > resource_limits.getMaxInstances()) {
+					instanceCount = resource_limits.getMaxInstances();
+					throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
 				}
 
-				if (inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
-					throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
-				}
-				
-				log.trace("[{}] Creating cache change {}", writer.getGuid().entityId, seqNum + 1);
-				CacheChange aChange = new CacheChange(kind, ++seqNum, sample);
-				sampleCount += inst.addSample(aChange);
-				if (sampleCount > resource_limits.getMaxSamples()) {
-					inst.history.removeLast();
-					sampleCount = resource_limits.getMaxSamples();
-					throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
-				}
-				changes.add(aChange);
+				inst = new Instance(key, history.getDepth());
+				instances.put(key, inst);
 			}
-		}
-		finally {
-			writer.notifyReaders();
+
+			if (inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
+				throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
+			}
+
+			log.trace("[{}] Creating cache change {}", writer.getGuid().entityId, seqNum + 1);
+			CacheChange aChange = new CacheChange(kind, ++seqNum, sample);
+			sampleCount += inst.addSample(aChange);
+			if (sampleCount > resource_limits.getMaxSamples()) {
+				inst.history.removeLast();
+				sampleCount = resource_limits.getMaxSamples();
+				throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
+			}
+			changes.add(aChange);
 		}
 	}
 
@@ -147,13 +147,13 @@ class HistoryCache<T> implements WriterCache {
 					if (reliability.getMaxBlockingTime().asMillis() > 0 &&
 							!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
 						// Block the writer and hope that readers acknowledge all the changes
-						
+
 						// TODO: during acknack, we should check if there is no need to block anymore.
 						//       I.e. we should notify blocked thread.
-						
+
 						log.debug("[{}] Blocking the writer for {} ms", writer.getGuid().entityId, reliability.getMaxBlockingTime().asMillis());
 						writer.getParticipant().waitFor((int) reliability.getMaxBlockingTime().asMillis());
-						
+
 						if (!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
 							throw new TimeOutException("Blocked writer for " + reliability.getMaxBlockingTime().asMillis() + 
 									" ms, and readers have not acknowledged " + oldestChange.getSequenceNumber());
@@ -182,7 +182,7 @@ class HistoryCache<T> implements WriterCache {
 		public boolean equals(Object o) {
 			if (o instanceof HistoryCache<?>.InstanceKey) {
 				InstanceKey other = (InstanceKey) o;
-				
+
 				return Arrays.equals(key, other.key);
 			}
 
@@ -193,7 +193,7 @@ class HistoryCache<T> implements WriterCache {
 		public int hashCode() {
 			return Arrays.hashCode(key);
 		}
-		
+
 		public String toString() {
 			return "Key: " + Arrays.toString(key);
 		}
@@ -239,7 +239,7 @@ class HistoryCache<T> implements WriterCache {
 		}
 		return changes.first().getSequenceNumber();
 	}
-	
+
 	/**
 	 * Gets the biggest sequence number this HistoryCache has.
 	 * 

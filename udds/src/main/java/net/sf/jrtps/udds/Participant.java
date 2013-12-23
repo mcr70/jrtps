@@ -306,22 +306,22 @@ public class Participant {
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 
 		Marshaller<?> m = getMarshaller(typeName);
-
+		HistoryCache<T> wCache = new HistoryCache(m, qos);
 		RTPSWriter<T> rtps_writer = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, m, wCache, qos);
 		}
 		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, m, wCache, qos);
 		}
 		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, m, wCache, qos);
 		}
 		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, m, wCache, qos);
 		}
 		else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, m, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, m, wCache, qos);
 		}
 		else {
 			int myIdx = userEntityIdx++;
@@ -335,10 +335,10 @@ public class Participant {
 				kind = 0x03; // User defined writer, no key
 			}
 
-			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, qos);
+			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, wCache, qos);
 		}
 		
-		DataWriter<T> writer = new DataWriter<T>(this, rtps_writer);
+		DataWriter<T> writer = new DataWriter<T>(this, rtps_writer, wCache);
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
 
