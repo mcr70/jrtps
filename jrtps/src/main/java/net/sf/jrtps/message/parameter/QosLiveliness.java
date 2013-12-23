@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 /**
  * This policy controls the mechanism and parameters used by the Service to ensure that particular 
@@ -14,7 +14,7 @@ import net.sf.jrtps.types.Duration_t;
  */
 public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLiveliness>, DataWriterPolicy<QosLiveliness>, TopicPolicy<QosLiveliness>, InlineParameter {
 	private int kind;
-	private Duration_t lease_duration;
+	private Duration lease_duration;
 
 	public enum Kind {
 		/**
@@ -46,7 +46,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	 *        lease_duration, it is assumed 'dead'
 	 * @see Kind
 	 */
-	public QosLiveliness(Kind kind, Duration_t lease_duration) {
+	public QosLiveliness(Kind kind, Duration lease_duration) {
 		super(ParameterEnum.PID_LIVELINESS);
 		switch(kind) {
 		case AUTOMATIC: this.kind = 0; break;
@@ -61,7 +61,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	 * Get the lease_duration
 	 * @return lease_duration
 	 */
-	public Duration_t getLeaseDuration() {
+	public Duration getLeaseDuration() {
 		return lease_duration;
 	}
 
@@ -79,7 +79,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
 		this.kind = bb.read_long(); // TODO: we should throw an exception, if kind is illegal
-		this.lease_duration = new Duration_t(bb);
+		this.lease_duration = new Duration(bb);
 	}
 
 	@Override
@@ -112,7 +112,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	}
 
 	public static QosLiveliness defaultLiveliness() {
-		return new QosLiveliness(Kind.AUTOMATIC, new Duration_t(10, 0)); // TODO: check defaults
+		return new QosLiveliness(Kind.AUTOMATIC, new Duration(10, 0)); // TODO: check defaults
 	}
 
 	public String toString() {	

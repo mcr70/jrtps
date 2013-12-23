@@ -1,7 +1,7 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.EntityId_t;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.SequenceNumberSet;
 
 /**
@@ -17,12 +17,12 @@ import net.sf.jrtps.types.SequenceNumberSet;
 public class AckNack extends SubMessage {
 	public static final int KIND = 0x06;
 	
-	private EntityId_t readerId;
-	private EntityId_t writerId;
+	private EntityId readerId;
+	private EntityId writerId;
 	private SequenceNumberSet readerSNState;
 	private int count;
 	
-	public AckNack(EntityId_t readerId, EntityId_t writerId, SequenceNumberSet readerSnSet, int count) {
+	public AckNack(EntityId readerId, EntityId writerId, SequenceNumberSet readerSnSet, int count) {
 		super(new SubMessageHeader(KIND));
 		
 		this.readerId = readerId;
@@ -45,7 +45,7 @@ public class AckNack extends SubMessage {
 	 * Identifies the Reader entity that acknowledges receipt of certain
 	 * sequence numbers and/or requests to receive certain sequence numbers.
 	 */
-	public EntityId_t getReaderId() {
+	public EntityId getReaderId() {
 		return readerId;
 	}
 	
@@ -55,7 +55,7 @@ public class AckNack extends SubMessage {
 	 * some sequence numbers or is being informed of the reception of
 	 * certain sequence numbers.
 	 */
-	public EntityId_t getWriterId() {
+	public EntityId getWriterId() {
 		return writerId;
 	}
 	
@@ -82,8 +82,8 @@ public class AckNack extends SubMessage {
 
 	
 	private void readMessage(RTPSByteBuffer is) {
-		this.readerId = EntityId_t.readEntityId(is);
-		this.writerId = EntityId_t.readEntityId(is);
+		this.readerId = EntityId.readEntityId(is);
+		this.writerId = EntityId.readEntityId(is);
 		this.readerSNState = new SequenceNumberSet(is);
 		this.count = is.read_long();
 	}

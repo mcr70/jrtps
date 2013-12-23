@@ -1,8 +1,8 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.SequenceNumber_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.SequenceNumber;
 
 /**
  * This message is sent from an RTPS Writer to an RTPS Reader to communicate 
@@ -15,21 +15,21 @@ import net.sf.jrtps.types.SequenceNumber_t;
 public class Heartbeat extends SubMessage {
 	public static final int KIND = 0x07;
 	
-	private EntityId_t readerId;
-	private EntityId_t writerId;
-	private SequenceNumber_t firstSN;
-	private SequenceNumber_t lastSN;
+	private EntityId readerId;
+	private EntityId writerId;
+	private SequenceNumber firstSN;
+	private SequenceNumber lastSN;
 	private int count;
 
-	public Heartbeat(EntityId_t readerId, EntityId_t writerId, 
+	public Heartbeat(EntityId readerId, EntityId writerId, 
 			long firstSeqNum, long lastSeqNum, int count) {
 		super(new SubMessageHeader(KIND));
 		
 		this.readerId = readerId;
 		this.writerId = writerId;
 		this.count = count;
-		firstSN = new SequenceNumber_t(firstSeqNum);
-		lastSN = new SequenceNumber_t(lastSeqNum);
+		firstSN = new SequenceNumber(firstSeqNum);
+		lastSN = new SequenceNumber(lastSeqNum);
 
 		header.flags |= 2; // set FinalFlag. No response needed.
 	}
@@ -82,14 +82,14 @@ public class Heartbeat extends SubMessage {
 	 * Identifies the Reader Entity that is being informed of the availability of a set of sequence numbers.
 	 * Can be set to ENTITYID_UNKNOWN to indicate all readers for the writer that sent the message.
 	 */
-	public EntityId_t getReaderId() {
+	public EntityId getReaderId() {
 		return readerId;
 	}
 	
 	/**
 	 * Identifies the Writer Entity to which the range of sequence numbers applies.
 	 */	
-	public EntityId_t getWriterId() {
+	public EntityId getWriterId() {
 		return writerId;
 	}
 	
@@ -119,10 +119,10 @@ public class Heartbeat extends SubMessage {
 
 	
 	private void readMessage(RTPSByteBuffer is) {
-		this.readerId = EntityId_t.readEntityId(is);
-		this.writerId = EntityId_t.readEntityId(is);
-		this.firstSN = new SequenceNumber_t(is);
-		this.lastSN = new SequenceNumber_t(is);
+		this.readerId = EntityId.readEntityId(is);
+		this.writerId = EntityId.readEntityId(is);
+		this.firstSN = new SequenceNumber(is);
+		this.lastSN = new SequenceNumber(is);
 		
 		this.count = is.read_long();
 	}

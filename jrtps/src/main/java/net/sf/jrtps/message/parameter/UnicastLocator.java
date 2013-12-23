@@ -1,10 +1,10 @@
 package net.sf.jrtps.message.parameter;
 
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 public class UnicastLocator extends LocatorParameter {
 
-	public UnicastLocator(Locator_t locator) {
+	public UnicastLocator(Locator locator) {
 		super(ParameterEnum.PID_UNICAST_LOCATOR, locator);
 	}
 	

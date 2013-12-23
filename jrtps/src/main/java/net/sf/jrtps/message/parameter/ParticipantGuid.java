@@ -1,12 +1,12 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.Guid;
 
 public class ParticipantGuid extends Parameter {
-	private GUID_t guid;
+	private Guid guid;
 
-	public ParticipantGuid(GUID_t guid) {
+	public ParticipantGuid(Guid guid) {
 		this();
 		this.guid = guid;
 	}
@@ -16,13 +16,13 @@ public class ParticipantGuid extends Parameter {
 	}
 
 	
-	public GUID_t getParticipantGuid() {
+	public Guid getParticipantGuid() {
 		return guid;
 	}
 	
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.guid = new GUID_t(bb);
+		this.guid = new Guid(bb);
 	}
 
 	@Override

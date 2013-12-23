@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Duration_t;
+import net.sf.jrtps.types.Duration;
 
 /**
  * QosTimeBasedFilter.
@@ -11,9 +11,9 @@ import net.sf.jrtps.types.Duration_t;
  *
  */
 public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<QosTimeBasedFilter> {
-	private Duration_t minimum_separation;
+	private Duration minimum_separation;
 
-	public QosTimeBasedFilter(Duration_t minimum_separation) {
+	public QosTimeBasedFilter(Duration minimum_separation) {
 		super(ParameterEnum.PID_TIME_BASED_FILTER);
 		this.minimum_separation = minimum_separation;
 		// TODO: OSPL 5.5 encodes timebased filter as two bytes: [0,0]
@@ -25,7 +25,7 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length) {
-		minimum_separation = new Duration_t(bb);
+		minimum_separation = new Duration(bb);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
 	 * Get the minimum separation.
 	 * @return minimum separation
 	 */
-	public Duration_t getMinimumSeparation() {
+	public Duration getMinimumSeparation() {
 		return minimum_separation;
 	}
 	
@@ -52,7 +52,7 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
 	 * @return default QosTimeBasedFilter
 	 */
 	public static QosTimeBasedFilter defaultTimeBasedFilter() {
-		return new QosTimeBasedFilter(new Duration_t(0, 0));
+		return new QosTimeBasedFilter(new Duration(0, 0));
 	}
 
 	public String toString() {	

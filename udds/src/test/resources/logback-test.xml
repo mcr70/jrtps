@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration>
+<configuration debug="false">
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
 			<pattern>%d{HH:mm:ss.SSS} %-5p %20.20c{10} %16.16t - %m%n</pattern>
 		</encoder>
 	</appender>
 
-	<root>
+	<root level="warn">
 		<appender-ref ref="console" />
 	</root>
-	<logger name="net.sf.jrtps" level="WARN" />
-	<logger name="net.sf.jrtps.message" level="WARN" />
-	<logger name="net.sf.jrtps.message.parameter" level="WARN" />
+	<logger name="net.sf.jrtps" level="debug" />
+	<logger name="net.sf.jrtps.message" level="debug" />
+	<logger name="net.sf.jrtps.message.parameter" level="info" />
 </configuration>

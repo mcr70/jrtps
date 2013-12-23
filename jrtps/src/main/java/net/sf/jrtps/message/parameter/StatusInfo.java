@@ -3,11 +3,11 @@ package net.sf.jrtps.message.parameter;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.CacheChange;
+import net.sf.jrtps.transport.RTPSByteBuffer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.sf.jrtps.ChangeKind;
-import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * StatusInfo parameter. 
@@ -21,11 +21,11 @@ public class StatusInfo extends Parameter implements InlineParameter {
 
 	private byte[] flags;
 
-	public StatusInfo(ChangeKind ... changeKinds) {
+	public StatusInfo(CacheChange.Kind ... changeKinds) {
 		super(ParameterEnum.PID_STATUS_INFO);
 		this.flags = new byte[4];
 
-		for (ChangeKind kind : changeKinds) {
+		for (CacheChange.Kind kind : changeKinds) {
 			switch(kind) {
 			case DISPOSE: this.flags[3] |= 0x1; break;
 			case UNREGISTER: this.flags[3] |= 0x2; break;
@@ -61,13 +61,13 @@ public class StatusInfo extends Parameter implements InlineParameter {
 		return (flags[3] & 0x2) == 0x2;
 	}
 
-	public List<ChangeKind> getChangeKinds() {
-		List<ChangeKind> ckList = new LinkedList<>();
+	public List<CacheChange.Kind> getChangeKinds() {
+		List<CacheChange.Kind> ckList = new LinkedList<>();
 		if (isDisposed()) {
-			ckList.add(ChangeKind.DISPOSE);
+			ckList.add(CacheChange.Kind.DISPOSE);
 		}
 		if (isUnregistered()) {
-			ckList.add(ChangeKind.UNREGISTER);
+			ckList.add(CacheChange.Kind.UNREGISTER);
 		}
 		
 		return ckList;

@@ -24,11 +24,11 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-public class WriterDataMarshaller extends Marshaller<WriterData> {
+public class WriterDataMarshaller implements Marshaller<WriterData> {
 	private static final Logger log = LoggerFactory.getLogger(WriterDataMarshaller.class);
 
 	@Override
-	public boolean hasKey(Class<?> data) {
+	public boolean hasKey() {
 		return true; // Always true. Key is PID_KEY_HASH.
 	}
 

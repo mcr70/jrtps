@@ -8,8 +8,8 @@ import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.ParameterFactory;
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.SequenceNumber_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.SequenceNumber;
 
 
 /**
@@ -22,9 +22,9 @@ public class DataFrag extends SubMessage {
 	public static final int KIND = 0x16;
 	
 	private short extraFlags;
-	private EntityId_t readerId;
-	private EntityId_t writerId;
-	private SequenceNumber_t writerSN;
+	private EntityId readerId;
+	private EntityId writerId;
+	private SequenceNumber writerSN;
 	private int fragmentStartingNum;
 	private int fragmentsInSubmessage;
 	private int fragmentSize;
@@ -49,15 +49,15 @@ public class DataFrag extends SubMessage {
 		return (header.flags & 0x4) != 0;
 	}
 
-	public EntityId_t getReaderId() {
+	public EntityId getReaderId() {
 		return readerId;
 	}
 
-	public EntityId_t getWriterId() {
+	public EntityId getWriterId() {
 		return writerId;
 	}
 	
-	public SequenceNumber_t getWriterSequenceNumber() {
+	public SequenceNumber getWriterSequenceNumber() {
 		return writerSN;
 	}
 
@@ -94,9 +94,9 @@ public class DataFrag extends SubMessage {
 		
 		int currentCount = bb.position(); // count bytes to inline qos
 
-		this.readerId = EntityId_t.readEntityId(bb);
-		this.writerId = EntityId_t.readEntityId(bb);		
-		this.writerSN = new SequenceNumber_t(bb);
+		this.readerId = EntityId.readEntityId(bb);
+		this.writerId = EntityId.readEntityId(bb);		
+		this.writerSN = new SequenceNumber(bb);
 		
 		this.fragmentStartingNum = bb.read_long(); // ulong
 		this.fragmentsInSubmessage = bb.read_short(); // ushort
@@ -144,7 +144,7 @@ public class DataFrag extends SubMessage {
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_short(extraFlags);
 		
-		short octets_to_inline_qos = EntityId_t.LENGTH + EntityId_t.LENGTH + SequenceNumber_t.LENGTH + 
+		short octets_to_inline_qos = EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH + 
 				4 + 2 + 2 + 4;  
 		buffer.write_short(octets_to_inline_qos);
 

@@ -1,25 +1,27 @@
-package net.sf.jrtps;
+package net.sf.jrtps.udds;
 
 import java.util.HashMap;
 import java.util.List;
 
+import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.Sample;
+import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.types.GUID_t;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BuiltinReaderDataListener implements SampleListener<ReaderData> {
+class BuiltinReaderDataListener extends BuiltinListener implements SampleListener<ReaderData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
 
-	private final RTPSParticipant participant;
-	private HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants;
-	private HashMap<GUID_t, ReaderData> discoveredReaders;
+	private HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
+	private HashMap<Guid, ReaderData> discoveredReaders;
 
-	BuiltinReaderDataListener(RTPSParticipant p, HashMap<GuidPrefix_t, ParticipantData> discoveredParticipants, HashMap<GUID_t, ReaderData> discoveredReaders) {
-		this.participant = p;
+	BuiltinReaderDataListener(Participant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants, HashMap<Guid, ReaderData> discoveredReaders) {
+		super(p);
 		this.discoveredParticipants = discoveredParticipants;
 		this.discoveredReaders = discoveredReaders;
 	}
@@ -36,26 +38,29 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 		for (Sample<ReaderData> rdSample : samples) {
 			ReaderData readerData = rdSample.getData();
 			//discoveredReaders.put(readerData.getParticipantGuid(), readerData);
-			GUID_t key = readerData.getKey();
+			Guid key = readerData.getKey();
 			if (discoveredReaders.put(key, readerData) == null) {
 				log.debug("Discovered a new reader {} for topic {}, type {}", key, readerData.getTopicName(), readerData.getTypeName());
+				fireReaderDetected(readerData);
 			}
 
-			List<RTPSWriter<?>> writers = participant.getWritersForTopic(readerData.getTopicName());
-			for (RTPSWriter<?> w : writers) {
+			List<DataWriter<?>> writers = participant.getWritersForTopic(readerData.getTopicName());
+			for (DataWriter<?> w : writers) {
 				if (rdSample.isDisposed()) {
-					w.removeMatchedReader(readerData);
+					w.getRTPSWriter().removeMatchedReader(readerData);
 				}
 				else {
 					QualityOfService requested = readerData.getQualityOfService();
-					QualityOfService offered = w.getQualityOfService();
-					log.debug("Check for compatible QoS for {} and {}", w.getGuid().entityId, readerData.getKey().entityId);
+					QualityOfService offered = w.getRTPSWriter().getQualityOfService();
+					log.debug("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().entityId, readerData.getKey().entityId);
 
 					if (offered.isCompatibleWith(requested)) {
-						w.addMatchedReader(readerData);
+						w.getRTPSWriter().addMatchedReader(readerData);
+						fireReaderMatched(w, readerData);
 					}
 					else {
 						log.warn("Discovered reader had incompatible QoS with writer. {}, {}", readerData, w);
+						fireInconsistentQoS(w, readerData);
 					}					
 				}
 
@@ -64,7 +69,8 @@ class BuiltinReaderDataListener implements SampleListener<ReaderData> {
 				if (key.entityId.isUserDefinedEntity()) {  
 					ParticipantData pd = discoveredParticipants.get(key.prefix);
 					if (pd != null) {
-						w.sendData(key.prefix, key.entityId, 0L);
+						w.getRTPSWriter().sendData(key.prefix, key.entityId, 0L);
+						//w.getRTPSWriter().notifyReader(key);
 					}
 					else {
 						log.warn("Participant was not found: {}", key.prefix);

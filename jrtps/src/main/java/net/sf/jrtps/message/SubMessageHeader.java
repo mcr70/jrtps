@@ -4,16 +4,16 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * A Header of the SubMessage.
+ * see 8.3.3.2 Submessage structure
  * 
  * @author mcr70
  *
  */
 public class SubMessageHeader {
 	/**
-	 * Default value for endianess in sub messages. extending classes should utilize this
-	 * value.
+	 * Default value for endianness in sub messages.
 	 */
-	public static final byte DEFAULT_ENDIANESS_FLAG = 0x01;
+	private static final byte DEFAULT_ENDIANNESS_FLAG = 0x00;
 
 	byte kind;
 	byte flags; // 8 flags
@@ -23,10 +23,11 @@ public class SubMessageHeader {
 	 * Constructs this SubMessageHeader with given kind and DEFAULT_ENDIANESS_FLAG.
 	 * Length of the SubMessage is set to 0. Length will be calculated during marshalling
 	 * of the Message.
+	 * 
 	 * @param kind
 	 */
 	public SubMessageHeader(int kind) {
-		this(kind, DEFAULT_ENDIANESS_FLAG);
+		this(kind, DEFAULT_ENDIANNESS_FLAG);
 	}
 
 	/**
@@ -43,10 +44,14 @@ public class SubMessageHeader {
 		this.submessageLength = 0; // Length will be calculated during Data.writeTo(...);		
 	}
 	
+	/**
+	 * Constructs SubMessageHeader by reading from RTPSByteBuffer.
+	 * @param bb
+	 */
 	SubMessageHeader(RTPSByteBuffer bb) {
 		kind = (byte) bb.read_octet();
 		flags = (byte) bb.read_octet();
-		bb.setEndianess(endianessFlag());
+		bb.setEndianess(endiannessFlag());
 		
 		submessageLength = ((int)bb.read_short()) & 0xffff;
 	}
@@ -62,17 +67,21 @@ public class SubMessageHeader {
 		buffer.write_short((short) submessageLength);
 	}
 	/**
-	 * Get the endianness for SubMessage. If endianness flag is set, big-endian is used 
-	 * by SubMessage, otherwise little-endian is used.
+	 * Get the endianness for SubMessage. If endianness flag is set, little-endian is used 
+	 * by SubMessage, otherwise big-endian is used.
 	 * 
 	 * @return true, if endianness flag is set
 	 */
-	public boolean endianessFlag() {
+	public boolean endiannessFlag() {
 		return (flags & 0x1) == 0x1;
 	}
 	
+	/**
+	 * Checks, if endianness flag of this SubMessageHeader represents big endian byte order.
+	 * @return true for big endian byte order
+	 */
 	public boolean isBigEndian() {
-		return !endianessFlag();
+		return !endiannessFlag();
 	}
 	
 	/**

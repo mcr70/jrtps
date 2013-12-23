@@ -1,9 +1,9 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.EntityId_t;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.SequenceNumberSet;
-import net.sf.jrtps.types.SequenceNumber_t;
+import net.sf.jrtps.types.SequenceNumber;
 
 /**
  * The NackFrag Submessage is used to communicate the state of a Reader to a Writer. When a data change
@@ -20,16 +20,16 @@ public class NackFrag extends SubMessage {
 	/**
 	 * Identifies the Reader entity that requests to receive certain fragments.
 	 */
-	private EntityId_t readerId;
+	private EntityId readerId;
 	/**
 	 * Identifies the Writer entity that is the target of the NackFrag message.
 	 * This is the Writer Entity that is being asked to re-send some fragments.
 	 */
-	private EntityId_t writerId;
+	private EntityId writerId;
 	/**
 	 * The sequence number for which some fragments are missing.
 	 */
-	private SequenceNumber_t writerSN;
+	private SequenceNumber writerSN;
 	/**
 	 * Communicates the state of the reader to the writer. The fragment numbers that appear in the set 
 	 * indicate missing fragments on the reader side. The ones that do not appear in the set
@@ -50,15 +50,15 @@ public class NackFrag extends SubMessage {
 		readMessage(is);
 	}
 
-	public EntityId_t getReaderId() {
+	public EntityId getReaderId() {
 		return readerId;
 	}
 	
-	public EntityId_t getWriterId() {
+	public EntityId getWriterId() {
 		return writerId;
 	}
 	
-	public SequenceNumber_t getWriterSequenceNumber() {
+	public SequenceNumber getWriterSequenceNumber() {
 		return writerSN;
 	}
 
@@ -72,9 +72,9 @@ public class NackFrag extends SubMessage {
 
 	
 	private void readMessage(RTPSByteBuffer bb) {
-		this.readerId = EntityId_t.readEntityId(bb);
-		this.writerId = EntityId_t.readEntityId(bb);
-		this.writerSN = new SequenceNumber_t(bb);
+		this.readerId = EntityId.readEntityId(bb);
+		this.writerId = EntityId.readEntityId(bb);
+		this.writerSN = new SequenceNumber(bb);
 		this.fragmentNumberState = new SequenceNumberSet(bb);
 		
 		this.count = bb.read_long();

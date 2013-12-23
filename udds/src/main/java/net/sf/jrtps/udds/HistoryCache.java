@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.udds;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -10,6 +10,12 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import net.sf.jrtps.CacheChange;
+import net.sf.jrtps.Marshaller;
+import net.sf.jrtps.OutOfResources;
+import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.TimeOutException;
+import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
@@ -25,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * RTPS layer, RTPSWriter requests changes to be sent to remote readers. When called 
  * from DDS layer, a DDS Writer is adding new changes to history cache.
  */
-class HistoryCache<T> {
+class HistoryCache<T> implements WriterCache {
 	private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
 	// QoS policies affecting writer cache
 	private final QosResourceLimits resource_limits;
@@ -48,67 +54,67 @@ class HistoryCache<T> {
 			}));
 
 	private final Marshaller<T> marshaller;
-	private final RTPSWriter<T> rtps_writer;
+	private DataWriter<T> writer;
 
 
-	HistoryCache(Marshaller<T> marshaller, QualityOfService qos, RTPSWriter<T> rtps_writer) {
+	HistoryCache(Marshaller<T> marshaller, QualityOfService qos) {
 		this.marshaller = marshaller;
-		this.rtps_writer = rtps_writer;
 
 		resource_limits = (QosResourceLimits) qos.getPolicy(QosResourceLimits.class);
 		history = (QosHistory) qos.getPolicy(QosHistory.class);
 		reliability = (QosReliability) qos.getPolicy(QosReliability.class);
 	}
 
+	void setDataWriter(DataWriter<T> dw) {
+		this.writer = dw;
+	}
+
+
 	void dispose(List<T> samples) {
-		addSample(ChangeKind.DISPOSE, samples);
+		addSample(CacheChange.Kind.DISPOSE, samples);
 	}
 
 	void unregister(List<T> samples) {
-		addSample(ChangeKind.UNREGISTER, samples);
+		addSample(CacheChange.Kind.UNREGISTER, samples);
 	}
 
 	void write(List<T> samples) {
-		addSample(ChangeKind.WRITE, samples);
+		addSample(CacheChange.Kind.WRITE, samples);
 	}
 
 
 
-	private void addSample(ChangeKind kind, List<T> samples) {
-		log.debug("[{}] add {} samples of kind {}", rtps_writer.getGuid().entityId, samples.size(), kind);
-		try {
-			for (T sample : samples) {
-				InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
-				Instance inst = instances.get(key);
-				if (inst == null) {
-					log.debug("[{}] Creating new instance {}", rtps_writer.getGuid().entityId, key);
-					instanceCount++;
-					if (instanceCount > resource_limits.getMaxInstances()) {
-						instanceCount = resource_limits.getMaxInstances();
-						throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
-					}
+	private void addSample(CacheChange.Kind kind, List<T> samples) {
+		log.debug("[{}] add {} samples of kind {}", writer.getGuid().entityId, samples.size(), kind);
 
-					inst = new Instance(key, history.getDepth());
-					instances.put(key, inst);
+		for (T sample : samples) {
+			InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
+			Instance inst = instances.get(key);
+			if (inst == null) {
+				log.debug("[{}] Creating new instance {}", writer.getGuid().entityId, key);
+				instanceCount++;
+				if (instanceCount > resource_limits.getMaxInstances()) {
+					instanceCount = resource_limits.getMaxInstances();
+					throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
 				}
 
-				if (inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
-					throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
-				}
-				
-				log.trace("[{}] Creating cache change {}", rtps_writer.getGuid().entityId, seqNum + 1);
-				CacheChange aChange = new CacheChange(kind, ++seqNum, sample);
-				sampleCount += inst.addSample(aChange);
-				if (sampleCount > resource_limits.getMaxSamples()) {
-					inst.history.removeLast();
-					sampleCount = resource_limits.getMaxSamples();
-					throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
-				}
-				changes.add(aChange);
+				inst = new Instance(key, history.getDepth());
+				instances.put(key, inst);
 			}
-		}
-		finally {
-			rtps_writer.notifyReaders();
+
+			if (inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
+				throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
+			}
+
+			log.trace("[{}] Creating cache change {}", writer.getGuid().entityId, seqNum + 1);
+			CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
+			sampleCount += inst.addSample(aChange);
+			if (sampleCount > resource_limits.getMaxSamples()) {
+				inst.history.removeLast();
+				sampleCount = resource_limits.getMaxSamples();
+				throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
+			}
+			changes.add(aChange);
 		}
 	}
 
@@ -131,30 +137,30 @@ class HistoryCache<T> {
 		// TODO: CacheChange.sequenceNumber must be set only if it is succesfully 
 		//       inserted into cache
 		int addSample(CacheChange aChange) {
-			log.debug("[{}] Adding sample {}", rtps_writer.getGuid().entityId, aChange.getSequenceNumber());
+			log.debug("[{}] Adding sample {}", writer.getGuid().entityId, aChange.getSequenceNumber());
 			int historySizeChange = 1;
 			history.add(aChange);
 			if (history.size() > maxSize) {
 				if (reliability.getKind() == QosReliability.Kind.RELIABLE) {
 					CacheChange oldestChange = history.getFirst();
 					if (reliability.getMaxBlockingTime().asMillis() > 0 &&
-							!rtps_writer.isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
+							!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
 						// Block the writer and hope that readers acknowledge all the changes
-						
+
 						// TODO: during acknack, we should check if there is no need to block anymore.
 						//       I.e. we should notify blocked thread.
-						
-						log.debug("[{}] Blocking the writer for {} ms", rtps_writer.getGuid().entityId, reliability.getMaxBlockingTime().asMillis());
-						rtps_writer.getParticipant().waitFor((int) reliability.getMaxBlockingTime().asMillis());
-						
-						if (!rtps_writer.isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
+
+						log.debug("[{}] Blocking the writer for {} ms", writer.getGuid().entityId, reliability.getMaxBlockingTime().asMillis());
+						writer.getParticipant().waitFor((int) reliability.getMaxBlockingTime().asMillis());
+
+						if (!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
 							throw new TimeOutException("Blocked writer for " + reliability.getMaxBlockingTime().asMillis() + 
 									" ms, and readers have not acknowledged " + oldestChange.getSequenceNumber());
 						}
 					}
 				}
 
-				log.debug("[{}] Removing oldest sample from history", rtps_writer.getGuid().entityId);
+				log.debug("[{}] Removing oldest sample from history", writer.getGuid().entityId);
 				CacheChange cc = history.removeFirst(); // Discard oldest sample
 				changes.remove(cc); // Removed oldest instance sample from a set of changes. 
 
@@ -175,7 +181,7 @@ class HistoryCache<T> {
 		public boolean equals(Object o) {
 			if (o instanceof HistoryCache<?>.InstanceKey) {
 				InstanceKey other = (InstanceKey) o;
-				
+
 				return Arrays.equals(key, other.key);
 			}
 
@@ -186,7 +192,7 @@ class HistoryCache<T> {
 		public int hashCode() {
 			return Arrays.hashCode(key);
 		}
-		
+
 		public String toString() {
 			return "Key: " + Arrays.toString(key);
 		}
@@ -201,20 +207,21 @@ class HistoryCache<T> {
 	 * @param sequenceNumber sequence number to compare to
 	 * @return a SortedSet of changes
 	 */
-	SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
-		log.debug("[{}] getChangesSince({})", rtps_writer.getGuid().entityId, sequenceNumber);
+	@Override
+	public SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
+		log.debug("[{}] getChangesSince({})", writer.getGuid().entityId, sequenceNumber);
 
 		synchronized (changes) {
 			for (CacheChange cc : changes) {
 				if (cc.getSequenceNumber() > sequenceNumber) {
 					SortedSet<CacheChange> tailSet = changes.tailSet(cc);
-					log.debug("[{}] returning {}", rtps_writer.getGuid().entityId, tailSet);
+					log.debug("[{}] returning {}", writer.getGuid().entityId, tailSet);
 					return tailSet;
 				}
 			}
 		}
 
-		log.debug("[{}] No chances to return for seq num {}", rtps_writer.getGuid().entityId, sequenceNumber);
+		log.debug("[{}] No chances to return for seq num {}", writer.getGuid().entityId, sequenceNumber);
 		return new TreeSet<>();
 	}
 
@@ -224,19 +231,21 @@ class HistoryCache<T> {
 	 * 
 	 * @return seqNumMin
 	 */
-	long getSeqNumMin() {
+	@Override
+	public long getSeqNumMin() {
 		if (changes.size() == 0) {
 			return 0;
 		}
 		return changes.first().getSequenceNumber();
 	}
-	
+
 	/**
 	 * Gets the biggest sequence number this HistoryCache has.
 	 * 
 	 * @return seqNumMax
 	 */
-	long getSeqNumMax() {
+	@Override
+	public long getSeqNumMax() {
 		if (changes.size() == 0) {
 			return 0;
 		}

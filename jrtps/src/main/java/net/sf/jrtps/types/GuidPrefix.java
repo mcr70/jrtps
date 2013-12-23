@@ -16,26 +16,26 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-public class GuidPrefix_t {
+public class GuidPrefix {
 	public static final int LENGTH = 12;
 
-	public static final GuidPrefix_t GUIDPREFIX_UNKNOWN = new GuidPrefix_t(new byte[] {0,0,0,0,0,0,0,0,0,0,0,0});
+	public static final GuidPrefix GUIDPREFIX_UNKNOWN = new GuidPrefix(new byte[] {0,0,0,0,0,0,0,0,0,0,0,0});
 
 	/**
 	 * bytes must be of length 12
 	 */
 	private final byte[] bytes;
 
-	public GuidPrefix_t(byte domainId, byte participantid, int vmid) {
+	public GuidPrefix(byte domainId, byte participantid, int vmid) {
 		this(new byte[] {domainId, participantid, (byte) (vmid>>8 & 0xff), (byte) (vmid&0xff), 0xc,0xa,0xf,0xe,0xb,0xa,0xb,0xe});
 	}
 
-	public GuidPrefix_t(RTPSByteBuffer bb) {
+	public GuidPrefix(RTPSByteBuffer bb) {
 		bytes = new byte[12];
 		bb.read(bytes);
 	}
 
-	GuidPrefix_t(byte[] bytes) {
+	GuidPrefix(byte[] bytes) {
 		this.bytes = bytes;
 
 		if (bytes.length != 12) {
@@ -75,8 +75,8 @@ public class GuidPrefix_t {
 
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof GuidPrefix_t) {
-			GuidPrefix_t other = (GuidPrefix_t) o;
+		if (o instanceof GuidPrefix) {
+			GuidPrefix other = (GuidPrefix) o;
 
 			return Arrays.equals(bytes, other.bytes);
 		}

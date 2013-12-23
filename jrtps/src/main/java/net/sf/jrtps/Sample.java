@@ -1,7 +1,7 @@
 package net.sf.jrtps;
 
 import net.sf.jrtps.message.parameter.StatusInfo;
-import net.sf.jrtps.types.Time_t;
+import net.sf.jrtps.types.Time;
 
 /**
  * Represents a sample of type T.
@@ -12,10 +12,10 @@ import net.sf.jrtps.types.Time_t;
  */
 public class Sample<T> {
 	private T obj;
-	private Time_t timestamp;
+	private Time timestamp;
 	private StatusInfo sInfo;
 
-	Sample(T obj, Time_t timestamp, StatusInfo sInfo) {
+	Sample(T obj, Time timestamp, StatusInfo sInfo) {
 		this.obj = obj;
 		this.timestamp = timestamp;
 		this.sInfo = sInfo;
