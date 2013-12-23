@@ -132,7 +132,7 @@ public class RTPSWriter<T> extends Endpoint {
 	public void close() {
 		heartbeatPeriod = 0; // Stops heartbeat thread gracefully 
 		matchedReaders.clear();
-		writer_cache.clear();
+		//writer_cache.clear();
 	}
 
 	/**
@@ -329,7 +329,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param sequenceNumber sequenceNumber of a change to check
 	 * @return true, if every matched reader has acknowledged given change number
 	 */
-	boolean isAcknowledgedByAll(long sequenceNumber) {
+	public boolean isAcknowledgedByAll(long sequenceNumber) {
 		for (ReaderProxy proxy : matchedReaders.values()) {
 			if (proxy.isActive() && proxy.getReadersHighestSeqNum() < sequenceNumber) {
 				return false;
@@ -345,6 +345,7 @@ public class RTPSWriter<T> extends Endpoint {
 		ll.add(obj);
 		write(ll);
 	}
+
 	public void write(List<T> objs) {
 		writer_cache.write(objs);	
 	}

@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.types.Guid;
 
 
 
@@ -27,8 +28,8 @@ public class DataWriter<T> extends Entity {
 	 * 
 	 * @param topicName
 	 */
-	DataWriter(RTPSWriter<T> writer) {
-		super(writer.getTopicName());
+	DataWriter(Participant p, RTPSWriter<T> writer) {
+		super(p, writer.getTopicName());
 		this.rtps_writer = writer;
 	}
 	
@@ -75,5 +76,21 @@ public class DataWriter<T> extends Entity {
 
 	RTPSWriter<T> getRTPSWriter() {
 		return rtps_writer;
+	}
+
+
+	/**
+	 * Gets the Guid of thie DataWriter
+	 * @return Guid
+	 */
+	Guid getGuid() {
+		return rtps_writer.getGuid();
+	}
+
+	/**
+	 * Notifies readers of the changes available.
+	 */
+	void notifyReaders() {
+		rtps_writer.notifyReaders();
 	}
 }
