@@ -1,7 +1,7 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.GuidPrefix;
 
 /**
  * This message is sent from an RTPS Writer to an RTPS Reader to modify the GuidPrefix used to 
@@ -15,20 +15,20 @@ import net.sf.jrtps.types.GuidPrefix_t;
 public class InfoDestination extends SubMessage {
 	public static final int KIND = 0x0e;
 
-	private GuidPrefix_t guidPrefix;
+	private GuidPrefix guidPrefix;
 
 	/**
 	 * Sets GuidPrefix_t to UNKNOWN.
 	 */
 	public InfoDestination() {
-		this(GuidPrefix_t.GUIDPREFIX_UNKNOWN);
+		this(GuidPrefix.GUIDPREFIX_UNKNOWN);
 	}
 
 	/**
 	 * This constructor is used when the intention is to send data into network.
 	 * @param guidPrefix 
 	 */
-	public InfoDestination(GuidPrefix_t guidPrefix) {
+	public InfoDestination(GuidPrefix guidPrefix) {
 		super(new SubMessageHeader(KIND));
 		this.guidPrefix = guidPrefix;
 	}
@@ -42,7 +42,7 @@ public class InfoDestination extends SubMessage {
 	InfoDestination(SubMessageHeader smh, RTPSByteBuffer bb) {
 		super(smh);
 		
-		this.guidPrefix = new GuidPrefix_t(bb);
+		this.guidPrefix = new GuidPrefix(bb);
 	}
 	
 
@@ -50,7 +50,7 @@ public class InfoDestination extends SubMessage {
 	 * Provides the GuidPrefix that should be used to reconstruct the
 	 * GUIDs of all the RTPS Reader entities whose EntityIds appears in the Submessages that follow.
 	 */
-	public GuidPrefix_t getGuidPrefix() {
+	public GuidPrefix getGuidPrefix() {
 		return guidPrefix;
 	}
 

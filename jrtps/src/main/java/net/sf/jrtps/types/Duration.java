@@ -8,9 +8,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class Duration_t implements Comparable<Duration_t> {
+public class Duration implements Comparable<Duration> {
 	// TODO: check infinite duration
-	public static final Duration_t INFINITE = new Duration_t(Integer.MAX_VALUE, 0);
+	public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, 0);
 	public int sec;
 	public int nano;
 
@@ -18,7 +18,7 @@ public class Duration_t implements Comparable<Duration_t> {
 	 * Constructor for Duration_t
 	 * @param millis Duration expressed in milliseconds.
 	 */
-	public Duration_t(int millis) {
+	public Duration(int millis) {
 		this.sec = (int) (millis / 1000);
 		this.nano = 0;
 	}
@@ -28,7 +28,7 @@ public class Duration_t implements Comparable<Duration_t> {
 	 * @param sec seconds
 	 * @param nano nanoseconds
 	 */
-	public Duration_t(int sec, int nano) {
+	public Duration(int sec, int nano) {
 		this.sec = sec;
 		this.nano = nano;
 	}
@@ -37,7 +37,7 @@ public class Duration_t implements Comparable<Duration_t> {
 	 * Constructs Duration_t from RTPSByteBuffer.
 	 * @param bb 
 	 */
-	public Duration_t(RTPSByteBuffer bb) {
+	public Duration(RTPSByteBuffer bb) {
 		sec = bb.read_long();
 		nano = bb.read_long();
 	}
@@ -65,14 +65,14 @@ public class Duration_t implements Comparable<Duration_t> {
 	}
 
 	@Override
-	public int compareTo(Duration_t o) {
+	public int compareTo(Duration o) {
 		return (int) (asMillis() - o.asMillis());
 	}
 	
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof Duration_t) {
-			Duration_t other = (Duration_t) o;
+		if (o instanceof Duration) {
+			Duration other = (Duration) o;
 			if (sec == other.sec && nano == other.nano) {
 				return true;
 			}

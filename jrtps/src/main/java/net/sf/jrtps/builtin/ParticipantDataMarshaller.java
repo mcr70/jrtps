@@ -14,7 +14,7 @@ import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.Sentinel;
 import net.sf.jrtps.message.parameter.VendorId;
-import net.sf.jrtps.types.Locator_t;
+import net.sf.jrtps.types.Locator;
 
 /**
  * ParticipantDataMarshaller is able to marshall / unmarshall builtin ParticipantData
@@ -22,10 +22,10 @@ import net.sf.jrtps.types.Locator_t;
  * 
  * @author mcr70
  */
-public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
+public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
 
 	@Override
-	public boolean hasKey(Class<?> data) {
+	public boolean hasKey() {
 		return false; // hardcoded. Key is remote participants GUID
 	}
 
@@ -51,22 +51,22 @@ public class ParticipantDataMarshaller extends Marshaller<ParticipantData> {
 		payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
 		payloadParams.add(new VendorId(pd.getVendorId()));
 
-		Locator_t unicastLocator = pd.getUnicastLocator();
+		Locator unicastLocator = pd.getUnicastLocator();
 		if (unicastLocator != null) {
 			payloadParams.add(new DefaultUnicastLocator(unicastLocator));			
 		}
 
-		Locator_t multicastLocator = pd.getMulticastLocator();
+		Locator multicastLocator = pd.getMulticastLocator();
 		if (multicastLocator != null) {
 			payloadParams.add(new DefaultMulticastLocator(multicastLocator));
 		}
 
-		Locator_t metaUnicastLocator = pd.getMetatrafficUnicastLocator();
+		Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
 		if (metaUnicastLocator != null) {
 			payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
 		}
 
-		Locator_t metaMulticastLocator = pd.getMetatrafficMulticastLocator();
+		Locator metaMulticastLocator = pd.getMetatrafficMulticastLocator();
 		if (metaMulticastLocator != null) {
 			payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
 		}

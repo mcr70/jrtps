@@ -1,7 +1,7 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.ProtocolVersion_t;
 import net.sf.jrtps.types.VendorId_t;
 
@@ -17,9 +17,9 @@ public class Header {
 	private byte[] hdrStart;
 	private ProtocolVersion_t version;
 	private VendorId_t vendorId;
-	private GuidPrefix_t guidPrefix;
+	private GuidPrefix guidPrefix;
 
-	public Header(GuidPrefix_t prefix) {
+	public Header(GuidPrefix prefix) {
 		hdrStart = HDR_START;
 		version = ProtocolVersion_t.PROTOCOLVERSION_2_1;
 		vendorId = VendorId_t.VENDORID_JRTPS; // VENDORID_UNKNOWN;
@@ -33,7 +33,7 @@ public class Header {
 		is.read(hdrStart);
 		version = new ProtocolVersion_t(is);
 		vendorId = new VendorId_t(is);
-		guidPrefix = new GuidPrefix_t(is);
+		guidPrefix = new GuidPrefix(is);
 	}
 
 
@@ -47,7 +47,7 @@ public class Header {
 	/**
 	 * Defines a default prefix to use for all GUIDs that appear in the message.
 	 */
-	public GuidPrefix_t getGuidPrefix() {
+	public GuidPrefix getGuidPrefix() {
 		return guidPrefix;
 	}
 

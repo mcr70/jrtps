@@ -15,8 +15,8 @@ import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
-import net.sf.jrtps.types.Time_t;
+import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,19 +48,19 @@ class RTPSMessageHandler implements Runnable {
 	 * @param msg
 	 */
 	private void handleMessage(Message msg) {
-		Time_t timestamp = null;
-		GuidPrefix_t destGuidPrefix = GuidPrefix_t.GUIDPREFIX_UNKNOWN;
-		GuidPrefix_t sourceGuidPrefix = msg.getHeader().getGuidPrefix();
+		Time timestamp = null;
+		GuidPrefix destGuidPrefix = GuidPrefix.GUIDPREFIX_UNKNOWN;
+		GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		
-		log.debug("Got Message from {}", sourceGuidPrefix);
 		if (participant.getGuid().prefix.equals(sourceGuidPrefix)) {
 			log.debug("Discarding message originating from this participant");
 			return;
 		}
-			
-		List<SubMessage> subMessages = msg.getSubMessages();
 
+		log.debug("Got Message from {}", sourceGuidPrefix);	
+		
 		Set<RTPSReader<?>> dataReceivers = new HashSet<>();
+		List<SubMessage> subMessages = msg.getSubMessages();
 		
 		for (SubMessage subMsg : subMessages) {
 			switch (subMsg.getKind()) {
@@ -70,7 +70,9 @@ class RTPSMessageHandler implements Runnable {
 			case DATA:
 				try {
 					RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
-					dataReceivers.add(r);
+					if (r != null) {
+						dataReceivers.add(r);
+					}
 				}
 				catch(IOException ioe) {
 					log.warn("Failed to handle data", ioe);
@@ -98,7 +100,7 @@ class RTPSMessageHandler implements Runnable {
 		}
 	}
 
-	private void handleAckNack(GuidPrefix_t sourceGuidPrefix, AckNack ackNack) {
+	private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
 		RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
 
 		if (writer != null) {
@@ -109,7 +111,7 @@ class RTPSMessageHandler implements Runnable {
 		}
 	}
 
-	private RTPSReader<?> handleData(GuidPrefix_t sourcePrefix, Time_t timestamp, Data data) throws IOException {
+	private RTPSReader<?> handleData(GuidPrefix sourcePrefix, Time timestamp, Data data) throws IOException {
 		RTPSReader<?> reader = participant.getReader(data.getReaderId(), data.getWriterId());
 
 		if (reader != null) {
@@ -123,7 +125,7 @@ class RTPSMessageHandler implements Runnable {
 		return null;
 	}
 
-	private void handleHeartbeat(GuidPrefix_t senderGuidPrefix, Heartbeat hb) {		
+	private void handleHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {		
 		RTPSReader<?> reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
 
 		if (reader != null) {

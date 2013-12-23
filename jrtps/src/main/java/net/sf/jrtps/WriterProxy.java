@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.jrtps.builtin.WriterData;
-import net.sf.jrtps.types.GUID_t;
+import net.sf.jrtps.types.Guid;
 
 
 /**
@@ -16,7 +16,7 @@ import net.sf.jrtps.types.GUID_t;
  */
 class WriterProxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
-	private GUID_t writerGuid;
+	private final Guid writerGuid;
 	private WriterData wd;
 	
 	private volatile long seqNumMax = 0;
@@ -25,12 +25,16 @@ class WriterProxy {
 	
 	WriterProxy(WriterData wd) {
 		this.wd = wd;
+		writerGuid = wd.getKey();
 	}
 	
-	WriterProxy(GUID_t writerGuid) {
+	WriterProxy(Guid writerGuid) {
 		this.writerGuid = writerGuid;
 	}
 	
+	Guid getGuid() {
+		return writerGuid;
+	}
 
 	long getSeqNumMax() {
 		return seqNumMax;

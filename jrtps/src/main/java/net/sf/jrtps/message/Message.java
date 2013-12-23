@@ -8,7 +8,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ public class Message {
 	private List<SubMessage> submessages = new LinkedList<SubMessage>();
 	
 	
-	public Message(GuidPrefix_t prefix) {
+	public Message(GuidPrefix prefix) {
 		header = new Header(prefix);
 	}
 	
@@ -119,7 +119,7 @@ public class Message {
 			try {
 				SubMessageHeader hdr = msg.getHeader();
 				buffer.align(4);
-				buffer.setEndianess(hdr.endianessFlag()); // Set the endianess
+				buffer.setEndianess(hdr.endiannessFlag()); // Set the endianess
 				hdr.writeTo(buffer);
 				
 				subMessageCount++;

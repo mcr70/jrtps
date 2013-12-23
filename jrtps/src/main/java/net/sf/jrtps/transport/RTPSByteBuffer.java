@@ -210,9 +210,10 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 	}
 
 	/**
+	 * Sets the endianness used. 
 	 * see 9.4.5.1.2 flags
 	 * 
-	 * @param endianessFlag
+	 * @param endianessFlag If true, little endian is used. If false, big endian is used.
 	 * 
 	 */
 	public void setEndianess(boolean endianessFlag) {

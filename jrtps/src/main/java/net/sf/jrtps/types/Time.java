@@ -9,28 +9,28 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-public class Time_t {
+public class Time {
 	public static final int LENGTH = 8;
 
-	public static final Time_t TIME_ZERO = new Time_t(0,0);
-	public static final Time_t TIME_INVALID = new Time_t(-1, 0xffffffff);
-	public static final Time_t TIME_INFINITE = new Time_t(0x7fffffff, 0xffffffff);
+	public static final Time TIME_ZERO = new Time(0,0);
+	public static final Time TIME_INVALID = new Time(-1, 0xffffffff);
+	public static final Time TIME_INFINITE = new Time(0x7fffffff, 0xffffffff);
 	
 	private final int seconds; // System.currentTimeMillis()
 	private final int fraction;
 	
 	
-	public Time_t(RTPSByteBuffer bb) {
+	public Time(RTPSByteBuffer bb) {
 		this.seconds = bb.read_long() & 0x7fffffff;  // long
 		this.fraction = bb.read_long(); // ulong
 	}
 
-	public Time_t(int sec, int frac) {
+	public Time(int sec, int frac) {
 		seconds = sec;
 		fraction = frac;
 	}
 
-	public Time_t(long systemCurrentMillis) {
+	public Time(long systemCurrentMillis) {
 		this.seconds = (int) (systemCurrentMillis / 1000); 
 		long scm = this.seconds * 1000;
 		this.fraction = (int) (systemCurrentMillis - scm);

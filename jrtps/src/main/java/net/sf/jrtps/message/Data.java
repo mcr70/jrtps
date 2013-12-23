@@ -7,8 +7,8 @@ import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.EntityId_t;
-import net.sf.jrtps.types.SequenceNumber_t;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.SequenceNumber;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,9 +29,9 @@ public class Data extends SubMessage {
 	private static final Logger log = LoggerFactory.getLogger(Data.class);
 	
 	private short extraFlags = 0;
-	private EntityId_t readerId;
-	private EntityId_t writerId;
-	private SequenceNumber_t writerSN;
+	private EntityId readerId;
+	private EntityId writerId;
+	private SequenceNumber writerSN;
 	private ParameterList inlineQosParams;
 	private DataEncapsulation dataEncapsulation;
 	
@@ -45,14 +45,14 @@ public class Data extends SubMessage {
 	 * @param inlineQosParams Inline QoS parameters. May be null.
 	 * @param dEnc
 	 */
-	public Data(EntityId_t readerId, EntityId_t writerId, long seqNum,
+	public Data(EntityId readerId, EntityId writerId, long seqNum,
 			ParameterList inlineQosParams, DataEncapsulation dEnc) {
 		
 		super(new SubMessageHeader(0x15));
 		
 		this.readerId = readerId;
 		this.writerId = writerId;
-		this.writerSN = new SequenceNumber_t(seqNum);
+		this.writerSN = new SequenceNumber(seqNum);
 		
 		if (inlineQosParams != null && inlineQosParams.size() > 0) {
 			header.flags |= 0x2;
@@ -90,9 +90,9 @@ public class Data extends SubMessage {
 		
 		int currentCount = bb.position(); // count bytes to inline qos
 		
-		this.readerId = EntityId_t.readEntityId(bb);
-		this.writerId = EntityId_t.readEntityId(bb);
-		this.writerSN = new SequenceNumber_t(bb);
+		this.readerId = EntityId.readEntityId(bb);
+		this.writerId = EntityId.readEntityId(bb);
+		this.writerSN = new SequenceNumber(bb);
 				
 		int bytesRead = bb.position() - currentCount;
 		int unknownOctets = octetsToInlineQos - bytesRead;
@@ -192,7 +192,7 @@ public class Data extends SubMessage {
 	 * 
 	 * @return EntityId_t of the reader
 	 */
-	public EntityId_t getReaderId() {
+	public EntityId getReaderId() {
 		return readerId;
 	}
 
@@ -201,7 +201,7 @@ public class Data extends SubMessage {
 	 * 
 	 * @return EntityId_t of the writer
 	 */
-	public EntityId_t getWriterId() {
+	public EntityId getWriterId() {
 		return writerId;
 	}
 
@@ -228,7 +228,7 @@ public class Data extends SubMessage {
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write_short(extraFlags);
 		
-		short octets_to_inline_qos = EntityId_t.LENGTH + EntityId_t.LENGTH + SequenceNumber_t.LENGTH;  
+		short octets_to_inline_qos = EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH;  
 		buffer.write_short(octets_to_inline_qos);
 
 		readerId.writeTo(buffer);

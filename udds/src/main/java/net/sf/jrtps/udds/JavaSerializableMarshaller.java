@@ -6,6 +6,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedList;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.CDREncapsulation;
@@ -28,25 +31,38 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-public class JavaSerializableMarshaller extends Marshaller<Serializable> {
+public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 	private static final Logger log = LoggerFactory.getLogger(JavaSerializableMarshaller.class);
-	private int bufferSize;
 
+	private final int bufferSize;
+	private final Field[] keyFields;
+	private final boolean hasKey;
+	
 	/**
 	 * Constructs this JavaSerializableMarshaller bufferSize 1024. This constructor is used 
 	 * by udds.
+	 * @param type 
 	 */
-	public JavaSerializableMarshaller() {
-		this(1024);
+	public JavaSerializableMarshaller(Class<?> type) {
+		this(type, 1024);
 	}
-	
+
 	/**
 	 * Constructs this JavaSerializableMarshaller with given bufferSize.
 	 * bufferSize must be big enough to hold serialized object. 
+	 * @param type 
 	 * @param bufferSize the size of the buffer that is used during marshall and unmarshall
 	 */
-	public JavaSerializableMarshaller(int bufferSize) {
+	public JavaSerializableMarshaller(Class<?> type, int bufferSize) {
 		this.bufferSize = bufferSize;
+		this.keyFields = getKeyFields(type);
+		this.hasKey = keyFields.length > 0;
+	}
+
+
+	@Override
+	public boolean hasKey() {
+		return hasKey;
 	}
 
 	/**
@@ -67,13 +83,13 @@ public class JavaSerializableMarshaller extends Marshaller<Serializable> {
 				Object value = f.get(data);
 				oos.writeObject(value);
 			}
-			
+
 			return baos.toByteArray();
 		}
 		catch(Exception e) {
 			log.warn("Failed to extract key from {}", data, e);
 		}
-		
+
 		return null;
 	}
 
@@ -113,5 +129,40 @@ public class JavaSerializableMarshaller extends Marshaller<Serializable> {
 		os.writeObject(data);
 
 		return cdrEnc;
+	}
+
+	/**
+	 * Get all the keyFields found from given type. If no key fields are found, an array of length 0 is returned.
+	 * 
+	 * @return an array of key fields
+	 */
+	private Field[] getKeyFields(final Class<?> type) {			
+		Field[] fields = type.getDeclaredFields();
+		LinkedList<Field> fieldList = new LinkedList<>();
+		for (Field f : fields) {
+			Key key = f.getAnnotation(Key.class);
+			if (key != null) {
+				fieldList.add(f);
+			}
+		}
+
+		// Sort fields according to @Key annotations index field
+		Collections.sort(fieldList, new Comparator<Field>() {
+			@Override
+			public int compare(Field f1, Field f2) {
+				Key key1 = f1.getAnnotation(Key.class);
+				Key key2 = f2.getAnnotation(Key.class);
+
+				if (key1.index() == key2.index()) {
+					throw new RuntimeException(type + " has two Key annotations with same index: " + key1.index());
+				}
+
+				return key1.index() - key2.index();
+			}
+		});
+
+		Field[] keyFields = fieldList.toArray(new Field[0]);
+
+		return keyFields;
 	}
 }

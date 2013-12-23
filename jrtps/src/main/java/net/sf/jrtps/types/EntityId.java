@@ -12,21 +12,21 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-public abstract class EntityId_t  {
-	public static final EntityId_t SPDP_BUILTIN_PARTICIPANT_WRITER = new SPDPbuiltinParticipantWriter();
-	public static final EntityId_t SPDP_BUILTIN_PARTICIPANT_READER = new SPDPbuiltinParticipantReader();
+public abstract class EntityId  {
+	public static final EntityId SPDP_BUILTIN_PARTICIPANT_WRITER = new SPDPbuiltinParticipantWriter();
+	public static final EntityId SPDP_BUILTIN_PARTICIPANT_READER = new SPDPbuiltinParticipantReader();
 	
-	public static final EntityId_t SEDP_BUILTIN_SUBSCRIPTIONS_WRITER = new SEDPbuiltinSubscriptionsWriter();
-	public static final EntityId_t SEDP_BUILTIN_SUBSCRIPTIONS_READER = new SEDPbuiltinSubscriptionsReader();
-	public static final EntityId_t SEDP_BUILTIN_PUBLICATIONS_WRITER = new SEDPbuiltinPublicationsWriter();
-	public static final EntityId_t SEDP_BUILTIN_PUBLICATIONS_READER = new SEDPbuiltinPublicationsReader();
-	public static final EntityId_t SEDP_BUILTIN_TOPIC_WRITER = new SEDPbuiltinTopicWriter();
-	public static final EntityId_t SEDP_BUILTIN_TOPIC_READER = new SEDPbuiltinTopicReader();
+	public static final EntityId SEDP_BUILTIN_SUBSCRIPTIONS_WRITER = new SEDPbuiltinSubscriptionsWriter();
+	public static final EntityId SEDP_BUILTIN_SUBSCRIPTIONS_READER = new SEDPbuiltinSubscriptionsReader();
+	public static final EntityId SEDP_BUILTIN_PUBLICATIONS_WRITER = new SEDPbuiltinPublicationsWriter();
+	public static final EntityId SEDP_BUILTIN_PUBLICATIONS_READER = new SEDPbuiltinPublicationsReader();
+	public static final EntityId SEDP_BUILTIN_TOPIC_WRITER = new SEDPbuiltinTopicWriter();
+	public static final EntityId SEDP_BUILTIN_TOPIC_READER = new SEDPbuiltinTopicReader();
 	
-	public static final EntityId_t PARTICIPANT = new Participant();
-	public static final EntityId_t BUILTIN_PARTICIPANT_MESSAGE_WRITER = new BuiltinParticipantMessageWriter();
-	public static final EntityId_t BUILTIN_PARTICIPANT_MESSAGE_READER = new BuiltinParticipantMessageReader();
-	public static final EntityId_t UNKNOWN_ENTITY = new UnknownEntity();
+	public static final EntityId PARTICIPANT = new Participant();
+	public static final EntityId BUILTIN_PARTICIPANT_MESSAGE_WRITER = new BuiltinParticipantMessageWriter();
+	public static final EntityId BUILTIN_PARTICIPANT_MESSAGE_READER = new BuiltinParticipantMessageReader();
+	public static final EntityId UNKNOWN_ENTITY = new UnknownEntity();
 	
 	public static final int LENGTH = 4;
 	
@@ -34,14 +34,14 @@ public abstract class EntityId_t  {
 	private byte entityKind;
 
 	
-	private EntityId_t(byte[] entityKey, byte entityKind) {
+	private EntityId(byte[] entityKey, byte entityKind) {
 		this.entityKey = entityKey;
 		this.entityKind = entityKind;
 
 		assert entityKey != null && entityKey.length == 3;
 	}
 
-	public boolean equals(EntityId_t other) {
+	public boolean equals(EntityId other) {
 		return other != null &&
 				entityKey[0] == other.entityKey[0] &&
 				entityKey[1] == other.entityKey[1] &&
@@ -77,8 +77,8 @@ public abstract class EntityId_t  {
 		return (entityKind & 0xc0) == 0x40; // @see 9.3.1.2
 	}
 
-	public static EntityId_t readEntityId(byte[] eKey, int kind) {		
-		EntityId_t entityId = null;
+	public static EntityId readEntityId(byte[] eKey, int kind) {		
+		EntityId entityId = null;
 		
 		int key = (eKey[0] << 24) | (eKey[1] << 16) | (eKey[2] << 8) | (kind & 0xff);
 
@@ -107,7 +107,7 @@ public abstract class EntityId_t  {
 		return entityId;
 	}
 	
-	public static EntityId_t readEntityId(RTPSByteBuffer is) {
+	public static EntityId readEntityId(RTPSByteBuffer is) {
 		byte[] eKey = new byte[3];
 		is.read(eKey);
 		int kind = is.read_octet() & 0xff;
@@ -117,7 +117,7 @@ public abstract class EntityId_t  {
 
 
 
-	public static class UserDefinedEntityId extends EntityId_t {
+	public static class UserDefinedEntityId extends EntityId {
 		public UserDefinedEntityId(byte[] entityKey, int entityKind) {
 			super(entityKey, (byte) entityKind);
 		}
@@ -128,7 +128,7 @@ public abstract class EntityId_t  {
 		}
 	}
 
-	public static class VendorSpecificEntityId extends EntityId_t {
+	public static class VendorSpecificEntityId extends EntityId {
 		public VendorSpecificEntityId(byte[] entityKey, byte entityKind) {
 			super(entityKey, entityKind);
 		}
@@ -140,7 +140,7 @@ public abstract class EntityId_t  {
 	}
 
 
-	public static class UnknownEntity extends EntityId_t {
+	public static class UnknownEntity extends EntityId {
 		public UnknownEntity() {
 			super(new byte[] {0,0,0}, (byte) 0x00);
 		}
@@ -151,7 +151,7 @@ public abstract class EntityId_t  {
 		}
 	}
 
-	public static class Participant extends EntityId_t {
+	public static class Participant extends EntityId {
 		private Participant() {
 			super(new byte[] {0,0,1}, (byte) 0xc1);
 		}
@@ -162,7 +162,7 @@ public abstract class EntityId_t  {
 		}
 	}
 
-	public static class SEDPbuiltinTopicWriter extends EntityId_t {
+	public static class SEDPbuiltinTopicWriter extends EntityId {
 		private SEDPbuiltinTopicWriter() {
 			super(new byte[] {0,0,2},(byte) 0xc2);
 		}
@@ -173,7 +173,7 @@ public abstract class EntityId_t  {
 		}
 	}
 
-	public static class SEDPbuiltinTopicReader extends EntityId_t {
+	public static class SEDPbuiltinTopicReader extends EntityId {
 		private SEDPbuiltinTopicReader() {
 			super(new byte[] {0,0,2},(byte) 0xc7);
 		}
@@ -184,62 +184,62 @@ public abstract class EntityId_t  {
 		}
 	}
 
-	public static class SEDPbuiltinPublicationsWriter extends EntityId_t {
+	public static class SEDPbuiltinPublicationsWriter extends EntityId {
 		private SEDPbuiltinPublicationsWriter() {
 			super(new byte[] {0,0,3},(byte) 0xc2);
 		}
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
 		}
 	}
 
-	public static class SEDPbuiltinPublicationsReader extends EntityId_t {
+	public static class SEDPbuiltinPublicationsReader extends EntityId {
 		private SEDPbuiltinPublicationsReader() {
 			super(new byte[] {0,0,3},(byte) 0xc7);
 		}
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
 		}
 	}
 
-	public static class SEDPbuiltinSubscriptionsWriter extends EntityId_t {
+	public static class SEDPbuiltinSubscriptionsWriter extends EntityId {
 		private SEDPbuiltinSubscriptionsWriter() {
 			super(new byte[] {0,0,4},(byte) 0xc2);
 		}
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
 		}
 	}
 
-	public static class SEDPbuiltinSubscriptionsReader extends EntityId_t {
+	public static class SEDPbuiltinSubscriptionsReader extends EntityId {
 		private SEDPbuiltinSubscriptionsReader() {
 			super(new byte[] {0,0,4},(byte) 0xc7);
 		}
 	
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
 		}
 	}
 
-	public static class SPDPbuiltinParticipantWriter extends EntityId_t {
+	public static class SPDPbuiltinParticipantWriter extends EntityId {
 		private SPDPbuiltinParticipantWriter() {
 			super(new byte[] {0,1,0},(byte) 0xc2);
 		}
 		
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER; // TODO: Check this
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER; // TODO: Check this
 		}
 	}
 
-	public static class SPDPbuiltinParticipantReader extends EntityId_t {
+	public static class SPDPbuiltinParticipantReader extends EntityId {
 		// NOTE: In spec, this is named SPDPbuiltinSdpParticipantReader
 		private SPDPbuiltinParticipantReader() {
 			super(new byte[] {0,1,0},(byte) 0xc7);
@@ -247,29 +247,29 @@ public abstract class EntityId_t  {
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR; // TODO: Check this
+			return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR; // TODO: Check this
 		}
 	}
 
-	public static class BuiltinParticipantMessageWriter extends EntityId_t {
+	public static class BuiltinParticipantMessageWriter extends EntityId {
 		private BuiltinParticipantMessageWriter() {
 			super(new byte[] {0,2,0},(byte) 0xc2);
 		}
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER; // TODO: Check this
+			return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER; // TODO: Check this
 		}
 	}
 
-	public static class BuiltinParticipantMessageReader extends EntityId_t {
+	public static class BuiltinParticipantMessageReader extends EntityId {
 		private BuiltinParticipantMessageReader() {
 			super(new byte[] {0,2,0},(byte) 0xc7);
 		}
 
 		@Override
 		public int getEndpointSetId() {
-			return BuiltinEndpointSet_t.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER; // TODO: Check this
+			return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER; // TODO: Check this
 		}
 }
 

@@ -6,13 +6,15 @@ package net.sf.jrtps.udds;
  *
  */
 public class Entity {
-	private String topicName;
+	private final String topicName;
+	private final Participant participant;
 	
 	/**
 	 * Constructor
 	 * @param topicName name of the topic this entity is bound to.
 	 */
-	protected Entity(String topicName) {
+	protected Entity(Participant p, String topicName) {
+		this.participant = p;
 		this.topicName = topicName;
 	}
 	
@@ -22,5 +24,14 @@ public class Entity {
 	 */
 	public String getTopicName() {
 		return topicName;
+	}
+	
+	/**
+	 * Get the Participant that has created this Entity.
+	 * 
+	 * @return Participant
+	 */
+	public Participant getParticipant() {
+		return participant;
 	}
 }

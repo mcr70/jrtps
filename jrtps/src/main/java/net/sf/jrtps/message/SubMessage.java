@@ -24,16 +24,27 @@ public abstract class SubMessage {
 	// TODO: implement this constructor??? try to use enum instead of int kind
 	//protected SubMessage(Kind kind) {		
 	//}
-	
+
+	/**
+	 * Constructor.
+	 * @param header
+	 */
 	protected SubMessage(SubMessageHeader header) {
 		this.header = header;
 	}
 	
-
+	/**
+	 * Gets the SubMessageHeader.
+	 * @return SubMessageHeader
+	 */
 	public SubMessageHeader getHeader() {
 		return header;
 	}
 
+	/**
+	 * Gets the Kind of this SubMessage
+	 * @return Kind
+	 */
 	public Kind getKind() {
 		switch(header.kind) {
 		case 0x01: return Kind.PAD;

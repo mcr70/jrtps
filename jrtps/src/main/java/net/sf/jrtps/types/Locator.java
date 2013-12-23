@@ -12,7 +12,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  *
  */
-public class Locator_t {
+public class Locator {
 	public static final int LENGTH = 24;
 	
 	public static final int LOCATOR_KIND_UDPv4 = 1;
@@ -32,7 +32,7 @@ public class Locator_t {
 	private byte[] address;
 	
 
-	public Locator_t(InetAddress addr, int port) {
+	public Locator(InetAddress addr, int port) {
 		this.port = port;
 		byte[] bytes = addr.getAddress();
 		
@@ -54,7 +54,7 @@ public class Locator_t {
 		}
 	}
 	
-	public Locator_t(RTPSByteBuffer is) {
+	public Locator(RTPSByteBuffer is) {
 		this.kind = is.read_long();
 		this.port = is.read_long();
 		this.address = new byte[16];
@@ -62,7 +62,7 @@ public class Locator_t {
 		is.read(address);
 	}
 	
-	private Locator_t(int kind, int port, byte[] address) {
+	private Locator(int kind, int port, byte[] address) {
 		this.kind = kind;
 		this.port = port;
 		this.address = address;
@@ -75,10 +75,10 @@ public class Locator_t {
 	 * @param domainId
 	 * 
 	 */
-	public static Locator_t defaultUserMulticastLocator(int domainId) { 
+	public static Locator defaultUserMulticastLocator(int domainId) { 
 		byte[] addr = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,(byte) 239,(byte) 255,0,1};
 		
-		return new Locator_t(LOCATOR_KIND_UDPv4, PB + DG * domainId + d2, addr);
+		return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d2, addr);
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public class Locator_t {
 	 * @param domainId
 	 * 
 	 */
-	public static Locator_t defaultUserUnicastLocator(int domainId, int participantId) { 
+	public static Locator defaultUserUnicastLocator(int domainId, int participantId) { 
 		InetAddress addr = null;
 		try {
 			addr = InetAddress.getLocalHost();
@@ -94,7 +94,7 @@ public class Locator_t {
 			addr = InetAddress.getLoopbackAddress();
 		}
 
-		return new Locator_t(addr, PB + DG * domainId + d3 + PG * participantId);
+		return new Locator(addr, PB + DG * domainId + d3 + PG * participantId);
 	}
 
 	
@@ -103,7 +103,7 @@ public class Locator_t {
 	 * @param domainId
 	 * 
 	 */
-	public static Locator_t defaultMetatrafficUnicastLocator(int domainId, int participantId) { 
+	public static Locator defaultMetatrafficUnicastLocator(int domainId, int participantId) { 
 		InetAddress addr = null;
 		try {
 			addr = InetAddress.getLocalHost();
@@ -111,7 +111,7 @@ public class Locator_t {
 			addr = InetAddress.getLoopbackAddress();
 		}
 		
-		return new Locator_t(addr, PB + DG * domainId + d1 + PG * participantId);
+		return new Locator(addr, PB + DG * domainId + d1 + PG * participantId);
 	}
 	
 	/**
@@ -119,10 +119,10 @@ public class Locator_t {
 	 * @param domainId
 	 * 
 	 */
-	public static Locator_t defaultDiscoveryMulticastLocator(int domainId) { 
+	public static Locator defaultDiscoveryMulticastLocator(int domainId) { 
 		byte[] addr = new byte[] {0,0,0,0,0,0,0,0,0,0,0,0,(byte) 239,(byte) 255,0,1};
 		
-		return new Locator_t(LOCATOR_KIND_UDPv4, PB + DG * domainId + d0, addr);
+		return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d0, addr);
 	}
 
 

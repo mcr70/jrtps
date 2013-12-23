@@ -3,8 +3,8 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.types.Guid;
 
 
 
@@ -17,7 +17,8 @@ import net.sf.jrtps.RTPSWriter;
  * IDL compiler, or it may be more dynamically constructed Object that is used with uDDS.
  */
 public class DataWriter<T> extends Entity {
-	private RTPSWriter<T> rtps_writer;
+	private final RTPSWriter<T> rtps_writer;
+	private final HistoryCache<T> hCache;
 	
 	// TODO: Consider timestamp methods. At the moment they are left out. 
 	//       Why would anyone want to fake a timestamp. It could cause more trouble than useful stuff.
@@ -28,9 +29,12 @@ public class DataWriter<T> extends Entity {
 	 * 
 	 * @param topicName
 	 */
-	DataWriter(String topicName, RTPSWriter<T> writer) {
-		super(topicName);
+	DataWriter(Participant p, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+		super(p, writer.getTopicName());
 		this.rtps_writer = writer;
+		this.hCache = hCache;
+		
+		hCache.setDataWriter(this);
 	}
 	
 	/**
@@ -41,7 +45,7 @@ public class DataWriter<T> extends Entity {
 	public void write(T instance) {
 		LinkedList<T> ll = new LinkedList<>();
 		ll.add(instance);
-		rtps_writer.write(ll);
+		write(ll);
 	}
 
 	/**
@@ -50,7 +54,12 @@ public class DataWriter<T> extends Entity {
 	 * @param instances a List of instances
 	 */
 	public void write(List<T> instances) {
-		rtps_writer.write(instances);
+		try {
+			hCache.write(instances);
+		}
+		finally {
+			notifyReaders();
+		}
 	}
 
 	/**
@@ -62,7 +71,7 @@ public class DataWriter<T> extends Entity {
 		//       see 9.6.3.4 StatusInfo_t (PID_STATUS_INFO)
 		LinkedList<T> ll = new LinkedList<>();
 		ll.add(instance);
-		rtps_writer.dispose(ll);
+		dispose(ll);
 	}
 	
 	/**
@@ -70,6 +79,32 @@ public class DataWriter<T> extends Entity {
 	 * @param instances
 	 */
 	public void dispose(List<T> instances) {
-		rtps_writer.dispose(instances);
+		try {
+			hCache.dispose(instances);
+		}
+		finally {
+			notifyReaders();
+		}
+	}
+
+
+	RTPSWriter<T> getRTPSWriter() {
+		return rtps_writer;
+	}
+
+
+	/**
+	 * Gets the Guid of thie DataWriter
+	 * @return Guid
+	 */
+	Guid getGuid() {
+		return rtps_writer.getGuid();
+	}
+
+	/**
+	 * Notifies readers of the changes available.
+	 */
+	void notifyReaders() {
+		rtps_writer.notifyReaders();
 	}
 }

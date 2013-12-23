@@ -1,7 +1,7 @@
 package net.sf.jrtps.udds.hello;
 import java.io.Serializable;
 
-import net.sf.jrtps.Key;
+import net.sf.jrtps.udds.Key;
 
 
 /**

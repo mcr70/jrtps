@@ -1,35 +1,67 @@
 package net.sf.jrtps;
 
+import java.io.IOException;
+
+import net.sf.jrtps.message.data.DataEncapsulation;
+
 
 /**
  * This class represents a sample in history cache.
  * 
  * @author mcr70
  */
-class CacheChange implements Comparable<CacheChange> {
+public class CacheChange implements Comparable<CacheChange> {
 	private final long sequenceNumber;
 	private final Object data;
-	private final ChangeKind kind;
+	private final Kind kind;
 	private final long timeStamp;
 	private final int hashCode;
+	private Marshaller marshaller;
+	private DataEncapsulation marshalledData;
 	
-	CacheChange(ChangeKind kind, long seqNum, Object data) {
+	/**
+	 * Enumeration for different changes made to an instance.
+	 * @author mcr70
+	 */
+	public enum Kind {
+		WRITE, DISPOSE, UNREGISTER;
+	}
+	
+	
+	public CacheChange(Marshaller m, Kind kind, long seqNum, Object data) {
 		this.kind = kind;
 		this.sequenceNumber = seqNum;
 		this.data = data;
 		this.timeStamp = System.currentTimeMillis(); // NOTE: write_w_timestamp
 		this.hashCode = new Long(sequenceNumber).hashCode();
+		this.marshaller = m;
 	}
 
 	Object getData() {
 		return data;
 	}
 
-	long getSequenceNumber() {
+	DataEncapsulation getDataEncapsulation() throws IOException {
+		if (marshalledData == null) {
+			marshalledData = marshaller.marshall(data);
+		}
+		
+		return marshalledData;
+	}
+	
+	boolean hasKey() {
+		return marshaller.hasKey();
+	}
+
+	byte[] extractKey() {
+		return marshaller.extractKey(data);
+	}
+	
+	public long getSequenceNumber() {
 		return sequenceNumber;
 	}
 	
-	ChangeKind getKind() {
+	Kind getKind() {
 		return kind;
 	}
 
@@ -60,4 +92,5 @@ class CacheChange implements Comparable<CacheChange> {
 	public String toString() {
 		return "change: " + sequenceNumber;
 	}
+
 }

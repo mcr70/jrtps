@@ -1,10 +1,6 @@
 package net.sf.jrtps.udds;
 
-import java.util.LinkedList;
-import java.util.List;
-
 import net.sf.jrtps.RTPSReader;
-import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 
 
@@ -24,30 +20,11 @@ public class DataReader<T> extends Entity {
 	 * Package access. This class is only instantiated by Participant class.
 	 * @param topicName
 	 */
-	DataReader(String topicName, RTPSReader<T> reader) {
-		super(topicName);
+	DataReader(Participant p, RTPSReader<T> reader) {
+		super(p, reader.getTopicName());
 		this.rtps_reader = reader;
 	}
 	
-	/**
-	 * Read samples.
-	 * 
-	 * @return a List of Sample<T>
-	 */
-	public List<Sample<T>> read() {
-		//rtps_reader.getHistoryCache();
-		
-		LinkedList<Sample<T>> l = new LinkedList<>();
-		return l;
-	}
-	
-	/**
-	 * Take samples.
-	 * @return a List of Sample<T>
-	 */
-	public List<Sample<T>> take() {
-		return null;
-	}
 
 	/**
 	 * Adds a new listener for this DataReader.
@@ -65,5 +42,10 @@ public class DataReader<T> extends Entity {
 	 */
 	public void removeListener(SampleListener<T> listener) {
 		rtps_reader.removeListener(listener);
+	}
+
+
+	RTPSReader<T> getRTPSReader() {
+		return rtps_reader;
 	}
 }

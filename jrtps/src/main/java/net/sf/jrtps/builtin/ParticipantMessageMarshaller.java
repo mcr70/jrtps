@@ -6,14 +6,14 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.CDREncapsulation;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.GuidPrefix_t;
+import net.sf.jrtps.types.GuidPrefix;
 
-public class ParticipantMessageMarshaller extends Marshaller<ParticipantMessage> {
+public class ParticipantMessageMarshaller implements Marshaller<ParticipantMessage> {
 	
 	private int bufferSize = 256;
 
 	@Override
-	public boolean hasKey(Class<?> data) {
+	public boolean hasKey() {
 		return true; // hardcoded. key is guid
 	}
 
@@ -34,7 +34,7 @@ public class ParticipantMessageMarshaller extends Marshaller<ParticipantMessage>
 		CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;		
 		RTPSByteBuffer bb = cdrEnc.getBuffer();
 		
-		GuidPrefix_t prefix = new GuidPrefix_t(bb);
+		GuidPrefix prefix = new GuidPrefix(bb);
 		byte[] kind = new byte[4];
 		bb.read(kind);
 		
