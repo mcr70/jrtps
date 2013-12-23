@@ -24,11 +24,11 @@ import net.sf.jrtps.message.parameter.TypeName;
  * @author mcr70
  *
  */
-public class TopicDataMarshaller extends Marshaller<TopicData> {
+public class TopicDataMarshaller implements Marshaller<TopicData> {
 	private static final Logger log = LoggerFactory.getLogger(TopicDataMarshaller.class);
 
 	@Override
-	public boolean hasKey(Class<?> data) {
+	public boolean hasKey() {
 		return true; // Always true. Key is PID_KEY_HASH.
 	}
 
