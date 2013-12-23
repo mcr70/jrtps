@@ -8,12 +8,12 @@ import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
 
-public class ParticipantMessageMarshaller extends Marshaller<ParticipantMessage> {
+public class ParticipantMessageMarshaller implements Marshaller<ParticipantMessage> {
 	
 	private int bufferSize = 256;
 
 	@Override
-	public boolean hasKey(Class<?> data) {
+	public boolean hasKey() {
 		return true; // hardcoded. key is guid
 	}
 

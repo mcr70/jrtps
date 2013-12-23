@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import java.io.Serializable;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,8 +52,7 @@ public class Participant {
 	private final ThreadPoolExecutor threadPoolExecutor;
 
 	private final Configuration config = new Configuration();
-	private Marshaller<?> defaultMarshaller;
-	private final HashMap<String, Marshaller<?>> marshallers = new HashMap<>();
+	private final HashMap<Class<?>, Marshaller<?>> marshallers = new HashMap<>();
 	private final RTPSParticipant rtps_participant;
 
 	private List<DataReader<?>> readers = new LinkedList<>();
@@ -102,7 +102,6 @@ public class Participant {
 	 * @throws SocketException
 	 */
 	public Participant(int domainId, int participantId) throws SocketException {
-		defaultMarshaller = new JavaSerializableMarshaller();
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
 		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 10);
@@ -135,11 +134,11 @@ public class Participant {
 
 	private void createBuiltinEntities() {
 		// ----  Builtin marshallers  ---------------
-		setMarshaller(ParticipantData.class.getName(), new ParticipantDataMarshaller());
-		setMarshaller(ParticipantMessage.class.getName(), new ParticipantMessageMarshaller());
-		setMarshaller(WriterData.class.getName(), new WriterDataMarshaller());
-		setMarshaller(ReaderData.class.getName(), new ReaderDataMarshaller());
-		setMarshaller(TopicData.class.getName(), new TopicDataMarshaller());
+		setMarshaller(ParticipantData.class, new ParticipantDataMarshaller());
+		setMarshaller(ParticipantMessage.class, new ParticipantMessageMarshaller());
+		setMarshaller(WriterData.class, new WriterDataMarshaller());
+		setMarshaller(ReaderData.class, new ReaderDataMarshaller());
+		setMarshaller(TopicData.class, new TopicDataMarshaller());
 
 		QualityOfService spdpQoS = new QualityOfService();
 		QualityOfService sedpQoS = new QualityOfService();
@@ -223,7 +222,7 @@ public class Participant {
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 		
-		Marshaller<?> m = getMarshaller(typeName);
+		Marshaller<?> m = getMarshaller(type);
 		RTPSReader<T> rtps_reader = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, m, qos);
@@ -248,7 +247,7 @@ public class Participant {
 			myKey[2] = (byte) (myIdx >> 16 & 0xff);
 
 			int kind = 0x07; // User defined reader, with key, see 9.3.1.2 Mapping of the EntityId_t
-			if (!m.hasKey(type)) {
+			if (!m.hasKey()) {
 				kind = 0x04; // User defined reader, no key
 			}
 
@@ -298,30 +297,30 @@ public class Participant {
 	 * 
 	 * @param topicName name of the topic
 	 * @param type type of the DataWriter
-	 * @param typeName name of the type
+	 * @param typeName name of the type. typeName gets sent to remote readers. 
 	 * @param qos QualityOfService
 	 * @return a DataWriter<T>
 	 */	
 	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 
-		Marshaller<?> m = getMarshaller(typeName);
+		Marshaller<?> m = getMarshaller(type);
 		HistoryCache<T> wCache = new HistoryCache(m, qos);
 		RTPSWriter<T> rtps_writer = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, m, wCache, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, wCache, qos);
 		}
 		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, m, wCache, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, wCache, qos);
 		}
 		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, m, wCache, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, wCache, qos);
 		}
 		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, m, wCache, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, wCache, qos);
 		}
 		else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, m, wCache, qos);
+			rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, wCache, qos);
 		}
 		else {
 			int myIdx = userEntityIdx++;
@@ -331,11 +330,11 @@ public class Participant {
 			myKey[2] = (byte) (myIdx >> 16 & 0xff);
 
 			int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
-			if (!m.hasKey(type)) {
+			if (!m.hasKey()) {
 				kind = 0x03; // User defined writer, no key
 			}
 
-			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, wCache, qos);
+			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, wCache, qos);
 		}
 		
 		DataWriter<T> writer = new DataWriter<T>(this, rtps_writer, wCache);
@@ -351,25 +350,25 @@ public class Participant {
 	}
 
 
-	/**
-	 * Sets the default Marshaller. Default marshaller is used if no other Marshaller 
-	 * could not be used.
-	 * d
-	 * @param m
-	 */
-	public void setDefaultMarshaller(Marshaller<?> m) {
-		defaultMarshaller = m;
-	}
+//	/**
+//	 * Sets the default Marshaller. Default marshaller is used if no other Marshaller 
+//	 * could not be used.
+//	 * d
+//	 * @param m
+//	 */
+//	public void setDefaultMarshaller(Marshaller<?> m) {
+//		defaultMarshaller = m;
+//	}
 
 	/**
 	 * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is
 	 * preferred over default Marshaller.
 	 * 
-	 * @param typeName
+	 * @param class1
 	 * @param m
 	 */
-	public void setMarshaller(String typeName, Marshaller<?> m) {
-		marshallers.put(typeName, m);
+	public void setMarshaller(Class<?> c, Marshaller<?> m) {
+		marshallers.put(c, m);
 	}
 
 	/**
@@ -401,13 +400,20 @@ public class Participant {
 	 * Get a Marshaller for given type. If no explicit Marshaller is found for type,
 	 * a default Marshaller is returned 
 	 * 
-	 * @param typeName
+	 * @param type
 	 * @return Marshaller
 	 */
-	private Marshaller<?> getMarshaller(String typeName) {
-		Marshaller<?> m = marshallers.get(typeName);
+	private Marshaller<?> getMarshaller(Class<?> type) {
+		Marshaller<?> m = marshallers.get(type);
 		if (m == null) {
-			m = defaultMarshaller;
+			if (Serializable.class.isAssignableFrom(type)) {
+				m = new JavaSerializableMarshaller(type);
+			}
+			else {
+				logger.error("No marshaller registered for {} and it is not Serializable", type);
+			
+				throw new IllegalArgumentException("No marshaller found for " + type);
+			}
 		}
 
 		return m;

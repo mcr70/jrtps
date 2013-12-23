@@ -1,5 +1,9 @@
 package net.sf.jrtps;
 
+import java.io.IOException;
+
+import net.sf.jrtps.message.data.DataEncapsulation;
+
 
 /**
  * This class represents a sample in history cache.
@@ -12,6 +16,8 @@ public class CacheChange implements Comparable<CacheChange> {
 	private final Kind kind;
 	private final long timeStamp;
 	private final int hashCode;
+	private Marshaller marshaller;
+	private DataEncapsulation marshalledData;
 	
 	/**
 	 * Enumeration for different changes made to an instance.
@@ -22,18 +28,35 @@ public class CacheChange implements Comparable<CacheChange> {
 	}
 	
 	
-	public CacheChange(Kind kind, long seqNum, Object data) {
+	public CacheChange(Marshaller m, Kind kind, long seqNum, Object data) {
 		this.kind = kind;
 		this.sequenceNumber = seqNum;
 		this.data = data;
 		this.timeStamp = System.currentTimeMillis(); // NOTE: write_w_timestamp
 		this.hashCode = new Long(sequenceNumber).hashCode();
+		this.marshaller = m;
 	}
 
 	Object getData() {
 		return data;
 	}
 
+	DataEncapsulation getDataEncapsulation() throws IOException {
+		if (marshalledData == null) {
+			marshalledData = marshaller.marshall(data);
+		}
+		
+		return marshalledData;
+	}
+	
+	boolean hasKey() {
+		return marshaller.hasKey();
+	}
+
+	byte[] extractKey() {
+		return marshaller.extractKey(data);
+	}
+	
 	public long getSequenceNumber() {
 		return sequenceNumber;
 	}
@@ -69,4 +92,5 @@ public class CacheChange implements Comparable<CacheChange> {
 	public String toString() {
 		return "change: " + sequenceNumber;
 	}
+
 }

@@ -39,7 +39,6 @@ public class RTPSWriter<T> extends Endpoint {
 	private HashMap<Guid, ReaderProxy> matchedReaders = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
-	private final Marshaller marshaller;
 	private final WriterCache writer_cache;
 	private final int nackResponseDelay;
 	private int heartbeatPeriod;
@@ -47,12 +46,11 @@ public class RTPSWriter<T> extends Endpoint {
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 
 
-	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller, WriterCache wCache, 
+	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache wCache, 
 			QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
 		this.writer_cache = wCache;
-		this.marshaller = marshaller;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
 		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
 
@@ -289,11 +287,11 @@ public class RTPSWriter<T> extends Endpoint {
 
 	@SuppressWarnings("unchecked")
 	private Data createData(EntityId readerId, CacheChange cc) throws IOException {		
-		DataEncapsulation dEnc = marshaller.marshall(cc.getData());
+		DataEncapsulation dEnc = cc.getDataEncapsulation();
 		ParameterList inlineQos = new ParameterList();
 
-		if (marshaller.hasKey(cc.getData().getClass())) { // Add KeyHash if present
-			byte[] key = marshaller.extractKey(cc.getData());
+		if (cc.hasKey()) { // Add KeyHash if present
+			byte[] key = cc.extractKey();
 			if (key == null) {
 				key = new byte[0];
 			}

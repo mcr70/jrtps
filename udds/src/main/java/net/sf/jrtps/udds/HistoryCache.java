@@ -107,7 +107,7 @@ class HistoryCache<T> implements WriterCache {
 			}
 
 			log.trace("[{}] Creating cache change {}", writer.getGuid().entityId, seqNum + 1);
-			CacheChange aChange = new CacheChange(kind, ++seqNum, sample);
+			CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
 			sampleCount += inst.addSample(aChange);
 			if (sampleCount > resource_limits.getMaxSamples()) {
 				inst.history.removeLast();
