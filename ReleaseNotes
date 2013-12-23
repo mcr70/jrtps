@@ -6,7 +6,8 @@
 	  The contract between DDS and RTPS is clarified. In short, DDS implementation
 	  is responsible for creation of RTPS entities. Also, determination of matched
 	  reader/writer is the responsibility of DDS layer. For writers, data is communicated
-	  through WriterCache and by a call to notifyReaders() 
+	  through WriterCache and by a call to notifyReaders(). QualityOfService stuff
+	  is moved to uDDS as much as possible.
 	
 0.4.3
 	- History cache work.
