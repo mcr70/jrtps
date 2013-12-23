@@ -9,11 +9,20 @@ package net.sf.jrtps;
 public class CacheChange implements Comparable<CacheChange> {
 	private final long sequenceNumber;
 	private final Object data;
-	private final ChangeKind kind;
+	private final Kind kind;
 	private final long timeStamp;
 	private final int hashCode;
 	
-	public CacheChange(ChangeKind kind, long seqNum, Object data) {
+	/**
+	 * Enumeration for different changes made to an instance.
+	 * @author mcr70
+	 */
+	public enum Kind {
+		WRITE, DISPOSE, UNREGISTER;
+	}
+	
+	
+	public CacheChange(Kind kind, long seqNum, Object data) {
 		this.kind = kind;
 		this.sequenceNumber = seqNum;
 		this.data = data;
@@ -29,7 +38,7 @@ public class CacheChange implements Comparable<CacheChange> {
 		return sequenceNumber;
 	}
 	
-	ChangeKind getKind() {
+	Kind getKind() {
 		return kind;
 	}
 

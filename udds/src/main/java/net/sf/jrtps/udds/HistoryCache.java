@@ -11,7 +11,6 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.sf.jrtps.CacheChange;
-import net.sf.jrtps.ChangeKind;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
@@ -72,20 +71,20 @@ class HistoryCache<T> implements WriterCache {
 
 
 	void dispose(List<T> samples) {
-		addSample(ChangeKind.DISPOSE, samples);
+		addSample(CacheChange.Kind.DISPOSE, samples);
 	}
 
 	void unregister(List<T> samples) {
-		addSample(ChangeKind.UNREGISTER, samples);
+		addSample(CacheChange.Kind.UNREGISTER, samples);
 	}
 
 	void write(List<T> samples) {
-		addSample(ChangeKind.WRITE, samples);
+		addSample(CacheChange.Kind.WRITE, samples);
 	}
 
 
 
-	private void addSample(ChangeKind kind, List<T> samples) {
+	private void addSample(CacheChange.Kind kind, List<T> samples) {
 		log.debug("[{}] add {} samples of kind {}", writer.getGuid().entityId, samples.size(), kind);
 
 		for (T sample : samples) {
