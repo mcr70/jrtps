@@ -255,7 +255,7 @@ public class Participant {
 			rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, qos);			
 		}
 
-		DataReader<T> reader = new DataReader<T>(rtps_reader);
+		DataReader<T> reader = new DataReader<T>(this, rtps_reader);
 		readers.add(reader);
 
 		@SuppressWarnings("unchecked")
@@ -338,7 +338,7 @@ public class Participant {
 			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, qos);
 		}
 		
-		DataWriter<T> writer = new DataWriter<T>(rtps_writer);
+		DataWriter<T> writer = new DataWriter<T>(this, rtps_writer);
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
 
@@ -557,5 +557,22 @@ public class Participant {
 	 */
 	public List<EntityListener> getEntityListeners() {
 		return entityListeners;
+	}
+
+	/**
+	 * Waits for a given amount of milliseconds.
+	 * @param millis
+	 * @return true, if timeout occured normally
+	 */
+	boolean waitFor(int millis) {
+		if (millis > 0) {
+			try {
+				return !threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
+			} catch (InterruptedException e) {
+				logger.debug("waitFor(...) was interrupted");
+			}
+		}
+		
+		return false;
 	}
 }

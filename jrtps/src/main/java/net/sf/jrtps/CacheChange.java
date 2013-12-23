@@ -6,14 +6,14 @@ package net.sf.jrtps;
  * 
  * @author mcr70
  */
-class CacheChange implements Comparable<CacheChange> {
+public class CacheChange implements Comparable<CacheChange> {
 	private final long sequenceNumber;
 	private final Object data;
 	private final ChangeKind kind;
 	private final long timeStamp;
 	private final int hashCode;
 	
-	CacheChange(ChangeKind kind, long seqNum, Object data) {
+	public CacheChange(ChangeKind kind, long seqNum, Object data) {
 		this.kind = kind;
 		this.sequenceNumber = seqNum;
 		this.data = data;
@@ -25,7 +25,7 @@ class CacheChange implements Comparable<CacheChange> {
 		return data;
 	}
 
-	long getSequenceNumber() {
+	public long getSequenceNumber() {
 		return sequenceNumber;
 	}
 	
