@@ -32,10 +32,10 @@ public class Endpoint {
 	/**
 	 * 
 	 * @param participant 
-	 * @param prefix prefix from the participant that creates this endpoint.
 	 * @param entityId
 	 * @param topicName
 	 * @param qos 
+	 * @param configuration
 	 */
 	protected Endpoint(RTPSParticipant participant, EntityId entityId, String topicName, QualityOfService qos, Configuration configuration) {
 		this.participant = participant;

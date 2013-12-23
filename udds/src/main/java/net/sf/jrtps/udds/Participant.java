@@ -362,9 +362,12 @@ public class Participant {
 
 	/**
 	 * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is
-	 * preferred over default Marshaller.
+	 * preferred over default Marshaller. Default Marshaller is JavaSerializationMarshaller, which
+	 * uses java serialization.
 	 * 
-	 * @param class1
+	 * @see JavaSerializableMarshaller
+	 * 
+	 * @param c
 	 * @param m
 	 */
 	public void setMarshaller(Class<?> c, Marshaller<?> m) {
