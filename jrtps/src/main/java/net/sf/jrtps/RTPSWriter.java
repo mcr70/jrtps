@@ -4,8 +4,6 @@ import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.SortedSet;
 
 import net.sf.jrtps.builtin.ReaderData;
@@ -312,7 +310,7 @@ public class RTPSWriter<T> extends Endpoint {
 			inlineQos.add(new KeyHash(bytes));
 		}
 
-		if (!cc.getKind().equals(ChangeKind.WRITE)) { // Add status info for operations other than WRITE
+		if (!cc.getKind().equals(CacheChange.Kind.WRITE)) { // Add status info for operations other than WRITE
 			inlineQos.add(new StatusInfo(cc.getKind()));
 		}
 
