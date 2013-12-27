@@ -23,19 +23,19 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  * @see net.sf.jrtps.RTPSParticipant#assertLiveliness()
  */
-class LivelinessManager implements Runnable {
-	private static final Logger log = LoggerFactory.getLogger(LivelinessManager.class);
-	
+class WriterLivelinessManager implements Runnable {
+	private static final Logger log = LoggerFactory.getLogger(WriterLivelinessManager.class);
+
 	private final List<Duration> alDurations = new LinkedList<>();
-	
+
 	private final Participant participant;
 	private DataWriter<ParticipantMessage> writer;
 
 	private final ParticipantMessage manualSample;
 	private final ParticipantMessage automaticSample;
 
-	
-	public LivelinessManager(Participant participant) {
+
+	public WriterLivelinessManager(Participant participant) {
 		this.participant = participant;
 
 		// Create samples used with liveliness protocol
@@ -44,7 +44,7 @@ class LivelinessManager implements Runnable {
 		automaticSample = new ParticipantMessage(participant.getRTPSParticipant().getGuid().getPrefix(),
 				ParticipantMessage.AUTOMATIC_LIVELINESS_KIND, new byte[0]);
 	}
-	
+
 	/**
 	 * Asserts liveliness. This implements QosLiveliness: MANUAL_BY_PARTICIPANT.
 	 * Liveliness is asserted by writing a sample to RTPSWriter<ParticipantMessage>.
@@ -53,7 +53,7 @@ class LivelinessManager implements Runnable {
 		log.debug("Asserting liveliness of DataWriters with QosLiveliness kind MANUAL_BY_PARTICIPANT");
 		writer.write(manualSample);
 	}
-	
+
 	/**
 	 * Register a writer. Writer is check for its QosLiveliness kind and if it is AUTOMATIC,
 	 * its lease_period is stored for usage with livelinessThread.
@@ -71,7 +71,7 @@ class LivelinessManager implements Runnable {
 			}
 		}
 	}
-	
+
 	/**
 	 * Unregister a writer. Writer is check for its QosLiveliness kind and if it is AUTOMATIC,
 	 * its lease_period is removed from bookkeeping.
@@ -86,40 +86,38 @@ class LivelinessManager implements Runnable {
 			}
 		}		
 	}
-	
+
 	/**
 	 * Starts livelinessThread.
 	 */
 	void start() {
 		writer = participant.getDataWriter(ParticipantMessage.class);
-		
+
 		log.debug("Starting liveliness thread");
 		participant.addRunnable(this);
 	}
 
 	@Override
 	public void run() {
-		try {
-			while(true) {
-				Duration nextLeaseWaitTime = null;
-				synchronized (alDurations) {
-					if (alDurations.size() > 0) {
-						nextLeaseWaitTime = alDurations.get(0);
-					}					
-				}
-			
-				long sleepTime = 1000; // TODO: hardcoded. default sleep time if no writers present
-				if (nextLeaseWaitTime != null) { // We have at least one writer to assert liveliness for
-					log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
-					writer.write(automaticSample);
-					sleepTime = nextLeaseWaitTime.asMillis();
-				}
-				
-				Thread.sleep(sleepTime);
+		boolean running = true;
+		while(running) {
+			Duration nextLeaseWaitTime = null;
+			synchronized (alDurations) {
+				if (alDurations.size() > 0) {
+					nextLeaseWaitTime = alDurations.get(0);
+				}					
 			}
+
+			long sleepTime = 1000; // TODO: hardcoded. default sleep time if no writers present
+			if (nextLeaseWaitTime != null) { // We have at least one writer to assert liveliness for
+				log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
+				writer.write(automaticSample);
+				sleepTime = nextLeaseWaitTime.asMillis();
+			}
+
+			running = participant.waitFor(sleepTime);
 		}
-		catch(InterruptedException ie) {
-			log.debug("livelinessThread was interrupted");
-		}
+		
+		log.debug("WriterLivelinessManager is exiting");
 	}
 }

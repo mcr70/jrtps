@@ -152,7 +152,7 @@ class HistoryCache<T> implements WriterCache {
 						//       I.e. we should notify blocked thread.
 
 						log.trace("[{}] Blocking the writer for {} ms", writer.getGuid().getEntityId(), reliability.getMaxBlockingTime().asMillis());
-						writer.getParticipant().waitFor((int) reliability.getMaxBlockingTime().asMillis());
+						writer.getParticipant().waitFor(reliability.getMaxBlockingTime().asMillis());
 
 						if (!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
 							throw new TimeOutException("Blocked writer for " + reliability.getMaxBlockingTime().asMillis() + 

@@ -74,7 +74,7 @@ public class Participant {
 	private final HashMap<Guid, WriterData> discoveredWriters = new HashMap<>();
 
 
-	private final LivelinessManager livelinessManager;
+	private final WriterLivelinessManager livelinessManager;
 
 	private Locator meta_mcLoc;
 	private Locator meta_ucLoc;
@@ -127,7 +127,7 @@ public class Participant {
 		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators);
 		rtps_participant.start();
 
-		this.livelinessManager = new LivelinessManager(this);
+		this.livelinessManager = new WriterLivelinessManager(this);
 		createBuiltinEntities();
 
 		livelinessManager.start();
@@ -410,16 +410,9 @@ public class Participant {
 	 * Close this participant.
 	 */
 	public void close() {
-		threadPoolExecutor.shutdown();
+		threadPoolExecutor.shutdown(); // won't accept new tasks, remaining tasks keeps on running.
 		rtps_participant.close();
-
-		try {
-			boolean terminated = threadPoolExecutor.awaitTermination(1, TimeUnit.SECONDS);
-			if (!terminated) {
-				threadPoolExecutor.shutdownNow();
-			}
-		} catch (InterruptedException e) {
-		}
+		threadPoolExecutor.shutdownNow(); // Shutdown now.
 	} 
 
 	/**
@@ -596,12 +589,12 @@ public class Participant {
 	 * @param millis
 	 * @return true, if timeout occured normally
 	 */
-	boolean waitFor(int millis) {
+	boolean waitFor(long millis) {
 		if (millis > 0) {
 			try {
 				return !threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
-				logger.debug("waitFor(...) was interrupted");
+				// Ignore. We are shutting down.
 			}
 		}
 		
