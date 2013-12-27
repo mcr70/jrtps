@@ -52,7 +52,7 @@ class RTPSMessageHandler implements Runnable {
 		GuidPrefix destGuidPrefix = GuidPrefix.GUIDPREFIX_UNKNOWN;
 		GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		
-		if (participant.getGuid().prefix.equals(sourceGuidPrefix)) {
+		if (participant.getGuid().getPrefix().equals(sourceGuidPrefix)) {
 			log.debug("Discarding message originating from this participant");
 			return;
 		}

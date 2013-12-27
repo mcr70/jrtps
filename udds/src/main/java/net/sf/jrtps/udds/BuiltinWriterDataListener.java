@@ -42,7 +42,7 @@ class BuiltinWriterDataListener extends BuiltinListener implements SampleListene
 					else {
 						QualityOfService offered = writerData.getQualityOfService();
 						QualityOfService requested = r.getRTPSReader().getQualityOfService();
-						log.debug("Check for compatible QoS for {} and {}", writerData.getKey().entityId, r.getRTPSReader().getGuid().entityId);
+						log.debug("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
 						
 						if (offered.isCompatibleWith(requested)) {
 							r.getRTPSReader().addMatchedWriter(writerData);

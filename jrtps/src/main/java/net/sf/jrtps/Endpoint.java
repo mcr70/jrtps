@@ -39,7 +39,7 @@ public class Endpoint {
 	 */
 	protected Endpoint(RTPSParticipant participant, EntityId entityId, String topicName, QualityOfService qos, Configuration configuration) {
 		this.participant = participant;
-		this.guid = new Guid(participant.getGuid().prefix, entityId);
+		this.guid = new Guid(participant.getGuid().getPrefix(), entityId);
 		this.topicName = topicName;
 		this.qos = qos;
 		this.configuration = configuration;
@@ -65,11 +65,11 @@ public class Endpoint {
 	 * @return Locator_t
 	 */
 	private Locator getParticipantLocators(GuidPrefix prefix) {
-		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().entityId, prefix, discoveredParticipants.keySet());
+		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().getEntityId(), prefix, discoveredParticipants.keySet());
 		
 		ParticipantData pd = discoveredParticipants.get(prefix);
 		if (pd != null) {
-			if (guid.entityId.isBuiltinEntity()) {
+			if (guid.getEntityId().isBuiltinEntity()) {
 				return pd.getMetatrafficUnicastLocator();
 			}
 			else {
@@ -77,7 +77,7 @@ public class Endpoint {
 			}
 		}
 
-		log.trace("[{}] Unknown participant. Returning default metatraffic multicast locator for domain {}", getGuid().entityId, participant.getDomainId());
+		log.trace("[{}] Unknown participant. Returning default metatraffic multicast locator for domain {}", getGuid().getEntityId(), participant.getDomainId());
 
 		return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());
 	}
@@ -104,7 +104,7 @@ public class Endpoint {
 			w.close();					
 		} 
 		catch(IOException e) {
-			log.warn("[{}] Failed to send message to {}", getGuid().entityId, locator, e);
+			log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
 		}
 		catch(BufferOverflowException boe) {
 			log.warn("Got unexpected BufferOverflowException, buffer size is {}. It should be increased.", configuration.getBufferSize());

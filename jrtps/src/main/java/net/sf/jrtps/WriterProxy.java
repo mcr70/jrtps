@@ -8,36 +8,46 @@ import net.sf.jrtps.types.Guid;
 
 
 /**
- * WriterProxy represents a remote writer. It also determines if
- * an incoming Data message is out-of-order or not.
+ * WriterProxy represents a remote writer. 
  * 
  * @author mcr70
  *
  */
-class WriterProxy {
+public class WriterProxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 	private final Guid writerGuid;
-	private WriterData wd;
+	private /*final*/ WriterData writerData; // TODO: should be final
 	
+	private volatile long livelinessTimestamp;
 	private volatile long seqNumMax = 0;
-
-	
 	
 	WriterProxy(WriterData wd) {
-		this.wd = wd;
+		this.writerData = wd;
 		writerGuid = wd.getKey();
 	}
 	
 	WriterProxy(Guid writerGuid) {
-		this.writerGuid = writerGuid;
+		this.writerGuid = writerGuid; // TODO: this constructor should be removed
 	}
 	
-	Guid getGuid() {
+	/**
+	 * Gets the guid of the writer represented by this WriterProxy.
+	 * @return Guid
+	 */
+	public Guid getGuid() {
 		return writerGuid;
 	}
 
 	long getSeqNumMax() {
 		return seqNumMax;
+	}
+	
+	/**
+	 * Gets the WriterData associated with this WriterProxy.
+	 * @return
+	 */
+	public WriterData getWriterData() {
+		return writerData;
 	}
 	
 	/**
@@ -65,5 +75,12 @@ class WriterProxy {
 
 	boolean acceptHeartbeat(long sequenceNumber) {
 		return seqNumMax < sequenceNumber;
+	}
+
+	/**
+	 * Asserts liveliness of a writer represented by this WriterProxy. 
+	 */
+	public void assertLiveliness() {
+		livelinessTimestamp = System.currentTimeMillis();
 	}
 }

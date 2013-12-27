@@ -3,18 +3,21 @@ package net.sf.jrtps.udds;
 /**
  * Entity is a base class for DataReader and DataWriter.
  * @author mcr70
+ * @param <T>
  *
  */
-public class Entity {
+public class Entity<T> {
 	private final String topicName;
 	private final Participant participant;
+	private final Class<T> type;
 	
 	/**
 	 * Constructor
 	 * @param topicName name of the topic this entity is bound to.
 	 */
-	protected Entity(Participant p, String topicName) {
+	protected Entity(Participant p, Class<T> type, String topicName) {
 		this.participant = p;
+		this.type = type;
 		this.topicName = topicName;
 	}
 	
@@ -33,5 +36,14 @@ public class Entity {
 	 */
 	public Participant getParticipant() {
 		return participant;
+	}
+
+	/**
+	 * Gets the type associated with this entity.
+	 * 
+	 * @return Class<T>
+	 */
+	public Class<T> getType() {
+		return type;
 	}
 }

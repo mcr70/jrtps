@@ -146,7 +146,7 @@ public class ParticipantData extends DiscoveredData {
 			log.trace("{}", param);
 			switch(param.getParameterId()) {
 			case PID_PARTICIPANT_GUID:
-				this.guidPrefix = ((ParticipantGuid)param).getParticipantGuid().prefix;
+				this.guidPrefix = ((ParticipantGuid)param).getParticipantGuid().getPrefix();
 				break;
 			case PID_PARTICIPANT_BUILTIN_ENDPOINTS: // Handle PARTICIPANT_BUILTIN_ENDPOINTS (opendds) and
 			case PID_BUILTIN_ENDPOINT_SET:          // BUILTIN_ENDPOINT_SET (opensplice) the same way

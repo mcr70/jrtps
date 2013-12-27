@@ -209,7 +209,7 @@ public class RTPSParticipant {
 	 */
 	private RTPSReader<?> getReader(EntityId readerId) {
 		for (RTPSReader<?> reader : readerEndpoints) {
-			if (reader.getGuid().entityId.equals(readerId)) {
+			if (reader.getGuid().getEntityId().equals(readerId)) {
 				return reader;
 			}
 		}
@@ -260,7 +260,7 @@ public class RTPSParticipant {
 	 */
 	private RTPSWriter<?> getWriter(EntityId writerId) {
 		for (RTPSWriter<?> writer : writerEndpoints) {
-			if (writer.getGuid().entityId.equals(writerId)) {
+			if (writer.getGuid().getEntityId().equals(writerId)) {
 				return writer;
 			}
 		}

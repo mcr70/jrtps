@@ -3,7 +3,10 @@ package net.sf.jrtps;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.SortedSet;
 
 import net.sf.jrtps.builtin.ReaderData;
@@ -26,17 +29,16 @@ import org.slf4j.LoggerFactory;
 
 /**
  * RTPSWriter implements RTPS writer endpoint. 
- * RTPSWriter does not keep track of remote readers on its own. It is expected that DDS implementations 
- * explicitly call addMatchedReader(ReaderData) and removeMatchedReader(ReaderData). 
- *  
+ * RTPSWriter will not communicate with unknown readers. It is expected that DDS implementation 
+ * explicitly call addMatchedReader(ReaderData) and removeMatchedReader(ReaderData).<p> 
+ * 
  * @author mcr70
- *
  */
 public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 	private MessageDigest md5 = null;
 
-	private HashMap<Guid, ReaderProxy> matchedReaders = new HashMap<>();
+	private HashMap<Guid, ReaderProxy> readerProxies = new HashMap<>();
 
 	@SuppressWarnings("rawtypes")
 	private final WriterCache writer_cache;
@@ -70,7 +72,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @return 0, if this RTPSWriter is not builtin endpoint
 	 */
 	public int endpointSetId() {
-		return getGuid().entityId.getEndpointSetId();
+		return getGuid().getEntityId().getEndpointSetId();
 	}
 
 
@@ -80,17 +82,17 @@ public class RTPSWriter<T> extends Endpoint {
 	 * This provides means to create multiple changes, before announcing the state to readers.
 	 */
 	public void notifyReaders() {		
-		if (matchedReaders.size() > 0) {
-			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().entityId, matchedReaders.size());
+		if (readerProxies.size() > 0) {
+			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().getEntityId(), readerProxies.size());
 
-			for (ReaderProxy proxy : matchedReaders.values()) {
+			for (ReaderProxy proxy : readerProxies.values()) {
 				Guid guid = proxy.getReaderData().getKey();
 				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
 				if (proxy.isReliable()) {
-					sendHeartbeat(guid.prefix, guid.entityId);
+					sendHeartbeat(guid.getPrefix(), guid.getEntityId());
 				}
 				else {
-					sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+					sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
 					proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 				}
 			}
@@ -99,14 +101,14 @@ public class RTPSWriter<T> extends Endpoint {
 
 
 	public void notifyReader(Guid guid) {
-		ReaderProxy proxy = matchedReaders.get(guid);
+		ReaderProxy proxy = readerProxies.get(guid);
 
 		// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
 		if (proxy.isReliable()) {
-			sendHeartbeat(guid.prefix, guid.entityId);
+			sendHeartbeat(guid.getPrefix(), guid.getEntityId());
 		}
 		else {
-			sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+			sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
 			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 		}
 	}
@@ -117,8 +119,8 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Heartbeat message of the liveliness of this writer.
 	 */
 	public void assertLiveliness() {
-		for (Guid guid : matchedReaders.keySet()) {
-			sendHeartbeat(guid.prefix, guid.entityId, true); // Send Heartbeat regardless of readers QosReliability
+		for (Guid guid : readerProxies.keySet()) {
+			sendHeartbeat(guid.getPrefix(), guid.getEntityId(), true); // Send Heartbeat regardless of readers QosReliability
 		}
 	}
 
@@ -127,35 +129,26 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	public void close() {
 		heartbeatPeriod = 0; // Stops heartbeat thread gracefully 
-		matchedReaders.clear();
+		readerProxies.clear();
 		//writer_cache.clear();
 	}
 
 	/**
-	 * Remove a matched reader.
-	 * @param readerData
-	 */
-	public void removeMatchedReader(ReaderData readerData) {
-		log.info("[{}] Removing matchedReader {}", getGuid().entityId, readerData);
-		matchedReaders.remove(readerData);
-	}
-
-	/**
 	 * Add a matched reader.
+	 * 
 	 * @param readerData
+	 * @return ReaderProxy
 	 */
-	public void addMatchedReader(ReaderData readerData) {
-		log.info("[{}] Adding matchedReader {}", getGuid().entityId, readerData);
-
+	public ReaderProxy addMatchedReader(ReaderData readerData) {
 		ReaderProxy proxy = new ReaderProxy(readerData);
-		matchedReaders.put(readerData.getKey(), proxy);
+		readerProxies.put(readerData.getKey(), proxy);
 
 		QosDurability readerDurability = 
 				(QosDurability) readerData.getQualityOfService().getPolicy(QosDurability.class);
 
 		if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
 			// VOLATILE readers are marked having received all the samples so far
-			log.debug("[{}] Setting highest seqNum to {} for VOLATILE reader", getGuid().entityId, 
+			log.debug("[{}] Setting highest seqNum to {} for VOLATILE reader", getGuid().getEntityId(), 
 					writer_cache.getSeqNumMax());
 
 			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
@@ -165,15 +158,51 @@ public class RTPSWriter<T> extends Endpoint {
 			Guid guid = readerData.getKey();
 
 			if (proxy.isReliable()) {
-				sendHeartbeat(guid.prefix, guid.entityId);
+				sendHeartbeat(guid.getPrefix(), guid.getEntityId());
 			}
 			else {
-				sendData(guid.prefix, guid.entityId, proxy.getReadersHighestSeqNum());
+				sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
 				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 			}
 		}
+		
+		log.info("[{}] Added matchedReader {}", getGuid().getEntityId(), readerData);
+		return proxy;
 	}
 
+	/**
+	 * Remove a matched reader.
+	 * @param readerData
+	 */
+	public void removeMatchedReader(ReaderData readerData) {
+		readerProxies.remove(readerData);
+		log.info("[{}] Removed matchedReader {}", getGuid().getEntityId(), readerData);
+	}
+
+	/**
+	 * Gets all the matched readers of this RTPSWriter
+	 * @return
+	 */
+	public Collection<ReaderProxy> getMatchedReaders() {
+		return readerProxies.values();
+	}
+
+	/**
+	 * Gets the matched readers owned by given remote participant.
+	 * 
+	 * @param prefix GuidPrefix of the remote participant
+	 * @return a Collection of matched readers
+	 */
+	public Collection<ReaderProxy> getMatchedReaders(GuidPrefix prefix) {
+		List<ReaderProxy> proxies = new LinkedList<>();
+		for (Guid guid : readerProxies.keySet()) {
+			if (guid.getPrefix().equals(prefix)) {
+				proxies.add(readerProxies.get(guid));
+			}
+		}
+		return proxies;	
+	}
+	
 	/**
 	 * Handle incoming AckNack message.
 	 * 
@@ -181,19 +210,19 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param ackNack
 	 */
 	void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
-		log.debug("[{}] Got AckNack: {}", getGuid().entityId, ackNack.getReaderSNState());
+		log.debug("[{}] Got AckNack: {}", getGuid().getEntityId(), ackNack.getReaderSNState());
 
-		ReaderProxy proxy = matchedReaders.get(new Guid(senderPrefix, ackNack.getReaderId()));
+		ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
 			proxy.ackNackReceived(); // Marks reader as being alive
 
-			log.debug("[{}] Wait for nack response delay: {} ms", getGuid().entityId, nackResponseDelay);
+			log.debug("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
 			getParticipant().waitFor(nackResponseDelay);
 
 			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
 		} // Note: proxy could be null
 		else {
-			log.warn("[{}] Discarding AckNack from unknown reader {}", getGuid().entityId, ackNack.getReaderId());
+			log.warn("[{}] Discarding AckNack from unknown reader {}", getGuid().getEntityId(), ackNack.getReaderId());
 		}
 	}
 
@@ -208,11 +237,11 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	public void sendData(GuidPrefix targetPrefix, EntityId readerId, long readersHighestSeqNum) {
 		// TODO: This should not be public
-		Message m = new Message(getGuid().prefix);
+		Message m = new Message(getGuid().getPrefix());
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
 		if (changes.size() == 0) {
-			log.debug("[{}] sendData() called, but history cache is empty. returning.", getGuid().entityId);
+			log.debug("[{}] sendData() called, but history cache is empty. returning.", getGuid().getEntityId());
 			return;
 		}
 
@@ -242,11 +271,11 @@ public class RTPSWriter<T> extends Endpoint {
 				}
 			}
 			catch(IOException ioe) {
-				log.warn("[{}] Failed to add cache change to message", getGuid().entityId, ioe);
+				log.warn("[{}] Failed to add cache change to message", getGuid().getEntityId(), ioe);
 			}
 		}
 
-		log.debug("[{}] Sending Data: {}-{}", getGuid().entityId, firstSeqNum, lastSeqNum);
+		log.debug("[{}] Sending Data: {}-{}", getGuid().getEntityId(), firstSeqNum, lastSeqNum);
 		boolean overFlowed = sendMessage(m, targetPrefix); 
 		if (overFlowed) {
 			sendHeartbeat(targetPrefix, readerId);
@@ -258,16 +287,16 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	private void sendHeartbeat(GuidPrefix targetPrefix, EntityId readerId, boolean livelinessFlag) {
-		Message m = new Message(getGuid().prefix);
+		Message m = new Message(getGuid().getPrefix());
 		Heartbeat hb = createHeartbeat(readerId);
 		hb.livelinessFlag(livelinessFlag);
 		m.addSubMessage(hb);
 
-		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().entityId, hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().getEntityId(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
 		sendMessage(m, targetPrefix);
 
 		if (!livelinessFlag) {
-			ReaderProxy proxy = matchedReaders.get(new Guid(targetPrefix, readerId));
+			ReaderProxy proxy = readerProxies.get(new Guid(targetPrefix, readerId));
 			proxy.heartbeatSent();
 		}		
 	}
@@ -277,7 +306,7 @@ public class RTPSWriter<T> extends Endpoint {
 			entityId = EntityId.UNKNOWN_ENTITY;
 		}
 
-		Heartbeat hb = new Heartbeat(entityId, getGuid().entityId,
+		Heartbeat hb = new Heartbeat(entityId, getGuid().getEntityId(),
 				writer_cache.getSeqNumMin(), writer_cache.getSeqNumMax(), hbCount++ );
 
 		return hb;
@@ -312,7 +341,7 @@ public class RTPSWriter<T> extends Endpoint {
 			inlineQos.add(new StatusInfo(cc.getKind()));
 		}
 
-		Data data = new Data(readerId, getGuid().entityId, cc.getSequenceNumber(), inlineQos, dEnc);
+		Data data = new Data(readerId, getGuid().getEntityId(), cc.getSequenceNumber(), inlineQos, dEnc);
 
 		return data;
 	}
@@ -326,7 +355,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @return true, if every matched reader has acknowledged given change number
 	 */
 	public boolean isAcknowledgedByAll(long sequenceNumber) {
-		for (ReaderProxy proxy : matchedReaders.values()) {
+		for (ReaderProxy proxy : readerProxies.values()) {
 			if (proxy.isActive() && proxy.getReadersHighestSeqNum() < sequenceNumber) {
 				return false;
 			}

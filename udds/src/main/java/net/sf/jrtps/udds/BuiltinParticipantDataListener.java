@@ -45,7 +45,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
-				if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().prefix)) {
+				if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().getPrefix())) {
 					log.trace("Ignoring self");
 				}
 				else {
@@ -72,7 +72,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 	 * @param builtinEndpoints
 	 */
 	private void handleBuiltinEnpointSet(GuidPrefix prefix, int builtinEndpoints) {
-		log.debug("handleBuiltinEndpointSet {}", builtinEndpoints);
 		QualityOfService sedpQoS = new QualityOfService();
 		try {
 			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
@@ -81,6 +80,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 		}
 
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
+		log.debug("handleBuiltinEndpointSet {}", eps);
 		
 		if (eps.hasPublicationDetector()) {
 			log.debug("Notifying remote publications reader of our publications");
@@ -91,7 +91,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			
 			pw.getRTPSWriter().addMatchedReader(rd);
 			//pw.getRTPSWriter().notifyReader(key);
-			pw.getRTPSWriter().sendData(key.prefix, key.entityId, 0L);
+			pw.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
 		}
 		if (eps.hasPublicationAnnouncer()) {
 			DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);

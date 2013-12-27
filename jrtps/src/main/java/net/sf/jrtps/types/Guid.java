@@ -10,8 +10,8 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class Guid {
-	public GuidPrefix prefix;
-	public EntityId entityId;
+	private final GuidPrefix prefix;
+	private final EntityId entityId;
 	
 	public Guid(GuidPrefix prefix, EntityId entityId) {
 		if (prefix == null || entityId == null) {
@@ -47,19 +47,19 @@ public class Guid {
 	public boolean equals(Object other) {
 		if (other instanceof Guid) {
 			Guid o = (Guid) other;
-			return o != null && prefix.equals(o.prefix) && entityId.equals(o.entityId);	
+			return o != null && getPrefix().equals(o.getPrefix()) && getEntityId().equals(o.getEntityId());	
 		}
 		return false;
 	}
 	
 	@Override
 	public int hashCode() {
-		return prefix.hashCode() + entityId.hashCode();
+		return getPrefix().hashCode() + getEntityId().hashCode();
 	}
 
 	public void writeTo(RTPSByteBuffer buffer) {
-		prefix.writeTo(buffer);
-		entityId.writeTo(buffer);
+		getPrefix().writeTo(buffer);
+		getEntityId().writeTo(buffer);
 	}
 
 	/**
@@ -75,8 +75,26 @@ public class Guid {
 		return guid_bytes;
 	}
 
+	/**
+	 * Gets the GuidPrefix. GuidPrefix represents a Participant. All the entities created by one Participant
+	 * share the same GuidPrefix.
+	 *   
+	 * @return GuidPrefix
+	 */
+	public GuidPrefix getPrefix() {
+		return prefix;
+	}
+
+	/**
+	 * Gets the EntityId.
+	 * @return EntityId
+	 */
+	public EntityId getEntityId() {
+		return entityId;
+	}
+
 
 	public String toString() {
-		return prefix.toString() + ", " + entityId.toString();
+		return getPrefix().toString() + ", " + getEntityId().toString();
 	}
 }
