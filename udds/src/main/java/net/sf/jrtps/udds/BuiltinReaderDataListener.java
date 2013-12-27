@@ -52,7 +52,7 @@ class BuiltinReaderDataListener extends BuiltinListener implements SampleListene
 				else {
 					QualityOfService requested = readerData.getQualityOfService();
 					QualityOfService offered = w.getRTPSWriter().getQualityOfService();
-					log.debug("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().entityId, readerData.getKey().entityId);
+					log.debug("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), readerData.getKey().getEntityId());
 
 					if (offered.isCompatibleWith(requested)) {
 						w.getRTPSWriter().addMatchedReader(readerData);
@@ -66,14 +66,14 @@ class BuiltinReaderDataListener extends BuiltinListener implements SampleListene
 
 				// builtin entities are handled with SEDP in ParticipantData reception
 				// TODO: user-defined entities should not be handled differently.
-				if (key.entityId.isUserDefinedEntity()) {  
-					ParticipantData pd = discoveredParticipants.get(key.prefix);
+				if (key.getEntityId().isUserDefinedEntity()) {  
+					ParticipantData pd = discoveredParticipants.get(key.getPrefix());
 					if (pd != null) {
-						w.getRTPSWriter().sendData(key.prefix, key.entityId, 0L);
+						w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
 						//w.getRTPSWriter().notifyReader(key);
 					}
 					else {
-						log.warn("Participant was not found: {}", key.prefix);
+						log.warn("Participant was not found: {}", key.getPrefix());
 					}
 				}
 			}

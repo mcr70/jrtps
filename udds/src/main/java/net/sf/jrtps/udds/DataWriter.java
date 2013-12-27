@@ -16,7 +16,7 @@ import net.sf.jrtps.types.Guid;
  * @param <T> Type of the DataWriter. Type may be obtained from an external tool like 
  * IDL compiler, or it may be more dynamically constructed Object that is used with uDDS.
  */
-public class DataWriter<T> extends Entity {
+public class DataWriter<T> extends Entity<T> {
 	private final RTPSWriter<T> rtps_writer;
 	private final HistoryCache<T> hCache;
 	
@@ -29,8 +29,8 @@ public class DataWriter<T> extends Entity {
 	 * 
 	 * @param topicName
 	 */
-	DataWriter(Participant p, RTPSWriter<T> writer, HistoryCache<T> hCache) {
-		super(p, writer.getTopicName());
+	DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+		super(p, type, writer.getTopicName());
 		this.rtps_writer = writer;
 		this.hCache = hCache;
 		

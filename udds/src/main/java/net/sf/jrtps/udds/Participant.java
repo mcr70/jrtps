@@ -29,6 +29,8 @@ import net.sf.jrtps.builtin.TopicDataMarshaller;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.builtin.WriterDataMarshaller;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.QosDurability;
+import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
@@ -140,15 +142,27 @@ public class Participant {
 		setMarshaller(ReaderData.class, new ReaderDataMarshaller());
 		setMarshaller(TopicData.class, new TopicDataMarshaller());
 
-		QualityOfService spdpQoS = new QualityOfService();
-		QualityOfService sedpQoS = new QualityOfService();
+		QualityOfService spdpQoS = new QualityOfService(); // QoS for SPDP
+		QualityOfService sedpQoS = new QualityOfService(); // QoS for SEDP
+		QualityOfService pmQoS = new QualityOfService();   // QoS for ParticipantMessages
 
 		try {
 			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
 		} catch (InconsistentPolicy e) {
 			logger.error("Got InconsistentPolicy exception. This is an internal error", e);
+			throw new RuntimeException(e);
 		}
 
+		try {
+			pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
+			pmQoS.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
+			pmQoS.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
+		} catch (InconsistentPolicy e) {
+			logger.error("Got InconsistentPolicy. This is an internal error", e);
+			throw new RuntimeException(e);
+		}
+
+		
 		// ----  Create a Writers for SEDP  ---------
 		DataWriter<WriterData> wdWriter = 
 				createDataWriter(WriterData.BUILTIN_TOPIC_NAME, WriterData.class, WriterData.class.getName(), sedpQoS);
@@ -185,6 +199,14 @@ public class Participant {
 		tReader.addListener(new BuiltinTopicDataListener(this));
 		readers.add(tReader);
 
+		// Create entities for ParticipantMessage ---------------
+		DataReader<ParticipantMessage> pmReader = 
+				createDataReader(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
+		pmReader.addListener(new BuiltinParticipantMessageListener(this, readers));
+		readers.add(pmReader);
+
+		// Just create writer for ParticipantMessage, so that it will endup being listed in builtin entities
+		createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
 
 		// ----  Create a Writer for SPDP  -----------------------
 		DataWriter<ParticipantData> pdWriter = 
@@ -255,7 +277,7 @@ public class Participant {
 			rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m, qos);			
 		}
 
-		DataReader<T> reader = new DataReader<T>(this, rtps_reader);
+		DataReader<T> reader = new DataReader<T>(this, type, rtps_reader);
 		readers.add(reader);
 
 		@SuppressWarnings("unchecked")
@@ -338,7 +360,7 @@ public class Participant {
 			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, wCache, qos);
 		}
 		
-		DataWriter<T> writer = new DataWriter<T>(this, rtps_writer, wCache);
+		DataWriter<T> writer = new DataWriter<T>(this, type, rtps_writer, wCache);
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
 
@@ -434,7 +456,7 @@ public class Participant {
 
 	private ParticipantData createSPDPParticipantData() {
 		int epSet = createEndpointSet();
-		ParticipantData pd = new ParticipantData(rtps_participant.getGuid().prefix, 
+		ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), 
 				epSet, ucLoc,  mcLoc,  meta_ucLoc, meta_mcLoc);
 
 		logger.debug("Created ParticipantData: {}", pd);
@@ -473,7 +495,7 @@ public class Participant {
 		};
 
 		logger.debug("[{}] Starting resend thread with period {}", 
-				rtps_participant.getGuid().entityId, period);		
+				rtps_participant.getGuid().getEntityId(), period);		
 
 		threadPoolExecutor.execute(resendRunnable);
 	}
@@ -495,7 +517,7 @@ public class Participant {
 	 */
 	DataReader<?> getReader(EntityId readerId) {
 		for (DataReader<?> reader : readers) {
-			if (reader.getRTPSReader().getGuid().entityId.equals(readerId)) {
+			if (reader.getRTPSReader().getGuid().getEntityId().equals(readerId)) {
 				return reader;
 			}
 		}
@@ -510,7 +532,7 @@ public class Participant {
 	 */
 	DataWriter<?> getWriter(EntityId writerId) {
 		for (DataWriter<?> writer : writers) {
-			if (writer.getRTPSWriter().getGuid().entityId.equals(writerId)) {
+			if (writer.getRTPSWriter().getGuid().getEntityId().equals(writerId)) {
 				return writer;
 			}
 		}
@@ -584,5 +606,39 @@ public class Participant {
 		}
 		
 		return false;
+	}
+
+	/**
+	 * Gets a writer for given type-
+	 * 
+	 * @param type Type of the writer
+	 * @return DataWriter<T>
+	 */
+	@SuppressWarnings("unchecked")
+	<T> DataReader<T> getDataReader(Class<T> type) {
+		for (DataReader<?> dr : readers) {
+			if (dr.getType().equals(type)) {
+				return (DataReader<T>) dr;
+			}
+		}
+		
+		return null;
+	}
+
+	/**
+	 * Gets a writer for given type-
+	 * 
+	 * @param type Type of the writer
+	 * @return DataWriter<T>
+	 */
+	@SuppressWarnings("unchecked")
+	<T> DataWriter<T> getDataWriter(Class<T> type) {
+		for (DataWriter<?> dw : writers) {
+			if (dw.getType().equals(type)) {
+				return (DataWriter<T>) dw;
+			}
+		}
+		
+		return null;
 	}
 }

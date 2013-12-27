@@ -4,16 +4,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.InconsistentPolicy;
-import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.RTPSWriter;
-import net.sf.jrtps.Sample;
-import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.message.parameter.QosDurability;
-import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosLiveliness;
-import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Duration;
 
 import org.slf4j.Logger;
@@ -27,20 +20,16 @@ import org.slf4j.LoggerFactory;
  * MANUAL_BY_PARTICIPANT, will have their liveliness asserted when application calls
  * assertLiveliness() method of RTPSParticipant.<p>
  * 
- * This class is also a SampleListener of ParticipantMessages. Remote writers liveliness is 
- * asserted when samples arrive. 
- * 
  * @author mcr70
  * @see net.sf.jrtps.RTPSParticipant#assertLiveliness()
  */
-class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> {
+class LivelinessManager implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(LivelinessManager.class);
 	
 	private final List<Duration> alDurations = new LinkedList<>();
 	
 	private final Participant participant;
 	private DataWriter<ParticipantMessage> writer;
-	private DataReader<ParticipantMessage> reader;
 
 	private final ParticipantMessage manualSample;
 	private final ParticipantMessage automaticSample;
@@ -50,9 +39,9 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		this.participant = participant;
 
 		// Create samples used with liveliness protocol
-		manualSample = new ParticipantMessage(participant.getRTPSParticipant().getGuid().prefix, 
+		manualSample = new ParticipantMessage(participant.getRTPSParticipant().getGuid().getPrefix(), 
 				ParticipantMessage.MANUAL_LIVELINESS_KIND, new byte[0]);
-		automaticSample = new ParticipantMessage(participant.getRTPSParticipant().getGuid().prefix,
+		automaticSample = new ParticipantMessage(participant.getRTPSParticipant().getGuid().getPrefix(),
 				ParticipantMessage.AUTOMATIC_LIVELINESS_KIND, new byte[0]);
 	}
 	
@@ -102,24 +91,8 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 	 * Starts livelinessThread.
 	 */
 	void start() {
-		// ---  Create QualityOfService used with entities  ----- 
-		QualityOfService qos = new QualityOfService();
-		try {
-			qos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
-			qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
-			qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
-		} catch (InconsistentPolicy e) {
-			log.error("Got InconsistentPolicy. This is an internal error", e);
-			throw new RuntimeException(e);
-		}
+		writer = participant.getDataWriter(ParticipantMessage.class);
 		
-		writer = participant.createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, 
-				ParticipantMessage.class.getName(), qos);
-
-		reader = participant.createDataReader(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, 
-				ParticipantMessage.class.getName(), qos);
-		reader.addListener(this);
-
 		log.debug("Starting liveliness thread");
 		participant.addRunnable(this);
 	}
@@ -147,15 +120,6 @@ class LivelinessManager implements Runnable, SampleListener<ParticipantMessage> 
 		}
 		catch(InterruptedException ie) {
 			log.debug("livelinessThread was interrupted");
-		}
-	}
-
-	@Override
-	public void onSamples(List<Sample<ParticipantMessage>> samples) {
-		for (Sample<ParticipantMessage> sample : samples) {
-			ParticipantMessage pm = sample.getData();
-			// TODO: assert liveliness of remote writers
-			log.warn("Liveliness message not handled");
 		}
 	}
 }

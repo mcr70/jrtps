@@ -6,6 +6,7 @@ import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**

@@ -67,6 +67,7 @@ class HistoryCache<T> implements WriterCache {
 
 	void setDataWriter(DataWriter<T> dw) {
 		this.writer = dw;
+		log.debug("Created HistoryCache for {}: {}, {}, {}", new Object[] {dw.getGuid().getEntityId(),  reliability, history, resource_limits});
 	}
 
 
@@ -85,13 +86,13 @@ class HistoryCache<T> implements WriterCache {
 
 
 	private void addSample(CacheChange.Kind kind, List<T> samples) {
-		log.debug("[{}] add {} samples of kind {}", writer.getGuid().entityId, samples.size(), kind);
+		log.trace("[{}] add {} samples of kind {}", writer.getGuid().getEntityId(), samples.size(), kind);
 
 		for (T sample : samples) {
 			InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
 			Instance inst = instances.get(key);
 			if (inst == null) {
-				log.debug("[{}] Creating new instance {}", writer.getGuid().entityId, key);
+				log.trace("[{}] Creating new instance {}", writer.getGuid().getEntityId(), key);
 				instanceCount++;
 				if (instanceCount > resource_limits.getMaxInstances()) {
 					instanceCount = resource_limits.getMaxInstances();
@@ -106,7 +107,7 @@ class HistoryCache<T> implements WriterCache {
 				throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
 			}
 
-			log.trace("[{}] Creating cache change {}", writer.getGuid().entityId, seqNum + 1);
+			log.trace("[{}] Creating cache change {}", writer.getGuid().getEntityId(), seqNum + 1);
 			CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
 			sampleCount += inst.addSample(aChange);
 			if (sampleCount > resource_limits.getMaxSamples()) {
@@ -137,7 +138,7 @@ class HistoryCache<T> implements WriterCache {
 		// TODO: CacheChange.sequenceNumber must be set only if it is succesfully 
 		//       inserted into cache
 		int addSample(CacheChange aChange) {
-			log.debug("[{}] Adding sample {}", writer.getGuid().entityId, aChange.getSequenceNumber());
+			log.trace("[{}] Adding sample {}", writer.getGuid().getEntityId(), aChange.getSequenceNumber());
 			int historySizeChange = 1;
 			history.add(aChange);
 			if (history.size() > maxSize) {
@@ -150,7 +151,7 @@ class HistoryCache<T> implements WriterCache {
 						// TODO: during acknack, we should check if there is no need to block anymore.
 						//       I.e. we should notify blocked thread.
 
-						log.debug("[{}] Blocking the writer for {} ms", writer.getGuid().entityId, reliability.getMaxBlockingTime().asMillis());
+						log.trace("[{}] Blocking the writer for {} ms", writer.getGuid().getEntityId(), reliability.getMaxBlockingTime().asMillis());
 						writer.getParticipant().waitFor((int) reliability.getMaxBlockingTime().asMillis());
 
 						if (!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
@@ -160,7 +161,7 @@ class HistoryCache<T> implements WriterCache {
 					}
 				}
 
-				log.debug("[{}] Removing oldest sample from history", writer.getGuid().entityId);
+				log.trace("[{}] Removing oldest sample from history", writer.getGuid().getEntityId());
 				CacheChange cc = history.removeFirst(); // Discard oldest sample
 				changes.remove(cc); // Removed oldest instance sample from a set of changes. 
 
@@ -209,19 +210,19 @@ class HistoryCache<T> implements WriterCache {
 	 */
 	@Override
 	public SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
-		log.debug("[{}] getChangesSince({})", writer.getGuid().entityId, sequenceNumber);
+		log.trace("[{}] getChangesSince({})", writer.getGuid().getEntityId(), sequenceNumber);
 
 		synchronized (changes) {
 			for (CacheChange cc : changes) {
 				if (cc.getSequenceNumber() > sequenceNumber) {
 					SortedSet<CacheChange> tailSet = changes.tailSet(cc);
-					log.debug("[{}] returning {}", writer.getGuid().entityId, tailSet);
+					log.trace("[{}] returning {}", writer.getGuid().getEntityId(), tailSet);
 					return tailSet;
 				}
 			}
 		}
 
-		log.debug("[{}] No chances to return for seq num {}", writer.getGuid().entityId, sequenceNumber);
+		log.trace("[{}] No chances to return for seq num {}", writer.getGuid().getEntityId(), sequenceNumber);
 		return new TreeSet<>();
 	}
 

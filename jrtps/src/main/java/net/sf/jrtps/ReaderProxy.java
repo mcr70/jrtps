@@ -2,15 +2,16 @@ package net.sf.jrtps;
 
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.types.Guid;
 
 /**
- * ReaderProxy.
+ * ReaderProxy represents a remote reader. 
  *
  * @author mcr70
  */
-class ReaderProxy {
-	private final ReaderData rd;
-	private boolean expectsInlineQoS = false;
+public class ReaderProxy {
+	private final ReaderData readerData;
+	private final boolean expectsInlineQoS;
 	private long readersHighestSeqNum = 0;
 	private boolean active = true;
 	private long heartbeatSentTime = 0; // set to 0 after acknack
@@ -20,13 +21,28 @@ class ReaderProxy {
 	}
 
 	ReaderProxy(ReaderData rd, boolean expectsInlineQoS) {
-		this.rd = rd;
+		this.readerData = rd;
 		this.expectsInlineQoS = expectsInlineQoS;
 	}
 
+	/**
+	 * Gets the ReaderData associated with this ReaderProxy.
+	 * @return ReaderData
+	 */
+	public ReaderData getReaderData() {
+		return readerData;
+	}
 
 	/**
-	 * Returnbs true if remote reader expects QoS to be sent inline with each Data submessage.
+	 * Gets the guid represented by this ReaderProxy
+	 * @return Guid
+	 */
+	public Guid getGuid() {
+		return readerData.getKey();
+	}
+	
+	/**
+	 * Returns true if remote reader expects QoS to be sent inline with each Data submessage.
 	 * @return true or false
 	 */
 	boolean expectsInlineQoS() {
@@ -39,16 +55,11 @@ class ReaderProxy {
 	 * @return
 	 */
 	boolean isReliable() {
-		QosReliability policy = (QosReliability) rd.getQualityOfService().getPolicy(QosReliability.class);
+		QosReliability policy = (QosReliability) readerData.getQualityOfService().getPolicy(QosReliability.class);
 
 		return policy.getKind() == QosReliability.Kind.RELIABLE;
 	}
 	
-	
-	ReaderData getReaderData() {
-		return rd;
-	}
-
 	long getReadersHighestSeqNum() {
 		return readersHighestSeqNum;
 	}
