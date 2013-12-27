@@ -150,6 +150,6 @@ class RTPSMessageHandler implements Runnable {
 			}
 		}
 		
-		log.debug("Handler exiting");
+		log.debug("RTPSMessageHandler exiting");
 	}
 }

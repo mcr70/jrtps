@@ -61,6 +61,9 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
 				}
 			}
+			else {
+				d.renewLease(); // TODO: Should we always store the new ParticipantData to discoveredParticipants.
+			}
 		}
 	}
 

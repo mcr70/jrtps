@@ -106,6 +106,11 @@ public class ParticipantData extends DiscoveredData {
 	 */
 	private int manualLivelinessCount = 0;
 
+	/**
+	 * Time, that will mark remote participants lease as expired.
+	 */
+	private long leaseExpirationTime;
+
 
 	public ParticipantData(GuidPrefix prefix, int endpoints,
 			Locator u_ucLocator, Locator u_mcLocator, 
@@ -128,6 +133,7 @@ public class ParticipantData extends DiscoveredData {
 		
 		super.topicName = BUILTIN_TOPIC_NAME;
 		super.typeName = ParticipantData.class.getName();
+		leaseExpirationTime = System.currentTimeMillis() + leaseDuration.asMillis();
 	}
 	
 	/**
@@ -201,6 +207,10 @@ public class ParticipantData extends DiscoveredData {
 		return guidPrefix;
 	}
 
+	/**
+	 * Gets the guid of the partcipant.
+	 * @return Guid
+	 */
 	public Guid getGuid() {
 		return new Guid(guidPrefix, EntityId.PARTICIPANT);
 	}
@@ -232,6 +242,11 @@ public class ParticipantData extends DiscoveredData {
 		return availableBuiltinEndpoints;
 	}
 
+	/**
+	 * Lease duration associated with remote participant represented by this ParticipantData. 
+	 * Remote participant is expected to renew its lease during its lease duration.  
+	 * @return
+	 */
 	public Duration getLeaseDuration() {
 		return leaseDuration;
 	}
@@ -271,5 +286,31 @@ public class ParticipantData extends DiscoveredData {
 	public String toString() {
 		return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + 
 				", lease duration " + getLeaseDuration() + ", locators " + getAllLocators();
+	}
+
+	/**
+	 * Renews lease time that has been associated with this ParticipantData
+	 * @see #getLeaseDuration()
+	 */
+	public void renewLease() {
+		this.leaseExpirationTime = System.currentTimeMillis() + leaseDuration.asMillis();
+	}
+
+	/**
+	 * Checks, if the lease has been expired or not.
+	 * @return true, if lease has been expired
+	 */
+	public boolean isLeaseExpired() {
+		long currentTimeMillis = System.currentTimeMillis();
+		
+		return currentTimeMillis > leaseExpirationTime;
+	}
+
+	/**
+	 * Gets the time when the lease will be expired.
+	 * @return the time lease will expire
+	 */
+	public long getLeaseExpirationTime() {
+		return leaseExpirationTime;
 	}
 }
