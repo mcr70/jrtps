@@ -1,36 +1,43 @@
+0.5.1
+	- ParticipantLeaseManager introduced
+
 0.5.0
-	- Moved some classes from net.sf.jrtps to udds. Most of the DDS knowledge is moved.
-	  jRTPS remains as a communication library, dealing with message parsing and
-	  handling of different RTPS messages, like Heartbeat & AckNack.
+	- Moved some classes from net.sf.jrtps to udds. Most of the DDS 
+	  knowledge is moved. jRTPS remains as a communication library, 
+          dealing with message parsing and handling of different RTPS 
+	  messages, like Heartbeat & AckNack.
 	  
-	  The contract between DDS and RTPS is clarified. In short, DDS implementation
-	  is responsible for creation of RTPS entities. Also, determination of matched
-	  reader/writer is the responsibility of DDS layer. For writers, data is communicated
-	  through WriterCache and by a call to notifyReaders(). QualityOfService stuff
-	  is moved to uDDS as much as possible.
+	  The contract between DDS and RTPS is clarified. In short, DDS 
+	  implementation is responsible for creation of RTPS entities. Also, 
+	  determination of matched reader/writer is the responsibility of DDS 
+	  layer. For writers, data is communicated through WriterCache and 
+	  by a call to notifyReaders(). QualityOfService stuff is moved to 
+	  uDDS as much as possible.
 	
 0.4.3
 	- History cache work.
-	- QosDurability. VOLATILE readers are sent only data after match making. For other readers,
-	  TRANSIENT_LOCAL behavior is presented.
-	- QosResourceLimits: resource limits are checked. OutOfResources is thrown if exceeded.
-	- QosHistory: history depth may be given. TimeoutException is thrown if a sample cannot 
-	  be added reliably.
-	- QosReliability: max_blocking_time. Writer blocks, if some of the reader has not 
-	  received a sample and addition would drop that sample. Works in conjunction with
-	  QosHistory. 
+	- QosDurability. VOLATILE readers are sent only data after match 
+	  making. For other readers, TRANSIENT_LOCAL behavior is presented.
+	- QosResourceLimits: resource limits are checked. OutOfResources is 
+	  thrown if exceeded.
+	- QosHistory: history depth may be given. TimeoutException is thrown 
+	  if a sample cannot be added reliably.
+	- QosReliability: max_blocking_time. Writer blocks, if some of the 
+	  reader has not received a sample and addition would drop that 
+	  sample. Works in conjunction with QosHistory. 
 	
 0.4.2
-	- Configuration with jrtps.properties: Thread pool can be tuned, heartbeatResponseDelay, 
-	  nackResponseDelay, SPDP resend data period.
-	- FIX: mapping of Reliabilitykind_t on the wire. This time for BEST_EFFORT :)
+	- Configuration with jrtps.properties: Thread pool can be tuned, 
+	  heartbeatResponseDelay, nackResponseDelay, SPDP resend data period.
+	- FIX: mapping of Reliabilitykind_t on the wire. This time for 
+	  BEST_EFFORT :)
 
 0.4.1
-	- QosLiveliness. Partly implemented. Writer side is implemented but readers don't
-	  react on liveliness of the writers. 
+	- QosLiveliness. Partly implemented. Writer side is implemented but 
+	  readers don't react on liveliness of the writers. 
 	- QosReliability
-	- FIX: QoS is marshalled/unmarshalled during discovery. Improved logging of QoS of 
-	  discovered entities.
+	- FIX: QoS is marshalled/unmarshalled during discovery. Improved 
+	  logging of QoS of discovered entities.
 	- FIX: mapping of Reliabilitykind_t on the wire
 
 0.4.0
