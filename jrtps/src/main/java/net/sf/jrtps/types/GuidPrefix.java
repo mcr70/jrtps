@@ -26,31 +26,28 @@ public class GuidPrefix {
 	 */
 	private final byte[] bytes;
 
-	public GuidPrefix(byte domainId, byte participantid, int vmid) {
-		this(new byte[] {domainId, participantid, (byte) (vmid>>8 & 0xff), (byte) (vmid&0xff), 0xc,0xa,0xf,0xe,0xb,0xa,0xb,0xe});
-	}
-
 	public GuidPrefix(RTPSByteBuffer bb) {
 		bytes = new byte[12];
 		bb.read(bytes);
 	}
 
-	GuidPrefix(byte[] bytes) {
+	/**
+	 * Create GuidPrefix with given byte array. The length of the array must be 12.
+	 * @param bytes
+	 * @throws IllegalArgumentException if length of the array is not 12
+	 */
+	public GuidPrefix(byte[] bytes) {
 		this.bytes = bytes;
 
 		if (bytes.length != 12) {
 			throw new IllegalArgumentException("Length of GuidPrefix must be 12");
 		}
 	}
-
-	/**
-	 * Get the domainId associated with this GuidPrefix
-	 */
-	public byte getDomainId() {
-		return bytes[0];
-	}
-
 	
+	/**
+	 * Gets the bytes of this GuidPrefix
+	 * @return byte array of length 12
+	 */
 	public byte[] getBytes() {
 		return bytes;
 	}

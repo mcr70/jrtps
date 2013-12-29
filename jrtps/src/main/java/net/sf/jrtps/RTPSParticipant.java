@@ -41,7 +41,7 @@ public class RTPSParticipant {
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
 	 */
-	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants =  new HashMap<>();
+	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
 	
 	/**
 	 * A Set that stores network receivers for each locator we know. (For listening purposes)
@@ -73,14 +73,20 @@ public class RTPSParticipant {
 	 * 
 	 * @see EntityId
 	 */
-	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, Set<Locator> locators) { 
+	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, Set<Locator> locators, 
+			HashMap<GuidPrefix, ParticipantData> discoveredParticipants) { 
 		this.domainId = domainId;
 		this.participantId = participantId; 
 		this.threadPoolExecutor = tpe;
 		this.locators = locators;
+		this.discoveredParticipants = discoveredParticipants;
 		
 		Random r = new Random(System.currentTimeMillis());
-		this.guid = new Guid(new GuidPrefix((byte) domainId, (byte) participantId, r.nextInt()), EntityId.PARTICIPANT);
+		int vmid = r.nextInt();
+		byte[] prefix = new byte[] {(byte) domainId, (byte) participantId, (byte) (vmid>>8 & 0xff), 
+				(byte) (vmid&0xff), 0xc,0xa,0xf,0xe,0xb,0xa,0xb,0xe};
+		
+		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
 
 		log.info("Creating participant {} for domain {}", participantId, domainId);
 	}

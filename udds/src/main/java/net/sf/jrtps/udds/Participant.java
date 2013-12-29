@@ -124,7 +124,8 @@ public class Participant {
 		locators.add(mcLoc);
 		locators.add(ucLoc);
 		
-		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators);
+		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators,
+				discoveredParticipants);
 		rtps_participant.start();
 
 		this.livelinessManager = new WriterLivelinessManager(this);
