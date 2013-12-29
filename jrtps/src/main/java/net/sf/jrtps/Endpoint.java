@@ -67,6 +67,10 @@ public class Endpoint {
 	private Locator getParticipantLocators(GuidPrefix prefix) {
 		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().getEntityId(), prefix, discoveredParticipants.keySet());
 		
+		if (prefix == null) {
+			return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());			
+		}
+		
 		ParticipantData pd = discoveredParticipants.get(prefix);
 		if (pd != null) {
 			if (guid.getEntityId().isBuiltinEntity()) {
@@ -77,7 +81,7 @@ public class Endpoint {
 			}
 		}
 
-		log.trace("[{}] Unknown participant. Returning default metatraffic multicast locator for domain {}", getGuid().getEntityId(), participant.getDomainId());
+		log.warn("[{}] Unknown participant {}. Returning default metatraffic multicast locator for domain {}", getGuid().getEntityId(), prefix, participant.getDomainId());
 
 		return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());
 	}
