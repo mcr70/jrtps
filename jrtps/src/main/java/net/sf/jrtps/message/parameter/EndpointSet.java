@@ -70,11 +70,11 @@ public class EndpointSet extends Parameter {
 		return (endpointSet &  DISC_BUILTIN_ENDPOINT_PARTICIPANT_STATE_DETECTOR) != 0;
 	}
 	
-	public boolean hasParticipantMessageDataReader() {
+	public boolean hasParticipantMessageReader() {
 		return (endpointSet &  BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER) != 0;
 	}
 	
-	public boolean hasParticipantMessageDataWriter() {
+	public boolean hasParticipantMessageWriter() {
 		return (endpointSet &  BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER) != 0;
 	}
 
@@ -132,10 +132,10 @@ public class EndpointSet extends Parameter {
 		if (hasParticipantStateDetector()) {
 			sb.append("ParticipantStateDetector ");
 		}
-		if (hasParticipantMessageDataReader()) {
+		if (hasParticipantMessageReader()) {
 			sb.append("ParticipantMessageDataReader ");
 		}
-		if (hasParticipantMessageDataWriter()) {
+		if (hasParticipantMessageWriter()) {
 			sb.append("ParticipantMessageDataWriter ");
 		}
 		sb.append("]");

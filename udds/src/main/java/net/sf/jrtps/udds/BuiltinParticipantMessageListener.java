@@ -1,26 +1,15 @@
 package net.sf.jrtps.udds;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 
-import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.WriterProxy;
-import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.builtin.WriterData;
-import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.message.parameter.QosLiveliness.Kind;
-import net.sf.jrtps.message.parameter.QosPolicy;
-import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.types.Duration;
-import net.sf.jrtps.types.EntityId;
-import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
@@ -52,6 +41,7 @@ class BuiltinParticipantMessageListener extends BuiltinListener implements Sampl
 			for (DataReader<?> dr : localReaders) {
 				Collection<WriterProxy> matchedWriters = dr.getRTPSReader().getMatchedWriters(guidPrefix);
 				for (WriterProxy wp : matchedWriters) {
+					//logger.debug("********* " + wp + ", " + wp.getWriterData());
 					QualityOfService qos = wp.getWriterData().getQualityOfService();
 					QosLiveliness qosLiveliness = (QosLiveliness) qos.getPolicy(QosLiveliness.class);
 

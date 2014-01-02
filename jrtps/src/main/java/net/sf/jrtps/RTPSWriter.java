@@ -87,14 +87,15 @@ public class RTPSWriter<T> extends Endpoint {
 
 			for (ReaderProxy proxy : readerProxies.values()) {
 				Guid guid = proxy.getReaderData().getKey();
-				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
-				if (proxy.isReliable()) {
-					sendHeartbeat(guid.getPrefix(), guid.getEntityId());
-				}
-				else {
-					sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
-					proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
-				}
+				notifyReader(guid);
+				//				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
+//				if (proxy.isReliable()) {
+//					sendHeartbeat(guid.getPrefix(), guid.getEntityId());
+//				}
+//				else {
+//					sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
+//					proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+//				}
 			}
 		}
 	}
@@ -104,7 +105,7 @@ public class RTPSWriter<T> extends Endpoint {
 		ReaderProxy proxy = readerProxies.get(guid);
 
 		// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
-		if (proxy.isReliable()) {
+		if (proxy != null && proxy.isReliable()) {
 			sendHeartbeat(guid.getPrefix(), guid.getEntityId());
 		}
 		else {
