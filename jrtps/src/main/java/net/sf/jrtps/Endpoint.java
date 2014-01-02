@@ -67,7 +67,7 @@ public class Endpoint {
 	private Locator getParticipantLocators(GuidPrefix prefix) {
 		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().getEntityId(), prefix, discoveredParticipants.keySet());
 		
-		if (prefix == null) {
+		if (prefix == null || GuidPrefix.GUIDPREFIX_UNKNOWN.equals(prefix)) {
 			return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());			
 		}
 		
