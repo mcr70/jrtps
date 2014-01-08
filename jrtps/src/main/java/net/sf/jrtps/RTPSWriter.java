@@ -243,7 +243,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 		if (changes.size() == 0) {
 			log.debug("[{}] sendData() called, but history cache is empty. returning.", getGuid().getEntityId());
-			return;
+			//return;
 		}
 
 		long lastSeqNum = 0;
