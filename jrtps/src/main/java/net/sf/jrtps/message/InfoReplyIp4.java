@@ -47,7 +47,7 @@ public class InfoReplyIp4 extends SubMessage {
 		return unicastLocator;
 	}
 	
-	public LocatorUDPv4_t getMulticastcastLocator() {
+	public LocatorUDPv4_t getMulticastLocator() {
 		return multicastLocator;
 	}
 
