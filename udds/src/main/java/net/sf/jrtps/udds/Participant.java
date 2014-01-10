@@ -18,6 +18,7 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.SEDPQualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
@@ -144,15 +145,8 @@ public class Participant {
 		setMarshaller(TopicData.class, new TopicDataMarshaller());
 
 		QualityOfService spdpQoS = new QualityOfService(); // QoS for SPDP
-		QualityOfService sedpQoS = new QualityOfService(); // QoS for SEDP
+		QualityOfService sedpQoS = new SEDPQualityOfService(); // QoS for SEDP
 		QualityOfService pmQoS = new QualityOfService();   // QoS for ParticipantMessages
-
-		try {
-			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
-		} catch (InconsistentPolicy e) {
-			logger.error("Got InconsistentPolicy exception. This is an internal error", e);
-			throw new RuntimeException(e);
-		}
 
 		try {
 			pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));

@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.SEDPQualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -81,12 +82,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 	 * @param builtinEndpoints
 	 */
 	private void handleBuiltinEnpointSet(GuidPrefix prefix, int builtinEndpoints) {
-		QualityOfService sedpQoS = new QualityOfService();
-		try {
-			sedpQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
-		} catch (InconsistentPolicy e) {
-			log.error("Got InconsistentPolicy exception. This is an internal error", e);
-		}
+		QualityOfService sedpQoS = new SEDPQualityOfService();
 
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
 		log.debug("handleBuiltinEndpointSet {}", eps);
