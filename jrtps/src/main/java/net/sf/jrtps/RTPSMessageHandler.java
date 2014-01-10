@@ -10,12 +10,16 @@ import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoDestination;
+import net.sf.jrtps.message.InfoReply;
+import net.sf.jrtps.message.InfoReplyIp4;
 import net.sf.jrtps.message.InfoSource;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.types.LocatorUDPv4_t;
 import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
@@ -89,6 +93,22 @@ class RTPSMessageHandler implements Runnable {
 				break;
 			case INFOTIMESTAMP: 
 				timestamp = ((InfoTimestamp)subMsg).getTimeStamp(); 
+				break;
+			case INFOREPLY: // TODO: HB, AC & DATA needs to use replyLocators, if present 
+				InfoReply ir = (InfoReply) subMsg;
+				List<Locator> replyLocators = ir.getUnicastLocatorList();
+				if (ir.multicastFlag()) {
+					replyLocators.addAll(ir.getMulticastLocatorList());
+				}
+				log.warn("InfoReply not handled");
+				break;
+			case INFOREPLYIP4: // TODO: HB, AC & DATA needs to use these Locators, if present
+				InfoReplyIp4 ir4 = (InfoReplyIp4) subMsg;
+				LocatorUDPv4_t unicastLocator = ir4.getUnicastLocator();
+				if (ir4.multicastFlag()) {
+					LocatorUDPv4_t multicastLocator = ir4.getMulticastLocator();
+				}
+				log.warn("InfoReplyIp4 not handled");
 				break;
 			default: 
 				log.warn("SubMessage not handled: {}", subMsg);
