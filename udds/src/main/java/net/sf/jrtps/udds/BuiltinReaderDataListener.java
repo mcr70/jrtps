@@ -69,8 +69,9 @@ class BuiltinReaderDataListener extends BuiltinListener implements SampleListene
 				if (key.getEntityId().isUserDefinedEntity()) {  
 					ParticipantData pd = discoveredParticipants.get(key.getPrefix());
 					if (pd != null) {
-						w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
-						//w.getRTPSWriter().notifyReader(key);
+						//w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
+						log.debug("Notify reader {}", key.getEntityId());
+						w.getRTPSWriter().notifyReader(key);
 					}
 					else {
 						log.warn("Participant was not found: {}", key.getPrefix());
