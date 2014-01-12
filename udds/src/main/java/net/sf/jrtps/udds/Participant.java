@@ -19,6 +19,7 @@ import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.SEDPQualityOfService;
+import net.sf.jrtps.SPDPQualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
@@ -144,7 +145,7 @@ public class Participant {
 		setMarshaller(ReaderData.class, new ReaderDataMarshaller());
 		setMarshaller(TopicData.class, new TopicDataMarshaller());
 
-		QualityOfService spdpQoS = new QualityOfService(); // QoS for SPDP
+		QualityOfService spdpQoS = new SPDPQualityOfService(); // QoS for SPDP
 		QualityOfService sedpQoS = new SEDPQualityOfService(); // QoS for SEDP
 		QualityOfService pmQoS = new QualityOfService();   // QoS for ParticipantMessages
 

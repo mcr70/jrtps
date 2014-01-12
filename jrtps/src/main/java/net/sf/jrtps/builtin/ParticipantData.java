@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import net.sf.jrtps.SPDPQualityOfService;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.DefaultMulticastLocator;
 import net.sf.jrtps.message.parameter.DefaultUnicastLocator;
@@ -115,6 +116,9 @@ public class ParticipantData extends DiscoveredData {
 	public ParticipantData(GuidPrefix prefix, int endpoints,
 			Locator u_ucLocator, Locator u_mcLocator, 
 			Locator m_ucLocator, Locator m_mcLocator) {
+		super();
+		qos = new SPDPQualityOfService();
+		
 		guidPrefix = prefix;
 		availableBuiltinEndpoints = endpoints;
 		
@@ -144,6 +148,7 @@ public class ParticipantData extends DiscoveredData {
 	 * @param parameterList
 	 */
 	public ParticipantData(ParameterList parameterList) {
+		qos = new SPDPQualityOfService();
 		Iterator<Parameter> iterator = parameterList.getParameters().iterator();
 		
 		while (iterator.hasNext()) {
@@ -283,11 +288,6 @@ public class ParticipantData extends DiscoveredData {
 		return allLocators;
 	}
 	
-	public String toString() {
-		return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + 
-				", lease duration " + getLeaseDuration() + ", locators " + getAllLocators();
-	}
-
 	/**
 	 * Renews lease time that has been associated with this ParticipantData
 	 * @see #getLeaseDuration()
@@ -312,5 +312,11 @@ public class ParticipantData extends DiscoveredData {
 	 */
 	public long getLeaseExpirationTime() {
 		return leaseExpirationTime;
+	}
+
+	public String toString() {
+		return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + 
+				", lease duration " + getLeaseDuration() + ", locators " + getAllLocators() + 
+				", " + qos;
 	}
 }

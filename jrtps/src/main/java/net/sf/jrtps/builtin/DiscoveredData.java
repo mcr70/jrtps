@@ -14,7 +14,7 @@ public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
 	// This list keeps track of inconsistencies occured
 	private List<QosPolicy<?>> inconsistenPolicies = new LinkedList<>(); 
-	private final QualityOfService qos;
+	protected QualityOfService qos;
 	
 	protected String typeName;
 	protected String topicName;
