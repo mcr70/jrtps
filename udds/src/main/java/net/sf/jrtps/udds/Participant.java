@@ -473,8 +473,8 @@ public class Participant {
 			public void run() {
 				boolean running = true;
 				while (running) {
-					//spdp_w.notifyReader(new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER));
-					spdp_w.sendData(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0);
+					spdp_w.notifyReader(new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER));
+					//spdp_w.sendData(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0);
 					try {
 						running = !threadPoolExecutor.awaitTermination(period.asMillis(), TimeUnit.MILLISECONDS);
 					} catch (InterruptedException e) {
