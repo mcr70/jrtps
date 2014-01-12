@@ -91,10 +91,10 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			DataWriter<?> pw = participant.getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 			
 			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
-			//ReaderData rd = new ReaderData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
-			//pw.getRTPSWriter().addMatchedReader(rd);
+			ReaderData rd = new ReaderData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
+			pw.getRTPSWriter().addMatchedReader(rd);
 			//pw.getRTPSWriter().notifyReader(key);
-			pw.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
+			//pw.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
 		}
 		if (eps.hasPublicationAnnouncer()) {
 			DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
