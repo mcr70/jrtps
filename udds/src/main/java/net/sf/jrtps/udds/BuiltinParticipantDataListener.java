@@ -110,7 +110,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			ReaderData rd = new ReaderData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
 			
 			sw.getRTPSWriter().addMatchedReader(rd);
-			sw.getRTPSWriter().notifyReader(key);
+			//sw.getRTPSWriter().notifyReader(key);
 			//sw.sendData(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
 		}
 		if (eps.hasSubscriptionAnnouncer()) {
@@ -129,7 +129,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					ParticipantMessage.class.getName(), key, sedpQoS);
 			
 			sw.getRTPSWriter().addMatchedReader(rd);
-			sw.getRTPSWriter().notifyReader(key);
+			//sw.getRTPSWriter().notifyReader(key);
 		}
 		if (eps.hasParticipantMessageWriter()) {
 			DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
