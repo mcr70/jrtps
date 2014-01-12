@@ -56,7 +56,8 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
 					ReaderData rd = 
 							new ReaderData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-									pd.getGuid(), pd.getQualityOfService());
+									new Guid(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER), 
+									pd.getQualityOfService());
 					pw.getRTPSWriter().addMatchedReader(rd);
 					//log.debug("Notify SPDP reader");
 					//pw.getRTPSWriter().notifyReader(pd.getGuid());
