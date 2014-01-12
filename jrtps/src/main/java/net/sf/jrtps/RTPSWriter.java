@@ -109,8 +109,16 @@ public class RTPSWriter<T> extends Endpoint {
 			sendHeartbeat(guid.getPrefix(), guid.getEntityId());
 		}
 		else {
-			sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
-			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+			long readersHighestSeqNum = 0;
+			if (proxy != null) { // Might be null, if destination is GuidPrefix.UNKNOWN (SPDP)
+				readersHighestSeqNum = proxy.getReadersHighestSeqNum();
+			}
+			
+			sendData(guid.getPrefix(), guid.getEntityId(), readersHighestSeqNum);
+			
+			if (proxy != null) {
+				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+			}
 		}
 	}
 
@@ -236,8 +244,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param readerId
 	 * @param readersHighestSeqNum
 	 */
-	public void sendData(GuidPrefix targetPrefix, EntityId readerId, long readersHighestSeqNum) {
-		// TODO: This should not be public
+	private void sendData(GuidPrefix targetPrefix, EntityId readerId, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().getPrefix());
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
