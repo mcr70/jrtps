@@ -139,7 +139,7 @@ class RTPSMessageHandler implements Runnable {
 			return reader;
 		}
 		else {
-			log.debug("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
+			log.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
 		}
 		
 		return null;
