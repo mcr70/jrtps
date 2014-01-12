@@ -103,6 +103,7 @@ public class RTPSReader<T> extends Endpoint {
 		writerProxies.put(writerData.getKey(), wp);
 
 		log.info("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
+		
 		return wp;
 	}
 
@@ -206,15 +207,7 @@ public class RTPSReader<T> extends Endpoint {
 				}
 
 				if (doSend) {
-					Message m = new Message(getGuid().getPrefix());
-					AckNack an = createAckNack(wp);
-					m.addSubMessage(an);
-
-					log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
-					getParticipant().waitFor(heartbeatResponseDelay);
-
-					log.debug("[{}] Sending AckNack: {}", getGuid().getEntityId(), an.getReaderSNState());
-					sendMessage(m, senderGuidPrefix);
+					sendAckNack(wp);
 				}
 			}
 		}
@@ -223,6 +216,17 @@ public class RTPSReader<T> extends Endpoint {
 		}
 	}
 
+	private void sendAckNack(WriterProxy wp) {
+		Message m = new Message(getGuid().getPrefix());
+		AckNack an = createAckNack(wp);
+		m.addSubMessage(an);
+
+		log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
+		getParticipant().waitFor(heartbeatResponseDelay);
+
+		log.debug("[{}] Sending AckNack: {}", getGuid().getEntityId(), an.getReaderSNState());
+		sendMessage(m, wp.getGuid().getPrefix());		
+	}
 
 	private AckNack createAckNack(WriterProxy wp) {
 		// This is a simple AckNack, that can be optimized if store
