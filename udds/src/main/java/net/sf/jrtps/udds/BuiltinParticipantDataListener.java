@@ -3,7 +3,6 @@ package net.sf.jrtps.udds;
 import java.util.HashMap;
 import java.util.List;
 
-import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.SEDPQualityOfService;
 import net.sf.jrtps.Sample;
@@ -13,8 +12,6 @@ import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.ReaderData;
 import net.sf.jrtps.builtin.WriterData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
-import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -51,18 +48,19 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					log.trace("Ignoring self");
 				}
 				else {
-					log.debug("A new Participant detected: {}", pd);
+					log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 					fireParticipantDetected(pd);
 					
 					// First, make sure remote participant knows about us.
 					DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
-					//ReaderData rd = 
-					//		new ReaderData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-					//				pd.getGuid(), pd.getQualityOfService());
-					//pw.getRTPSWriter().addMatchedReader(rd);
+					ReaderData rd = 
+							new ReaderData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+									pd.getGuid(), pd.getQualityOfService());
+					pw.getRTPSWriter().addMatchedReader(rd);
+					//log.debug("Notify SPDP reader");
 					//pw.getRTPSWriter().notifyReader(pd.getGuid());
-					pw.getRTPSWriter().sendData(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0L);
+					//pw.getRTPSWriter().sendData(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0L);
 
 					// Then, announce our builtin endpoints
 					handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
