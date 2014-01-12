@@ -242,8 +242,8 @@ public class RTPSWriter<T> extends Endpoint {
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
 		if (changes.size() == 0) {
-			log.debug("[{}] sendData() called, but history cache is empty. returning.", getGuid().getEntityId());
-			//return;
+			log.debug("[{}] sendData() called, but no changes since {}. returning.", getGuid().getEntityId(), readersHighestSeqNum);
+			return;
 		}
 
 		long lastSeqNum = 0;
