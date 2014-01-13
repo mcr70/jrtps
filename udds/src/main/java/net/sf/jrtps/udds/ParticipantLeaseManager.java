@@ -1,13 +1,11 @@
 package net.sf.jrtps.udds;
 
-import java.util.LinkedList;
 import java.util.List;
+
+import net.sf.jrtps.builtin.ParticipantData;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.types.Duration;
 
 /**
  * ParticipantLeaseManager tracks leaseTime of remote participants. If leaseTime is expired,

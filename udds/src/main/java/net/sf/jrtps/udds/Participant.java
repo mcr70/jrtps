@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import java.io.Externalizable;
 import java.io.Serializable;
 import java.net.SocketException;
 import java.util.HashMap;
@@ -421,7 +422,10 @@ public class Participant {
 	private Marshaller<?> getMarshaller(Class<?> type) {
 		Marshaller<?> m = marshallers.get(type);
 		if (m == null) {
-			if (Serializable.class.isAssignableFrom(type)) {
+			if (Externalizable.class.isAssignableFrom(type)) {
+				m = new JavaExternalizableMarshaller((Class<? extends Externalizable>) type);
+			}
+			else if (Serializable.class.isAssignableFrom(type)) {
 				m = new JavaSerializableMarshaller(type);
 			}
 			else {

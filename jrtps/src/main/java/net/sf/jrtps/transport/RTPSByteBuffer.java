@@ -238,7 +238,7 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */ {
 				if (!buffer.hasRemaining()) {
 					return -1;
 				}
-
+				
 				return buffer.get() & 0xff;
 			}
 		};

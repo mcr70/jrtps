@@ -1,4 +1,5 @@
 0.5.1
+	- JavaExternalizableMarshaller introduced.
 	- FIX: Discovered participants was not propagated to RTPS layer. 
 	- ParticipantLeaseManager introduced
 
