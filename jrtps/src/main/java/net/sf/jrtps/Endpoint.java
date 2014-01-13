@@ -45,11 +45,18 @@ public class Endpoint {
 		this.configuration = configuration;
 	}
 
-
+	/**
+	 * Gets the name of the topic associated with this Endpoint.
+	 * @return name of the topic
+	 */
 	public String getTopicName() {
 		return topicName;
 	}
 
+	/**
+	 * Gets the Guid of this Endpoint.
+	 * @return Guid
+	 */
 	public Guid getGuid() {
 		return guid;
 	}
@@ -99,6 +106,14 @@ public class Endpoint {
 		return qos;
 	}
 
+	/**
+	 * Sends a message. If an overflow occurs during marshalling of Message, only submessages before 
+	 * the overflow will get sent. 
+	 * 
+	 * @param m Message to send
+	 * @param targetPrefix GuidPrefix of the target participant
+	 * @return true, if an overflow occured during send.
+	 */
 	protected boolean sendMessage(Message m, GuidPrefix targetPrefix) {
 		Locator locator = getParticipantLocators(targetPrefix);
 		boolean overFlowed = true;

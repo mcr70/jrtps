@@ -21,18 +21,40 @@ public class Sample<T> {
 		this.sInfo = sInfo;
 	}
 	
+	/**
+	 * Gets the data associated with this Sample.
+	 * @return data
+	 */
 	public T getData() {
 		return obj;
 	}
-	
+
+	/**
+	 * Gets the timestamp associated with this Sample.
+	 * @return timestamp in millis.
+	 */
 	public long getTimestamp() {
 		return timestamp.timeMillis();
 	}
-	
+
+	/**
+	 * Gets the value of disposeFlag of StatusInfo parameter. StatusInfo parameter is part of 
+	 * Data submessage.
+	 *
+	 * @see StatusInfo
+	 * @return true, if disposeFlag is set 
+	 */
 	public boolean isDisposed() {
 		return sInfo.isDisposed();
 	}
 	
+	/**
+	 * Gets the value of unregisterFlag of StatusInfo parameter. StatusInfo parameter is part of 
+	 * Data submessage.
+	 *
+	 * @see StatusInfo
+	 * @return true, if unregisterFlag is set 
+	 */
 	public boolean isUnregistered() {
 		return sInfo.isUnregistered();
 	}

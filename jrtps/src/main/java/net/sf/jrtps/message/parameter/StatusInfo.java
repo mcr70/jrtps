@@ -52,11 +52,19 @@ public class StatusInfo extends Parameter implements InlineParameter {
 	public void writeTo(RTPSByteBuffer bb) {
 		bb.write(flags);
 	}
-	
+
+	/**
+	 * Gets the value of disposeFlag.
+	 * @return true, if disposeFlag is set
+	 */
 	public boolean isDisposed() {
 		return (flags[3] & 0x1) == 0x1;
 	}
 	
+	/**
+	 * Gets the value of unregisterFlag.
+	 * @return true, if unregisterFlag is set
+	 */
 	public boolean isUnregistered() {
 		return (flags[3] & 0x2) == 0x2;
 	}
