@@ -1,10 +1,10 @@
 package net.sf.jrtps.udds;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.Collections;
 import java.util.Comparator;
@@ -19,40 +19,42 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This Marshaller marshalls objects by writing them to <i>ObjectOutputStream</i> and reading from
- * <i>ObjectInputStream</i>. JavaMarshaller supports net.sf.jrtps.Key annotation
+ * This Marshaller marshalls objects by writing them to <i>ObjectOutput</i> and reading from
+ * <i>ObjectInput</i>. JavaExternalizableMarshaller supports net.sf.jrtps.Key annotation
  * to form a Key for the marshalled Object.
  * 
- * @see java.io.ObjectOutputStream
- * @see java.io.ObjectInputStream
+ * @see java.io.ObjectOutput
+ * @see java.io.ObjectInput
  * @see net.sf.jrtps.Key
  * 
  * @author mcr70
- *
  */
-public class JavaSerializableMarshaller implements Marshaller<Serializable> {
-	private static final Logger log = LoggerFactory.getLogger(JavaSerializableMarshaller.class);
+public class JavaExternalizableMarshaller implements Marshaller<Externalizable> {
+	private static final Logger log = LoggerFactory.getLogger(JavaExternalizableMarshaller.class);
 
 	private final int bufferSize;
 	private final Field[] keyFields;
 	private final boolean hasKey;
+
+	private final Class<? extends Externalizable> type;
 	
 	/**
-	 * Constructs this JavaSerializableMarshaller bufferSize 1024. This constructor is used 
+	 * Constructs this JavaExternalizableMarshaller bufferSize 1024. This constructor is used 
 	 * by udds.
 	 * @param type 
 	 */
-	public JavaSerializableMarshaller(Class<?> type) {
+	public JavaExternalizableMarshaller(Class<? extends Externalizable> type) {
 		this(type, 1024);
 	}
 
 	/**
-	 * Constructs this JavaSerializableMarshaller with given bufferSize.
+	 * Constructs this JavaExternalizableMarshaller with given bufferSize.
 	 * bufferSize must be big enough to hold serialized object. 
 	 * @param type 
 	 * @param bufferSize the size of the buffer that is used during marshall and unmarshall
 	 */
-	public JavaSerializableMarshaller(Class<?> type, int bufferSize) {
+	public JavaExternalizableMarshaller(Class<? extends Externalizable> type, int bufferSize) {
+		this.type = type;
 		this.bufferSize = bufferSize;
 		this.keyFields = getKeyFields(type);
 		this.hasKey = keyFields.length > 0;
@@ -72,7 +74,7 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 	 * @return a key hash of the annotated field values.
 	 */
 	@Override
-	public byte[] extractKey(Serializable data) {
+	public byte[] extractKey(Externalizable data) {
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream(bufferSize);
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -95,38 +97,54 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 	/**
 	 * Unmarshalls an object from DataEncapsulation.
 	 * @param dEnc
-	 * @return Serializable
+	 * @return Externalizable
 	 */
 	@Override
-	public Serializable unmarshall(DataEncapsulation dEnc) throws IOException {
+	public Externalizable unmarshall(DataEncapsulation dEnc) throws IOException {
 		CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;		
 		RTPSByteBuffer bb = cdrEnc.getBuffer();
 
-		ObjectInputStream ois = new ObjectInputStream(bb.getInputStream());
 
-		Object o = null;
+		Externalizable obj = null;
+		ObjectInputStream ois = null;
 		try {
-			o = ois.readObject();
-		} catch (ClassNotFoundException e) {
+			ois = new ObjectInputStream(bb.getInputStream());
+			obj = type.newInstance();
+			obj.readExternal(ois);
+		} catch (Exception e) {
 			throw new IOException(e);
 		}
-		return (Serializable) o;
+		finally {
+			if (ois != null) {
+				ois.close();
+			}
+		}
+		
+		return obj;
 	}
 
 	/**
-	 * Marshalls a given Serializable Object into DataEncapsulation.
+	 * Marshalls a given Externalizable Object into DataEncapsulation.
 	 * 
 	 * @param data Data to marshall
 	 * @return DataEncapsulation
 	 */
 	@Override
-	public DataEncapsulation marshall(Serializable data) throws IOException {
+	public DataEncapsulation marshall(Externalizable data) throws IOException {
 		CDREncapsulation cdrEnc = new CDREncapsulation(bufferSize);
 		RTPSByteBuffer bb = cdrEnc.getBuffer();
-
-		ObjectOutputStream os = new ObjectOutputStream(bb.getOutputStream());
-		os.writeObject(data);
-
+		
+		ObjectOutputStream oos = null;
+		try {
+			oos = new ObjectOutputStream(bb.getOutputStream());
+			data.writeExternal(oos);
+		}
+		finally {
+			if (oos != null) {
+				oos.close();
+			}
+		}
+		
 		return cdrEnc;
 	}
 
@@ -164,4 +182,5 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
 
 		return keyFields;
 	}
+
 }
