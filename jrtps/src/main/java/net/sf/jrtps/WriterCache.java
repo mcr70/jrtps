@@ -4,6 +4,7 @@ import java.util.SortedSet;
 
 /**
  * WriterCache represents writers history cache from the RTPSWriter point of view.
+ * RTPSWriter uses WriterCache to construct Data and HeartBeat messages to be sent to RTPSReaders.
  * 
  * @author mcr70
  *

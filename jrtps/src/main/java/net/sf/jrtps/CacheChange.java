@@ -27,12 +27,30 @@ public class CacheChange implements Comparable<CacheChange> {
 		WRITE, DISPOSE, UNREGISTER;
 	}
 	
-	
+	/**
+	 * Constructor for CacheChange
+	 * @param m Marhsaller
+	 * @param kind Kind
+	 * @param seqNum sequence Number
+	 * @param data data
+	 */
 	public CacheChange(Marshaller m, Kind kind, long seqNum, Object data) {
+		this(m, kind, seqNum, data, System.currentTimeMillis());
+	}
+
+	/**
+	 * Constructor for CacheChange
+	 * @param m Marhsaller
+	 * @param kind Kind
+	 * @param seqNum sequence Number
+	 * @param data data
+	 * @param timeStamp timestamp to use
+	 */
+	public CacheChange(Marshaller m, Kind kind, long seqNum, Object data, long timeStamp) {
 		this.kind = kind;
 		this.sequenceNumber = seqNum;
 		this.data = data;
-		this.timeStamp = System.currentTimeMillis(); // NOTE: write_w_timestamp
+		this.timeStamp = timeStamp;
 		this.hashCode = new Long(sequenceNumber).hashCode();
 		this.marshaller = m;
 	}
@@ -49,6 +67,23 @@ public class CacheChange implements Comparable<CacheChange> {
 		return marshalledData;
 	}
 	
+	/**
+	 * Gets the sequence number of this CacheChange.
+	 * @return sequence number
+	 */
+	public long getSequenceNumber() {
+		return sequenceNumber;
+	}
+
+	/**
+	 * Gets the timestamp of this CacheChange.
+	 * @return timestamp
+	 */
+	long getTimeStamp() {
+		return timeStamp;
+	}
+
+
 	boolean hasKey() {
 		return marshaller.hasKey();
 	}
@@ -56,17 +91,9 @@ public class CacheChange implements Comparable<CacheChange> {
 	byte[] extractKey() {
 		return marshaller.extractKey(data);
 	}
-	
-	public long getSequenceNumber() {
-		return sequenceNumber;
-	}
-	
+
 	Kind getKind() {
 		return kind;
-	}
-
-	public long getTimeStamp() {
-		return timeStamp;
 	}
 
 	// TODO: should we implement equals() and hashCode(). If so, it would be for sequenceNumber

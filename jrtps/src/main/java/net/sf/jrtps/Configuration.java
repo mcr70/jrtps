@@ -115,11 +115,16 @@ public class Configuration {
 		return getIntProperty("rtps.reader.heartbeat-response-delay", 500);
 	}
 
-	public int getBufferSize() {
+	int getBufferSize() {
 		return getIntProperty("jrtps.buffer-size", 16384);
 	}
 
-	// package access to ease unit tests
+	/**
+	 * Gets a named integer property from configuration. 
+	 * @param key Key of the propooerty
+	 * @param defltValue default value used, if property is not set, or it could not be converted to int
+	 * @return integer value
+	 */
 	public int getIntProperty(String key, int defltValue) {
 		String value = props.getProperty(key);
 		int i = defltValue;

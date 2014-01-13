@@ -30,7 +30,14 @@ import org.slf4j.LoggerFactory;
 /**
  * RTPSWriter implements RTPS writer endpoint. 
  * RTPSWriter will not communicate with unknown readers. It is expected that DDS implementation 
- * explicitly call addMatchedReader(ReaderData) and removeMatchedReader(ReaderData).<p> 
+ * explicitly call addMatchedReader(ReaderData) and removeMatchedReader(ReaderData).
+ * 
+ * Samples are written through an implementation of WriterCache, which will be given when creating 
+ * RTPSWriter with RTPSParticipant. When RTPSWriter needs to write samples to RTPSReader, it will query
+ * WriterCache for the CacheChanges.  
+ * 
+ * @see WriterCache
+ * @see RTPSParticipant#createWriter(EntityId, String, WriterCache, QualityOfService)
  * 
  * @author mcr70
  */
@@ -40,7 +47,6 @@ public class RTPSWriter<T> extends Endpoint {
 
 	private HashMap<Guid, ReaderProxy> readerProxies = new HashMap<>();
 
-	@SuppressWarnings("rawtypes")
 	private final WriterCache writer_cache;
 	private final int nackResponseDelay;
 	private int heartbeatPeriod;
@@ -321,8 +327,6 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 
-
-	@SuppressWarnings("unchecked")
 	private Data createData(EntityId readerId, CacheChange cc) throws IOException {		
 		DataEncapsulation dEnc = cc.getDataEncapsulation();
 		ParameterList inlineQos = new ParameterList();
