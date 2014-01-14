@@ -1,10 +1,6 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 
 import net.sf.jrtps.message.data.DataEncapsulation;
 
