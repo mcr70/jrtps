@@ -35,7 +35,6 @@ import org.slf4j.LoggerFactory;
 public class RTPSReader<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
-	//private HashSet<WriterData> matchedWriters = new HashSet<>();
 	private final HashMap<Guid, WriterProxy> writerProxies = new HashMap<>();
 	private final List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
 	private final Marshaller<?> marshaller;
@@ -85,12 +84,6 @@ public class RTPSReader<T> extends Endpoint {
 		return getGuid().getEntityId().getEndpointSetId();
 	}
 
-	/**
-	 * Closes this RTPSReader.
-	 */
-	public void close() {
-		// TODO: No use for this
-	}
 
 	/**
 	 * Adds a matched writer for this RTPSReader.
@@ -143,12 +136,15 @@ public class RTPSReader<T> extends Endpoint {
 	
 	
 	/**
-	 * Handle incoming Data message.
+	 * Handle incoming Data message. Data is unmarshalled and added to pending samples.
+	 * Once RTPSMessageHandler has finished with the whole RTPSMessage, it will call 
+	 * releasePendingSamples of each RTPSReader that has received some Data messages.
 	 * 
 	 * @param sourcePrefix GuidPrefix of the remote participant sending Data message 
 	 * @param data
 	 * @param timestamp
 	 * @throws IOException
+	 * @see #releasePendingSamples()
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void createSample(GuidPrefix sourcePrefix, Data data, Time timestamp) throws IOException {
@@ -162,9 +158,7 @@ public class RTPSReader<T> extends Endpoint {
 				log.trace("[{}] Got Data: {}, {}", getGuid().getEntityId(), 
 						obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
 
-				synchronized (pendingSamples) {
-					pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
-				}
+				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
 			}
 			else {
 				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
@@ -188,7 +182,7 @@ public class RTPSReader<T> extends Endpoint {
 		WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
 		if (wp != null) {
 			if (hb.livelinessFlag()) {
-				// TODO: implement liveliness
+				wp.assertLiveliness();
 			}
 
 			if (isReliable()) { // Only reliable readers respond to heartbeat
@@ -260,18 +254,17 @@ public class RTPSReader<T> extends Endpoint {
 
 
 	/**
-	 * Releases pending samples.
+	 * Releases pending samples. Data is unmarshalled and added to pending samples.
+	 * Once RTPSMessageHandler has finished with the whole RTPSMessage, it will call 
+	 * releasePendingSamples of each RTPSReader that has received some Data messages.
+	 * 
+	 * @see #createSample(GuidPrefix, Data, Time)
 	 */
 	void releasePendingSamples() {
-		// TODO: pending samples need to be handled differently.
-		//       Maybe have a flag that tells if there is more pending samples
-		//       at the end of the method.
 		LinkedList<Sample<T>> ll = new LinkedList<>();
 
-		synchronized(pendingSamples) {
-			ll.addAll(pendingSamples);
-			pendingSamples.clear();
-		}
+		ll.addAll(pendingSamples);
+		pendingSamples.clear();
 
 		log.debug("[{}] Got {} samples", getGuid().getEntityId(), ll.size());
 

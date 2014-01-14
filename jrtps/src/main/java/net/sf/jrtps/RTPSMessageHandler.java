@@ -24,6 +24,7 @@ import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 /**
  * RTPSMessageHandler is a consumer to BlockingQueue.
@@ -46,6 +47,26 @@ class RTPSMessageHandler implements Runnable {
 		this.queue = queue;
 	}
 
+
+	@Override
+	public void run() {
+		while(running) {
+			try {
+				// NOTE: We can have only one MessageHandler. pending samples concept relies on it.
+				byte[] bytes = queue.take();
+				Message msg = new Message(new RTPSByteBuffer(bytes));
+				log.debug("Parsed RTPS message {}", msg);
+
+				handleMessage(msg);
+			} catch (InterruptedException e) {
+				running = false;
+			}
+		}
+		
+		log.debug("RTPSMessageHandler exiting");
+	}
+	
+	
 	/**
 	 * Handles incoming Message. Each sub message is transferred to corresponding
 	 * reader.
@@ -147,29 +168,12 @@ class RTPSMessageHandler implements Runnable {
 
 	private void handleHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {		
 		RTPSReader<?> reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
-
+	
 		if (reader != null) {
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {
 			log.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
 		}
-	}
-
-	@Override
-	public void run() {
-		while(running) {
-			try {
-				byte[] bytes = queue.take();
-				Message msg = new Message(new RTPSByteBuffer(bytes));
-				log.debug("Parsed RTPS message {}", msg);
-
-				handleMessage(msg);
-			} catch (InterruptedException e) {
-				running = false;
-			}
-		}
-		
-		log.debug("RTPSMessageHandler exiting");
 	}
 }
