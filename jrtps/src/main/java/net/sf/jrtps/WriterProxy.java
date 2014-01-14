@@ -3,7 +3,7 @@ package net.sf.jrtps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.types.Guid;
 
 
@@ -16,12 +16,12 @@ import net.sf.jrtps.types.Guid;
 public class WriterProxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 	private final Guid writerGuid;
-	private /*final*/ WriterData writerData; // TODO: should be final
+	private /*final*/ PublicationData writerData; // TODO: should be final
 	
 	private volatile long livelinessTimestamp;
 	private volatile long seqNumMax = 0;
 	
-	WriterProxy(WriterData wd) {
+	WriterProxy(PublicationData wd) {
 		this.writerData = wd;
 		writerGuid = wd.getKey();
 	}
@@ -44,9 +44,9 @@ public class WriterProxy {
 	
 	/**
 	 * Gets the WriterData associated with this WriterProxy.
-	 * @return
+	 * @return WriterData
 	 */
-	public WriterData getWriterData() {
+	public PublicationData getPublicationData() {
 		return writerData;
 	}
 	

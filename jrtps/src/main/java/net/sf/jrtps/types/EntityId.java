@@ -5,7 +5,8 @@ import java.util.Arrays;
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -265,7 +266,7 @@ public abstract class EntityId  {
 	/**
 	 * EntityId representing SEDP builtin publications writer.
 	 * 
-	 * @see WriterData
+	 * @see net.sf.jrtps.builtin.PublicationData
 	 * @author mcr70
 	 */
 	public static class SEDPbuiltinPublicationsWriter extends EntityId {
@@ -282,7 +283,7 @@ public abstract class EntityId  {
 	/**
 	 * EntityId representing SEDP builtin publications reader.
 	 * 
-	 * @see WriterData
+	 * @see net.sf.jrtps.builtin.PublicationData
 	 * @author mcr70
 	 */
 	public static class SEDPbuiltinPublicationsReader extends EntityId {
@@ -299,7 +300,7 @@ public abstract class EntityId  {
 	/**
 	 * EntityId representing SEDP builtin subscriptions writer.
 	 * 
-	 * @see ReaderData
+	 * @see net.sf.jrtps.builtin.SubscriptionData
 	 * @author mcr70
 	 */
 	public static class SEDPbuiltinSubscriptionsWriter extends EntityId {
@@ -316,7 +317,7 @@ public abstract class EntityId  {
 	/**
 	 * EntityId representing SEDP builtin subscriptions reader.
 	 * 
-	 * @see ReaderData
+	 * @see net.sf.jrtps.builtin.SubscriptionData
 	 * @author mcr70
 	 */
 	public static class SEDPbuiltinSubscriptionsReader extends EntityId {

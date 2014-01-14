@@ -6,26 +6,26 @@ import java.util.Map;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BuiltinWriterDataListener extends BuiltinListener implements SampleListener<WriterData>{
-	private static final Logger log = LoggerFactory.getLogger(BuiltinWriterDataListener.class);
+class BuiltinPublicationDataListener extends BuiltinListener implements SampleListener<PublicationData> {
+	private static final Logger log = LoggerFactory.getLogger(BuiltinPublicationDataListener.class);
 
-	private Map<Guid, WriterData> discoveredWriters;
+	private Map<Guid, PublicationData> discoveredWriters;
 
-	BuiltinWriterDataListener(Participant p, Map<Guid, WriterData> discoveredWriters) {
+	BuiltinPublicationDataListener(Participant p, Map<Guid, PublicationData> discoveredWriters) {
 		super(p); 
 		this.discoveredWriters = discoveredWriters;
 	}
 
 	@Override
-	public void onSamples(List<Sample<WriterData>> samples) {
-		for (Sample<WriterData> wdSample : samples) {
-			WriterData writerData = wdSample.getData();
+	public void onSamples(List<Sample<PublicationData>> samples) {
+		for (Sample<PublicationData> wdSample : samples) {
+			PublicationData writerData = wdSample.getData();
 
 			Guid key = writerData.getKey();
 			if (discoveredWriters.put(key, writerData) == null) {

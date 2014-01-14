@@ -18,14 +18,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Marshaller for builtin data for topic DCPSPublication.
- * With jRTPS, instances of this topic is of type WriterData.
+ * Marshaller for builtin data for topic <i>DCPSPublication</i>.
+ * With jRTPS, instances of this topic is of type PublicationData.
  * 
+ * @see PublicationData
  * @author mcr70
- *
  */
-public class WriterDataMarshaller implements Marshaller<WriterData> {
-	private static final Logger log = LoggerFactory.getLogger(WriterDataMarshaller.class);
+public class PublicationDataMarshaller implements Marshaller<PublicationData> {
+	private static final Logger log = LoggerFactory.getLogger(PublicationDataMarshaller.class);
 
 	@Override
 	public boolean hasKey() {
@@ -33,16 +33,16 @@ public class WriterDataMarshaller implements Marshaller<WriterData> {
 	}
 
 	@Override
-	public byte[] extractKey(WriterData data) {
+	public byte[] extractKey(PublicationData data) {
 		return data.getKey().getBytes();
 	}
 
 	@Override
-	public WriterData unmarshall(DataEncapsulation data) {
+	public PublicationData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
-		WriterData wd = null;
+		PublicationData wd = null;
 		try {
-			wd = new WriterData(plEnc.getParameterList());
+			wd = new PublicationData(plEnc.getParameterList());
 		} catch (InconsistentPolicy e) {
 			log.error("Could not resolve inconsistent policies for WriterData", e);
 		}
@@ -51,7 +51,7 @@ public class WriterDataMarshaller implements Marshaller<WriterData> {
 	}
 
 	@Override
-	public DataEncapsulation marshall(WriterData wd) {
+	public DataEncapsulation marshall(PublicationData wd) {
 		ParameterList payloadParams = new ParameterList();
 
 		payloadParams.add(new TopicName(wd.getTopicName()));
@@ -64,7 +64,7 @@ public class WriterDataMarshaller implements Marshaller<WriterData> {
 		return new ParameterListEncapsulation(payloadParams);
 	}
 
-	private void addQoS(WriterData wd, ParameterList payloadParams) {
+	private void addQoS(PublicationData wd, ParameterList payloadParams) {
 		Set<QosPolicy<?>> inlineableQosPolicies = wd.getInlineableQosPolicies();
 		for (QosPolicy<?> qp : inlineableQosPolicies) {
 			payloadParams.add((Parameter) qp);

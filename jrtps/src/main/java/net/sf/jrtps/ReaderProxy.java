@@ -1,6 +1,6 @@
 package net.sf.jrtps;
 
-import net.sf.jrtps.builtin.ReaderData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Guid;
 
@@ -10,17 +10,17 @@ import net.sf.jrtps.types.Guid;
  * @author mcr70
  */
 public class ReaderProxy {
-	private final ReaderData readerData;
+	private final SubscriptionData readerData;
 	private final boolean expectsInlineQoS;
 	private long readersHighestSeqNum = 0;
 	private boolean active = true;
 	private long heartbeatSentTime = 0; // set to 0 after acknack
 	
-	ReaderProxy(ReaderData readerData) {
+	ReaderProxy(SubscriptionData readerData) {
 		this(readerData, false);
 	}
 
-	ReaderProxy(ReaderData rd, boolean expectsInlineQoS) {
+	ReaderProxy(SubscriptionData rd, boolean expectsInlineQoS) {
 		this.readerData = rd;
 		this.expectsInlineQoS = expectsInlineQoS;
 	}
@@ -29,7 +29,7 @@ public class ReaderProxy {
 	 * Gets the ReaderData associated with this ReaderProxy.
 	 * @return ReaderData
 	 */
-	public ReaderData getReaderData() {
+	public SubscriptionData getSubscriptionData() {
 		return readerData;
 	}
 
@@ -52,7 +52,7 @@ public class ReaderProxy {
 	/**
 	 * Return true, if remote reader represented by this ReaderProxy is configured to be reliable.
 	 * 
-	 * @return
+	 * @return true, if this ReaderProxy represents a reliable reader
 	 */
 	boolean isReliable() {
 		QosReliability policy = (QosReliability) readerData.getQualityOfService().getPolicy(QosReliability.class);

@@ -7,20 +7,20 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.ReaderData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BuiltinReaderDataListener extends BuiltinListener implements SampleListener<ReaderData> {
-	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
+class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleListener<SubscriptionData> {
+	private static final Logger log = LoggerFactory.getLogger(BuiltinSubscriptionDataListener.class);
 
 	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
-	private Map<Guid, ReaderData> discoveredReaders;
+	private Map<Guid, SubscriptionData> discoveredReaders;
 
-	BuiltinReaderDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants, Map<Guid, ReaderData> discoveredReaders) {
+	BuiltinSubscriptionDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants, Map<Guid, SubscriptionData> discoveredReaders) {
 		super(p);
 		this.discoveredParticipants = discoveredParticipants;
 		this.discoveredReaders = discoveredReaders;
@@ -34,9 +34,9 @@ class BuiltinReaderDataListener extends BuiltinListener implements SampleListene
 	 * @param samples
 	 */
 	@Override
-	public void onSamples(List<Sample<ReaderData>> samples) {
-		for (Sample<ReaderData> rdSample : samples) {
-			ReaderData readerData = rdSample.getData();
+	public void onSamples(List<Sample<SubscriptionData>> samples) {
+		for (Sample<SubscriptionData> rdSample : samples) {
+			SubscriptionData readerData = rdSample.getData();
 			//discoveredReaders.put(readerData.getParticipantGuid(), readerData);
 			Guid key = readerData.getKey();
 			if (discoveredReaders.put(key, readerData) == null) {

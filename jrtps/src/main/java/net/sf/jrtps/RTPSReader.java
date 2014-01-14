@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
@@ -98,7 +98,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param writerData
 	 * @return WriterProxy
 	 */
-	public WriterProxy addMatchedWriter(WriterData writerData) {
+	public WriterProxy addMatchedWriter(PublicationData writerData) {
 		WriterProxy wp = new WriterProxy(writerData);
 		writerProxies.put(writerData.getKey(), wp);
 
@@ -111,7 +111,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * Removes a matched writer from this RTPSReader.
 	 * @param writerData writer to remove. If corresponding writer does not exists, this method silently returns
 	 */
-	public void removeMatchedWriter(WriterData writerData) {
+	public void removeMatchedWriter(PublicationData writerData) {
 		writerProxies.remove(writerData.getKey());
 
 		log.info("[{}] Removed matchedWriter {}", getGuid().getEntityId(), writerData);
@@ -119,7 +119,7 @@ public class RTPSReader<T> extends Endpoint {
 
 	/**
 	 * Gets all the matched writers of this RTPSReader.
-	 * @return 
+	 * @return a Collection of matched writers 
 	 */
 	public Collection<WriterProxy> getMatchedWriters() {
 		return writerProxies.values();

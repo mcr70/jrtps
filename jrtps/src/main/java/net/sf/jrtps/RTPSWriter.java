@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.SortedSet;
 
-import net.sf.jrtps.builtin.ReaderData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Heartbeat;
@@ -92,7 +92,7 @@ public class RTPSWriter<T> extends Endpoint {
 			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().getEntityId(), readerProxies.size());
 
 			for (ReaderProxy proxy : readerProxies.values()) {
-				Guid guid = proxy.getReaderData().getKey();
+				Guid guid = proxy.getSubscriptionData().getKey();
 				notifyReader(guid);
 				//				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
 //				if (proxy.isReliable()) {
@@ -154,7 +154,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param readerData
 	 * @return ReaderProxy
 	 */
-	public ReaderProxy addMatchedReader(ReaderData readerData) {
+	public ReaderProxy addMatchedReader(SubscriptionData readerData) {
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		readerProxies.put(readerData.getKey(), proxy);
 
@@ -189,14 +189,14 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Remove a matched reader.
 	 * @param readerData
 	 */
-	public void removeMatchedReader(ReaderData readerData) {
+	public void removeMatchedReader(SubscriptionData readerData) {
 		readerProxies.remove(readerData);
 		log.info("[{}] Removed matchedReader {}", getGuid().getEntityId(), readerData);
 	}
 
 	/**
 	 * Gets all the matched readers of this RTPSWriter
-	 * @return
+	 * @return a Collection of matched readers
 	 */
 	public Collection<ReaderProxy> getMatchedReaders() {
 		return readerProxies.values();

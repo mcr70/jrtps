@@ -1,4 +1,7 @@
 0.5.1
+	- Artifacts are OSGi bundles
+	- Renamed ReaderData -> SubscriptionData, WriterData PublicationData
+	  to be more in sync with DDS specification.
 	- JavaExternalizableMarshaller introduced.
 	- FIX: Discovered participants was not propagated to RTPS layer. 
 	- ParticipantLeaseManager introduced

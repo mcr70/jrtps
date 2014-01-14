@@ -20,12 +20,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This Marshaller marshalls objects by writing them to <i>ObjectOutputStream</i> and reading from
- * <i>ObjectInputStream</i>. JavaMarshaller supports net.sf.jrtps.Key annotation
+ * <i>ObjectInputStream</i>. JavaMarshaller supports net.sf.jrtps.udds.Key annotation
  * to form a Key for the marshalled Object.
  * 
  * @see java.io.ObjectOutputStream
  * @see java.io.ObjectInputStream
- * @see net.sf.jrtps.Key
+ * @see net.sf.jrtps.udds.Key
  * 
  * @author mcr70
  *

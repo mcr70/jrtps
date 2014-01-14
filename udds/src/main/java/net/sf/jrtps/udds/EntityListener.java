@@ -1,8 +1,8 @@
 package net.sf.jrtps.udds;
 
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.builtin.PublicationData;
 
 /**
  * EntityListener.
@@ -29,7 +29,7 @@ public interface EntityListener {
 	 * 
 	 * @param remoteWriter
 	 */
-	public void livelinessLost(WriterData remoteWriter);
+	public void livelinessLost(PublicationData remoteWriter);
 	
 	/**
 	 * Called when a liveliness of remote reader has been lost.
@@ -40,33 +40,33 @@ public interface EntityListener {
 	 * 
 	 * @param remoteReader
 	 */
-	public void livelinessLost(ReaderData remoteReader);
+	public void livelinessLost(SubscriptionData remoteReader);
 
 	/**
 	 * Called when a new remote reader has been detected.
 	 * @param rd
 	 */
-	public void readerDetected(ReaderData rd);
+	public void readerDetected(SubscriptionData rd);
 
 	/**
 	 * Called when a local writer is associated with remote reader 
 	 * @param writer local writer
 	 * @param rd remote reader
 	 */
-	public void readerMatched(DataWriter<?> writer, ReaderData rd);
+	public void readerMatched(DataWriter<?> writer, SubscriptionData rd);
 
 	/**
 	 * Called when a new remote writer has been detected.
 	 * @param wd
 	 */
-	public void writerDetected(WriterData wd);	
+	public void writerDetected(PublicationData wd);	
 	
 	/**
 	 * Called when a local reader is associated with remote writer 
 	 * @param reader local reader
 	 * @param wd remote writer
 	 */
-	public void writerMatched(DataReader<?> reader, WriterData wd);
+	public void writerMatched(DataReader<?> reader, PublicationData wd);
 
 	/**
 	 * Called when a local writer cannot be associated with remote reader because of 
@@ -74,7 +74,7 @@ public interface EntityListener {
 	 * @param writer local writer
 	 * @param rd remote reader
 	 */
-	public void inconsistentQoS(DataWriter<?> writer, ReaderData rd);
+	public void inconsistentQoS(DataWriter<?> writer, SubscriptionData rd);
 
 	/**
 	 * Called when a local reader cannot be associated with remote writer because of 
@@ -82,5 +82,5 @@ public interface EntityListener {
 	 * @param reader local reader
 	 * @param wd remote writer
 	 */
-	public void inconsistentQoS(DataReader<?> reader, WriterData wd);
+	public void inconsistentQoS(DataReader<?> reader, PublicationData wd);
 }

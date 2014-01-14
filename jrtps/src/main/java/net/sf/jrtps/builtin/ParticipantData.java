@@ -30,7 +30,8 @@ import net.sf.jrtps.types.VendorId_t;
 import org.slf4j.LoggerFactory;
 
 /**
- * see 8.5.3.2 SPDPdiscoveredParticipantData
+ * see 8.5.3.2 SPDPdiscoveredParticipantData.
+ * DDS::ParticipantBuiltinTopicData
  * 
  * @author mcr70
  * 
@@ -253,7 +254,8 @@ public class ParticipantData extends DiscoveredData {
 	/**
 	 * Lease duration associated with remote participant represented by this ParticipantData. 
 	 * Remote participant is expected to renew its lease during its lease duration.  
-	 * @return
+	 * 
+	 * @return Lease duration
 	 */
 	public Duration getLeaseDuration() {
 		return leaseDuration;

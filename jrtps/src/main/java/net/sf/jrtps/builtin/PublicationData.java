@@ -14,12 +14,18 @@ import net.sf.jrtps.types.Guid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class WriterData extends DiscoveredData {
+/**
+ * This class represents DDS::PublicationBuiltinTopicData
+ * 
+ * @author mcr70
+ *
+ */
+public class PublicationData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSPublication";
 	
-	private static final Logger log = LoggerFactory.getLogger(WriterData.class);
+	private static final Logger log = LoggerFactory.getLogger(PublicationData.class);
 	
-	public WriterData(ParameterList parameterList) throws InconsistentPolicy {
+	public PublicationData(ParameterList parameterList) throws InconsistentPolicy {
 		Iterator<Parameter> iter = parameterList.getParameters().iterator();
 		while (iter.hasNext()) {
 			Parameter param = iter.next();
@@ -54,14 +60,14 @@ public class WriterData extends DiscoveredData {
 		}
 		
 		if (super.typeName == null) { // Other vendors may use different typeName
-			super.typeName = WriterData.class.getName();
+			super.typeName = PublicationData.class.getName();
 		}
 		
 		// Resolve possible inconsistencies
 		resolveInconsistencies();
 	}
 	
-	public WriterData(String topicName, String typeName, Guid key, QualityOfService qos) {
+	public PublicationData(String topicName, String typeName, Guid key, QualityOfService qos) {
 		super(typeName, topicName, key, qos);
 	}
 }

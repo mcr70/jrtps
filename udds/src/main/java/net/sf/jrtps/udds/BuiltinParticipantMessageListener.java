@@ -41,7 +41,7 @@ class BuiltinParticipantMessageListener extends BuiltinListener implements Sampl
 			for (DataReader<?> dr : localReaders) {
 				Collection<WriterProxy> matchedWriters = dr.getRTPSReader().getMatchedWriters(guidPrefix);
 				for (WriterProxy wp : matchedWriters) {
-					QualityOfService qos = wp.getWriterData().getQualityOfService();
+					QualityOfService qos = wp.getPublicationData().getQualityOfService();
 					QosLiveliness qosLiveliness = (QosLiveliness) qos.getPolicy(QosLiveliness.class);
 
 					if (qosLiveliness.getKind() == Kind.AUTOMATIC && pm.isAutomaticLivelinessKind()) {
