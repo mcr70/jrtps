@@ -18,6 +18,12 @@ class BuiltinListener {
 		}		
 	}
 	
+	protected void fireParticipantLost(ParticipantData pd) {
+		for (EntityListener el : participant.getEntityListeners()) {
+			el.participantLost(pd);
+		}				
+	}
+	
 	protected void fireWriterDetected(WriterData writerData) {
 		for (EntityListener el : participant.getEntityListeners()) {
 			el.writerDetected(writerData);

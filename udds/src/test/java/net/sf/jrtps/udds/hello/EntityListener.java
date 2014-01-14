@@ -25,6 +25,11 @@ public class EntityListener implements net.sf.jrtps.udds.EntityListener {
 	}
 
 	@Override
+	public void participantLost(ParticipantData pd) {
+		System.out.println("Participant lost: " + pd);
+	}
+
+	@Override
 	public void livelinessLost(WriterData remoteWriter) {
 		System.out.println("Liveliness lost: " + remoteWriter);
 	}

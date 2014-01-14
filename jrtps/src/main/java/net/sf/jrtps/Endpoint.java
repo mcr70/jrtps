@@ -2,7 +2,7 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
-import java.util.HashMap;
+import java.util.Map;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;
@@ -20,7 +20,7 @@ public class Endpoint {
 
 	private final String topicName;
 	private final Guid guid;	
-	private HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
+	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
 	private final Configuration configuration;
 
@@ -94,7 +94,7 @@ public class Endpoint {
 	}
 
 
-	void setDiscoveredParticipants(HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
+	void setDiscoveredParticipants(Map<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.discoveredParticipants = discoveredParticipants;
 	}
 

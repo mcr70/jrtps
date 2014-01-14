@@ -1,10 +1,10 @@
 package net.sf.jrtps;
 
 import java.net.SocketException;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -41,7 +41,7 @@ public class RTPSParticipant {
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
 	 */
-	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
+	private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
 	
 	/**
 	 * A Set that stores network receivers for each locator we know. (For listening purposes)
@@ -74,7 +74,7 @@ public class RTPSParticipant {
 	 * @see EntityId
 	 */
 	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, Set<Locator> locators, 
-			HashMap<GuidPrefix, ParticipantData> discoveredParticipants) { 
+			Map<GuidPrefix, ParticipantData> discoveredParticipants) { 
 		this.domainId = domainId;
 		this.participantId = participantId; 
 		this.threadPoolExecutor = tpe;

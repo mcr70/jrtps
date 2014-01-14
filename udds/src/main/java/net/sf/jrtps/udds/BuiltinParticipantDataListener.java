@@ -1,7 +1,7 @@
 package net.sf.jrtps.udds;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.SEDPQualityOfService;
@@ -28,10 +28,10 @@ import org.slf4j.LoggerFactory;
 class BuiltinParticipantDataListener extends BuiltinListener implements SampleListener<ParticipantData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
 
-	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
+	private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
 
-	BuiltinParticipantDataListener(Participant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
+	BuiltinParticipantDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
 		super(p);
 		this.discoveredParticipants = discoveredParticipants;
 	}
@@ -52,7 +52,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					log.debug("A new Participant detected: {}, {}, current list of participants: {}", pd, pd.getQualityOfService(), discoveredParticipants);
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 					
-					
 					fireParticipantDetected(pd);
 					
 					// First, make sure remote participant knows about us.
@@ -62,9 +61,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 									new Guid(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER), 
 									pd.getQualityOfService());
 					pw.getRTPSWriter().addMatchedReader(rd);
-					//log.debug("Notify SPDP reader");
-					//pw.getRTPSWriter().notifyReader(pd.getGuid());
-					//pw.getRTPSWriter().sendData(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0L);
 
 					// Then, announce our builtin endpoints
 					handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
@@ -73,6 +69,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 				}
 			}
 			else {
+				log.debug("Renewed lease for {}, new expiration time is {}", pd.getGuidPrefix(), pd.getLeaseExpirationTime());
 				d.renewLease(); // TODO: Should we always store the new ParticipantData to discoveredParticipants.
 			}
 		}
@@ -98,8 +95,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
 			ReaderData rd = new ReaderData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
 			pw.getRTPSWriter().addMatchedReader(rd);
-			//pw.getRTPSWriter().notifyReader(key);
-			//pw.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
 		}
 		if (eps.hasPublicationAnnouncer()) {
 			DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
@@ -116,8 +111,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			ReaderData rd = new ReaderData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
 			
 			sw.getRTPSWriter().addMatchedReader(rd);
-			//sw.getRTPSWriter().notifyReader(key);
-			//sw.sendData(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, 0L);
 		}
 		if (eps.hasSubscriptionAnnouncer()) {
 			DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
@@ -135,7 +128,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					ParticipantMessage.class.getName(), key, sedpQoS);
 			
 			sw.getRTPSWriter().addMatchedReader(rd);
-			//sw.getRTPSWriter().notifyReader(key);
 		}
 		if (eps.hasParticipantMessageWriter()) {
 			DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);

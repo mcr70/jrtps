@@ -1,8 +1,8 @@
 package net.sf.jrtps.udds;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.types.GuidPrefix;
@@ -19,9 +19,9 @@ import org.slf4j.LoggerFactory;
 class ParticipantLeaseManager implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(ParticipantLeaseManager.class);
 	private final Participant participant;
-	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
+	private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
-	ParticipantLeaseManager(Participant participant, HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
+	ParticipantLeaseManager(Participant participant, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.participant = participant;
 		this.discoveredParticipants = discoveredParticipants;
 	}
@@ -46,7 +46,8 @@ class ParticipantLeaseManager implements Runnable {
 			for (GuidPrefix prefix: expiryList) {
 				// TODO: implement participants lease expiration
 				discoveredParticipants.remove(prefix);
-				log.warn("Lease expiration has not been implemented");				
+				log.warn("Lease expiration has not been implemented");
+				participant.fireParticipantLeaseExpired(prefix);
 			}
 			
 			

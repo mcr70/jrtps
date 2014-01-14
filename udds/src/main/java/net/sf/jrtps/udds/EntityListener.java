@@ -16,6 +16,13 @@ public interface EntityListener {
 	public void participantDetected(ParticipantData pd);
 	
 	/**
+	 * Called when a previously know Participant has been lost. Participant gets lost
+	 * if it does not renew its lease in time.
+	 * @param pd
+	 */
+	public void participantLost(ParticipantData pd);
+	
+	/**
 	 * Called when a liveliness of remote writer has been lost. This method
 	 * is will be called during writer liveliness protocol.
 	 * See 8.4.13 Writer Liveliness Protocol.
