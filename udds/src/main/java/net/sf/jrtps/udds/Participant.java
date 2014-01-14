@@ -3,10 +3,12 @@ package net.sf.jrtps.udds;
 import java.io.Externalizable;
 import java.io.Serializable;
 import java.net.SocketException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -72,9 +74,9 @@ public class Participant {
 	 * Maps that stores discovered participants. discovered participant is shared with
 	 * all entities created by this participant. 
 	 */
-	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants =  new HashMap<>();
-	private final HashMap<Guid, ReaderData> discoveredReaders = new HashMap<>();
-	private final HashMap<Guid, WriterData> discoveredWriters = new HashMap<>();
+	private final Map<GuidPrefix, ParticipantData> discoveredParticipants = Collections.synchronizedMap(new HashMap<GuidPrefix, ParticipantData>());
+	private final Map<Guid, ReaderData> discoveredReaders = Collections.synchronizedMap(new HashMap<Guid, ReaderData>());
+	private final Map<Guid, WriterData> discoveredWriters = Collections.synchronizedMap(new HashMap<Guid, WriterData>());
 
 
 	private final WriterLivelinessManager livelinessManager;
@@ -638,5 +640,14 @@ public class Participant {
 		}
 		
 		return null;
+	}
+
+	void fireParticipantLeaseExpired(GuidPrefix prefix) {
+		ParticipantData pd = discoveredParticipants.get(prefix);
+		if (pd != null) {
+			for (EntityListener el : entityListeners) {
+				el.participantLost(pd);
+			}
+		}
 	}
 }

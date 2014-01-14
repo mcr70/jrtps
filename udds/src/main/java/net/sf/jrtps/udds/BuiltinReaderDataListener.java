@@ -1,7 +1,7 @@
 package net.sf.jrtps.udds;
 
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 class BuiltinReaderDataListener extends BuiltinListener implements SampleListener<ReaderData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinReaderDataListener.class);
 
-	private HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
-	private HashMap<Guid, ReaderData> discoveredReaders;
+	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
+	private Map<Guid, ReaderData> discoveredReaders;
 
-	BuiltinReaderDataListener(Participant p, HashMap<GuidPrefix, ParticipantData> discoveredParticipants, HashMap<Guid, ReaderData> discoveredReaders) {
+	BuiltinReaderDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants, Map<Guid, ReaderData> discoveredReaders) {
 		super(p);
 		this.discoveredParticipants = discoveredParticipants;
 		this.discoveredReaders = discoveredReaders;

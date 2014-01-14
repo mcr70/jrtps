@@ -297,7 +297,6 @@ public class ParticipantData extends DiscoveredData {
 	 */
 	public void renewLease() {
 		this.leaseExpirationTime = System.currentTimeMillis() + leaseDuration.asMillis();
-		log.debug("renewLease for {}, new expiration time is {}", getGuidPrefix(), leaseExpirationTime);
 	}
 
 	/**
