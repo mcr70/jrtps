@@ -100,10 +100,9 @@ public class RTPSParticipant {
 	public void start() throws SocketException {
 		// TODO: We should have endpoints for TCP, InMemory, What else? encrypted?, signed? 
 		// UDP is required by the specification. 
-
-		// TODO: should we have more than just one RTPSMessageHandler
-		//       It might cause problems during message processing.
 		BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
+		
+		// NOTE: We can have only one MessageHandler. pending samples concept relies on it.
 		RTPSMessageHandler handler = new RTPSMessageHandler(this, queue);
 		threadPoolExecutor.execute(handler);
 		
