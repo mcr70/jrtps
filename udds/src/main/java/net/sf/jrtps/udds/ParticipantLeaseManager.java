@@ -1,25 +1,27 @@
 package net.sf.jrtps.udds;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.builtin.ParticipantData;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * ParticipantLeaseManager tracks leaseTime of remote participants. If leaseTime is expired,
- * Local endpoints will be notified of this fact by removing matched readers/writers created
- * by that participant.  
+ * Local endpoints will be notified of this.
  * 
  * @author mcr70
  */
 class ParticipantLeaseManager implements Runnable {
 	private static final Logger log = LoggerFactory.getLogger(ParticipantLeaseManager.class);
-	private final List<ParticipantData> discoveredParticipants;
-	private Participant participant;
+	private final Participant participant;
+	private final HashMap<GuidPrefix, ParticipantData> discoveredParticipants;
 
-	ParticipantLeaseManager(Participant participant, List<ParticipantData> discoveredParticipants) {
+	ParticipantLeaseManager(Participant participant, HashMap<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.participant = participant;
 		this.discoveredParticipants = discoveredParticipants;
 	}
@@ -28,18 +30,31 @@ class ParticipantLeaseManager implements Runnable {
 	public void run() {
 		boolean running = true;
 		while(running) {
-			for (ParticipantData pd : discoveredParticipants) {
+			if (discoveredParticipants.size() > 0) {
+				log.debug("Checking lease of {} remote participants", discoveredParticipants.size());
+			}
+			
+			List<GuidPrefix> expiryList = new LinkedList<>();
+			for (ParticipantData pd : discoveredParticipants.values()) {
 				if (pd.isLeaseExpired()) {
-					// TODO: implement participants lease expiration
-					log.warn("Lease expiration has not been implemented");
+					log.debug("Lease has expired for {}, currenTime is {}, expirationTime is {}", 
+							pd.getGuidPrefix(), System.currentTimeMillis(), pd.getLeaseExpirationTime());
+					expiryList.add(pd.getGuidPrefix());
 				}
 			}
+			
+			for (GuidPrefix prefix: expiryList) {
+				// TODO: implement participants lease expiration
+				discoveredParticipants.remove(prefix);
+				log.warn("Lease expiration has not been implemented");				
+			}
+			
 			
 			long sleepTime = getNextSleepTime();
 			running = participant.waitFor(sleepTime);
 		}
 		
-		log.debug("ParticipantLeaseManager is exiting");
+		log.debug("ParticipantLeaseManager is exiting, running={}", running);
 	}
 
 	/**
@@ -49,17 +64,24 @@ class ParticipantLeaseManager implements Runnable {
 	 * @return next sleepTime
 	 */
 	private long getNextSleepTime() {
+		if (discoveredParticipants.size() == 0) {
+			return 1000; // TODO: configurable?
+		}
+		
 		long smallest_expireTime = Long.MAX_VALUE;
-		for (ParticipantData pd : discoveredParticipants) {
+
+		for (ParticipantData pd : discoveredParticipants.values()) {
 			if (pd.getLeaseExpirationTime() < smallest_expireTime) {
 				smallest_expireTime = pd.getLeaseExpirationTime();
 			}
 		}
 
-		if (smallest_expireTime == Long.MAX_VALUE) {
-			smallest_expireTime = 1000;
-		}
+		long nextSleeptime = smallest_expireTime - System.currentTimeMillis();
 
-		return smallest_expireTime;
+		if (nextSleeptime <= 0) {
+			nextSleeptime = 1000; // TODO: configurable?
+		}
+		
+		return nextSleeptime;
 	}
 }

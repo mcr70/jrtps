@@ -64,8 +64,7 @@ class WriterLivelinessManager implements Runnable {
 		QosLiveliness policy = (QosLiveliness) aWriter.getRTPSWriter().getQualityOfService().getPolicy(QosLiveliness.class);
 		if (policy.getKind() == QosLiveliness.Kind.AUTOMATIC) {
 			synchronized (alDurations) {
-				log.debug("Registering DataWriter for automatic liveliness with lease duration of ", 
-						policy.getLeaseDuration());
+				log.debug("Registering DataWriter for automatic liveliness with lease duration of {}", policy.getLeaseDuration());
 				alDurations.add(policy.getLeaseDuration());
 				Collections.sort(alDurations);
 			}

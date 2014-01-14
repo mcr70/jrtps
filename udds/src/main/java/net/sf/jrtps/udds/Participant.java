@@ -78,6 +78,7 @@ public class Participant {
 
 
 	private final WriterLivelinessManager livelinessManager;
+	private final ParticipantLeaseManager leaseManager;
 
 	private Locator meta_mcLoc;
 	private Locator meta_ucLoc;
@@ -135,6 +136,9 @@ public class Participant {
 		createBuiltinEntities();
 
 		livelinessManager.start();
+		
+		this.leaseManager = new ParticipantLeaseManager(this, discoveredParticipants);
+		addRunnable(leaseManager);
 	}
 
 
