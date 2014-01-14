@@ -38,9 +38,10 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
 	@Override
 	public void onSamples(List<Sample<ParticipantData>> samples) {
+		log.debug("Got {} ParticipantData samples, known participants: {}", samples.size(), discoveredParticipants.keySet());
 		for (Sample<ParticipantData> pdSample : samples) {
 			ParticipantData pd = pdSample.getData();
-			log.trace("Considering Participant {}", pd.getGuid());
+			log.debug("Considering Participant {}", pd.getGuid());
 
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
@@ -48,8 +49,10 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					log.trace("Ignoring self");
 				}
 				else {
-					log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
+					log.debug("A new Participant detected: {}, {}, current list of participants: {}", pd, pd.getQualityOfService(), discoveredParticipants);
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
+					
+					
 					fireParticipantDetected(pd);
 					
 					// First, make sure remote participant knows about us.
@@ -65,6 +68,8 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
 					// Then, announce our builtin endpoints
 					handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
+					
+					log.debug("Discovered participants: {}, {}", hashCode(), discoveredParticipants.keySet());
 				}
 			}
 			else {

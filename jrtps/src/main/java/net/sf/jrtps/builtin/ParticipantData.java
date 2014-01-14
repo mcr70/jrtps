@@ -137,7 +137,8 @@ public class ParticipantData extends DiscoveredData {
 		
 		super.topicName = BUILTIN_TOPIC_NAME;
 		super.typeName = ParticipantData.class.getName();
-		leaseExpirationTime = System.currentTimeMillis() + leaseDuration.asMillis();
+		
+		renewLease();
 	}
 	
 	/**
@@ -200,6 +201,8 @@ public class ParticipantData extends DiscoveredData {
 		if (super.typeName == null) { // Other vendors may use different typeName
 			super.typeName = ParticipantData.class.getName();
 		}
+		
+		renewLease();
 	}
 
 
@@ -294,6 +297,7 @@ public class ParticipantData extends DiscoveredData {
 	 */
 	public void renewLease() {
 		this.leaseExpirationTime = System.currentTimeMillis() + leaseDuration.asMillis();
+		log.debug("renewLease for {}, new expiration time is {}", getGuidPrefix(), leaseExpirationTime);
 	}
 
 	/**
