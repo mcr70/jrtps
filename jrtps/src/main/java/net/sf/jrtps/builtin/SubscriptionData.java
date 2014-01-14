@@ -16,17 +16,22 @@ import net.sf.jrtps.types.Guid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ReaderData extends DiscoveredData {
+/**
+ * This class represents DDS::SubscriptionBuiltinTopicData
+ * 
+ * @author mcr70
+ */
+public class SubscriptionData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSSubscription";
 	
-	private static final Logger log = LoggerFactory.getLogger(ReaderData.class);
+	private static final Logger log = LoggerFactory.getLogger(SubscriptionData.class);
 
 	private Guid participantGuid;
 	private boolean expectsInlineQos = false;
 	
 	private ContentFilterProperty_t contentFilter;
 	
-	public ReaderData(ParameterList parameterList) throws InconsistentPolicy {
+	public SubscriptionData(ParameterList parameterList) throws InconsistentPolicy {
 		Iterator<Parameter> iter = parameterList.getParameters().iterator();
 		while (iter.hasNext()) {
 			Parameter param = iter.next();
@@ -67,13 +72,13 @@ public class ReaderData extends DiscoveredData {
 		}
 		
 		if (super.typeName == null) { // Other vendors may use different typeName
-			super.typeName = ReaderData.class.getName();
+			super.typeName = SubscriptionData.class.getName();
 		}
 		
 		resolveInconsistencies();
 	}
 
-	public ReaderData(String topicName, String typeName, Guid key, QualityOfService qos) {
+	public SubscriptionData(String topicName, String typeName, Guid key, QualityOfService qos) {
 		super(typeName, topicName, key, qos);
 	}
 	

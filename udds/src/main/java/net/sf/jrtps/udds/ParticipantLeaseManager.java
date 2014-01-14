@@ -37,7 +37,7 @@ class ParticipantLeaseManager implements Runnable {
 			List<GuidPrefix> expiryList = new LinkedList<>();
 			for (ParticipantData pd : discoveredParticipants.values()) {
 				if (pd.isLeaseExpired()) {
-					log.debug("Lease has expired for {}, currenTime is {}, expirationTime is {}", 
+					log.debug("Lease has expired for {}, currentTime is {}, expirationTime is {}", 
 							pd.getGuidPrefix(), System.currentTimeMillis(), pd.getLeaseExpirationTime());
 					expiryList.add(pd.getGuidPrefix());
 				}
@@ -45,9 +45,9 @@ class ParticipantLeaseManager implements Runnable {
 			
 			for (GuidPrefix prefix: expiryList) {
 				// TODO: implement participants lease expiration
-				discoveredParticipants.remove(prefix);
 				log.warn("Lease expiration has not been implemented");
 				participant.fireParticipantLeaseExpired(prefix);
+				discoveredParticipants.remove(prefix);
 			}
 			
 			

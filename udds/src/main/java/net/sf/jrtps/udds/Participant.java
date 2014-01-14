@@ -27,12 +27,12 @@ import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.ParticipantMessageMarshaller;
-import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.builtin.ReaderDataMarshaller;
+import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
-import net.sf.jrtps.builtin.WriterData;
-import net.sf.jrtps.builtin.WriterDataMarshaller;
+import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.PublicationDataMarshaller;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
@@ -75,8 +75,8 @@ public class Participant {
 	 * all entities created by this participant. 
 	 */
 	private final Map<GuidPrefix, ParticipantData> discoveredParticipants = Collections.synchronizedMap(new HashMap<GuidPrefix, ParticipantData>());
-	private final Map<Guid, ReaderData> discoveredReaders = Collections.synchronizedMap(new HashMap<Guid, ReaderData>());
-	private final Map<Guid, WriterData> discoveredWriters = Collections.synchronizedMap(new HashMap<Guid, WriterData>());
+	private final Map<Guid, SubscriptionData> discoveredReaders = Collections.synchronizedMap(new HashMap<Guid, SubscriptionData>());
+	private final Map<Guid, PublicationData> discoveredWriters = Collections.synchronizedMap(new HashMap<Guid, PublicationData>());
 
 
 	private final WriterLivelinessManager livelinessManager;
@@ -148,8 +148,8 @@ public class Participant {
 		// ----  Builtin marshallers  ---------------
 		setMarshaller(ParticipantData.class, new ParticipantDataMarshaller());
 		setMarshaller(ParticipantMessage.class, new ParticipantMessageMarshaller());
-		setMarshaller(WriterData.class, new WriterDataMarshaller());
-		setMarshaller(ReaderData.class, new ReaderDataMarshaller());
+		setMarshaller(PublicationData.class, new PublicationDataMarshaller());
+		setMarshaller(SubscriptionData.class, new SubscriptionDataMarshaller());
 		setMarshaller(TopicData.class, new TopicDataMarshaller());
 
 		QualityOfService spdpQoS = new SPDPQualityOfService(); // QoS for SPDP
@@ -167,12 +167,12 @@ public class Participant {
 
 		
 		// ----  Create a Writers for SEDP  ---------
-		DataWriter<WriterData> wdWriter = 
-				createDataWriter(WriterData.BUILTIN_TOPIC_NAME, WriterData.class, WriterData.class.getName(), sedpQoS);
+		DataWriter<PublicationData> wdWriter = 
+				createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
 		writers.add(wdWriter);
 
-		DataWriter<ReaderData> rdWriter = 
-				createDataWriter(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class, ReaderData.class.getName(), sedpQoS);
+		DataWriter<SubscriptionData> rdWriter = 
+				createDataWriter(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);
 		writers.add(rdWriter);
 
 
@@ -186,14 +186,14 @@ public class Participant {
 		readers.add(pdReader);
 
 		// ----  Create a Readers for SEDP  ---------
-		DataReader<WriterData> wdReader = 
-				createDataReader(WriterData.BUILTIN_TOPIC_NAME, WriterData.class, WriterData.class.getName(), sedpQoS);
-		wdReader.addListener(new BuiltinWriterDataListener(this, discoveredWriters));
+		DataReader<PublicationData> wdReader = 
+				createDataReader(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
+		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredWriters));
 		readers.add(wdReader);
 
-		DataReader<ReaderData> rdReader = 
-				createDataReader(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class, ReaderData.class.getName(), sedpQoS);
-		rdReader.addListener(new BuiltinReaderDataListener(this, discoveredParticipants, discoveredReaders));
+		DataReader<SubscriptionData> rdReader = 
+				createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);
+		rdReader.addListener(new BuiltinSubscriptionDataListener(this, discoveredParticipants, discoveredReaders));
 		readers.add(rdReader);
 
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
@@ -253,10 +253,10 @@ public class Participant {
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, m, qos);
 		}
-		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+		else if (SubscriptionData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, topicName, m, qos);
 		}
-		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+		else if (PublicationData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, topicName, m, qos);
 		}
 		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
@@ -284,8 +284,8 @@ public class Participant {
 		readers.add(reader);
 
 		@SuppressWarnings("unchecked")
-		DataWriter<ReaderData> sw = (DataWriter<ReaderData>) getWritersForTopic(ReaderData.BUILTIN_TOPIC_NAME).get(0);
-		ReaderData rd = new ReaderData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
+		DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
+		SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
 		sw.write(rd);
 
 		return reader;
@@ -336,10 +336,10 @@ public class Participant {
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, wCache, qos);
 		}
-		else if (ReaderData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+		else if (SubscriptionData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, wCache, qos);
 		}
-		else if (WriterData.BUILTIN_TOPIC_NAME.equals(topicName)) {
+		else if (PublicationData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, wCache, qos);
 		}
 		else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
@@ -368,8 +368,8 @@ public class Participant {
 		livelinessManager.registerWriter(writer);
 
 		@SuppressWarnings("unchecked")
-		DataWriter<WriterData> pw = (DataWriter<WriterData>) getWritersForTopic(WriterData.BUILTIN_TOPIC_NAME).get(0);
-		WriterData wd = new WriterData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
+		DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(PublicationData.BUILTIN_TOPIC_NAME).get(0);
+		PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
 		pw.write(wd);
 		
 		return writer;
@@ -644,6 +644,7 @@ public class Participant {
 
 	void fireParticipantLeaseExpired(GuidPrefix prefix) {
 		ParticipantData pd = discoveredParticipants.get(prefix);
+		logger.debug("Notifying participant lost status for {} listeners, {}", entityListeners.size(), pd);
 		if (pd != null) {
 			for (EntityListener el : entityListeners) {
 				el.participantLost(pd);

@@ -18,14 +18,14 @@ import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 
 /**
- * Marshaller for builtin data for topic DCPSSubscription.
- * With jRTPS, instances of this topic is of type ReaderData.
+ * Marshaller for builtin data for topic <i>DCPSSubscription</i>.
+ * With jRTPS, instances of this topic is of type SubscriptionData.
  * 
  * @author mcr70
  *
  */
-public class ReaderDataMarshaller implements Marshaller<ReaderData> {
-	private static final Logger log = LoggerFactory.getLogger(ReaderDataMarshaller.class);
+public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> {
+	private static final Logger log = LoggerFactory.getLogger(SubscriptionDataMarshaller.class);
 
 	@Override
 	public boolean hasKey() {
@@ -33,16 +33,16 @@ public class ReaderDataMarshaller implements Marshaller<ReaderData> {
 	}
 
 	@Override
-	public byte[] extractKey(ReaderData data) {
+	public byte[] extractKey(SubscriptionData data) {
 		return data.getKey().getBytes();
 	}
 
 	@Override
-	public ReaderData unmarshall(DataEncapsulation data) {
+	public SubscriptionData unmarshall(DataEncapsulation data) {
 		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
-		ReaderData rd = null;
+		SubscriptionData rd = null;
 		try {
-			rd = new ReaderData(plEnc.getParameterList());
+			rd = new SubscriptionData(plEnc.getParameterList());
 		} catch (InconsistentPolicy e) {
 			log.error("Could not resolve inconsistent policies for ReaderData", e);
 		}
@@ -51,7 +51,7 @@ public class ReaderDataMarshaller implements Marshaller<ReaderData> {
 	}
 
 	@Override
-	public DataEncapsulation marshall(ReaderData rd) {
+	public DataEncapsulation marshall(SubscriptionData rd) {
 		ParameterList payloadParams = new ParameterList();
 		 
 		payloadParams.add(new TopicName(rd.getTopicName()));
@@ -64,7 +64,7 @@ public class ReaderDataMarshaller implements Marshaller<ReaderData> {
 		return new ParameterListEncapsulation(payloadParams);
 	}
 	
-	private void addQoS(ReaderData rd, ParameterList payloadParams) {
+	private void addQoS(SubscriptionData rd, ParameterList payloadParams) {
 		Set<QosPolicy<?>> inlineableQosPolicies = rd.getInlineableQosPolicies();
 		for (QosPolicy<?> qp : inlineableQosPolicies) {
 			payloadParams.add((Parameter) qp);

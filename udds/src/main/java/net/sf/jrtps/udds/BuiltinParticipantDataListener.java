@@ -9,8 +9,8 @@ import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -56,8 +56,8 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					
 					// First, make sure remote participant knows about us.
 					DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
-					ReaderData rd = 
-							new ReaderData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+					SubscriptionData rd = 
+							new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
 									new Guid(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER), 
 									pd.getQualityOfService());
 					pw.getRTPSWriter().addMatchedReader(rd);
@@ -93,14 +93,14 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			DataWriter<?> pw = participant.getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
 			
 			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
-			ReaderData rd = new ReaderData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
+			SubscriptionData rd = new SubscriptionData(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class.getName(), key, sedpQoS);
 			pw.getRTPSWriter().addMatchedReader(rd);
 		}
 		if (eps.hasPublicationAnnouncer()) {
 			DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
 
 			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
-			WriterData wd = new WriterData(WriterData.BUILTIN_TOPIC_NAME, WriterData.class.getName(), key, sedpQoS);
+			PublicationData wd = new PublicationData(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class.getName(), key, sedpQoS);
 			pr.getRTPSReader().addMatchedWriter(wd);
 		}
 		if (eps.hasSubscriptionDetector()) {
@@ -108,7 +108,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			DataWriter<?> sw = participant.getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
 			
 			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
-			ReaderData rd = new ReaderData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
+			SubscriptionData rd = new SubscriptionData(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class.getName(), key, sedpQoS);
 			
 			sw.getRTPSWriter().addMatchedReader(rd);
 		}
@@ -116,7 +116,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
 
 			Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
-			WriterData wd = new WriterData(ReaderData.BUILTIN_TOPIC_NAME, ReaderData.class.getName(), key, sedpQoS);
+			PublicationData wd = new PublicationData(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class.getName(), key, sedpQoS);
 			pr.getRTPSReader().addMatchedWriter(wd);
 		}
 		if (eps.hasParticipantMessageReader()) {
@@ -124,7 +124,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			DataWriter<?> sw = participant.getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
 			
 			Guid key = new Guid(prefix, EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
-			ReaderData rd = new ReaderData(ParticipantMessage.BUILTIN_TOPIC_NAME, 
+			SubscriptionData rd = new SubscriptionData(ParticipantMessage.BUILTIN_TOPIC_NAME, 
 					ParticipantMessage.class.getName(), key, sedpQoS);
 			
 			sw.getRTPSWriter().addMatchedReader(rd);
@@ -133,7 +133,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
 
 			Guid key = new Guid(prefix, EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
-			WriterData wd = new WriterData(ParticipantMessage.BUILTIN_TOPIC_NAME, 
+			PublicationData wd = new PublicationData(ParticipantMessage.BUILTIN_TOPIC_NAME, 
 					ParticipantMessage.class.getName(), key, sedpQoS);
 			pr.getRTPSReader().addMatchedWriter(wd);
 		}

@@ -3,8 +3,8 @@ package net.sf.jrtps.udds.hello;
 import java.io.IOException;
 
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.ReaderData;
-import net.sf.jrtps.builtin.WriterData;
+import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
@@ -30,42 +30,42 @@ public class EntityListener implements net.sf.jrtps.udds.EntityListener {
 	}
 
 	@Override
-	public void livelinessLost(WriterData remoteWriter) {
+	public void livelinessLost(PublicationData remoteWriter) {
 		System.out.println("Liveliness lost: " + remoteWriter);
 	}
 
 	@Override
-	public void livelinessLost(ReaderData remoteReader) {
+	public void livelinessLost(SubscriptionData remoteReader) {
 		System.out.println("Liveliness lost: " + remoteReader);
 	}
 
 	@Override
-	public void readerDetected(ReaderData rd) {
+	public void readerDetected(SubscriptionData rd) {
 		System.out.println("Reader detected: " + rd);
 	}
 
 	@Override
-	public void readerMatched(DataWriter<?> writer, ReaderData rd) {
+	public void readerMatched(DataWriter<?> writer, SubscriptionData rd) {
 		System.out.println("Reader matched: " + writer + ", " + rd);
 	}
 
 	@Override
-	public void writerDetected(WriterData wd) {
+	public void writerDetected(PublicationData wd) {
 		System.out.println("Writer detected: " + wd);
 	}
 
 	@Override
-	public void writerMatched(DataReader<?> reader, WriterData wd) {
+	public void writerMatched(DataReader<?> reader, PublicationData wd) {
 		System.out.println("Writer matched: " + reader + ", " + wd);
 	}
 
 	@Override
-	public void inconsistentQoS(DataWriter<?> writer, ReaderData rd) {
+	public void inconsistentQoS(DataWriter<?> writer, SubscriptionData rd) {
 		System.out.println("Inconsistent QoS: " + writer + ", " + rd);
 	}
 
 	@Override
-	public void inconsistentQoS(DataReader<?> reader, WriterData wd) {
+	public void inconsistentQoS(DataReader<?> reader, PublicationData wd) {
 		System.out.println("Inconsistent QoS: " + reader + ", " + wd);
 	}
 }
