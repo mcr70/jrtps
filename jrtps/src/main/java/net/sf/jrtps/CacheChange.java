@@ -7,9 +7,6 @@ import java.security.NoSuchAlgorithmException;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 
 /**
  * This class represents a sample in history cache.
@@ -17,18 +14,27 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class CacheChange implements Comparable<CacheChange> {
-	private static final Logger logger = LoggerFactory.getLogger(CacheChange.class);
-
 	private final long sequenceNumber;
 	private final Object data;
 	private final Kind kind;
 	private final long timeStamp;
 	private final int hashCode;
 	private final KeyHash keyHash;
-	
+
 	private Marshaller marshaller;
 	private DataEncapsulation marshalledData;
+
 	private static MessageDigest md5 = null;
+	private static NoSuchAlgorithmException noSuchAlgorithm = null;
+	static {
+		try {
+			md5 = MessageDigest.getInstance("MD5");
+		} 
+		catch (NoSuchAlgorithmException e) {
+			// Actual usage might not even need it.
+			noSuchAlgorithm = e;
+		}
+	}
 
 	/**
 	 * Enumeration for different changes made to an instance.
@@ -37,7 +43,7 @@ public class CacheChange implements Comparable<CacheChange> {
 	public enum Kind {
 		WRITE, DISPOSE, UNREGISTER;
 	}
-	
+
 	/**
 	 * Constructor for CacheChange
 	 * @param m Marhsaller
@@ -50,29 +56,24 @@ public class CacheChange implements Comparable<CacheChange> {
 	}
 
 	/**
-	 * Constructor for CacheChange
+	 * Constructor for CacheChange. 
+	 * 
 	 * @param m Marhsaller
 	 * @param kind Kind
 	 * @param seqNum sequence Number
 	 * @param data data
 	 * @param timeStamp timestamp to use
+	 * @throws RuntimeException if this cache change has a key, and it needs to be coverted to MD5
+	 *         hash, but there is no MD5 algorithm available for this platform.
 	 */
 	public CacheChange(Marshaller m, Kind kind, long seqNum, Object data, long timeStamp) {
-		try {
-			this.md5 = MessageDigest.getInstance("MD5");
-		} 
-		catch (NoSuchAlgorithmException e) {
-			// Just warn. Actual usage might not even need it.
-			logger.warn("There is no MD5 algorithm available", e);
-		}
-
 		this.kind = kind;
 		this.sequenceNumber = seqNum;
 		this.data = data;
 		this.timeStamp = timeStamp;
 		this.hashCode = new Long(sequenceNumber).hashCode();
 		this.marshaller = m;
-		
+
 		if (m.hasKey()) {
 			this.keyHash = extractKey();
 		}
@@ -89,10 +90,10 @@ public class CacheChange implements Comparable<CacheChange> {
 		if (marshalledData == null) {
 			marshalledData = marshaller.marshall(data);
 		}
-		
+
 		return marshalledData;
 	}
-	
+
 	/**
 	 * Gets the sequence number of this CacheChange.
 	 * @return sequence number
@@ -117,7 +118,7 @@ public class CacheChange implements Comparable<CacheChange> {
 	KeyHash getKey() {
 		return keyHash;
 	}
-	
+
 	private KeyHash extractKey() {
 		byte[] key = marshaller.extractKey(data);
 		if (key == null) {
@@ -130,7 +131,11 @@ public class CacheChange implements Comparable<CacheChange> {
 			System.arraycopy(key, 0, bytes, 0, key.length);
 		}
 		else {
-			// Throws NPE, if MD5 algorithm is not available
+			if (md5 == null) {
+				throw new RuntimeException(noSuchAlgorithm);
+			}
+
+			// TODO: multithreading
 			bytes = md5.digest(key);
 			md5.reset();
 		}
@@ -148,20 +153,20 @@ public class CacheChange implements Comparable<CacheChange> {
 		if (other instanceof CacheChange) {
 			return sequenceNumber == ((CacheChange)other).sequenceNumber;
 		}
-		
+
 		return false;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return hashCode;
 	}
-	
+
 	@Override
 	public int compareTo(CacheChange o) {
 		return (int) (sequenceNumber - o.sequenceNumber);
 	}
-	
+
 	public String toString() {
 		return "change: " + sequenceNumber;
 	}
