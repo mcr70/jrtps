@@ -205,12 +205,14 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param ackNack
 	 */
 	void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
-		log.debug("[{}] Got AckNack: {}", getGuid().getEntityId(), ackNack.getReaderSNState());
+		log.debug("[{}] Got AckNack: {}, F:{}", getGuid().getEntityId(), ackNack.getReaderSNState(), ackNack.finalFlag());
 
 		ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
 			proxy.ackNackReceived(); // Marks reader as being alive
 
+			// TODO: check finalFlag
+			
 			log.debug("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
 			getParticipant().waitFor(nackResponseDelay);
 

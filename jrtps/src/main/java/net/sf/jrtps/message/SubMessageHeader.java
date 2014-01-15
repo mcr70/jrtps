@@ -66,6 +66,7 @@ public class SubMessageHeader {
 		buffer.write_octet(flags);
 		buffer.write_short((short) submessageLength);
 	}
+
 	/**
 	 * Get the endianness for SubMessage. If endianness flag is set, little-endian is used 
 	 * by SubMessage, otherwise big-endian is used.

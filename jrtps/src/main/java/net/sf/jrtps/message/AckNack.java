@@ -37,6 +37,11 @@ public class AckNack extends SubMessage {
 		readMessage(bb);
 	}
 
+	/**
+	 * Final flag indicates to the Writer whether a response is mandatory.
+	 * 
+	 * @return true, if response is NOT mandatory
+	 */
 	public boolean finalFlag() {
 		return (header.flags & 0x2) != 0;
 	}

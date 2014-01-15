@@ -9,8 +9,8 @@ import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -38,7 +38,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
 	@Override
 	public void onSamples(List<Sample<ParticipantData>> samples) {
-		log.debug("Got {} ParticipantData samples, known participants: {}", samples.size(), discoveredParticipants.keySet());
 		for (Sample<ParticipantData> pdSample : samples) {
 			ParticipantData pd = pdSample.getData();
 			log.debug("Considering Participant {}", pd.getGuid());
@@ -49,7 +48,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					log.trace("Ignoring self");
 				}
 				else {
-					log.debug("A new Participant detected: {}, {}, current list of participants: {}", pd, pd.getQualityOfService(), discoveredParticipants);
+					log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 					
 					fireParticipantDetected(pd);
@@ -64,8 +63,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
 					// Then, announce our builtin endpoints
 					handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
-					
-					log.debug("Discovered participants: {}, {}", hashCode(), discoveredParticipants.keySet());
 				}
 			}
 			else {
@@ -120,7 +117,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 			pr.getRTPSReader().addMatchedWriter(wd);
 		}
 		if (eps.hasParticipantMessageReader()) {
-			log.debug("Notifying remote participant data reader");
+			log.debug("Notifying remote participant message reader");
 			DataWriter<?> sw = participant.getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
 			
 			Guid key = new Guid(prefix, EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
