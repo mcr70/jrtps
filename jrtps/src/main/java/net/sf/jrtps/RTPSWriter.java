@@ -1,8 +1,6 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -16,7 +14,6 @@ import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.data.DataEncapsulation;
-import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.StatusInfo;
@@ -43,7 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
-	private MessageDigest md5 = null;
 
 	private HashMap<Guid, ReaderProxy> readerProxies = new HashMap<>();
 
@@ -61,14 +57,6 @@ public class RTPSWriter<T> extends Endpoint {
 		this.writer_cache = wCache;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
 		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
-
-		try {
-			this.md5 = MessageDigest.getInstance("MD5");
-		} 
-		catch (NoSuchAlgorithmException e) {
-			// Just warn. Actual usage might not even need it.
-			log.warn("There is no MD5 algorithm available", e);
-		}
 	}
 
 
@@ -94,14 +82,6 @@ public class RTPSWriter<T> extends Endpoint {
 			for (ReaderProxy proxy : readerProxies.values()) {
 				Guid guid = proxy.getSubscriptionData().getKey();
 				notifyReader(guid);
-				//				// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
-//				if (proxy.isReliable()) {
-//					sendHeartbeat(guid.getPrefix(), guid.getEntityId());
-//				}
-//				else {
-//					sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
-//					proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
-//				}
 			}
 		}
 	}
@@ -332,21 +312,7 @@ public class RTPSWriter<T> extends Endpoint {
 		ParameterList inlineQos = new ParameterList();
 
 		if (cc.hasKey()) { // Add KeyHash if present
-			byte[] key = cc.extractKey();
-			if (key == null) {
-				key = new byte[0];
-			}
-
-			byte[] bytes = null;
-			if (key.length < 16) {			
-				bytes = new byte[16];
-				System.arraycopy(key, 0, bytes, 0, key.length);
-			}
-			else {
-				bytes = md5.digest(key);
-			}
-
-			inlineQos.add(new KeyHash(bytes));
+			inlineQos.add(cc.getKey());
 		}
 
 		if (!cc.getKind().equals(CacheChange.Kind.WRITE)) { // Add status info for operations other than WRITE
