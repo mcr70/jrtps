@@ -45,7 +45,7 @@ public class Heartbeat extends SubMessage {
 	 * is required to respond to the Heartbeat or if it is just an advisory heartbeat.
 	 * If finalFlag is set, Reader is not required to respond with AckNack.
 	 * 
-	 * @return true if final flag is set
+	 * @return true if final flag is set and reader is not required to respond
 	 */
 	public boolean finalFlag() {
 		return (header.flags & 0x2) != 0;

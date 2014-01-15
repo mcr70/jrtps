@@ -27,7 +27,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 	}
 
 	/**
-	 * Handle discovered ReaderData. If ReaderData represents an user defined
+	 * Handle discovered SubscriptionData. If SubscriptionData represents an user defined
 	 * Reader, and this participant has a Writer for same topic, send writers history
 	 * cache to reader.
 	 * 

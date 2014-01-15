@@ -177,7 +177,9 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param hb
 	 */
 	void onHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {
-		log.debug("[{}] Got Heartbeat: {}-{}", getGuid().getEntityId(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+		log.debug("[{}] Got Heartbeat: {}-{}, F:{}, L:{}", getGuid().getEntityId(), 
+				hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
+				hb.finalFlag(), hb.livelinessFlag());
 
 		WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
 		if (wp != null) {
