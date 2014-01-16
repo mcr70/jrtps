@@ -27,7 +27,7 @@ public class SEDPQualityOfService extends QualityOfService {
 			setPolicy(new QosPresentation(QosPresentation.Kind.TOPIC, false, false));
 			setPolicy(new QosDeadline(Duration.INFINITE));
 			setPolicy(new QosOwnership(QosOwnership.Kind.SHARED));
-			setPolicy(new QosLiveliness(QosLiveliness.Kind.AUTOMATIC, new Duration(0)));
+			setPolicy(new QosLiveliness(QosLiveliness.Kind.AUTOMATIC, new Duration(10,0)));
 			setPolicy(new QosTimeBasedFilter(new Duration(0)));
 			setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(100)));
 			setPolicy(new QosDestinationOrder(QosDestinationOrder.Kind.BY_RECEPTION_TIMESTAMP));
