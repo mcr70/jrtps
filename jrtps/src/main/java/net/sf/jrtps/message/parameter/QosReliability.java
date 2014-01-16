@@ -5,6 +5,11 @@ import net.sf.jrtps.types.Duration;
 
 
 public class QosReliability extends Parameter implements DataReaderPolicy<QosReliability>, DataWriterPolicy<QosReliability>, TopicPolicy<QosReliability>, InlineParameter {
+	// see Table 9.4 - PSM mapping of the value types that appear on the wire
+	// TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
+	private static final int BEST_EFFORT_INT = 1;
+	private static final int RELIABLE_INT = 2;
+	
 	private int kind;
 	private Duration max_blocking_time;
 	
@@ -19,8 +24,8 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	public QosReliability(Kind kind, Duration max_blocking_time) {
 		super(ParameterEnum.PID_RELIABILITY);
 		switch(kind) {
-		case BEST_EFFORT: this.kind = 1; break;
-		case RELIABLE: this.kind = 3; break; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire
+		case BEST_EFFORT: this.kind = BEST_EFFORT_INT; break;
+		case RELIABLE: this.kind = RELIABLE_INT; break; 
 		}
 		
 		this.max_blocking_time = max_blocking_time;
@@ -32,8 +37,8 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	
 	public Kind getKind() {
 		switch(kind) {
-		case 1: return Kind.BEST_EFFORT;
-		case 3: return Kind.RELIABLE; // 3: see Table 9.4 - PSM mapping of the value types that appear on the wire 
+		case BEST_EFFORT_INT: return Kind.BEST_EFFORT;
+		case RELIABLE_INT: return Kind.RELIABLE;  
 		}
 
 		throw new IllegalArgumentException("Illegal kind " + kind + " for QosReliability");
@@ -42,7 +47,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 
 	@Override
 	public void read(RTPSByteBuffer bb, int length)  {
-		this.kind = bb.read_long(); // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE 
+		this.kind = bb.read_long();  
 		max_blocking_time = new Duration(bb);
 	}
 	
