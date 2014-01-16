@@ -4,9 +4,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.InlineParameter;
@@ -27,6 +24,9 @@ import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.message.parameter.QosTransportPriority;
 import net.sf.jrtps.message.parameter.TopicPolicy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * QualityOfService holds a collection QosPolicies.
@@ -98,7 +98,7 @@ public class QualityOfService {
 
 			QosHistory h = (QosHistory) policies.get(QosHistory.class);
 			if (h != null) {
-				if (rl.getMaxSamplesPerInstance() < h.getDepth()) {
+				if (rl.getMaxSamplesPerInstance() != -1 && rl.getMaxSamplesPerInstance() < h.getDepth()) {
 					throw new InconsistentPolicy("HISTORY.depth must be <= RESOURCE_LIMITS.max_samples_per_instance");
 				}				
 			}

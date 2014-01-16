@@ -1,7 +1,5 @@
 package net.sf.jrtps.message.parameter;
 
-import java.util.Arrays;
-
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class VendorSpecificParameter extends Parameter {
@@ -25,9 +23,5 @@ public class VendorSpecificParameter extends Parameter {
 	@Override
 	public void writeTo(RTPSByteBuffer bb) {
 		writeBytes(bb); // TODO: default writing. just writes byte[] in super class
-	}
-
-	public String toString() {
-		return super.toString() + ": " + getVendorParameterId() + " (" + Arrays.toString(getBytes()) + ")";
 	}
 }
