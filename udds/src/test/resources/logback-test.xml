@@ -10,7 +10,7 @@
 	<root level="warn">
 		<appender-ref ref="console" />
 	</root>
-	<logger name="net.sf.jrtps" level="warn" />
+	<logger name="net.sf.jrtps" level="debug" />
 	<logger name="net.sf.jrtps.message" level="debug" />
 	<logger name="net.sf.jrtps.message.parameter" level="info" />
 </configuration>
