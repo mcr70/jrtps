@@ -27,12 +27,12 @@ import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.ParticipantMessageMarshaller;
+import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.PublicationDataMarshaller;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
-import net.sf.jrtps.builtin.PublicationData;
-import net.sf.jrtps.builtin.PublicationDataMarshaller;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
@@ -601,6 +601,7 @@ public class Participant {
 			try {
 				return !threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
 			} catch (InterruptedException e) {
+				//logger.debug("waitFor was interrputed", e);
 				// Ignore. We are shutting down.
 			}
 		}
