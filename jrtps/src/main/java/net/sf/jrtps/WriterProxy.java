@@ -1,10 +1,10 @@
 package net.sf.jrtps;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.types.Guid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -61,7 +61,7 @@ public class WriterProxy {
 		// HeartBeat & AckNack messages
 
 		if (sequenceNumber > seqNumMax) { 
-			if (sequenceNumber > seqNumMax + 1) {
+			if (sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
 				log.warn("Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}", sequenceNumber, seqNumMax);
 			}
 
