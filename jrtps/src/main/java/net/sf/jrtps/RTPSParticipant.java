@@ -252,6 +252,10 @@ public class RTPSParticipant {
 			return getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		}
 
+		if (writerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER)) {
+			return getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
+		}
+
 		log.warn("Failed to find RTPSReader for reader entity {} or matching writer entity {}", readerId, writerId);
 		return null;
 	}
@@ -293,6 +297,10 @@ public class RTPSParticipant {
 
 		if (readerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_READER)) {
 			return getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
+		}
+
+		if (readerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER)) {
+			return getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
 		}
 
 		log.warn("Failed to find Writer for writer {} or matching reader {}",  writerId, readerId);
