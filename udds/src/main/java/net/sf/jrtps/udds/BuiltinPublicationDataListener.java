@@ -42,14 +42,14 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 					else {
 						QualityOfService offered = writerData.getQualityOfService();
 						QualityOfService requested = r.getRTPSReader().getQualityOfService();
-						log.debug("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
+						log.trace("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
 						
 						if (offered.isCompatibleWith(requested)) {
 							r.getRTPSReader().addMatchedWriter(writerData);
 							fireWriterMatched(r, writerData);
 						}
 						else {
-							log.warn("Discovered writer had incompatible QoS with reader. {}, {}", writerData, r);
+							log.warn("Discovered writer had incompatible QoS with reader. {}, {}", writerData, r.getRTPSReader().getQualityOfService());
 							fireInconsistentQoS(r, writerData);
 						}
 					}

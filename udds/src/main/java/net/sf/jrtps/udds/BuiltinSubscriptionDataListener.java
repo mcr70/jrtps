@@ -37,10 +37,10 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 	public void onSamples(List<Sample<SubscriptionData>> samples) {
 		for (Sample<SubscriptionData> rdSample : samples) {
 			SubscriptionData readerData = rdSample.getData();
-			//discoveredReaders.put(readerData.getParticipantGuid(), readerData);
+
 			Guid key = readerData.getKey();
 			if (discoveredReaders.put(key, readerData) == null) {
-				log.debug("Discovered a new reader {} for topic {}, type {}", key, readerData.getTopicName(), readerData.getTypeName());
+				log.debug("Discovered a new subscription {} for topic {}, type {}", key, readerData.getTopicName(), readerData.getTypeName());
 				fireReaderDetected(readerData);
 			}
 
@@ -52,14 +52,14 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 				else {
 					QualityOfService requested = readerData.getQualityOfService();
 					QualityOfService offered = w.getRTPSWriter().getQualityOfService();
-					log.debug("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), readerData.getKey().getEntityId());
+					log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), readerData.getKey().getEntityId());
 
 					if (offered.isCompatibleWith(requested)) {
 						w.getRTPSWriter().addMatchedReader(readerData);
 						fireReaderMatched(w, readerData);
 					}
 					else {
-						log.warn("Discovered reader had incompatible QoS with writer. {}, {}", readerData, w);
+						log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", readerData, w.getRTPSWriter().getQualityOfService());
 						fireInconsistentQoS(w, readerData);
 					}					
 				}

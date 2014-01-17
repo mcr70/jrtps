@@ -200,7 +200,7 @@ public class QualityOfService {
 			QosPolicy qpOther = other.getPolicy(qp.getClass());
 			if (!qp.isCompatible(qpOther)) {
 				compatible = false;
-				log.debug("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
+				log.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
 				// Don't break from the loop. Report every incompatible QoS policy.
 			}
 		}

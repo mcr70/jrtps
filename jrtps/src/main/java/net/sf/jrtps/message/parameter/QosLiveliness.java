@@ -112,7 +112,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 	}
 
 	public static QosLiveliness defaultLiveliness() {
-		return new QosLiveliness(Kind.AUTOMATIC, new Duration(10, 0)); // TODO: check defaults
+		return new QosLiveliness(Kind.AUTOMATIC, new Duration(0, 0)); // TODO: check defaults
 	}
 
 	public String toString() {	
