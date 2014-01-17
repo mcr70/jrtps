@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
@@ -166,7 +167,7 @@ public class RTPSReader<T> extends Endpoint {
 			}
 		}
 		else {
-			log.warn("[{}] Discarding Data from unknown writer {}", getGuid().getEntityId(), data.getWriterId());
+			log.warn("[{}] Discarding Data from unknown writer {}, {}", getGuid().getEntityId(), sourcePrefix, data.getWriterId());
 		}
 	}
 
@@ -208,13 +209,20 @@ public class RTPSReader<T> extends Endpoint {
 			}
 		}
 		else {
-			log.warn("[{}] Discarding Heartbeat from unknown writer {}", getGuid().getEntityId(), hb.getWriterId());
+			log.warn("[{}] Discarding Heartbeat from unknown writer {}, {}", getGuid().getEntityId(), senderGuidPrefix, hb.getWriterId());
 		}
 	}
 
 	private void sendAckNack(WriterProxy wp) {
 		Message m = new Message(getGuid().getPrefix());
 		AckNack an = createAckNack(wp);
+
+		if (an.getReaderSNState().getBitmapBase() > wp.getSeqNumMax()) {
+			// We already have all the samples. Set the finalFlag to indicate that
+			// no response is needed
+			an.finalFlag(true);
+		}
+		
 		m.addSubMessage(an);
 
 		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
@@ -248,9 +256,19 @@ public class RTPSReader<T> extends Endpoint {
 				// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
 				//       Remote entities are assumed alive even though corresponding discovery data has not been
 				//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
-				log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-				wp = new WriterProxy(writerGuid);
-				writerProxies.put(writerGuid, wp); 
+
+				//if (EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
+				
+					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
+					PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+							writerGuid, new SPDPQualityOfService());
+					wp = new WriterProxy(pd);
+					writerProxies.put(writerGuid, wp);
+					
+//					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
+//					wp = new WriterProxy(writerGuid);
+//					writerProxies.put(writerGuid, wp); 
+				//}
 			}
 		}
 
