@@ -58,7 +58,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param listener SampleListener to add.
 	 */
 	public void addListener(SampleListener<T> listener) {
-		log.debug("[{}] Adding SampleListener {} for topic {}", getGuid().getEntityId(), listener, getTopicName());
+		log.trace("[{}] Adding SampleListener {} for topic {}", getGuid().getEntityId(), listener, getTopicName());
 		sampleListeners.add(listener);
 	}
 
@@ -68,7 +68,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param listener SampleListener to remove
 	 */
 	public void removeListener(SampleListener<T> listener) {
-		log.debug("[{}] Removing SampleListener {} from topic {}", getGuid().getEntityId(), listener, getTopicName());
+		log.trace("[{}] Removing SampleListener {} from topic {}", getGuid().getEntityId(), listener, getTopicName());
 		sampleListeners.remove(listener);
 	}
 
@@ -95,7 +95,7 @@ public class RTPSReader<T> extends Endpoint {
 		WriterProxy wp = new WriterProxy(writerData);
 		writerProxies.put(writerData.getKey(), wp);
 
-		log.info("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
+		log.trace("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
 		
 		return wp;
 	}
@@ -107,7 +107,7 @@ public class RTPSReader<T> extends Endpoint {
 	public void removeMatchedWriter(PublicationData writerData) {
 		writerProxies.remove(writerData.getKey());
 
-		log.info("[{}] Removed matchedWriter {}", getGuid().getEntityId(), writerData);
+		log.trace("[{}] Removed matchedWriter {}", getGuid().getEntityId(), writerData);
 	}
 
 	/**
@@ -161,7 +161,7 @@ public class RTPSReader<T> extends Endpoint {
 				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
 			}
 			else {
-				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
+				log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
 						data.getWriterSequenceNumber(), wp.getSeqNumMax());
 			}
 		}
@@ -177,9 +177,9 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param hb
 	 */
 	void onHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {
-		log.debug("[{}] Got Heartbeat: {}-{}, F:{}, L:{}", getGuid().getEntityId(), 
-				hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
-				hb.finalFlag(), hb.livelinessFlag());
+		log.debug("[{}] Got Heartbeat: #{} {}-{}, F:{}, L:{} from {}", getGuid().getEntityId(), 
+				hb.getCount(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
+				hb.finalFlag(), hb.livelinessFlag(), senderGuidPrefix);
 
 		WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
 		if (wp != null) {
@@ -217,11 +217,15 @@ public class RTPSReader<T> extends Endpoint {
 		AckNack an = createAckNack(wp);
 		m.addSubMessage(an);
 
-		log.debug("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
+		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
 		getParticipant().waitFor(heartbeatResponseDelay);
 
-		log.debug("[{}] Sending AckNack: {}", getGuid().getEntityId(), an.getReaderSNState());
-		sendMessage(m, wp.getGuid().getPrefix());		
+		GuidPrefix targetPrefix = wp.getGuid().getPrefix(); 
+		
+		log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getGuid().getEntityId(), 
+				an.getCount(), an.getReaderSNState(), an.finalFlag(), targetPrefix);
+		
+		sendMessage(m, targetPrefix);		
 	}
 
 	private AckNack createAckNack(WriterProxy wp) {
@@ -268,7 +272,7 @@ public class RTPSReader<T> extends Endpoint {
 		ll.addAll(pendingSamples);
 		pendingSamples.clear();
 
-		log.debug("[{}] Got {} samples", getGuid().getEntityId(), ll.size());
+		log.trace("[{}] Got {} samples", getGuid().getEntityId(), ll.size());
 
 		if (ll.size() > 0) {
 			for (SampleListener<T> sl: sampleListeners) {

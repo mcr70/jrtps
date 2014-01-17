@@ -126,7 +126,7 @@ public class Endpoint {
 			log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
 		}
 		catch(BufferOverflowException boe) {
-			log.warn("Got unexpected BufferOverflowException, buffer size is {}. It should be increased.", configuration.getBufferSize());
+			log.warn("Got BufferOverflowException, buffer size is {}. Consider increasing it.", configuration.getBufferSize());
 		}
 
 		return overFlowed;
