@@ -77,7 +77,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	public void notifyReaders() {		
 		if (readerProxies.size() > 0) {
-			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().getEntityId(), readerProxies.size());
+			log.trace("[{}] Notifying {} matched readers of changes in history cache", getGuid().getEntityId(), readerProxies.size());
 
 			for (ReaderProxy proxy : readerProxies.values()) {
 				Guid guid = proxy.getSubscriptionData().getKey();
@@ -143,7 +143,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 		if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
 			// VOLATILE readers are marked having received all the samples so far
-			log.debug("[{}] Setting highest seqNum to {} for VOLATILE reader", getGuid().getEntityId(), 
+			log.trace("[{}] Setting highest seqNum to {} for VOLATILE reader", getGuid().getEntityId(), 
 					writer_cache.getSeqNumMax());
 
 			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
@@ -161,7 +161,7 @@ public class RTPSWriter<T> extends Endpoint {
 			}
 		}
 		
-		log.info("[{}] Added matchedReader {}", getGuid().getEntityId(), readerData);
+		log.trace("[{}] Added matchedReader {}", getGuid().getEntityId(), readerData);
 		return proxy;
 	}
 
@@ -171,7 +171,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	public void removeMatchedReader(SubscriptionData readerData) {
 		readerProxies.remove(readerData);
-		log.info("[{}] Removed matchedReader {}", getGuid().getEntityId(), readerData);
+		log.trace("[{}] Removed matchedReader {}", getGuid().getEntityId(), readerData);
 	}
 
 	/**
@@ -205,7 +205,8 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param ackNack
 	 */
 	void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
-		log.debug("[{}] Got AckNack: {}, F:{}", getGuid().getEntityId(), ackNack.getReaderSNState(), ackNack.finalFlag());
+		log.debug("[{}] Got AckNack: #{} {}, F:{} from {}", getGuid().getEntityId(), 
+				ackNack.getCount(), ackNack.getReaderSNState(), ackNack.finalFlag(), senderPrefix);
 
 		ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
@@ -213,7 +214,7 @@ public class RTPSWriter<T> extends Endpoint {
 
 			// TODO: check finalFlag
 			
-			log.debug("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
+			log.trace("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
 			getParticipant().waitFor(nackResponseDelay);
 
 			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
@@ -237,7 +238,7 @@ public class RTPSWriter<T> extends Endpoint {
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
 		if (changes.size() == 0) {
-			log.debug("[{}] sendData() called, but no changes since {}. returning.", getGuid().getEntityId(), readersHighestSeqNum);
+			log.trace("[{}] sendData() called, but no changes since {}. returning.", getGuid().getEntityId(), readersHighestSeqNum);
 			return;
 		}
 
@@ -271,9 +272,11 @@ public class RTPSWriter<T> extends Endpoint {
 			}
 		}
 
-		log.debug("[{}] Sending Data: {}-{}", getGuid().getEntityId(), firstSeqNum, lastSeqNum);
+		log.debug("[{}] Sending Data: {}-{} to {}", getGuid().getEntityId(), firstSeqNum, lastSeqNum, targetPrefix);
+		
 		boolean overFlowed = sendMessage(m, targetPrefix); 
 		if (overFlowed) {
+			log.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
 			sendHeartbeat(targetPrefix, readerId);
 		}
 	}
@@ -288,7 +291,10 @@ public class RTPSWriter<T> extends Endpoint {
 		hb.livelinessFlag(livelinessFlag);
 		m.addSubMessage(hb);
 
-		log.debug("[{}] Sending Heartbeat: {}-{}", getGuid().getEntityId(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber());
+		log.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getGuid().getEntityId(), 
+				hb.getCount(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
+				hb.finalFlag(), hb.livelinessFlag(), targetPrefix);
+		
 		sendMessage(m, targetPrefix);
 
 		if (!livelinessFlag) {
