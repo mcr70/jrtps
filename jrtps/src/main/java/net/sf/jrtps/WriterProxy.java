@@ -26,9 +26,9 @@ public class WriterProxy {
 		writerGuid = wd.getKey();
 	}
 	
-	WriterProxy(Guid writerGuid) {
-		this.writerGuid = writerGuid; // TODO: this constructor should be removed
-	}
+//	WriterProxy(Guid writerGuid) {
+//		this.writerGuid = writerGuid; // TODO: this constructor should be removed
+//	}
 	
 	/**
 	 * Gets the guid of the writer represented by this WriterProxy.

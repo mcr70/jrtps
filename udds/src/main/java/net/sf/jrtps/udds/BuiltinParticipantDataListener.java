@@ -51,6 +51,11 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 					log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
 					discoveredParticipants.put(pd.getGuidPrefix(), pd);
 					
+//					PublicationData spdp_pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+//							new Guid(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER), new SPDPQualityOfService());
+//					DataReader<?> spdp_r = participant.getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+//					spdp_r.getRTPSReader().addMatchedWriter(spdp_pd);
+					
 					fireParticipantDetected(pd);
 					
 					// First, make sure remote participant knows about us.

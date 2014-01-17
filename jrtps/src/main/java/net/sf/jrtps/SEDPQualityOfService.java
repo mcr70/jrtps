@@ -23,11 +23,11 @@ public class SEDPQualityOfService extends QualityOfService {
 		super(); // Creates defaults
 		
 		try {
-			setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
+			setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT)); // TODO: OSPL uses TRANSIENT, while TRANSIENT_LOCAL would be correct
 			setPolicy(new QosPresentation(QosPresentation.Kind.TOPIC, false, false));
 			setPolicy(new QosDeadline(Duration.INFINITE));
 			setPolicy(new QosOwnership(QosOwnership.Kind.SHARED));
-			setPolicy(new QosLiveliness(QosLiveliness.Kind.AUTOMATIC, new Duration(10,0)));
+			setPolicy(new QosLiveliness(QosLiveliness.Kind.AUTOMATIC, new Duration(0,0)));
 			setPolicy(new QosTimeBasedFilter(new Duration(0)));
 			setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(100)));
 			setPolicy(new QosDestinationOrder(QosDestinationOrder.Kind.BY_RECEPTION_TIMESTAMP));
