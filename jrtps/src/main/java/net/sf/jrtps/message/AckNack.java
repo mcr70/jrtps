@@ -47,6 +47,19 @@ public class AckNack extends SubMessage {
 	}
 	
 	/**
+	 * Sets the finalFlag.
+	 * @param value
+	 */
+	public void finalFlag(boolean value) {		
+		if (value) {
+			header.flags |= 0x2;
+		}
+		else {
+			header.flags &= ~0x2;
+		}
+	}
+	
+	/**
 	 * Identifies the Reader entity that acknowledges receipt of certain
 	 * sequence numbers and/or requests to receive certain sequence numbers.
 	 */
