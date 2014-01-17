@@ -1,7 +1,6 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
-import java.nio.BufferOverflowException;
 import java.util.Map;
 
 import net.sf.jrtps.builtin.ParticipantData;
@@ -88,9 +87,7 @@ public class Endpoint {
 			}
 		}
 
-		log.warn("[{}] Unknown participant {}. Returning default metatraffic multicast locator for domain {}", getGuid().getEntityId(), prefix, participant.getDomainId());
-
-		return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());
+		return null;
 	}
 
 
@@ -115,20 +112,23 @@ public class Endpoint {
 	 * @return true, if an overflow occured during send.
 	 */
 	protected boolean sendMessage(Message m, GuidPrefix targetPrefix) {
+		boolean overFlowed = false;
 		Locator locator = getParticipantLocators(targetPrefix);
-		boolean overFlowed = true;
-		try {
-			UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO: No need to create and close all the time
-			overFlowed = w.sendMessage(m);
-			w.close();					
-		} 
-		catch(IOException e) {
-			log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+		
+		if (locator != null) {
+			try {
+				UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO: No need to create and close all the time
+				overFlowed = w.sendMessage(m);
+				w.close();
+			} 
+			catch(IOException e) {
+				log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+			}
 		}
-		catch(BufferOverflowException boe) {
-			log.warn("Got BufferOverflowException, buffer size is {}. Consider increasing it.", configuration.getBufferSize());
+		else {
+			log.debug("[{}] Unknown participant {}, will not send message", getGuid().getEntityId(), targetPrefix);
 		}
-
+		
 		return overFlowed;
 	}
 

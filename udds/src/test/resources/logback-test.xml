@@ -15,4 +15,5 @@
 	<logger name="net.sf.jrtps.RTPSReader" level="debug" />
 	<logger name="net.sf.jrtps.message" level="debug" />
 	<logger name="net.sf.jrtps.message.parameter" level="info" />
+	<logger name="net.sf.jrtps.udds" level="debug" />
 </configuration>

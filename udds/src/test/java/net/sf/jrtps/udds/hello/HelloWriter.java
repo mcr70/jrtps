@@ -12,7 +12,7 @@ public class HelloWriter {
 		
 		DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
 		
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 10; i++) {
 			HelloMessage m = new HelloMessage(i, "Hello");
 			dw.write(m);
 			Thread.sleep(1000);

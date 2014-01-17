@@ -43,8 +43,6 @@ public class UDPWriter {
 			log.error("Failed to send message to " + locator, e);
 		}
 		
-		//	writeToFile(buffer.getBuffer().rewind(), fileName);
-		
 		return overFlowed;
 	}
 	

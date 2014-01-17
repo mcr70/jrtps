@@ -109,7 +109,7 @@ class WriterLivelinessManager implements Runnable {
 
 			long sleepTime = 0; 
 			if (nextLeaseWaitTime != null) { // We have at least one writer to assert liveliness for
-				log.debug("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
+				log.trace("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
 				writer.write(automaticSample);
 				sleepTime = nextLeaseWaitTime.asMillis();
 			}
