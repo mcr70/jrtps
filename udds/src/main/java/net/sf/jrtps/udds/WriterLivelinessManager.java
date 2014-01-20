@@ -35,7 +35,7 @@ class WriterLivelinessManager implements Runnable {
 	private final ParticipantMessage automaticSample;
 
 
-	public WriterLivelinessManager(Participant participant) {
+	WriterLivelinessManager(Participant participant) {
 		this.participant = participant;
 
 		// Create samples used with liveliness protocol
@@ -107,6 +107,8 @@ class WriterLivelinessManager implements Runnable {
 				}					
 			}
 
+			//log.debug("Next lease wait time is {}", nextLeaseWaitTime);
+			
 			long sleepTime = 0; 
 			if (nextLeaseWaitTime != null) { // We have at least one writer to assert liveliness for
 				log.trace("Asserting liveliness of RTPSWriters with QosLiveliness kind AUTOMATIC");
@@ -114,7 +116,7 @@ class WriterLivelinessManager implements Runnable {
 				sleepTime = nextLeaseWaitTime.asMillis();
 			}
 			if (sleepTime <= 0) {
-				sleepTime = 1000; // TODO: hardcoded. default sleep time if no writers present
+				sleepTime = 10000; // TODO: hardcoded.
  			}
 			
 			running = participant.waitFor(sleepTime);

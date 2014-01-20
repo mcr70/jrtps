@@ -83,4 +83,8 @@ public class WriterProxy {
 	public void assertLiveliness() {
 		livelinessTimestamp = System.currentTimeMillis();
 	}
+
+	public String toString() {
+		return getGuid().toString();
+	}
 }
