@@ -11,6 +11,7 @@ import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
+import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.QosReliability;
@@ -321,5 +322,19 @@ public class RTPSReader<T> extends Endpoint {
 	private boolean isReliable() {
 		QosReliability reliability = (QosReliability) getQualityOfService().getPolicy(QosReliability.class);
 		return reliability.getKind() == QosReliability.Kind.RELIABLE;
+	}
+
+	/**
+	 * Handles Gap submessage by updating WriterProxy.
+	 * @param sourceGuidPrefix
+	 * @param gap
+	 */
+	void handleGap(GuidPrefix sourcePrefix, Gap gap) {
+		Guid writerGuid = new Guid(sourcePrefix, gap.getWriterId()); 
+
+		WriterProxy wp = getWriterProxy(writerGuid);
+		if (wp != null) {
+			wp.applyGap(gap);
+		}
 	}
 }

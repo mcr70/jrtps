@@ -1,7 +1,9 @@
 package net.sf.jrtps;
 
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.SequenceNumberSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +62,9 @@ public class WriterProxy {
 		// Data must come in order. If not, drop it. Manage out-of-order data with 
 		// HeartBeat & AckNack messages
 
-		if (sequenceNumber > seqNumMax) { 
+		// TODO: SPDP writer keeps its Data seq-num always at 1. We need >= comparison here for that purpose.
+		//       So that participant lease expiration gets handled.
+		if (sequenceNumber >= seqNumMax) { 
 			if (sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
 				log.warn("Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}", sequenceNumber, seqNumMax);
 			}
@@ -73,6 +77,8 @@ public class WriterProxy {
 		return false;
 	}
 
+	
+	
 	boolean acceptHeartbeat(long sequenceNumber) {
 		return seqNumMax < sequenceNumber;
 	}
@@ -86,5 +92,14 @@ public class WriterProxy {
 
 	public String toString() {
 		return getGuid().toString();
+	}
+
+	void applyGap(Gap gap) {
+		log.debug("Applying GAP {}", gap);
+		SequenceNumberSet gapList = gap.getGapList();
+		long bitmapBase = gapList.getBitmapBase();
+		if (bitmapBase - 1 > seqNumMax) {
+			seqNumMax = bitmapBase - 1;
+		}
 	}
 }

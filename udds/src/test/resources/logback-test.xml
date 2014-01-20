@@ -10,6 +10,7 @@
 	<root level="debug">
 		<appender-ref ref="console" />
 	</root>
+	
 	<!-- 
 	<logger name="net.sf.jrtps" level="info" />
 	<logger name="net.sf.jrtps.RTPSWriter" level="debug" />
