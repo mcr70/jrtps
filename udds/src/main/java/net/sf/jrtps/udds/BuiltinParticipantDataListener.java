@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -71,7 +72,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 				}
 			}
 			else {
-				log.debug("Renewed lease for {}, new expiration time is {}", pd.getGuidPrefix(), pd.getLeaseExpirationTime());
+				log.debug("Renewed lease for {}, new expiration time is {}", pd.getGuidPrefix(), new Date(pd.getLeaseExpirationTime()));
 				d.renewLease(); // TODO: Should we always store the new ParticipantData to discoveredParticipants.
 			}
 		}
