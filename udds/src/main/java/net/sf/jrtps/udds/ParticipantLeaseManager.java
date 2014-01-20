@@ -21,6 +21,7 @@ class ParticipantLeaseManager implements Runnable {
 	private final Participant participant;
 	private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
+
 	ParticipantLeaseManager(Participant participant, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.participant = participant;
 		this.discoveredParticipants = discoveredParticipants;
@@ -44,14 +45,11 @@ class ParticipantLeaseManager implements Runnable {
 			}
 			
 			for (GuidPrefix prefix: expiryList) {
-				// TODO: implement participants lease expiration
-				log.warn("Lease expiration has not been implemented");
-				participant.fireParticipantLeaseExpired(prefix);
-				discoveredParticipants.remove(prefix);
-			}
-			
+				participant.handleParticipantLeaseExpiration(prefix);
+			}			
 			
 			long sleepTime = getNextSleepTime();
+			//log.debug("Next sleep time is " + sleepTime);
 			running = participant.waitFor(sleepTime);
 		}
 		

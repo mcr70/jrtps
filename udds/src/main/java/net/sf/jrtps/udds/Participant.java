@@ -643,13 +643,46 @@ public class Participant {
 		return null;
 	}
 
-	void fireParticipantLeaseExpired(GuidPrefix prefix) {
+	/**
+	 * Handle lease expiration of given participant. This method removes matched readers and writers belonging to 
+	 * given participant.
+	 * @param prefix
+	 */
+	void handleParticipantLeaseExpiration(GuidPrefix prefix) {
 		ParticipantData pd = discoveredParticipants.get(prefix);
-		logger.debug("Notifying participant lost status for {} listeners, {}", entityListeners.size(), pd);
+
 		if (pd != null) {
+			// Remove participant
+			discoveredParticipants.remove(prefix);
+			// NOTE: Alternative would be to mark matched writers/readers as 'not alive'
+			//       This would help in the case where participant gets back online
+
+			// Remove matched writers
+			for (DataReader<?> dr : readers) {
+				dr.getRTPSReader().removeMatchedWriters(prefix);
+			}
+
+			// Remove matched readers
+			for (DataWriter<?> dw : writers) {
+				dw.getRTPSWriter().removeMatchedReaders(prefix);
+			}
+			
+			logger.debug("Notifying participant lost status for {} listeners, {}", entityListeners.size(), pd);
 			for (EntityListener el : entityListeners) {
 				el.participantLost(pd);
 			}
 		}
+	}
+	
+	
+	List<SubscriptionData> getDiscoveredReaders(GuidPrefix prefix) {
+		List<SubscriptionData> __readers = new LinkedList<>();
+		for (SubscriptionData sd : discoveredReaders.values()) {
+			if (prefix.equals(sd.getKey().getPrefix())) {
+				__readers.add(sd);
+			}
+		}
+		
+		return __readers;
 	}
 }
