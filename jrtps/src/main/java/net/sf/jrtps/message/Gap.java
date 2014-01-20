@@ -2,8 +2,8 @@ package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.EntityId;
-import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.types.SequenceNumber;
+import net.sf.jrtps.types.SequenceNumberSet;
 
 /**
  * This Submessage is sent from an RTPS Writer to an RTPS Reader and indicates to the RTPS Reader 
@@ -75,5 +75,9 @@ public class Gap extends SubMessage {
 		writerId.writeTo(buffer);
 		gapStart.writeTo(buffer);
 		gapList.writeTo(buffer);
+	}
+	
+	public String toString() {
+		return gapStart + ", " + gapList; 
 	}
 }

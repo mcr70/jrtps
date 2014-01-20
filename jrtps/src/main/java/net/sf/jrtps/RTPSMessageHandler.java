@@ -8,6 +8,7 @@ import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
+import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoDestination;
 import net.sf.jrtps.message.InfoReply;
@@ -24,7 +25,6 @@ import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
 
 /**
  * RTPSMessageHandler is a consumer to BlockingQueue.
@@ -131,15 +131,21 @@ class RTPSMessageHandler implements Runnable {
 				}
 				log.warn("InfoReplyIp4 not handled");
 				break;
+			case GAP:
+				handleGap(sourceGuidPrefix, (Gap)subMsg);
+				break;
 			default: 
 				log.warn("SubMessage not handled: {}", subMsg);
 			}
 		}
 		
+		log.trace("Releasing samples for {} readers", dataReceivers.size());
 		for (RTPSReader<?> reader : dataReceivers) {
 			reader.releasePendingSamples();
 		}
 	}
+
+
 
 	private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
 		RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
@@ -150,6 +156,11 @@ class RTPSMessageHandler implements Runnable {
 		else {
 			log.debug("No Writer({}) to handle AckNack from {}", ackNack.getWriterId(), ackNack.getReaderId());
 		}
+	}
+
+	private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
+		RTPSReader<?> reader = participant.getReader(gap.getReaderId(), gap.getWriterId());
+		reader.handleGap(sourceGuidPrefix, gap);
 	}
 
 	private RTPSReader<?> handleData(GuidPrefix sourcePrefix, Time timestamp, Data data) throws IOException {

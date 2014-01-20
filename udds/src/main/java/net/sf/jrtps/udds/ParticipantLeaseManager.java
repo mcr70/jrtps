@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -38,8 +40,13 @@ class ParticipantLeaseManager implements Runnable {
 			List<GuidPrefix> expiryList = new LinkedList<>();
 			for (ParticipantData pd : discoveredParticipants.values()) {
 				if (pd.isLeaseExpired()) {
+					Date current = new Date();
+					Date expiration = new Date(pd.getLeaseExpirationTime());
+					
+					SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
+					
 					log.debug("Lease has expired for {}, currentTime is {}, expirationTime is {}", 
-							pd.getGuidPrefix(), System.currentTimeMillis(), pd.getLeaseExpirationTime());
+							pd.getGuidPrefix(), sdf.format(current), sdf.format(expiration));
 					expiryList.add(pd.getGuidPrefix());
 				}
 			}
