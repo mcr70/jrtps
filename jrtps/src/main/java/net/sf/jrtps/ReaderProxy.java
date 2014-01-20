@@ -86,4 +86,8 @@ public class ReaderProxy {
 		this.heartbeatSentTime = 0;
 		active = true;
 	}
+
+	public String toString() {
+		return getGuid().toString();
+	}
 }
