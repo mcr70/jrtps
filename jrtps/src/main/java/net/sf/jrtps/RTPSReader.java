@@ -2,9 +2,10 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
@@ -36,7 +37,7 @@ import org.slf4j.LoggerFactory;
 public class RTPSReader<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
-	private final HashMap<Guid, WriterProxy> writerProxies = new HashMap<>();
+	private final Map<Guid, WriterProxy> writerProxies = new ConcurrentHashMap<>();
 	private final List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
 	private final Marshaller<?> marshaller;
 	private final List<Sample<T>> pendingSamples = new LinkedList<>();
@@ -94,11 +95,23 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	public WriterProxy addMatchedWriter(PublicationData writerData) {
 		WriterProxy wp = new WriterProxy(writerData);
-		writerProxies.put(writerData.getKey(), wp);
+		writerProxies.put(writerData.getKey(), wp);	
 
 		log.trace("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
-		
+
 		return wp;
+	}
+
+	/**
+	 * Removes all the matched writers that have a given GuidPrefix
+	 * @param prefix
+	 */
+	public void removeMatchedWriters(GuidPrefix prefix) {
+		for (WriterProxy wp : writerProxies.values()) {
+			if (prefix.equals(wp.getGuid().getPrefix())) {
+				removeMatchedWriter(wp.getPublicationData());
+			}
+		}
 	}
 
 	/**
@@ -106,9 +119,9 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param writerData writer to remove. If corresponding writer does not exists, this method silently returns
 	 */
 	public void removeMatchedWriter(PublicationData writerData) {
-		writerProxies.remove(writerData.getKey());
+		writerProxies.remove(writerData.getKey());	
 
-		log.trace("[{}] Removed matchedWriter {}", getGuid().getEntityId(), writerData);
+		log.debug("[{}] Removed matchedWriter {}", getGuid().getEntityId(), writerData.getKey());
 	}
 
 	/**
@@ -118,7 +131,7 @@ public class RTPSReader<T> extends Endpoint {
 	public Collection<WriterProxy> getMatchedWriters() {
 		return writerProxies.values();
 	}
-	
+
 	/**
 	 * Gets the matched writers owned by given remote participant.
 	 * 
@@ -127,15 +140,17 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	public Collection<WriterProxy> getMatchedWriters(GuidPrefix prefix) {
 		List<WriterProxy> proxies = new LinkedList<>();
+
 		for (Guid guid : writerProxies.keySet()) {
 			if (guid.getPrefix().equals(prefix)) {
 				proxies.add(writerProxies.get(guid));
 			}
 		}
+
 		return proxies;
 	}
-	
-	
+
+
 	/**
 	 * Handle incoming Data message. Data is unmarshalled and added to pending samples.
 	 * Once RTPSMessageHandler has finished with the whole RTPSMessage, it will call 
@@ -222,17 +237,17 @@ public class RTPSReader<T> extends Endpoint {
 			// no response is needed
 			an.finalFlag(true);
 		}
-		
+
 		m.addSubMessage(an);
 
 		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
 		getParticipant().waitFor(heartbeatResponseDelay);
 
 		GuidPrefix targetPrefix = wp.getGuid().getPrefix(); 
-		
+
 		log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getGuid().getEntityId(), 
 				an.getCount(), an.getReaderSNState(), an.finalFlag(), targetPrefix);
-		
+
 		sendMessage(m, targetPrefix);		
 	}
 
@@ -250,7 +265,10 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private WriterProxy getWriterProxy(Guid writerGuid) {
-		WriterProxy wp = writerProxies.get(writerGuid);
+		WriterProxy wp = null;
+
+		wp = writerProxies.get(writerGuid);	
+
 		if (wp == null) {
 			if (writerGuid.getEntityId().isBuiltinEntity()) {
 				// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
@@ -258,16 +276,17 @@ public class RTPSReader<T> extends Endpoint {
 				//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
 
 				//if (EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
-				
-					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-					PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-							writerGuid, new SPDPQualityOfService());
-					wp = new WriterProxy(pd);
-					writerProxies.put(writerGuid, wp);
-					
-//					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-//					wp = new WriterProxy(writerGuid);
-//					writerProxies.put(writerGuid, wp); 
+
+				log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
+				PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+						writerGuid, new SPDPQualityOfService());
+				wp = new WriterProxy(pd);
+
+				writerProxies.put(writerGuid, wp);	
+
+				//					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
+				//					wp = new WriterProxy(writerGuid);
+				//					writerProxies.put(writerGuid, wp); 
 				//}
 			}
 		}

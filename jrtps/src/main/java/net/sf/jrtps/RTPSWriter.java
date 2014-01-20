@@ -2,10 +2,11 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
 public class RTPSWriter<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 
-	private HashMap<Guid, ReaderProxy> readerProxies = new HashMap<>();
+	private Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
 	private final WriterCache writer_cache;
 	private final int nackResponseDelay;
@@ -166,12 +167,24 @@ public class RTPSWriter<T> extends Endpoint {
 	}
 
 	/**
+	 * Removes all the matched writers that have a given GuidPrefix
+	 * @param prefix
+	 */
+	public void removeMatchedReaders(GuidPrefix prefix) {
+		for (ReaderProxy rp : readerProxies.values()) {
+			if (prefix.equals(rp.getGuid().getPrefix())) {
+				removeMatchedReader(rp.getSubscriptionData());
+			}
+		}
+	}
+
+	/**
 	 * Remove a matched reader.
 	 * @param readerData
 	 */
 	public void removeMatchedReader(SubscriptionData readerData) {
-		readerProxies.remove(readerData);
-		log.trace("[{}] Removed matchedReader {}", getGuid().getEntityId(), readerData);
+		readerProxies.remove(readerData.getKey());
+		log.debug("[{}] Removed matchedReader {}, {}", getGuid().getEntityId(), readerData.getKey());
 	}
 
 	/**
@@ -295,11 +308,16 @@ public class RTPSWriter<T> extends Endpoint {
 				hb.getCount(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
 				hb.finalFlag(), hb.livelinessFlag(), targetPrefix);
 		
+//		Exception e = new Exception();
+//		e.printStackTrace();
+		
 		sendMessage(m, targetPrefix);
 
 		if (!livelinessFlag) {
 			ReaderProxy proxy = readerProxies.get(new Guid(targetPrefix, readerId));
-			proxy.heartbeatSent();
+			if (proxy != null) {
+				proxy.heartbeatSent();
+			}
 		}		
 	}
 
