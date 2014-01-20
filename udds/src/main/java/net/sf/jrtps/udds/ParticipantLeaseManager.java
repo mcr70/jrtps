@@ -76,7 +76,9 @@ class ParticipantLeaseManager implements Runnable {
 		}
 
 		long nextSleeptime = smallest_expireTime - System.currentTimeMillis();
-
+		nextSleeptime = nextSleeptime + 1000; // Grace period. Check lease one sec after expiration
+		
+		
 		if (nextSleeptime <= 0) {
 			nextSleeptime = 1000; // TODO: configurable?
 		}
