@@ -100,9 +100,9 @@ public class RTPSWriter<T> extends Endpoint {
 			if (proxy != null) { // Might be null, if destination is GuidPrefix.UNKNOWN (SPDP)
 				readersHighestSeqNum = proxy.getReadersHighestSeqNum();
 			}
-			
+
 			sendData(guid.getPrefix(), guid.getEntityId(), readersHighestSeqNum);
-			
+
 			if (proxy != null) {
 				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 			}
@@ -161,7 +161,7 @@ public class RTPSWriter<T> extends Endpoint {
 				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 			}
 		}
-		
+
 		log.trace("[{}] Added matchedReader {}", getGuid().getEntityId(), readerData);
 		return proxy;
 	}
@@ -210,7 +210,7 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 		return proxies;	
 	}
-	
+
 	/**
 	 * Handle incoming AckNack message.
 	 * 
@@ -223,15 +223,16 @@ public class RTPSWriter<T> extends Endpoint {
 
 		ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
-			proxy.ackNackReceived(); // Marks reader as being alive
+			if(proxy.ackNackReceived(ackNack)) {
+				log.trace("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
+				getParticipant().waitFor(nackResponseDelay);
 
-			// TODO: check finalFlag
-			
-			log.trace("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
-			getParticipant().waitFor(nackResponseDelay);
-
-			sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
-		} // Note: proxy could be null
+				sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
+			}
+			else {
+				log.debug("[{}] Ignoring AckNack whose count is {}, since proxys count is {}", getGuid().getEntityId(), ackNack.getCount(), proxy.getLatestAckNackCount());
+			}
+		} 
 		else {
 			log.warn("[{}] Discarding AckNack from unknown reader {}", getGuid().getEntityId(), ackNack.getReaderId());
 		}
@@ -286,7 +287,7 @@ public class RTPSWriter<T> extends Endpoint {
 		}
 
 		log.debug("[{}] Sending Data: {}-{} to {}", getGuid().getEntityId(), firstSeqNum, lastSeqNum, targetPrefix);
-		
+
 		boolean overFlowed = sendMessage(m, targetPrefix); 
 		if (overFlowed) {
 			log.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
@@ -307,10 +308,10 @@ public class RTPSWriter<T> extends Endpoint {
 		log.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getGuid().getEntityId(), 
 				hb.getCount(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
 				hb.finalFlag(), hb.livelinessFlag(), targetPrefix);
-		
-//		Exception e = new Exception();
-//		e.printStackTrace();
-		
+
+		//		Exception e = new Exception();
+		//		e.printStackTrace();
+
 		sendMessage(m, targetPrefix);
 
 		if (!livelinessFlag) {

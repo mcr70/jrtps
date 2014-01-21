@@ -1,6 +1,7 @@
 package net.sf.jrtps;
 
 import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Guid;
 
@@ -12,6 +13,8 @@ import net.sf.jrtps.types.Guid;
 public class ReaderProxy {
 	private final SubscriptionData readerData;
 	private final boolean expectsInlineQoS;
+	
+	private AckNack latestAckNack;
 	private long readersHighestSeqNum = 0;
 	private boolean active = true;
 	private long heartbeatSentTime = 0; // set to 0 after acknack
@@ -82,9 +85,31 @@ public class ReaderProxy {
 		}
 	}
 	
-	void ackNackReceived() {
-		this.heartbeatSentTime = 0;
-		active = true;
+	int getLatestAckNackCount() {
+		if (latestAckNack == null) {
+			return 0;
+		}
+		
+		return latestAckNack.getCount();
+	}
+	
+	/**
+	 * 
+	 * @param ackNack
+	 * @return true, if AckNack was accepted
+	 */
+	boolean ackNackReceived(AckNack ackNack) {
+		if (latestAckNack == null) {
+			latestAckNack = ackNack;
+			return true;
+		}
+		
+		if (ackNack.getCount() > latestAckNack.getCount()) {
+			latestAckNack = ackNack;
+			return true;
+		}
+		
+		return false;
 	}
 
 	public String toString() {

@@ -179,7 +179,7 @@ public class RTPSReader<T> extends Endpoint {
 			}
 			else {
 				log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
-						data.getWriterSequenceNumber(), wp.getSeqNumMax());
+						data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
 			}
 		}
 		else {
@@ -200,28 +200,33 @@ public class RTPSReader<T> extends Endpoint {
 
 		WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
 		if (wp != null) {
-			if (hb.livelinessFlag()) {
-				wp.assertLiveliness();
-			}
-
-			if (isReliable()) { // Only reliable readers respond to heartbeat
-				boolean doSend = false;
-				if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
-					doSend = true;
+			if (wp.heartbeatReceived(hb)) {
+				if (hb.livelinessFlag()) {
+					wp.assertLiveliness();
 				}
-				else {
-					if (wp.acceptHeartbeat(hb.getLastSequenceNumber())) {
+
+				if (isReliable()) { // Only reliable readers respond to heartbeat
+					boolean doSend = false;
+					if (!hb.finalFlag()) { // if the FinalFlag is not set, then the Reader must send an AckNack
 						doSend = true;
 					}
 					else {
-						log.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", 
-								getGuid().getEntityId(), wp.getSeqNumMax(), hb.getLastSequenceNumber());
+						if (wp.getGreatestDataSeqNum() < hb.getLastSequenceNumber()) {
+							doSend = true;
+						}
+						else {
+							log.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}", 
+									getGuid().getEntityId(), wp.getGreatestDataSeqNum(), hb.getLastSequenceNumber());
+						}
+					}
+
+					if (doSend) {
+						sendAckNack(wp);
 					}
 				}
-
-				if (doSend) {
-					sendAckNack(wp);
-				}
+			}
+			else {
+				log.debug("[{}] Ignoring Heartbeat whose count is {}, since proxys count is {}", getGuid().getEntityId(), hb.getCount(), wp.getLatestHeartbeatCount());
 			}
 		}
 		else {
@@ -233,7 +238,7 @@ public class RTPSReader<T> extends Endpoint {
 		Message m = new Message(getGuid().getPrefix());
 		AckNack an = createAckNack(wp);
 
-		if (an.getReaderSNState().getBitmapBase() > wp.getSeqNumMax()) {
+		if (an.getReaderSNState().getBitmapBase() > wp.getGreatestDataSeqNum()) {
 			// We already have all the samples. Set the finalFlag to indicate that
 			// no response is needed
 			an.finalFlag(true);
@@ -256,7 +261,7 @@ public class RTPSReader<T> extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		long seqNumFirst = wp.getSeqNumMax(); // Positively ACK all that we have..
+		long seqNumFirst = wp.getGreatestDataSeqNum(); // Positively ACK all that we have..
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
 
