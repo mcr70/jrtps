@@ -40,6 +40,8 @@ class RTPSMessageHandler implements Runnable {
 	private final RTPSParticipant participant;
 	private final BlockingQueue<byte[]> queue;
 
+	private Set<GuidPrefix> ignoredParticipants = new HashSet<>();
+	
 	private boolean running = true;
 
 	RTPSMessageHandler(RTPSParticipant p, BlockingQueue<byte[]> queue) {
@@ -90,9 +92,17 @@ class RTPSMessageHandler implements Runnable {
 		for (SubMessage subMsg : subMessages) {
 			switch (subMsg.getKind()) {
 			case ACKNACK:
+				if (ignoredParticipants.contains(sourceGuidPrefix)) {
+					continue;
+				}
+		
 				handleAckNack(sourceGuidPrefix, (AckNack)subMsg);
 				break;
 			case DATA:
+				if (ignoredParticipants.contains(sourceGuidPrefix)) {
+					continue;
+				}
+
 				try {
 					RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
 					if (r != null) {
@@ -104,6 +114,10 @@ class RTPSMessageHandler implements Runnable {
 				}
 				break;
 			case HEARTBEAT:
+				if (ignoredParticipants.contains(sourceGuidPrefix)) {
+					continue;
+				}
+
 				handleHeartbeat(sourceGuidPrefix, (Heartbeat)subMsg);
 				break;
 			case INFODESTINATION: 
@@ -186,5 +200,10 @@ class RTPSMessageHandler implements Runnable {
 		else {
 			log.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
 		}
+	}
+
+
+	void ignoreParticipant(GuidPrefix prefix) {
+		ignoredParticipants.add(prefix);
 	}
 }

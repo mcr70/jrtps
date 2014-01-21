@@ -2,6 +2,7 @@ package net.sf.jrtps;
 
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
+import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumberSet;
 
@@ -18,20 +19,18 @@ import org.slf4j.LoggerFactory;
 public class WriterProxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 	private final Guid writerGuid;
-	private /*final*/ PublicationData writerData; // TODO: should be final
-	
+	private PublicationData writerData; // TODO: should be final
+
+	private Heartbeat latestHeartBeat;
+
 	private volatile long livelinessTimestamp;
 	private volatile long seqNumMax = 0;
-	
+
 	WriterProxy(PublicationData wd) {
 		this.writerData = wd;
 		writerGuid = wd.getKey();
 	}
-	
-//	WriterProxy(Guid writerGuid) {
-//		this.writerGuid = writerGuid; // TODO: this constructor should be removed
-//	}
-	
+
 	/**
 	 * Gets the guid of the writer represented by this WriterProxy.
 	 * @return Guid
@@ -40,10 +39,14 @@ public class WriterProxy {
 		return writerGuid;
 	}
 
-	long getSeqNumMax() {
+	/**
+	 * Gets the max Data seqnum that has been received.
+	 * @return
+	 */
+	long getGreatestDataSeqNum() {
 		return seqNumMax;
 	}
-	
+
 	/**
 	 * Gets the WriterData associated with this WriterProxy.
 	 * @return WriterData
@@ -51,7 +54,7 @@ public class WriterProxy {
 	public PublicationData getPublicationData() {
 		return writerData;
 	}
-	
+
 	/**
 	 * Determines if incoming Data should be accepted or not.
 	 * 
@@ -70,18 +73,13 @@ public class WriterProxy {
 			}
 
 			seqNumMax = sequenceNumber;
-			
+
 			return true;
 		}
 
 		return false;
 	}
 
-	
-	
-	boolean acceptHeartbeat(long sequenceNumber) {
-		return seqNumMax < sequenceNumber;
-	}
 
 	/**
 	 * Asserts liveliness of a writer represented by this WriterProxy. 
@@ -89,6 +87,27 @@ public class WriterProxy {
 	public void assertLiveliness() {
 		livelinessTimestamp = System.currentTimeMillis();
 	}
+
+
+	/**
+	 * 
+	 * @param ackNack
+	 * @return true, if AckNack was accepted
+	 */
+	boolean heartbeatReceived(Heartbeat hb) {
+		if (latestHeartBeat == null) {
+			latestHeartBeat = hb;
+			return true;
+		}
+
+		if (hb.getCount() > latestHeartBeat.getCount()) {
+			latestHeartBeat = hb;
+			return true;
+		}
+
+		return false;
+	}	
+
 
 	public String toString() {
 		return getGuid().toString();
@@ -101,5 +120,13 @@ public class WriterProxy {
 		if (bitmapBase - 1 > seqNumMax) {
 			seqNumMax = bitmapBase - 1;
 		}
+	}
+
+	Object getLatestHeartbeatCount() {
+		if (latestHeartBeat == null) {
+			return 0;
+		}
+
+		return latestHeartBeat.getCount();
 	}
 }

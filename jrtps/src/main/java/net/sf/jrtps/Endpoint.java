@@ -127,6 +127,7 @@ public class Endpoint {
 		}
 		else {
 			log.debug("[{}] Unknown participant {}, will not send message", getGuid().getEntityId(), targetPrefix);
+			//participant.ignoreParticipant(targetPrefix);
 		}
 		
 		return overFlowed;

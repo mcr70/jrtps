@@ -685,4 +685,9 @@ public class Participant {
 		
 		return __readers;
 	}
+
+
+	void ignoreParticipant(GuidPrefix prefix) {
+		rtps_participant.ignoreParticipant(prefix);
+	}
 }

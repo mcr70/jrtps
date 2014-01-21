@@ -60,6 +60,8 @@ public class RTPSParticipant {
 
 	private final int domainId;
 	private final int participantId;
+
+	private RTPSMessageHandler handler;
 	
 	/**
 	 * Creates a new participant with given domainId and participantId. Domain ID and particiapnt ID
@@ -103,7 +105,7 @@ public class RTPSParticipant {
 		BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
 		
 		// NOTE: We can have only one MessageHandler. pending samples concept relies on it.
-		RTPSMessageHandler handler = new RTPSMessageHandler(this, queue);
+		handler = new RTPSMessageHandler(this, queue);
 		threadPoolExecutor.execute(handler);
 		
 		int bufferSize = config.getBufferSize();
@@ -305,5 +307,10 @@ public class RTPSParticipant {
 
 		log.warn("Failed to find Writer for writer {} or matching reader {}",  writerId, readerId);
 		return null;
+	}
+
+
+	public void ignoreParticipant(GuidPrefix prefix) {
+		handler.ignoreParticipant(prefix);
 	}
 }

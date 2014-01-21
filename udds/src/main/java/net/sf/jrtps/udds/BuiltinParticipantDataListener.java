@@ -41,8 +41,13 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 	public void onSamples(List<Sample<ParticipantData>> samples) {
 		for (Sample<ParticipantData> pdSample : samples) {
 			ParticipantData pd = pdSample.getData();
-			log.debug("Considering Participant {}", pd.getGuid());
+			log.debug("Considering Participant {}", pd.getGuidPrefix());
 
+//			if (pd.getGuidPrefix().getBytes()[7] != 98) {
+//				participant.ignoreParticipant(pd.getGuidPrefix());
+//				continue;
+//			}
+			
 			ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
 			if (d == null && pd.getGuidPrefix() != null) {
 				if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().getPrefix())) {
