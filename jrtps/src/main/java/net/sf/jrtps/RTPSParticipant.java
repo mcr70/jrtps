@@ -9,7 +9,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.builtin.ParticipantData;
@@ -34,7 +35,7 @@ public class RTPSParticipant {
 	private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
 	private final Configuration config = new Configuration();
-	private final ThreadPoolExecutor threadPoolExecutor;
+	private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
 
 	/**
@@ -75,7 +76,7 @@ public class RTPSParticipant {
 	 * 
 	 * @see EntityId
 	 */
-	public RTPSParticipant(int domainId, int participantId, ThreadPoolExecutor tpe, Set<Locator> locators, 
+	public RTPSParticipant(int domainId, int participantId, ScheduledThreadPoolExecutor tpe, Set<Locator> locators, 
 			Map<GuidPrefix, ParticipantData> discoveredParticipants) { 
 		this.domainId = domainId;
 		this.participantId = participantId; 
@@ -206,8 +207,15 @@ public class RTPSParticipant {
 		return false;
 	}
 	
-
-
+	/**
+	 * Schedules given Runnable to be executed at given rate.
+	 * @param r
+	 * @param millis Number of milliseconds between executions
+	 * @return ScheduledFuture
+	 */
+	ScheduledFuture<?> scheduleAtFixedRate(Runnable r, long millis) {
+		return threadPoolExecutor.scheduleAtFixedRate(r, millis, millis, TimeUnit.MILLISECONDS);
+	}
 
 	/**
 	 * Finds a Reader with given entity id.

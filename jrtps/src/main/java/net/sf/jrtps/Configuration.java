@@ -69,10 +69,10 @@ public class Configuration {
 	/**
 	 * Protocol tuning parameter that allows the RTPS Writer to repeatedly announce the
 	 * availability of data by sending a Heartbeat Message.
-	 * @return heartbeat period
+	 * @return heartbeat period in milliseconds
 	 */
 	int getHeartbeatPeriod() {
-		return getIntProperty("rtps.writer.nack-response-delay", 0);
+		return getIntProperty("rtps.writer.heartbeat-period", 10000);
 	}
 
 	/**

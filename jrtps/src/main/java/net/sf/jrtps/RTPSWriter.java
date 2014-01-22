@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledFuture;
 
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
@@ -50,6 +51,8 @@ public class RTPSWriter<T> extends Endpoint {
 
 	private int hbCount; // heartbeat counter. incremented each time hb is sent
 
+	private ScheduledFuture<?> announceThread;
+
 
 	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache wCache, 
 			QualityOfService qos, Configuration configuration) {
@@ -57,7 +60,22 @@ public class RTPSWriter<T> extends Endpoint {
 
 		this.writer_cache = wCache;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
-		this.heartbeatPeriod = configuration.getHeartbeatPeriod(); 
+		this.heartbeatPeriod = configuration.getHeartbeatPeriod();
+		
+		Runnable r = new Runnable() {
+			@Override
+			public void run() {
+				log.debug("[{}] Starting periodical notification", getGuid().getEntityId());
+				try {
+					notifyReaders();
+				}
+				catch(Exception e) {
+					log.error("Got exception while doing periodical notification", e);
+				}
+			}
+		};
+		
+		announceThread = participant.scheduleAtFixedRate(r, heartbeatPeriod);
 	}
 
 
@@ -124,7 +142,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Close this writer. Closing a writer clears its cache of changes.
 	 */
 	public void close() {
-		heartbeatPeriod = 0; // Stops heartbeat thread gracefully 
+		announceThread.cancel(true);
 		readerProxies.clear();
 		//writer_cache.clear();
 	}
