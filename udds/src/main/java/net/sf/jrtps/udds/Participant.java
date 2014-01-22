@@ -217,6 +217,7 @@ public class Participant {
 		ParticipantData pd = createSPDPParticipantData();
 		pdWriter.write(pd);
 
+		// TODO: We should get rid of resender thread. Each RTPSWriter has an announce thread.
 		createSPDPResender(config.getSPDPResendPeriod(), pdWriter.getRTPSWriter());
 	}
 
@@ -401,7 +402,7 @@ public class Participant {
 	}
 
 	/**
-	 * Asserts liveliness of RTPSWriters, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
+	 * Asserts liveliness of writers, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
 	 * 
 	 * @see net.sf.jrtps.message.parameter.QosLiveliness
 	 */
@@ -410,7 +411,8 @@ public class Participant {
 	}
 
 	/**
-	 * Close this participant.
+	 * Close this participant. Closing a participant shuts down all the threads allocated.
+	 * 
 	 */
 	public void close() {
 		threadPoolExecutor.shutdown(); // won't accept new tasks, remaining tasks keeps on running.

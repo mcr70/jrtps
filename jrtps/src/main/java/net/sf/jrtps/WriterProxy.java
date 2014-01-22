@@ -41,7 +41,7 @@ public class WriterProxy {
 
 	/**
 	 * Gets the max Data seqnum that has been received.
-	 * @return
+	 * @return max Data seqnum that has been received.
 	 */
 	long getGreatestDataSeqNum() {
 		return seqNumMax;
