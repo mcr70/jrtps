@@ -10,8 +10,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
@@ -56,7 +55,7 @@ import org.slf4j.LoggerFactory;
 public class Participant {
 	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
 
-	private final ThreadPoolExecutor threadPoolExecutor;
+	private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
 	private final Configuration config = new Configuration();
 	private final HashMap<Class<?>, Marshaller<?>> marshallers = new HashMap<>();
@@ -112,11 +111,12 @@ public class Participant {
 	public Participant(int domainId, int participantId) throws SocketException {
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
-		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 10);
+		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
 		int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
-		threadPoolExecutor = new ThreadPoolExecutor(corePoolSize, maxPoolSize, 5, TimeUnit.SECONDS, 
-				new LinkedBlockingQueue<Runnable>(maxPoolSize));
-
+		threadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize);
+		threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+		threadPoolExecutor.setRemoveOnCancelPolicy(true);
+		
 		logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
 		meta_mcLoc = Locator.defaultDiscoveryMulticastLocator(domainId);

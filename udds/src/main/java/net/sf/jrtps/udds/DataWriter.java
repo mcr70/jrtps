@@ -20,10 +20,6 @@ public class DataWriter<T> extends Entity<T> {
 	private final RTPSWriter<T> rtps_writer;
 	private final HistoryCache<T> hCache;
 	
-	// TODO: Consider timestamp methods. At the moment they are left out. 
-	//       Why would anyone want to fake a timestamp. It could cause more trouble than useful stuff.
-	//	     Like order (timestamp point of view) of the messages could be wrong on receiving side. 
-	
 	/**
 	 * Creates this DataWriter with given topic name.
 	 * 
