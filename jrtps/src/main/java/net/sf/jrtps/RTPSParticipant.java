@@ -167,6 +167,10 @@ public class RTPSParticipant {
 	 */
 	public void close() {
 		log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
+
+		for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce thread
+			w.close();
+		}
 		
 		// close network receivers
 		for (UDPReceiver r : receivers) {
