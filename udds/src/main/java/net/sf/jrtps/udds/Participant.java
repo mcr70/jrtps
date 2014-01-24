@@ -208,7 +208,7 @@ public class Participant {
 		pmReader.addListener(new BuiltinParticipantMessageListener(this, readers));
 		readers.add(pmReader);
 
-		// Just create writer for ParticipantMessage, so that it will endup being listed in builtin entities
+		// Just create writer for ParticipantMessage, so that it will be listed in builtin entities
 		createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
 
 		// ----  Create a Writer for SPDP  -----------------------

@@ -35,7 +35,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 
 			List<DataReader<?>> readers = participant.getReadersForTopic(writerData.getTopicName());
 			for (DataReader<?> r : readers) {
-				if (r != null) {
+				if (!r.getRTPSReader().isMatchedWith(writerData)) {
 					if (wdSample.isDisposed()) {
 						r.getRTPSReader().removeMatchedWriter(writerData);
 					}
@@ -43,7 +43,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 						QualityOfService offered = writerData.getQualityOfService();
 						QualityOfService requested = r.getRTPSReader().getQualityOfService();
 						log.trace("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
-						
+
 						if (offered.isCompatibleWith(requested)) {
 							r.getRTPSReader().addMatchedWriter(writerData);
 							fireWriterMatched(r, writerData);
