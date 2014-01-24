@@ -342,4 +342,9 @@ public class RTPSReader<T> extends Endpoint {
 			wp.applyGap(gap);
 		}
 	}
+
+
+	public boolean isMatchedWith(PublicationData writerData) {
+		return writerProxies.get(writerData.getKey()) != null;
+	}
 }

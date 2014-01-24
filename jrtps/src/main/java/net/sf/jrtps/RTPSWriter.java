@@ -386,4 +386,9 @@ public class RTPSWriter<T> extends Endpoint {
 
 		return true;
 	}
+
+
+	public boolean isMatchedWith(SubscriptionData readerData) {
+		return readerProxies.get(readerData.getKey()) != null;
+	}
 }

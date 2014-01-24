@@ -46,35 +46,37 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 
 			List<DataWriter<?>> writers = participant.getWritersForTopic(readerData.getTopicName());
 			for (DataWriter<?> w : writers) {
-				if (rdSample.isDisposed()) {
-					w.getRTPSWriter().removeMatchedReader(readerData);
-				}
-				else {
-					QualityOfService requested = readerData.getQualityOfService();
-					QualityOfService offered = w.getRTPSWriter().getQualityOfService();
-					log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), readerData.getKey().getEntityId());
-
-					if (offered.isCompatibleWith(requested)) {
-						w.getRTPSWriter().addMatchedReader(readerData);
-						fireReaderMatched(w, readerData);
+				if (!w.getRTPSWriter().isMatchedWith(readerData)) {
+					if (rdSample.isDisposed()) {
+						w.getRTPSWriter().removeMatchedReader(readerData);
 					}
 					else {
-						log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", readerData, w.getRTPSWriter().getQualityOfService());
-						fireInconsistentQoS(w, readerData);
-					}					
-				}
+						QualityOfService requested = readerData.getQualityOfService();
+						QualityOfService offered = w.getRTPSWriter().getQualityOfService();
+						log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), readerData.getKey().getEntityId());
 
-				// builtin entities are handled with SEDP in ParticipantData reception
-				// TODO: user-defined entities should not be handled differently.
-				if (key.getEntityId().isUserDefinedEntity()) {  
-					ParticipantData pd = discoveredParticipants.get(key.getPrefix());
-					if (pd != null) {
-						//w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
-						log.debug("Notify reader {}", key.getEntityId());
-						w.getRTPSWriter().notifyReader(key);
+						if (offered.isCompatibleWith(requested)) {
+							w.getRTPSWriter().addMatchedReader(readerData);
+							fireReaderMatched(w, readerData);
+						}
+						else {
+							log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", readerData, w.getRTPSWriter().getQualityOfService());
+							fireInconsistentQoS(w, readerData);
+						}					
 					}
-					else {
-						log.warn("Participant was not found: {}", key.getPrefix());
+
+					// builtin entities are handled with SEDP in ParticipantData reception
+					// TODO: user-defined entities should not be handled differently.
+					if (key.getEntityId().isUserDefinedEntity()) {  
+						ParticipantData pd = discoveredParticipants.get(key.getPrefix());
+						if (pd != null) {
+							//w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
+							log.debug("Notify reader {}", key.getEntityId());
+							w.getRTPSWriter().notifyReader(key);
+						}
+						else {
+							log.warn("Participant was not found: {}", key.getPrefix());
+						}
 					}
 				}
 			}
