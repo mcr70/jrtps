@@ -130,4 +130,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+	
+	<distributionManagement>
+		<site> <!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
+			<id>jrtps.site</id>
+			<name>jRTPS</name>
+			<url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url>
+		</site>
+	</distributionManagement>
 </project>
