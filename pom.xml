@@ -72,7 +72,6 @@
 					</execution>
 				</executions>
 			</plugin>
-<!--
 			<plugin>
 				<groupId>org.apache.felix</groupId>
 				<artifactId>maven-bundle-plugin</artifactId>
@@ -82,7 +81,7 @@
 				<executions>
 					<execution>
 						<id>bundle</id>
-						<phase>verify</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>bundle</goal>
 						</goals>
@@ -95,7 +94,6 @@
 					</instructions>
 				</configuration>
 			</plugin>
--->
 		</plugins>
 	</build>
 
