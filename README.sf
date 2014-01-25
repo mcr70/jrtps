@@ -1,2 +1,2 @@
 ssh -t mcr70,jrtps@shell.sourceforge.net create
-scp apidocs.zip mcr70,jrtps@web.sourceforge.net:/home/project-web/jrtps/htdocs/
+scp apidocs.zip mcr70,jrtps@web.sourceforge.net:/home/project-web/jrtps/
