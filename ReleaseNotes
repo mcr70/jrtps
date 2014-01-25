@@ -1,4 +1,4 @@
-0.5.1
+0.5.2
 	- Heartbeat period
 	- Artifacts are OSGi bundles
 	- Renamed ReaderData -> SubscriptionData, WriterData PublicationData
