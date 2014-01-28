@@ -43,10 +43,18 @@ public class InfoReplyIp4 extends SubMessage {
 		return (header.flags & 0x2) != 0;
 	}
 
+	/**
+	 * Gets the unicast locator, if present
+	 * @return {@link LocatorUDPv4_t} or null if no unicast locator is present
+	 */
 	public LocatorUDPv4_t getUnicastLocator() {
 		return unicastLocator;
 	}
 	
+	/**
+	 * Gets the multicast locator, if present.
+	 * @return {@link LocatorUDPv4_t} or null if no multicast locator is present
+	 */
 	public LocatorUDPv4_t getMulticastLocator() {
 		return multicastLocator;
 	}

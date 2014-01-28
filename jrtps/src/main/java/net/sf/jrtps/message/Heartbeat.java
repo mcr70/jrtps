@@ -51,6 +51,10 @@ public class Heartbeat extends SubMessage {
 		return (header.flags & 0x2) != 0;
 	}
 
+	/**
+	 * Sets the finalFlag to given value.
+	 * @param flag
+	 */
 	public void finalFlag(boolean flag) {
 		if (flag) {
 			header.flags |= 0x2;
@@ -70,6 +74,10 @@ public class Heartbeat extends SubMessage {
 		return (header.flags & 0x4) != 0;
 	}
 	
+	/**
+	 * Sets the livelinessFlag to given value
+	 * @param livelinessFlag
+	 */
 	public void livelinessFlag(boolean livelinessFlag) {
 		if (livelinessFlag) {
 			header.flags |= 0x4;
