@@ -14,8 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class represents a RTPS message. It also represents 'the Reveiver' as
- * discussed in 8.3.4, to store the state of incoming message.
+ * This class represents a RTPS message.
  * 
  * @author mcr70
  *
@@ -26,13 +25,16 @@ public class Message {
 	private Header header;
 	private List<SubMessage> submessages = new LinkedList<SubMessage>();
 	
-	
+	/**
+	 * Constructor.
+	 * @param prefix
+	 */
 	public Message(GuidPrefix prefix) {
 		header = new Header(prefix);
 	}
 	
 	/**
-	 * Constructs a Message from given RTPSByteBuffer
+	 * Constructs a Message from given RTPSByteBuffer.
 	 * 
 	 * @param bb
 	 * @throws IOException
@@ -87,26 +89,50 @@ public class Message {
 		}
 	}
 
-	public SubMessage getSubMessage(SubMessage.Kind kind) {
+	/**
+	 * Gets all the SubMessages with given SubMessage.Kind.
+	 * 
+	 * @param kind
+	 * @return a List of SubMessages of given Kind, or an empty List if none was found.
+	 */
+	public List<SubMessage> getSubMessage(SubMessage.Kind kind) {
+		List<SubMessage> list = new LinkedList<>();
 		for (SubMessage sm: submessages) {
 			if (sm.getKind() == kind) {
-				return sm;
+				list.add(sm);
 			}
 		}
 		
-		return null;
+		return list;
 	}
 
+	/**
+	 * Gets the Header of this Message.
+	 * @return Header
+	 */
 	public Header getHeader() {
 		return header;
 	}
 	
+	/**
+	 * Gets all the SubMessages of this Message.
+	 * 
+	 * @return List<SubMessages>. Returned List is never null.
+	 */
 	public List<SubMessage> getSubMessages() {
 		return submessages;
 	}
 
 	
-	
+	/**
+	 * Writes this Message to given RTPSByteBuffer.
+	 * During writing of each SubMessage, its length is calculated and SubMessageHeader.submessageLength
+	 * is updated. If an overflow occurs during writing, buffer position is set 
+	 * to the start of submessage that caused overflow.
+	 * 
+	 * @param buffer
+	 * @return true, if an overflow occured during write.
+	 */
 	public boolean writeTo(RTPSByteBuffer buffer) {
 		header.writeTo(buffer);
 		boolean overFlowed = false;
@@ -129,6 +155,7 @@ public class Message {
 				int subMessageLength = buffer.position() - position;
 
 				// Position to 'submessageLength' -2 is for short (2 bytes)
+				// buffers current position is not changed
 				buffer.getBuffer().putShort(position-2, (short) subMessageLength);
 			}
 			catch(BufferOverflowException boe) {
@@ -141,7 +168,9 @@ public class Message {
 		}
 		
 		// Length of last submessage is 0, @see 8.3.3.2.3 submessageLength
-		buffer.getBuffer().putShort(position-2, (short)0);
+		if (subMessageCount > 0) {
+			buffer.getBuffer().putShort(position-2, (short)0);
+		}
 		
 		return overFlowed;
 	}

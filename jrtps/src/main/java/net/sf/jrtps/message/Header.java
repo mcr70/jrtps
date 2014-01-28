@@ -19,6 +19,10 @@ public class Header {
 	private VendorId_t vendorId;
 	private GuidPrefix guidPrefix;
 
+	/**
+	 * Constructor for Header. ProtocolVersion is set to 2.1 and VendorId is set to jRTPS.
+	 * @param prefix
+	 */
 	public Header(GuidPrefix prefix) {
 		hdrStart = HDR_START;
 		version = ProtocolVersion_t.PROTOCOLVERSION_2_1;
@@ -26,17 +30,23 @@ public class Header {
 		guidPrefix = prefix;
 	}
 
-
-	Header(RTPSByteBuffer is) {
+	/**
+	 * Constructs Header from given RTPSByteBuffer.
+	 * @param bb
+	 */
+	Header(RTPSByteBuffer bb) {
 		// Header length == 20
 		hdrStart = new byte[4];
-		is.read(hdrStart);
-		version = new ProtocolVersion_t(is);
-		vendorId = new VendorId_t(is);
-		guidPrefix = new GuidPrefix(is);
+		bb.read(hdrStart);
+		version = new ProtocolVersion_t(bb);
+		vendorId = new VendorId_t(bb);
+		guidPrefix = new GuidPrefix(bb);
 	}
 
-
+	/**
+	 * Writer this Header to given RTPSByteBuffer.
+	 * @param buffer
+	 */
 	public void writeTo(RTPSByteBuffer buffer) {
 		buffer.write(hdrStart);
 		version.writeTo(buffer);

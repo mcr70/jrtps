@@ -241,7 +241,7 @@ public class Data extends SubMessage {
 
 		if (dataFlag() || keyFlag()) { 
 			buffer.align(4);
-			buffer.write(dataEncapsulation.getSerializedPayload()); // TODO: check this
+			buffer.write(dataEncapsulation.getSerializedPayload());
 		}
 	}
 

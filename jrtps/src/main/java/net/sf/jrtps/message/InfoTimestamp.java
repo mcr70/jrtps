@@ -22,7 +22,6 @@ public class InfoTimestamp extends SubMessage {
 	 */
 	private Time timestamp;
 
-
 	public InfoTimestamp(SubMessageHeader smh, RTPSByteBuffer is) {
 		super(smh);
 		
@@ -34,11 +33,6 @@ public class InfoTimestamp extends SubMessage {
 		this.timestamp = new Time(systemCurrentMillis);
 	}
 	
-	public InfoTimestamp(Time timestamp) {
-		super(new SubMessageHeader(KIND));
-
-		this.timestamp = timestamp;
-	}
 
 	/**
 	 * Indicates whether subsequent Submessages should be considered as having a timestamp or not.
@@ -63,7 +57,10 @@ public class InfoTimestamp extends SubMessage {
 		}
 	}
 
-
+	/**
+	 * Gets the timestamp
+	 * @return Time
+	 */
 	public Time getTimeStamp() {
 		return timestamp;
 	}

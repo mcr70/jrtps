@@ -2,8 +2,8 @@ package net.sf.jrtps.message;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.EntityId;
-import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.types.SequenceNumber;
+import net.sf.jrtps.types.SequenceNumberSet;
 
 /**
  * The NackFrag Submessage is used to communicate the state of a Reader to a Writer. When a data change
@@ -17,31 +17,10 @@ import net.sf.jrtps.types.SequenceNumber;
 public class NackFrag extends SubMessage {
 	public static final int KIND = 0x12;
 	
-	/**
-	 * Identifies the Reader entity that requests to receive certain fragments.
-	 */
 	private EntityId readerId;
-	/**
-	 * Identifies the Writer entity that is the target of the NackFrag message.
-	 * This is the Writer Entity that is being asked to re-send some fragments.
-	 */
 	private EntityId writerId;
-	/**
-	 * The sequence number for which some fragments are missing.
-	 */
 	private SequenceNumber writerSN;
-	/**
-	 * Communicates the state of the reader to the writer. The fragment numbers that appear in the set 
-	 * indicate missing fragments on the reader side. The ones that do not appear in the set
-	 * are undetermined (could have been received or not).
-	 */
 	private SequenceNumberSet fragmentNumberState;
-	/**
-	 * A counter that is incremented each time a new NackFrag message is sent.
-	 * Provides the means for a Writer to detect duplicate NackFrag
-	 * messages that can result from the presence of redundant
-	 * communication paths.
-	 */
 	private int count;
 
 	public NackFrag(SubMessageHeader smh, RTPSByteBuffer is) {
@@ -50,22 +29,43 @@ public class NackFrag extends SubMessage {
 		readMessage(is);
 	}
 
+	/**
+	 * Identifies the Reader entity that requests to receive certain fragments.
+	 */
 	public EntityId getReaderId() {
 		return readerId;
 	}
 	
+	/**
+	 * Identifies the Writer entity that is the target of the NackFrag message.
+	 * This is the Writer Entity that is being asked to re-send some fragments.
+	 */	
 	public EntityId getWriterId() {
 		return writerId;
 	}
 	
+	/**
+	 * The sequence number for which some fragments are missing.
+	 */
 	public SequenceNumber getWriterSequenceNumber() {
 		return writerSN;
 	}
-
+	
+	/**
+	 * Communicates the state of the reader to the writer. The fragment numbers that appear in the set 
+	 * indicate missing fragments on the reader side. The ones that do not appear in the set
+	 * are undetermined (could have been received or not).
+	 */
 	public SequenceNumberSet getFragmentNumberState() {
 		return fragmentNumberState;
 	}
-	
+
+	/**
+	 * A counter that is incremented each time a new NackFrag message is sent.
+	 * Provides the means for a Writer to detect duplicate NackFrag
+	 * messages that can result from the presence of redundant
+	 * communication paths.
+	 */
 	public int getCount() {
 		return count;
 	}
