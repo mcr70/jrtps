@@ -48,6 +48,17 @@ public class WriterProxy {
 	}
 
 	/**
+	 * 
+	 */
+	boolean isAllReceived() {
+		if (latestHeartBeat == null) {
+			return false;
+		}
+		
+		return latestHeartBeat.getLastSequenceNumber() == getGreatestDataSeqNum();
+	}
+	
+	/**
 	 * Gets the WriterData associated with this WriterProxy.
 	 * @return WriterData
 	 */
@@ -90,9 +101,12 @@ public class WriterProxy {
 
 
 	/**
+	 * Updates proxys latest Heartbeat. Latest Heartbeat gets updated only if its
+	 * count is greater than previously received Heartbeat. This ensures, that
+	 * Heartbeat gets processed only once.
 	 * 
-	 * @param ackNack
-	 * @return true, if AckNack was accepted
+	 * @param hb
+	 * @return true, if Heartbeat was accepted
 	 */
 	boolean heartbeatReceived(Heartbeat hb) {
 		if (latestHeartBeat == null) {

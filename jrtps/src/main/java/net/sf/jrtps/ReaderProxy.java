@@ -94,6 +94,9 @@ public class ReaderProxy {
 	}
 	
 	/**
+	 * Updates proxys latest AckNack. Latest AckNack gets updated only if its
+	 * count is greater than previously received AckNack. This ensures, that
+	 * AckNack gets processed only once.
 	 * 
 	 * @param ackNack
 	 * @return true, if AckNack was accepted

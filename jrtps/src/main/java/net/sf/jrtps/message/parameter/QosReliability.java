@@ -8,7 +8,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	// see Table 9.4 - PSM mapping of the value types that appear on the wire
 	// TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for BEST_EFFORT and 2 for RELIABLE
 	private static final int BEST_EFFORT_INT = 1;
-	private static final int RELIABLE_INT = 2;
+	private static final int RELIABLE_INT = 3;
 	
 	private int kind;
 	private Duration max_blocking_time;

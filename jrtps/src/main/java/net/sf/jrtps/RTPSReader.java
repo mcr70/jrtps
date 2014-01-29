@@ -172,13 +172,12 @@ public class RTPSReader<T> extends Endpoint {
 		if (wp != null) {
 			if (wp.acceptData(data.getWriterSequenceNumber())) {
 				Object obj = marshaller.unmarshall(data.getDataEncapsulation());
-				log.trace("[{}] Got Data: {}, {}", getGuid().getEntityId(), 
-						obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
+				log.debug("[{}] Got Data: {}", getGuid().getEntityId(), data.getWriterSequenceNumber());
 
 				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
 			}
 			else {
-				log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
+				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
 						data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
 			}
 		}
@@ -238,14 +237,9 @@ public class RTPSReader<T> extends Endpoint {
 		Message m = new Message(getGuid().getPrefix());
 		AckNack an = createAckNack(wp);
 
-		if (an.getReaderSNState().getBitmapBase() > wp.getGreatestDataSeqNum()) {
-			// We already have all the samples. Set the finalFlag to indicate that
-			// no response is needed
-			an.finalFlag(true);
-		}
-		else {
-			an.finalFlag(false);
-		}
+		// Set the finalFlag. If all the data is already received, set it to true,
+		// otherwise set it to false(response required)
+		an.finalFlag(wp.isAllReceived());
 
 		m.addSubMessage(an);
 
@@ -268,7 +262,7 @@ public class RTPSReader<T> extends Endpoint {
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
 
-		AckNack an = new AckNack(getGuid().getEntityId(), wp.getGuid().getEntityId(), snSet, ackNackCount++);
+		AckNack an = new AckNack(getGuid().getEntityId(), wp.getGuid().getEntityId(), snSet, ++ackNackCount);
 
 		return an;
 	}
