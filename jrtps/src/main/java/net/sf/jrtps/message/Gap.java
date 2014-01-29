@@ -79,6 +79,6 @@ public class Gap extends SubMessage {
 	}
 	
 	public String toString() {
-		return gapStart + ", " + gapList; 
+		return super.toString() + " " + gapStart + ", " + gapList; 
 	}
 }

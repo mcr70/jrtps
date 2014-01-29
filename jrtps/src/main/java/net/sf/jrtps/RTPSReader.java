@@ -243,6 +243,9 @@ public class RTPSReader<T> extends Endpoint {
 			// no response is needed
 			an.finalFlag(true);
 		}
+		else {
+			an.finalFlag(false);
+		}
 
 		m.addSubMessage(an);
 

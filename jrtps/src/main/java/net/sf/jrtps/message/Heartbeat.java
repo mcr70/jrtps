@@ -146,8 +146,8 @@ public class Heartbeat extends SubMessage {
 	}
 
 	public String toString() {
-		return super.toString() + ", " + readerId + ", " + writerId + ", " + 
-				firstSN + ", " + lastSN + ", finalFlag=" + finalFlag() + 
-				", livelinessFlag=" + livelinessFlag();
+		return super.toString() + " #" + count + ", " + readerId + ", " + writerId + ", " + 
+				firstSN + ", " + lastSN + ", F:" + finalFlag() + 
+				", L:" + livelinessFlag();
 	}
 }
