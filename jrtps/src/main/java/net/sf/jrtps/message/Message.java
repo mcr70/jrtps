@@ -41,7 +41,6 @@ public class Message {
 	 */
 	public Message(RTPSByteBuffer bb) {
 		header = new Header(bb); 
-		log.trace("Reading message, header: {}", header);
 		
 		while(bb.getBuffer().hasRemaining()) {
 			try {
@@ -51,8 +50,6 @@ public class Message {
 				SubMessageHeader smh = new SubMessageHeader(bb);
 				int smStart = bb.position();
 				
-				log.trace("SubMessageHeader, starts at {}: {}", smhPosition, smh);
-
 				SubMessage sm = null;
 
 				switch(smh.kind) { // @see 9.4.5.1.1
@@ -79,7 +76,7 @@ public class Message {
 					log.warn("SubMessage length differs for {} != {} for {}", smEnd-smStart, smh.submessageLength, sm.getKind());
 				}
 				
-				log.trace("{}", sm);
+				log.trace("SubMsg in:  {}", sm);
 				submessages.add(sm);
 			}
 			catch(BufferUnderflowException bue) {
@@ -157,6 +154,8 @@ public class Message {
 				// Position to 'submessageLength' -2 is for short (2 bytes)
 				// buffers current position is not changed
 				buffer.getBuffer().putShort(position-2, (short) subMessageLength);
+
+				log.trace("SubMsg out: {}", msg);
 			}
 			catch(BufferOverflowException boe) {
 				log.warn("Buffer overflow occured after {} succesful sub-message writes, dropping rest of the sub messages",

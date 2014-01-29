@@ -114,7 +114,7 @@ public class WriterProxy {
 	}
 
 	void applyGap(Gap gap) {
-		log.debug("Applying GAP {}", gap);
+		log.debug("Applying {}", gap);
 		SequenceNumberSet gapList = gap.getGapList();
 		long bitmapBase = gapList.getBitmapBase();
 		if (bitmapBase - 1 > seqNumMax) {
@@ -122,7 +122,7 @@ public class WriterProxy {
 		}
 	}
 
-	Object getLatestHeartbeatCount() {
+	int getLatestHeartbeatCount() {
 		if (latestHeartBeat == null) {
 			return 0;
 		}
