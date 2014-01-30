@@ -66,9 +66,13 @@ public class SubscriptionData extends DiscoveredData {
 					addQosPolicy((QosPolicy) param);
 				}
 				else {
-					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
+					addUnhandledParameter(param);
 				}
 			}
+		}
+		
+		if (getUnhandledParameters().size() > 0) {
+			log.warn("Unhandled parameters encountered: {}", getUnhandledParameters());
 		}
 		
 		if (super.typeName == null) { // Other vendors may use different typeName

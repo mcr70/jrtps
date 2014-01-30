@@ -17,6 +17,7 @@ import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ParticipantManualLivelinessCount;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Duration;
@@ -195,9 +196,19 @@ public class ParticipantData extends DiscoveredData {
 			case PID_SENTINEL:
 				break;
 			default:
-				log.warn("Parameter {} not handled", param.getParameterId());
+				if (param instanceof QosPolicy) {
+					addQosPolicy((QosPolicy) param);
+				}
+				else {
+					addUnhandledParameter(param);
+				}			
 			}
 		}
+
+		if (getUnhandledParameters().size() > 0) {
+			log.warn("Unhandled parameters encountered: {}", getUnhandledParameters());
+		}
+		
 		
 		if (super.typeName == null) { // Other vendors may use different typeName
 			super.typeName = ParticipantData.class.getName();
