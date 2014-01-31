@@ -161,7 +161,7 @@ public class Message {
 				log.warn("Buffer overflow occured after {} succesful sub-message writes, dropping rest of the sub messages",
 						subMessageCount);
 				buffer.getBuffer().position(subMsgStartPosition);
-				overFlowed = true;
+				overFlowed = true; 
 				break;
 			}			
 		}
