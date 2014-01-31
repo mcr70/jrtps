@@ -55,7 +55,7 @@ public class Header {
 	}	
 	
 	/**
-	 * Defines a default prefix to use for all GUIDs that appear in the message.
+	 * Defines a default prefix to use for all GUIDs that appear within the Submessages contained in the message.
 	 */
 	public GuidPrefix getGuidPrefix() {
 		return guidPrefix;

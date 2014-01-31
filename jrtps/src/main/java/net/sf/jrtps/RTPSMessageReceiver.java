@@ -27,15 +27,18 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSMessageHandler is a consumer to BlockingQueue.
- * Queue contains byte[] entries, which is parsed to RTPS Messages.
+ * RTPSMessageReceiver is a consumer to BlockingQueue<byte[]>. A network receiver 
+ * produces byte arrays into this queue. These byte[] are parsed into RTPS messages 
+ * by this class. <p> 
+ * 
  * Successfully parsed messages are split into submessages, which are passed
  * to corresponding RTPS reader entities.
  * 
+ * @see RTPSReader
  * @author mcr70
  */
-class RTPSMessageHandler implements Runnable {
-	private static final Logger logger = LoggerFactory.getLogger(RTPSMessageHandler.class);
+class RTPSMessageReceiver implements Runnable {
+	private static final Logger logger = LoggerFactory.getLogger(RTPSMessageReceiver.class);
 	
 	private final RTPSParticipant participant;
 	private final BlockingQueue<byte[]> queue;
@@ -44,7 +47,7 @@ class RTPSMessageHandler implements Runnable {
 	
 	private boolean running = true;
 
-	RTPSMessageHandler(RTPSParticipant p, BlockingQueue<byte[]> queue) {
+	RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue) {
 		this.participant = p;
 		this.queue = queue;
 	}
@@ -54,7 +57,7 @@ class RTPSMessageHandler implements Runnable {
 	public void run() {
 		while(running) {
 			try {
-				// NOTE: We can have only one MessageHandler. pending samples concept relies on it.
+				// NOTE: We can have only one MessageReceiver. pending samples concept relies on it.
 				byte[] bytes = queue.take();
 				Message msg = new Message(new RTPSByteBuffer(bytes));
 				logger.debug("Parsed RTPS message {}", msg);
@@ -65,7 +68,7 @@ class RTPSMessageHandler implements Runnable {
 			}
 		}
 		
-		logger.debug("RTPSMessageHandler exiting");
+		logger.debug("RTPSMessageReceiver exiting");
 	}
 	
 	
