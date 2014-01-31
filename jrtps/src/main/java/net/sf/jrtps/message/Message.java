@@ -4,9 +4,11 @@ package net.sf.jrtps.message;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.Experimental;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
 
@@ -174,6 +176,83 @@ public class Message {
 		return overFlowed;
 	}
 
+	
+	/**
+	 * Writes this message to given RTPSByteBuffer. While writing message to buffer, successfully
+	 * written SubMessages are removed from this message. This makes it possible to write this
+	 * same message again to another buffer without duplicating submessages to recipient.
+	 * 
+	 * @param buffer
+	 * @return true, if all the SubMessages were drained to given buffer.
+	 */
+	@Experimental("drainTo() is experimental, use writeTo() instead")
+	public boolean drainTo(RTPSByteBuffer buffer) {
+		header.writeTo(buffer);
+		
+		// TODO: handle situation, where no submessages was not written. This will cause endless loop.
+		//       Maybe mark the whole message illegal, or just remove first submessage and log a warning.
+		
+		// TODO: Handle receiver state affecting SubMessages, like InfoDestination 
+		
+		int position = 0;
+		int subMessageCount = 0;
+		Iterator<SubMessage> i = submessages.iterator();
+		while(i.hasNext()) {
+			SubMessage msg = i.next();
+			int subMsgStartPosition = buffer.position();
+
+			SubMessageHeader hdr = msg.getHeader();
+			buffer.align(4);
+			buffer.setEndianess(hdr.endiannessFlag()); // Set the endianess
+
+			try {
+				hdr.writeTo(buffer);
+				i.remove();
+
+				subMessageCount++;
+				
+				position = buffer.position();  
+				msg.writeTo(buffer);
+				int subMessageLength = buffer.position() - position;
+
+				// Position to 'submessageLength' -2 is for short (2 bytes)
+				// buffers current position is not changed
+				if (subMessageLength > Short.MAX_VALUE) {
+					// Length of submessage is 0, if its size exceeds Short.MAX_VALUE. @see 8.3.3.2.3 submessageLength
+					buffer.getBuffer().putShort(position-2, (short) 0);
+					break;  // Also, it has to be the last SubMessage
+				}
+				else {
+					buffer.getBuffer().putShort(position-2, (short) subMessageLength);
+				}
+			}
+			catch(BufferOverflowException boe) {
+				log.warn("Buffer overflow occured after {} succesful sub-message writes, dropping rest of the sub messages",
+						subMessageCount);
+				buffer.getBuffer().position(subMsgStartPosition); 
+				break;
+			}			
+		}
+
+		return submessages.size() == 0;
+	}
+	
+
+	/**
+	 * Joins two messages together. SubMessages of the other Message are appended to sub messages of this Message.
+	 * Before append, an InfoDestination is inserted if the default GuidPrefix from Messages headers differ.  
+	 * 
+	 * @param other
+	 */
+	public void join(Message other) {
+		GuidPrefix otherPrefix = other.getHeader().getGuidPrefix();
+		if (!header.getGuidPrefix().equals(otherPrefix)) {
+			submessages.add(new InfoDestination(otherPrefix));
+		}
+		
+		submessages.addAll(other.getSubMessages());
+	}
+	
 	
 	/**
 	 * Adds a new SubMessage to this Message. SubMessage must well formed.

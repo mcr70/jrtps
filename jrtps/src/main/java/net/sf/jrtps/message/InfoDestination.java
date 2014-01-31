@@ -18,13 +18,6 @@ public class InfoDestination extends SubMessage {
 	private GuidPrefix guidPrefix;
 
 	/**
-	 * Sets GuidPrefix_t to UNKNOWN.
-	 */
-	public InfoDestination() {
-		this(GuidPrefix.GUIDPREFIX_UNKNOWN);
-	}
-
-	/**
 	 * This constructor is used when the intention is to send data into network.
 	 * @param guidPrefix 
 	 */

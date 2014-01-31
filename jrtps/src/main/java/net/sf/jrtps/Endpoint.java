@@ -14,6 +14,10 @@ import net.sf.jrtps.types.Locator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Base class for RTPS endpoints
+ * @author mcr70
+ */
 public class Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(Endpoint.class);
 

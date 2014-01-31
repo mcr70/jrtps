@@ -8,6 +8,7 @@ import java.nio.ByteOrder;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 
+import net.sf.jrtps.Experimental;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.types.Locator;
 
@@ -59,5 +60,11 @@ public class UDPWriter {
 
 	public void close() throws IOException {
 		channel.close();		
+	}
+
+	@Experimental("Will eventually replace writeTo(Message)")
+	public void sendMessage(RTPSByteBuffer buffer) {
+		// TODO Auto-generated method stub
+		
 	}
 }
