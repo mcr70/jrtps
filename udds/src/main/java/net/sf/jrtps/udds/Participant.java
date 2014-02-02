@@ -169,11 +169,9 @@ public class Participant {
 		// ----  Create a Writers for SEDP  ---------
 		DataWriter<PublicationData> wdWriter = 
 				createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
-		writers.add(wdWriter);
 
 		DataWriter<SubscriptionData> rdWriter = 
 				createDataWriter(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);
-		writers.add(rdWriter);
 
 
 		// NOTE: It is not mandatory to publish TopicData
@@ -183,30 +181,25 @@ public class Participant {
 		DataReader<ParticipantData> pdReader = 
 				createDataReader(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
 		pdReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
-		readers.add(pdReader);
 
 		// ----  Create a Readers for SEDP  ---------
 		DataReader<PublicationData> wdReader = 
 				createDataReader(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
 		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredWriters));
-		readers.add(wdReader);
 
 		DataReader<SubscriptionData> rdReader = 
 				createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);
 		rdReader.addListener(new BuiltinSubscriptionDataListener(this, discoveredParticipants, discoveredReaders));
-		readers.add(rdReader);
 
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		DataReader<TopicData> tReader = 
 				createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class, TopicData.class.getName(), sedpQoS);
 		tReader.addListener(new BuiltinTopicDataListener(this));
-		readers.add(tReader);
 
 		// Create entities for ParticipantMessage ---------------
 		DataReader<ParticipantMessage> pmReader = 
 				createDataReader(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
 		pmReader.addListener(new BuiltinParticipantMessageListener(this, readers));
-		readers.add(pmReader);
 
 		// Just create writer for ParticipantMessage, so that it will be listed in builtin entities
 		createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
