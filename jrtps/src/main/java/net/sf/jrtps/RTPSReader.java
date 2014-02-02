@@ -234,6 +234,9 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private void sendAckNack(WriterProxy wp) {
+		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
+		getParticipant().waitFor(heartbeatResponseDelay);
+
 		Message m = new Message(getGuid().getPrefix());
 		AckNack an = createAckNack(wp);
 
@@ -242,9 +245,6 @@ public class RTPSReader<T> extends Endpoint {
 		an.finalFlag(wp.isAllReceived());
 
 		m.addSubMessage(an);
-
-		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
-		getParticipant().waitFor(heartbeatResponseDelay);
 
 		GuidPrefix targetPrefix = wp.getGuid().getPrefix(); 
 
