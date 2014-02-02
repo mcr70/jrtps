@@ -268,30 +268,15 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private WriterProxy getWriterProxy(Guid writerGuid) {
-		WriterProxy wp = null;
+		WriterProxy wp = writerProxies.get(writerGuid);
 
-		wp = writerProxies.get(writerGuid);	
+		if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
+			log.debug("[{}] Creating proxy for SPDP writer {}", getGuid().getEntityId(), writerGuid); 
+			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+					writerGuid, new SPDPQualityOfService());
+			wp = new WriterProxy(pd);
 
-		if (wp == null) {
-			if (writerGuid.getEntityId().isBuiltinEntity()) {
-				// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
-				//       Remote entities are assumed alive even though corresponding discovery data has not been
-				//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
-
-				//if (EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
-
-				log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-				PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-						writerGuid, new SPDPQualityOfService());
-				wp = new WriterProxy(pd);
-
-				writerProxies.put(writerGuid, wp);	
-
-				//					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-				//					wp = new WriterProxy(writerGuid);
-				//					writerProxies.put(writerGuid, wp); 
-				//}
-			}
+			writerProxies.put(writerGuid, wp);	
 		}
 
 		return wp;

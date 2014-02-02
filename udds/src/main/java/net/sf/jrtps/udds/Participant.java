@@ -210,6 +210,12 @@ public class Participant {
 		ParticipantData pd = createSPDPParticipantData();
 		pdWriter.write(pd);
 
+		// Add a matched reader for SPDP writer 
+//		SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+//				new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
+//		pdWriter.getRTPSWriter().addMatchedReader(sd);
+		
+		
 		// TODO: We should get rid of resender thread. Each RTPSWriter has an announce thread.
 		createSPDPResender(config.getSPDPResendPeriod(), pdWriter.getRTPSWriter());
 	}
@@ -477,8 +483,9 @@ public class Participant {
 			@Override
 			public void run() {
 				boolean running = true;
+				Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 				while (running) {
-					spdp_w.notifyReader(new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER));
+					spdp_w.notifyReader(guid);
 					//spdp_w.sendData(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0);
 					try {
 						running = !threadPoolExecutor.awaitTermination(period.asMillis(), TimeUnit.MILLISECONDS);
