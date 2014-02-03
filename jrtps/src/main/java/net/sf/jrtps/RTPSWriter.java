@@ -180,7 +180,7 @@ public class RTPSWriter<T> extends Endpoint {
 			}
 		}
 
-		log.trace("[{}] Added matchedReader {}", getGuid().getEntityId(), readerData);
+		log.debug("[{}] Added matchedReader {}", getGuid().getEntityId(), readerData);
 		return proxy;
 	}
 

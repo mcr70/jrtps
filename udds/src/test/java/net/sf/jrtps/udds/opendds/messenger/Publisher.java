@@ -9,7 +9,7 @@ public class Publisher {
 		p.setMarshaller(Message.class, new MessageMarshaller());
 		
 		DataWriter<Message> dw = p.createDataWriter("Movie Discussion List", 
-				Message.class, "Messenger::Message", new MessengerQoS());
+				Message.class, "IDL:Messenger/MessageTypeSupport:1.0", new MessengerQoS());
 		
 		for (int i = 0; i < 10; i++) {
 			Message m = new Message("from foo" + i, "subject bar" + i, i, "text baz" + i, i);
