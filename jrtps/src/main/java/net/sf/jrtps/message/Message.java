@@ -80,7 +80,7 @@ public class Message {
 				submessages.add(sm);
 			}
 			catch(BufferUnderflowException bue) {
-				log.warn("Buffer underflow");
+				log.warn("Buffer underflow", bue);
 				break;
 			}
 		}
