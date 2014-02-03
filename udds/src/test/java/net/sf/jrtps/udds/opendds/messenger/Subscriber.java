@@ -12,7 +12,7 @@ public class Subscriber {
  
 		DataReader<Message> dr = 
 				p.createDataReader("Movie Discussion List", 
-						Message.class, "Messenger::Message", new MessengerQoS());
+						Message.class, "IDL:Messenger/MessageTypeSupport:1.0", new MessengerQoS());
 		
 		MessageListener hl = new MessageListener();
 		dr.addListener(hl);

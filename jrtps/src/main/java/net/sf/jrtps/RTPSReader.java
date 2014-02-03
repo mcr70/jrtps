@@ -98,7 +98,7 @@ public class RTPSReader<T> extends Endpoint {
 		WriterProxy wp = new WriterProxy(writerData);
 		writerProxies.put(writerData.getKey(), wp);	
 
-		log.trace("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
+		log.debug("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
 
 		return wp;
 	}
