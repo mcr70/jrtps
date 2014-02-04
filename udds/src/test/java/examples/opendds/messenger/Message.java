@@ -1,4 +1,4 @@
-package net.sf.jrtps.udds.opendds.messenger;
+package examples.opendds.messenger;
 
 public class Message {
 	String from;

@@ -1,4 +1,4 @@
-package net.sf.jrtps.udds.opendds.messenger;
+package examples.ospl.hello;
 
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
@@ -6,13 +6,13 @@ import net.sf.jrtps.udds.Participant;
 public class Publisher {
 	public static void main(String[] args) throws Exception {
 		Participant p = new Participant(0, 2); // Create participant; domain 0, participant 2
-		p.setMarshaller(Message.class, new MessageMarshaller());
+		p.setMarshaller(Msg.class, new MsgMarshaller());
 		
-		DataWriter<Message> dw = p.createDataWriter("Movie Discussion List", 
-				Message.class, "IDL:Messenger/MessageTypeSupport:1.0", new MessengerQoS());
+		DataWriter<Msg> dw = p.createDataWriter("HelloWorldData_Msg", 
+				Msg.class, "HelloWorldData::Msg", new MsgQoS());
 		
 		for (int i = 0; i < 10; i++) {
-			Message m = new Message("from foo" + i, "subject bar" + i, i, "text baz" + i, i);
+			Msg m = new Msg(i, "message" + i);
 			dw.write(m);
 			Thread.sleep(1000);
 		}

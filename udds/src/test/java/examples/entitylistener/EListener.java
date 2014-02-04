@@ -1,18 +1,18 @@
-package net.sf.jrtps.udds.hello;
+package examples.entitylistener;
 
 import java.io.IOException;
 
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
 
-public class EntityListener implements net.sf.jrtps.udds.EntityListener {
+public class EListener implements net.sf.jrtps.udds.EntityListener {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
 		Participant p = new Participant(0, 4); // Create participant; domain 0, participant 2
-		p.addEntityListener(new EntityListener());
+		p.addEntityListener(new EListener());
 		System.out.println("\n*** Press enter to close Participant ***\n");
 		System.in.read();
 		

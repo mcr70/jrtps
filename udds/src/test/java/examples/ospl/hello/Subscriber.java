@@ -1,18 +1,17 @@
-package net.sf.jrtps.udds.hello;
+package examples.ospl.hello;
 
 import java.io.IOException;
 
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.Participant;
 
-
-public class HelloReader {
+public class Subscriber {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-		HelloListener hl = new HelloListener(); // implements DataListener
-
-		Participant p = new Participant(0, 1); // Create participant; domain 0, participant 2
-		
-		DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
+		Participant p = new Participant(0, 1); // Create participant; domain 0, participant 1
+		p.setMarshaller(Msg.class, new MsgMarshaller());
+ 
+		DataReader<Msg> dr = p.createDataReader("HelloWorldData_Msg", Msg.class, "HelloWorldData::Msg", new MsgQoS());
+		MsgListener hl = new MsgListener();
 		dr.addListener(hl);
 		
 		System.out.println("\n*** Press enter to close Participant ***\n");

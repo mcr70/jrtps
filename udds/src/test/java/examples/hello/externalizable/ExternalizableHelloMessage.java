@@ -1,4 +1,4 @@
-package net.sf.jrtps.udds.hello;
+package examples.hello.externalizable;
 import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
