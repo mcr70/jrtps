@@ -234,17 +234,15 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private void sendAckNack(WriterProxy wp) {
-		Message m = new Message(getGuid().getPrefix());
-		AckNack an = createAckNack(wp);
-
-		// Set the finalFlag. If all the data is already received, set it to true,
-		// otherwise set it to false(response required)
-		an.finalFlag(wp.isAllReceived());
-
-		m.addSubMessage(an);
-
 		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
 		getParticipant().waitFor(heartbeatResponseDelay);
+
+		Message m = new Message(getGuid().getPrefix());
+
+		AckNack an = createAckNack(wp);   // If all the data is already received, set finalFlag to true, 
+		an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
+
+		m.addSubMessage(an);
 
 		GuidPrefix targetPrefix = wp.getGuid().getPrefix(); 
 
