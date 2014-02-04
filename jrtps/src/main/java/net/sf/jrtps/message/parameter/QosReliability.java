@@ -38,6 +38,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 	public Kind getKind() {
 		switch(kind) {
 		case BEST_EFFORT_INT: return Kind.BEST_EFFORT;
+		case 2: // TODO: OSPL treats 2 as reliable
 		case RELIABLE_INT: return Kind.RELIABLE;  
 		}
 
