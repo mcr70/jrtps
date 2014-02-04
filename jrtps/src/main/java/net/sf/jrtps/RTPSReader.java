@@ -96,6 +96,7 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	public WriterProxy addMatchedWriter(PublicationData writerData) {
 		WriterProxy wp = new WriterProxy(writerData);
+		addLocators(wp);
 		writerProxies.put(writerData.getKey(), wp);	
 
 		log.debug("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);

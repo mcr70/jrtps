@@ -9,9 +9,6 @@ import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.SubscriptionData;
-import net.sf.jrtps.message.parameter.MulticastLocator;
-import net.sf.jrtps.message.parameter.Parameter;
-import net.sf.jrtps.message.parameter.UnicastLocator;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 
@@ -61,7 +58,6 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 
 						if (offered.isCompatibleWith(requested)) {
 							ReaderProxy proxy = w.getRTPSWriter().addMatchedReader(readerData);
-							addLocators(proxy);
 							fireReaderMatched(w, readerData);
 						}
 						else {
@@ -86,32 +82,5 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 				}
 			}
 		}
-	}
-
-	// TODO: this is duplicated in BuiltinPublicationsListener
-	private void addLocators(ReaderProxy proxy) {
-		ParticipantData pd = discoveredParticipants.get(proxy.getGuid().getPrefix());
-		if (proxy.getGuid().getEntityId().isBuiltinEntity()) {
-			proxy.setUnicastLocator(pd.getMetatrafficUnicastLocator());
-			proxy.setMulticastLocator(pd.getMetatrafficMulticastLocator());
-		}
-		else {
-			proxy.setUnicastLocator(pd.getUnicastLocator());
-			proxy.setMulticastLocator(pd.getMulticastLocator());			
-		}
-		
-		List<Parameter> params = proxy.getSubscriptionData().getParameters();
-		for (Parameter p : params) {
-			if (p instanceof UnicastLocator) {
-				UnicastLocator ul = (UnicastLocator) p;
-				proxy.setUnicastLocator(ul.getLocator());
-			}
-			else if (p instanceof MulticastLocator) {
-				MulticastLocator mc = (MulticastLocator) p;
-				proxy.setMulticastLocator(mc.getLocator());
-			}
-		}
-		
-		log.debug("Locators for {}: {}, {}", proxy.getGuid(), proxy.getUnicastLocator(), proxy.getMulticastLocator());
 	}
 }

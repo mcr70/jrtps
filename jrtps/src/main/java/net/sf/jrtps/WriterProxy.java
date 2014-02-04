@@ -3,7 +3,6 @@ package net.sf.jrtps;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
-import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumberSet;
 
 import org.slf4j.Logger;
@@ -18,8 +17,6 @@ import org.slf4j.LoggerFactory;
  */
 public class WriterProxy extends Proxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
-	private final Guid writerGuid;
-	private PublicationData writerData; // TODO: should be final
 
 	private Heartbeat latestHeartBeat;
 
@@ -27,17 +24,9 @@ public class WriterProxy extends Proxy {
 	private volatile long seqNumMax = 0;
 
 	WriterProxy(PublicationData wd) {
-		this.writerData = wd;
-		writerGuid = wd.getKey();
+		super(wd);
 	}
 
-	/**
-	 * Gets the guid of the writer represented by this WriterProxy.
-	 * @return Guid
-	 */
-	public Guid getGuid() {
-		return writerGuid;
-	}
 
 	/**
 	 * Gets the max Data seqnum that has been received.
@@ -63,7 +52,7 @@ public class WriterProxy extends Proxy {
 	 * @return WriterData
 	 */
 	public PublicationData getPublicationData() {
-		return writerData;
+		return (PublicationData) getDiscoveredData();
 	}
 
 	/**
