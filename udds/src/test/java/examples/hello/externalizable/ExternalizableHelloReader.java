@@ -1,4 +1,4 @@
-package net.sf.jrtps.udds.hello;
+package examples.hello.externalizable;
 
 import java.io.IOException;
 
@@ -8,11 +8,10 @@ import net.sf.jrtps.udds.Participant;
 
 public class ExternalizableHelloReader {
 	public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-		ExternalizableHelloListener hl = new ExternalizableHelloListener(); // implements DataListener
-
 		Participant p = new Participant(0, 1); // Create participant; domain 0, participant 2
 
 		DataReader<ExternalizableHelloMessage> dr = p.createDataReader(ExternalizableHelloMessage.class);
+		ExternalizableHelloListener hl = new ExternalizableHelloListener(); // implements DataListener
 		dr.addListener(hl);
 		
 		System.out.println("\n*** Press enter to close Participant ***\n");

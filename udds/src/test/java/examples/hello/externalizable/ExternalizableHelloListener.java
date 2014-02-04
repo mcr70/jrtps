@@ -1,4 +1,4 @@
-package net.sf.jrtps.udds.hello;
+package examples.hello.externalizable;
 
 import java.util.List;
 
