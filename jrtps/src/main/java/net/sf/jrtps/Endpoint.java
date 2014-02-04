@@ -133,6 +133,28 @@ public class Endpoint {
 		return overFlowed;
 	}
 
+	protected boolean sendMessage(Message m, Proxy proxy) {
+		boolean overFlowed = false;
+		Locator locator = proxy.getUnicastLocator();
+		
+		if (locator != null) {
+			try {
+				UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO: No need to create and close all the time
+				overFlowed = w.sendMessage(m);
+				w.close();
+			} 
+			catch(IOException e) {
+				log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+			}
+		}
+		else {
+			log.debug("[{}] Unable to send message, no locator for proxy {}", getGuid().getEntityId(), proxy);
+			//participant.ignoreParticipant(targetPrefix);
+		}
+		
+		return overFlowed;		
+	}
+	
 	/**
 	 * Get the RTPSParticipant, that created this entity. 
 	 * @return RTPSParticipant

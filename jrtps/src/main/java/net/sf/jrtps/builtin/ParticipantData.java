@@ -200,13 +200,13 @@ public class ParticipantData extends DiscoveredData {
 					addQosPolicy((QosPolicy) param);
 				}
 				else {
-					addUnhandledParameter(param);
+					addParameter(param);
 				}			
 			}
 		}
 
-		if (getUnhandledParameters().size() > 0) {
-			log.warn("Unhandled parameters encountered: {}", getUnhandledParameters());
+		if (getParameters().size() > 0) {
+			log.warn("Unhandled parameters encountered: {}", getParameters());
 		}
 		
 		

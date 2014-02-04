@@ -1,8 +1,8 @@
 package net.sf.jrtps.udds;
 
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.SubscriptionData;
 
 class BuiltinListener {
 	protected final Participant participant;
