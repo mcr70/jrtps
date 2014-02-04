@@ -13,7 +13,6 @@ public class SequenceNumberSetTest {
 		RTPSByteBuffer bb = new RTPSByteBuffer(snsBytes);
 		
 		SequenceNumberSet sns = new SequenceNumberSet(bb);
-		assertEquals(1, sns.getBitmapBase());
 		assertEquals(1, sns.getBitmaps().length);
 	}
 
@@ -24,7 +23,6 @@ public class SequenceNumberSetTest {
 		RTPSByteBuffer bb = new RTPSByteBuffer(snsBytes);
 		
 		SequenceNumberSet sns = new SequenceNumberSet(bb);
-		assertEquals(1, sns.getBitmapBase());
 		assertEquals(2, sns.getBitmaps().length);
 	}
 }
