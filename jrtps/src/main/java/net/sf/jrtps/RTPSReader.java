@@ -249,7 +249,8 @@ public class RTPSReader<T> extends Endpoint {
 		log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getGuid().getEntityId(), 
 				an.getCount(), an.getReaderSNState(), an.finalFlag(), targetPrefix);
 
-		sendMessage(m, wp);		
+		//sendMessage(m, wp);
+		sendMessage(m, targetPrefix);
 	}
 
 	private AckNack createAckNack(WriterProxy wp) {
