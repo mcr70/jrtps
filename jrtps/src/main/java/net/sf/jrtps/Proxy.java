@@ -1,12 +1,19 @@
 package net.sf.jrtps;
 
+import net.sf.jrtps.builtin.DiscoveredData;
+import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.Locator;
 
 public class Proxy {
-
+	private final DiscoveredData discoveredData;
+	
 	private Locator ucLocator;
 	private Locator mcLocator;
 
+	protected Proxy(DiscoveredData dd) {
+		discoveredData = dd;
+	}
+	
 	/**
 	 * Gets the unicast locator of this Proxy.
 	 * @return unicast locator
@@ -37,5 +44,17 @@ public class Proxy {
 	 */
 	public void setMulticastLocator(Locator locator) {
 		this.mcLocator = locator;
+	}
+
+	public DiscoveredData getDiscoveredData() {
+		return discoveredData;
+	}
+	
+	public Guid getGuid() {
+		return discoveredData.getKey();
+	}
+
+	public String toString() {
+		return getGuid().toString();
 	}
 }

@@ -1,10 +1,14 @@
 package net.sf.jrtps;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;
+import net.sf.jrtps.message.parameter.MulticastLocator;
+import net.sf.jrtps.message.parameter.Parameter;
+import net.sf.jrtps.message.parameter.UnicastLocator;
 import net.sf.jrtps.transport.UDPWriter;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -161,5 +165,38 @@ public class Endpoint {
 	 */
 	protected RTPSParticipant getParticipant() {
 		return participant;
+	}
+
+
+	/**
+	 * Adds locators to given proxy.
+	 * @param proxy
+	 */
+	protected void addLocators(Proxy proxy) {
+		// Set the default locators from ParticipantData
+		ParticipantData pd = discoveredParticipants.get(proxy.getGuid().getPrefix());
+		if (proxy.getGuid().getEntityId().isBuiltinEntity()) {
+			proxy.setUnicastLocator(pd.getMetatrafficUnicastLocator());
+			proxy.setMulticastLocator(pd.getMetatrafficMulticastLocator());
+		}
+		else {
+			proxy.setUnicastLocator(pd.getUnicastLocator());
+			proxy.setMulticastLocator(pd.getMulticastLocator());			
+		}
+		
+		// Then check if proxys discovery data contains locator info
+		List<Parameter> params = proxy.getDiscoveredData().getParameters();
+		for (Parameter p : params) {
+			if (p instanceof UnicastLocator) {
+				UnicastLocator ul = (UnicastLocator) p;
+				proxy.setUnicastLocator(ul.getLocator());
+			}
+			else if (p instanceof MulticastLocator) {
+				MulticastLocator mc = (MulticastLocator) p;
+				proxy.setMulticastLocator(mc.getLocator());
+			}
+		}
+		
+		log.debug("Locators for {}: {}, {}", proxy.getGuid(), proxy.getUnicastLocator(), proxy.getMulticastLocator());
 	}
 }
