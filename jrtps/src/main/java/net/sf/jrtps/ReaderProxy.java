@@ -10,7 +10,7 @@ import net.sf.jrtps.types.Guid;
  *
  * @author mcr70
  */
-public class ReaderProxy {
+public class ReaderProxy extends Proxy {
 	private final SubscriptionData readerData;
 	private final boolean expectsInlineQoS;
 	

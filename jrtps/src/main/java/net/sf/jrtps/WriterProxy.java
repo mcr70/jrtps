@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-public class WriterProxy {
+public class WriterProxy extends Proxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 	private final Guid writerGuid;
 	private PublicationData writerData; // TODO: should be final

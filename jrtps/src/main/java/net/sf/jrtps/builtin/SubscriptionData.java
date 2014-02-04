@@ -35,6 +35,7 @@ public class SubscriptionData extends DiscoveredData {
 		Iterator<Parameter> iter = parameterList.getParameters().iterator();
 		while (iter.hasNext()) {
 			Parameter param = iter.next();
+			addParameter(param);
 
 			log.trace("{}", param);
 			switch(param.getParameterId()) {
@@ -65,14 +66,7 @@ public class SubscriptionData extends DiscoveredData {
 				if (param instanceof QosPolicy) {
 					addQosPolicy((QosPolicy) param);
 				}
-				else {
-					addUnhandledParameter(param);
-				}
 			}
-		}
-		
-		if (getUnhandledParameters().size() > 0) {
-			log.warn("Unhandled parameters encountered: {}", getUnhandledParameters());
 		}
 		
 		if (super.typeName == null) { // Other vendors may use different typeName

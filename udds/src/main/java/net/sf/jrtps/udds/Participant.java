@@ -185,7 +185,7 @@ public class Participant {
 		// ----  Create a Readers for SEDP  ---------
 		DataReader<PublicationData> wdReader = 
 				createDataReader(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
-		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredWriters));
+		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredParticipants, discoveredWriters));
 
 		DataReader<SubscriptionData> rdReader = 
 				createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);

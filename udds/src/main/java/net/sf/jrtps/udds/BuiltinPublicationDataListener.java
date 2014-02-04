@@ -6,8 +6,14 @@ import java.util.Map;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
+import net.sf.jrtps.WriterProxy;
+import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.message.parameter.MulticastLocator;
+import net.sf.jrtps.message.parameter.Parameter;
+import net.sf.jrtps.message.parameter.UnicastLocator;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +21,12 @@ import org.slf4j.LoggerFactory;
 class BuiltinPublicationDataListener extends BuiltinListener implements SampleListener<PublicationData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinPublicationDataListener.class);
 
+	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 	private Map<Guid, PublicationData> discoveredWriters;
 
-	BuiltinPublicationDataListener(Participant p, Map<Guid, PublicationData> discoveredWriters) {
-		super(p); 
+	BuiltinPublicationDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants, Map<Guid, PublicationData> discoveredWriters) {
+		super(p);
+		this.discoveredParticipants = discoveredParticipants; 
 		this.discoveredWriters = discoveredWriters;
 	}
 
@@ -45,7 +53,8 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 						log.trace("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
 
 						if (offered.isCompatibleWith(requested)) {
-							r.getRTPSReader().addMatchedWriter(writerData);
+							WriterProxy proxy = r.getRTPSReader().addMatchedWriter(writerData);
+							addLocators(proxy);
 							fireWriterMatched(r, writerData);
 						}
 						else {
@@ -58,4 +67,30 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 		}
 	}
 
+	// TODO: this is duplicated in BuiltinSubscriptionsListener
+	private void addLocators(WriterProxy proxy) {
+		ParticipantData pd = discoveredParticipants.get(proxy.getGuid().getPrefix());
+		if (proxy.getGuid().getEntityId().isBuiltinEntity()) {
+			proxy.setUnicastLocator(pd.getMetatrafficUnicastLocator());
+			proxy.setMulticastLocator(pd.getMetatrafficMulticastLocator());
+		}
+		else {
+			proxy.setUnicastLocator(pd.getUnicastLocator());
+			proxy.setMulticastLocator(pd.getMulticastLocator());			
+		}
+		
+		List<Parameter> params = proxy.getPublicationData().getParameters();
+		for (Parameter p : params) {
+			if (p instanceof UnicastLocator) {
+				UnicastLocator ul = (UnicastLocator) p;
+				proxy.setUnicastLocator(ul.getLocator());
+			}
+			else if (p instanceof MulticastLocator) {
+				MulticastLocator mc = (MulticastLocator) p;
+				proxy.setMulticastLocator(mc.getLocator());
+			}
+		}
+		
+		log.debug("Locators for {}: {}, {}", proxy.getGuid(), proxy.getUnicastLocator(), proxy.getMulticastLocator());
+	}
 }
