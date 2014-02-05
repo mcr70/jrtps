@@ -86,8 +86,6 @@ class RTPSMessageReceiver implements Runnable {
 			logger.debug("Discarding message originating from this participant");
 			return;
 		}
-
-		logger.debug("Got Message from {}", sourceGuidPrefix);	
 		
 		Set<RTPSReader<?>> dataReceivers = new HashSet<>();
 		List<SubMessage> subMessages = msg.getSubMessages();
