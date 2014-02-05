@@ -18,6 +18,7 @@ import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
+import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -61,21 +62,23 @@ public class RTPSWriter<T> extends Endpoint {
 		this.writer_cache = wCache;
 		this.nackResponseDelay = configuration.getNackResponseDelay(); 
 		this.heartbeatPeriod = configuration.getHeartbeatPeriod();
-		
-		Runnable r = new Runnable() {
-			@Override
-			public void run() {
-				log.debug("[{}] Starting periodical notification", getGuid().getEntityId());
-				try {
-					notifyReaders();
+
+		if (isReliable()) {
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					log.debug("[{}] Starting periodical notification", getGuid().getEntityId());
+					try {
+						notifyReaders();
+					}
+					catch(Exception e) {
+						log.error("Got exception while doing periodical notification", e);
+					}
 				}
-				catch(Exception e) {
-					log.error("Got exception while doing periodical notification", e);
-				}
-			}
-		};
-		
-		announceThread = participant.scheduleAtFixedRate(r, heartbeatPeriod);
+			};
+
+			announceThread = participant.scheduleAtFixedRate(r, heartbeatPeriod);
+		}
 	}
 
 
@@ -109,12 +112,12 @@ public class RTPSWriter<T> extends Endpoint {
 	public void notifyReader(Guid guid) {
 		log.debug("Notifying {}", guid);
 		ReaderProxy proxy = readerProxies.get(guid);
-		
+
 		if (proxy == null) {
 			log.warn("Will not notify, no proxy for {}", guid);
 			return;
 		}
-		
+
 		if (proxy.isReliable()) {
 			sendHeartbeat(proxy);
 		}
@@ -142,7 +145,10 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Close this writer. Closing a writer clears its cache of changes.
 	 */
 	public void close() {
-		announceThread.cancel(true);
+		if (announceThread != null) {
+			announceThread.cancel(true);
+		}
+		
 		readerProxies.clear();
 		//writer_cache.clear();
 	}
@@ -157,7 +163,7 @@ public class RTPSWriter<T> extends Endpoint {
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		addLocators(proxy);
 		readerProxies.put(readerData.getKey(), proxy);
-		
+
 		QosDurability readerDurability = 
 				(QosDurability) readerData.getQualityOfService().getPolicy(QosDurability.class);
 
@@ -382,5 +388,12 @@ public class RTPSWriter<T> extends Endpoint {
 
 	public boolean isMatchedWith(SubscriptionData readerData) {
 		return readerProxies.get(readerData.getKey()) != null;
+	}
+
+
+	boolean isReliable() {
+		QosReliability policy = (QosReliability) getQualityOfService().getPolicy(QosReliability.class);
+
+		return policy.getKind() == QosReliability.Kind.RELIABLE;
 	}
 }
