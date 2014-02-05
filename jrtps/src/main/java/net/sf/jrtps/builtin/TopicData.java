@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 public class TopicData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSTopic";
+	public static final String BUILTIN_TYPE_NAME = "TOPIC_BUILT_IN_TOPIC_TYPE"; // TODO: for odds 3.5
 	
 	private static final Logger log = LoggerFactory.getLogger(TopicData.class);
 

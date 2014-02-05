@@ -17,6 +17,7 @@ import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ParticipantManualLivelinessCount;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Duration;
@@ -38,7 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ParticipantData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSParticipant";
-
+	public static final String BUILTIN_TYPE_NAME = "PARTICIPANT_BUILT_IN_TOPIC_TYPE"; // TODO: for odds 3.5
+	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
 	
 	private ProtocolVersion_t protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
@@ -195,9 +197,19 @@ public class ParticipantData extends DiscoveredData {
 			case PID_SENTINEL:
 				break;
 			default:
-				log.warn("Parameter {} not handled", param.getParameterId());
+				if (param instanceof QosPolicy) {
+					addQosPolicy((QosPolicy) param);
+				}
+				else {
+					addParameter(param);
+				}			
 			}
 		}
+
+		if (getParameters().size() > 0) {
+			log.warn("Unhandled parameters encountered: {}", getParameters());
+		}
+		
 		
 		if (super.typeName == null) { // Other vendors may use different typeName
 			super.typeName = ParticipantData.class.getName();
@@ -321,7 +333,9 @@ public class ParticipantData extends DiscoveredData {
 
 	public String toString() {
 		return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + 
-				", lease duration " + getLeaseDuration() + ", locators " + getAllLocators() + 
+				", lease duration " + getLeaseDuration() + 
+				", u_uc: " + unicastLocator + ", u_mc: " + multicastLocator + 
+				", m_uc: " + metatrafficUnicastLocator + ", m_mc: " + metatrafficMulticastLocator +
 				", " + qos;
 	}
 }

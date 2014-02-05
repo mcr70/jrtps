@@ -1,5 +1,13 @@
+0.5.6
+	- Rearranged udds test to examples. Initial interoperability tests for 
+	  OpenSplice and OpenDDS. Not interoperable for now :|
+	- FIX: Heartbeat announce period is applied only for reliable writers
+	- FIX: Heartbeat response delay is applied before AckNack gets created
+	- FIX: SequenceNumberSet reading/writing
+	
 0.5.5	
 	- Artifacts are OSGi bundles
+
 0.5.1
 	- Heartbeat period
 	- Artifacts are OSGi bundles

@@ -18,23 +18,9 @@ import net.sf.jrtps.types.SequenceNumberSet;
 public class Gap extends SubMessage {
 	public static final int KIND = 0x08;
 	
-	/**
-	 * Identifies the Reader Entity that is being informed of the irrelevance of a set of sequence numbers.
-	 */
 	private EntityId readerId;
-	/**
-	 * Identifies the Writer Entity to which the range of sequence numbers applies.
-	 */
 	private EntityId writerId;
-	/**
-	 * Identifies the first sequence number in the interval of irrelevant sequence numbers.
-	 */
 	private SequenceNumber gapStart;
-	/**
-	 * Serves two purposes:
-	 * (1) Identifies the last sequence number in the interval of irrelevant sequence numbers.
-	 * (2) Identifies an additional list of sequence numbers that are irrelevant.
-	 */
 	private SequenceNumberSet gapList;
 
 	public Gap(SubMessageHeader smh, RTPSByteBuffer bb) {
@@ -43,18 +29,33 @@ public class Gap extends SubMessage {
 		readMessage(bb);
 	}
 
+	/**
+	 * Get the Reader Entity that is being informed of the irrelevance of a set of sequence numbers.
+	 */
 	public EntityId getReaderId() {
 		return readerId;
 	}
 	
+	/**
+	 * Get the Writer Entity to which the range of sequence numbers applies.
+	 */
 	public EntityId getWriterId() {
 		return writerId;
 	}
 
+	/**
+	 * Identifies the first sequence number in the interval of irrelevant sequence numbers.
+	 * @return First irrelevant sequence number
+	 */
 	public SequenceNumber getGapStart() {
 		return gapStart;
 	}
 	
+	/**
+	 * SequenceNumberSet.bitmapBase is the last sequence number of irrelevant seq nums.
+	 * SequenceNumberSet.bitmaps identifies additional irrelevant sequence numbers.
+	 * @return SequenceNumberSet
+	 */
 	public SequenceNumberSet getGapList() {
 		return gapList;
 	}
@@ -78,6 +79,6 @@ public class Gap extends SubMessage {
 	}
 	
 	public String toString() {
-		return gapStart + ", " + gapList; 
+		return super.toString() + " " + gapStart + ", " + gapList; 
 	}
 }

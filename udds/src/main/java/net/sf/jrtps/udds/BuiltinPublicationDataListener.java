@@ -6,8 +6,11 @@ import java.util.Map;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
+import net.sf.jrtps.WriterProxy;
+import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +18,12 @@ import org.slf4j.LoggerFactory;
 class BuiltinPublicationDataListener extends BuiltinListener implements SampleListener<PublicationData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinPublicationDataListener.class);
 
+	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 	private Map<Guid, PublicationData> discoveredWriters;
 
-	BuiltinPublicationDataListener(Participant p, Map<Guid, PublicationData> discoveredWriters) {
-		super(p); 
+	BuiltinPublicationDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants, Map<Guid, PublicationData> discoveredWriters) {
+		super(p);
+		this.discoveredParticipants = discoveredParticipants; 
 		this.discoveredWriters = discoveredWriters;
 	}
 
@@ -29,7 +34,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 
 			Guid key = writerData.getKey();
 			if (discoveredWriters.put(key, writerData) == null) {
-				log.debug("Discovered a new writer {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
+				log.debug("Discovered a new publication {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
 				fireWriterDetected(writerData);
 			}
 
@@ -45,7 +50,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 						log.trace("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
 
 						if (offered.isCompatibleWith(requested)) {
-							r.getRTPSReader().addMatchedWriter(writerData);
+							WriterProxy proxy = r.getRTPSReader().addMatchedWriter(writerData);
 							fireWriterMatched(r, writerData);
 						}
 						else {
@@ -57,5 +62,4 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 			}
 		}
 	}
-
 }

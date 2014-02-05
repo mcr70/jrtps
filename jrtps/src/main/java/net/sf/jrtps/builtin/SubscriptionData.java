@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SubscriptionData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSSubscription";
+	public static final String BUILTIN_TYPE_NAME = "SUBSCRIPTION_BUILT_IN_TOPIC_TYPE"; // TODO: for odds 3.5
 	
 	private static final Logger log = LoggerFactory.getLogger(SubscriptionData.class);
 
@@ -35,6 +36,7 @@ public class SubscriptionData extends DiscoveredData {
 		Iterator<Parameter> iter = parameterList.getParameters().iterator();
 		while (iter.hasNext()) {
 			Parameter param = iter.next();
+			addParameter(param);
 
 			log.trace("{}", param);
 			switch(param.getParameterId()) {
@@ -64,9 +66,6 @@ public class SubscriptionData extends DiscoveredData {
 			default:
 				if (param instanceof QosPolicy) {
 					addQosPolicy((QosPolicy) param);
-				}
-				else {
-					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
 				}
 			}
 		}

@@ -96,9 +96,10 @@ public class RTPSReader<T> extends Endpoint {
 	 */
 	public WriterProxy addMatchedWriter(PublicationData writerData) {
 		WriterProxy wp = new WriterProxy(writerData);
+		addLocators(wp);
 		writerProxies.put(writerData.getKey(), wp);	
 
-		log.trace("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
+		log.debug("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
 
 		return wp;
 	}
@@ -172,13 +173,12 @@ public class RTPSReader<T> extends Endpoint {
 		if (wp != null) {
 			if (wp.acceptData(data.getWriterSequenceNumber())) {
 				Object obj = marshaller.unmarshall(data.getDataEncapsulation());
-				log.trace("[{}] Got Data: {}, {}", getGuid().getEntityId(), 
-						obj.getClass().getSimpleName(), data.getWriterSequenceNumber());
+				log.debug("[{}] Got Data: {}", getGuid().getEntityId(), data.getWriterSequenceNumber());
 
 				pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));	
 			}
 			else {
-				log.trace("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
+				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getGuid().getEntityId(), 
 						data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
 			}
 		}
@@ -235,26 +235,23 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	private void sendAckNack(WriterProxy wp) {
-		Message m = new Message(getGuid().getPrefix());
-		AckNack an = createAckNack(wp);
-
-		if (an.getReaderSNState().getBitmapBase() > wp.getGreatestDataSeqNum()) {
-			// We already have all the samples. Set the finalFlag to indicate that
-			// no response is needed
-			an.finalFlag(true);
-		}
-
-		m.addSubMessage(an);
-
 		log.trace("[{}] Wait for heartbeat response delay: {} ms", getGuid().getEntityId(), heartbeatResponseDelay);
 		getParticipant().waitFor(heartbeatResponseDelay);
+
+		Message m = new Message(getGuid().getPrefix());
+
+		AckNack an = createAckNack(wp);   // If all the data is already received, set finalFlag to true, 
+		an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
+
+		m.addSubMessage(an);
 
 		GuidPrefix targetPrefix = wp.getGuid().getPrefix(); 
 
 		log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getGuid().getEntityId(), 
 				an.getCount(), an.getReaderSNState(), an.finalFlag(), targetPrefix);
 
-		sendMessage(m, targetPrefix);		
+		sendMessage(m, wp);
+		//sendMessage(m, targetPrefix);
 	}
 
 	private AckNack createAckNack(WriterProxy wp) {
@@ -265,36 +262,21 @@ public class RTPSReader<T> extends Endpoint {
 		int[] bitmaps = new int[] {-1}; // Negatively ACK rest
 		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst+1, bitmaps);
 
-		AckNack an = new AckNack(getGuid().getEntityId(), wp.getGuid().getEntityId(), snSet, ackNackCount++);
+		AckNack an = new AckNack(getGuid().getEntityId(), wp.getGuid().getEntityId(), snSet, ++ackNackCount);
 
 		return an;
 	}
 
 	private WriterProxy getWriterProxy(Guid writerGuid) {
-		WriterProxy wp = null;
+		WriterProxy wp = writerProxies.get(writerGuid);
 
-		wp = writerProxies.get(writerGuid);	
+		if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
+			log.debug("[{}] Creating proxy for SPDP writer {}", getGuid().getEntityId(), writerGuid); 
+			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+					writerGuid, new SPDPQualityOfService());
+			wp = new WriterProxy(pd);
 
-		if (wp == null) {
-			if (writerGuid.getEntityId().isBuiltinEntity()) {
-				// TODO: Ideally, we should not need to do this. For now, builtin entities need this behaviour:
-				//       Remote entities are assumed alive even though corresponding discovery data has not been
-				//       received yet. I.e. during discovery, BuiltinEnpointSet is received with ParticipantData.
-
-				//if (EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
-
-				log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-				PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-						writerGuid, new SPDPQualityOfService());
-				wp = new WriterProxy(pd);
-
-				writerProxies.put(writerGuid, wp);	
-
-				//					log.debug("[{}] Creating proxy for {}", getGuid().getEntityId(), writerGuid); 
-				//					wp = new WriterProxy(writerGuid);
-				//					writerProxies.put(writerGuid, wp); 
-				//}
-			}
+			writerProxies.put(writerGuid, wp);	
 		}
 
 		return wp;

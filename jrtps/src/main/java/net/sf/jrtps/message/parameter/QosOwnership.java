@@ -35,6 +35,7 @@ public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwner
 	public void writeTo(RTPSByteBuffer bb) {
 		bb.write_long(kind);
 	}
+
 	public Kind getKind() {
 		switch(kind) {
 		case 0: return Kind.SHARED;

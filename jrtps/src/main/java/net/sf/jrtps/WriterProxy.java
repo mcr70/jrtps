@@ -3,7 +3,6 @@ package net.sf.jrtps;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
-import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumberSet;
 
 import org.slf4j.Logger;
@@ -16,10 +15,8 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-public class WriterProxy {
+public class WriterProxy extends Proxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
-	private final Guid writerGuid;
-	private PublicationData writerData; // TODO: should be final
 
 	private Heartbeat latestHeartBeat;
 
@@ -27,17 +24,9 @@ public class WriterProxy {
 	private volatile long seqNumMax = 0;
 
 	WriterProxy(PublicationData wd) {
-		this.writerData = wd;
-		writerGuid = wd.getKey();
+		super(wd);
 	}
 
-	/**
-	 * Gets the guid of the writer represented by this WriterProxy.
-	 * @return Guid
-	 */
-	public Guid getGuid() {
-		return writerGuid;
-	}
 
 	/**
 	 * Gets the max Data seqnum that has been received.
@@ -48,11 +37,22 @@ public class WriterProxy {
 	}
 
 	/**
+	 * 
+	 */
+	boolean isAllReceived() {
+		if (latestHeartBeat == null) {
+			return false;
+		}
+		
+		return latestHeartBeat.getLastSequenceNumber() == getGreatestDataSeqNum();
+	}
+	
+	/**
 	 * Gets the WriterData associated with this WriterProxy.
 	 * @return WriterData
 	 */
 	public PublicationData getPublicationData() {
-		return writerData;
+		return (PublicationData) getDiscoveredData();
 	}
 
 	/**
@@ -90,9 +90,12 @@ public class WriterProxy {
 
 
 	/**
+	 * Updates proxys latest Heartbeat. Latest Heartbeat gets updated only if its
+	 * count is greater than previously received Heartbeat. This ensures, that
+	 * Heartbeat gets processed only once.
 	 * 
-	 * @param ackNack
-	 * @return true, if AckNack was accepted
+	 * @param hb
+	 * @return true, if Heartbeat was accepted
 	 */
 	boolean heartbeatReceived(Heartbeat hb) {
 		if (latestHeartBeat == null) {
@@ -114,7 +117,7 @@ public class WriterProxy {
 	}
 
 	void applyGap(Gap gap) {
-		log.debug("Applying GAP {}", gap);
+		log.debug("Applying {}", gap);
 		SequenceNumberSet gapList = gap.getGapList();
 		long bitmapBase = gapList.getBitmapBase();
 		if (bitmapBase - 1 > seqNumMax) {
@@ -122,7 +125,7 @@ public class WriterProxy {
 		}
 	}
 
-	Object getLatestHeartbeatCount() {
+	int getLatestHeartbeatCount() {
 		if (latestHeartBeat == null) {
 			return 0;
 		}

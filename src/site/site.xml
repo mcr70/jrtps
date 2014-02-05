@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="jRTPS">
+	<body>
+		<links>
+			<item name="jRTPS@sf" href="https://sourceforge.net/projects/jrtps/files/" />
+		</links>
+
+		<menu name="Overview">
+			<item name="Usage" href="usage.html" />
+			<item name="Examples" href="examples.html" />
+		</menu>
+
+		<!-- <menu ref="reports"/> -->
+
+		<menu name="Javadoc">
+			<item name="javadoc" href="apidocs/index.html" />
+		</menu>
+	</body>
+</project>

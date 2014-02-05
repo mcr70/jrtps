@@ -13,17 +13,12 @@ public abstract class SubMessage {
 
 	/**
 	 * Different kinds of SubMessages
-	 * @author mcr70
-	 *
 	 */
 	public enum Kind {
 		PAD, ACKNACK, HEARTBEAT, GAP, INFOTIMESTAMP, INFOSOURCE, INFOREPLYIP4,
 		INFODESTINATION, INFOREPLY, NACKFRAG, HEARTBEATFRAG, DATA, DATAFRAG, UNKNOWN
 	}
 	
-	// TODO: implement this constructor??? try to use enum instead of int kind
-	//protected SubMessage(Kind kind) {		
-	//}
 
 	/**
 	 * Constructor.

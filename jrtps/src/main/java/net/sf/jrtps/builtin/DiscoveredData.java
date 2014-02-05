@@ -7,6 +7,7 @@ import java.util.Set;
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.InlineParameter;
+import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.Guid;
 
@@ -14,6 +15,8 @@ public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
 	// This list keeps track of inconsistencies occured
 	private List<QosPolicy<?>> inconsistenPolicies = new LinkedList<>(); 
+	private List<Parameter> params = new LinkedList<>();
+	
 	protected QualityOfService qos;
 	
 	protected String typeName;
@@ -58,6 +61,23 @@ public class DiscoveredData {
 		if (inconsistenPolicies.size() > 0) {
 			resolveInconsistencies(inconsistenPolicies);
 		}
+	}
+
+	/**
+	 * Adds a Parameter that was not handled by subclass.
+	 * @param param
+	 */
+	protected void addParameter(Parameter param) {
+		params.add(param);
+	}
+	
+	/**
+	 * Gets all the parameters that were received during discovery.  
+	 * 
+	 * @return parameters
+	 */
+	public List<Parameter> getParameters() {
+		return params;
 	}
 	
 	private void resolveInconsistencies(List<QosPolicy<?>> inconsistentPolicies) throws InconsistentPolicy {

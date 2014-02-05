@@ -1,25 +1,23 @@
-o Project name
-	- bluepepper? bluespepper?
 o QoS
 	- missing EntityFactoryQos, ReaderDataLifeCycle, WriterDataLifecycle
-o Domain ID & participant ID
-	- Domain ID is encoded in GuidPrefix	
 o types
 	- octet -> byte
 	- long -> int
-o SequenceNumber_t -> java long	
-o Should we utilize DDS types like DDS.Duration_t
 o Optional RTPS stuff, 8.4.14
 	- DataFrag, HeartbeatFrag, NackFrag
-o each submessage is aligned on 32 bit boundary
-o writeTo needs to be reconsidered. Maybe BytesBuffer will help
-  SubMessageHeader needs to write submessage length into stream.
-  It is not necessary easy to calculate. the same is true for parameters.
 o There is no need to support deprecated parameters, see 9.6.4 ParameterIds Deprecated by Version 2.1 of the Protocol  
-o PID_STATUS_INFO contains isUnregisterd, isDisposed info.
 
-OSPL (5.5) Specific Notes
-===================
+OpenDDS 3.5 specific notes
+==========================
+	- OpenDDS complains about type names of builtin entities. SUBSCRIPTION_BUILT_IN_TOPIC_TYPE,
+	  PUBLICATION_BUILT_IN_TOPIC_TYPE, TOPIC_BUILT_IN_TOPIC_TYPE
+
+OSPL 6.3 specific notes
+=======================
+	- Reliability QoS: Reliability kind RELIABLE is still 2 on the wire 
+
+OSPL 5.5 specific notes
+=======================
 	- TimeBasedFilter is received as two bytes: [0, 0]. It should have been 
 	  received as two longs: [0,0,0,0, 0,0,0,0] for Duration_t
 	- Reliability QoS (kind) seems to have an offset of 1 (starting from 1)
@@ -28,5 +26,4 @@ OSPL (5.5) Specific Notes
 	  And communication should not be established if both entities does not belong to same partition.
 	  Should we set the partition for built-in stuff to "*", which would match any partition.
 	  
-	
 	

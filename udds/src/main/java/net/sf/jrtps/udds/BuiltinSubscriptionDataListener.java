@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.ReaderProxy;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -56,7 +57,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 						log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), readerData.getKey().getEntityId());
 
 						if (offered.isCompatibleWith(requested)) {
-							w.getRTPSWriter().addMatchedReader(readerData);
+							ReaderProxy proxy = w.getRTPSWriter().addMatchedReader(readerData);
 							fireReaderMatched(w, readerData);
 						}
 						else {
@@ -67,17 +68,17 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 
 					// builtin entities are handled with SEDP in ParticipantData reception
 					// TODO: user-defined entities should not be handled differently.
-					if (key.getEntityId().isUserDefinedEntity()) {  
-						ParticipantData pd = discoveredParticipants.get(key.getPrefix());
-						if (pd != null) {
-							//w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
-							log.debug("Notify reader {}", key.getEntityId());
-							w.getRTPSWriter().notifyReader(key);
-						}
-						else {
-							log.warn("Participant was not found: {}", key.getPrefix());
-						}
-					}
+//					if (key.getEntityId().isUserDefinedEntity()) {  
+//						ParticipantData pd = discoveredParticipants.get(key.getPrefix());
+//						if (pd != null) {
+//							//w.getRTPSWriter().sendData(key.getPrefix(), key.getEntityId(), 0L);
+//							log.debug("Notify reader {}", key.getEntityId());
+//							w.getRTPSWriter().notifyReader(key);
+//						}
+//						else {
+//							log.warn("Participant was not found: {}", key.getPrefix());
+//						}
+//					}
 				}
 			}
 		}
