@@ -282,6 +282,8 @@ public class RTPSWriter<T> extends Endpoint {
 		long firstSeqNum = 0;
 		long prevTimeStamp = 0;
 
+		EntityId proxyEntityId = proxy.getGuid().getEntityId();
+		
 		for (CacheChange cc : changes) {			
 			try {
 				lastSeqNum = cc.getSequenceNumber();
@@ -299,7 +301,7 @@ public class RTPSWriter<T> extends Endpoint {
 					}
 
 					log.trace("Marshalling {}", cc.getData());
-					Data data = createData(proxy.getGuid().getEntityId(), cc);
+					Data data = createData(proxyEntityId, cc);
 					m.addSubMessage(data);
 				}
 			}
@@ -307,7 +309,14 @@ public class RTPSWriter<T> extends Endpoint {
 				log.warn("[{}] Failed to add cache change to message", getGuid().getEntityId(), ioe);
 			}
 		}
-
+		
+		// add HB at the end of data, see 8.4.15.4 Piggybacking HeartBeat Submessages
+		if (isReliable()) {
+			Heartbeat hb = createHeartbeat(proxyEntityId);
+			hb.finalFlag(false); // Reply needed
+			m.addSubMessage(hb);
+		}
+		
 		log.debug("[{}] Sending Data: {}-{} to {}", getGuid().getEntityId(), firstSeqNum, lastSeqNum, proxy);
 
 		boolean overFlowed = sendMessage(m, proxy); 
