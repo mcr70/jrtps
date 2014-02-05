@@ -62,7 +62,7 @@ public class RTPSParticipant {
 	private final int domainId;
 	private final int participantId;
 
-	private RTPSMessageHandler handler;
+	private RTPSMessageReceiver handler;
 	
 	/**
 	 * Creates a new participant with given domainId and participantId. Domain ID and particiapnt ID
@@ -105,8 +105,8 @@ public class RTPSParticipant {
 		// UDP is required by the specification. 
 		BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
 		
-		// NOTE: We can have only one MessageHandler. pending samples concept relies on it.
-		handler = new RTPSMessageHandler(this, queue);
+		// NOTE: We can have only one MessageReceiver. pending samples concept relies on it.
+		handler = new RTPSMessageReceiver(this, queue);
 		threadPoolExecutor.execute(handler);
 		
 		int bufferSize = config.getBufferSize();

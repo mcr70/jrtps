@@ -1,7 +1,7 @@
-jrtps-0.5.5
+jrtps-0.5.6
 	This release is provided as-is. In short, one can get started 
 	by using classes in net.sf.jrtps.udds package, which is a minimalistic 
 	set of classes that can be used to start communicating over RTPS.
 
-	This release introduces Participant lease time and writer heartbeat
-	period. All the artifacts are OSGi ready.
+	This release contains couple of fixes. Some preliminary work on
+	interoperability is also included.

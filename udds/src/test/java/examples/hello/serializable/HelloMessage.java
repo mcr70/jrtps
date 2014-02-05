@@ -1,4 +1,4 @@
-package net.sf.jrtps.udds.hello;
+package examples.hello.serializable;
 import java.io.Serializable;
 
 import net.sf.jrtps.udds.Key;

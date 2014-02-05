@@ -117,6 +117,6 @@ public class AckNack extends SubMessage {
 
 
 	public String toString() {
-		return super.toString() + ", " + readerId + ", " + writerId + ", " + readerSNState + ", " + count;
+		return super.toString() + " #" + count + ", " + readerId + ", " + writerId + ", " + readerSNState + ", F:" + finalFlag();
 	}
 }

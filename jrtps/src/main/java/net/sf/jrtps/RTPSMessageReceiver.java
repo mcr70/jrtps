@@ -27,16 +27,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSMessageHandler is a consumer to BlockingQueue.
- * Queue contains byte[] entries, which is parsed to RTPS Messages.
+ * RTPSMessageReceiver is a consumer to BlockingQueue<byte[]>. A network receiver 
+ * produces byte arrays into this queue. These byte[] are parsed into RTPS messages 
+ * by this class. <p> 
+ * 
  * Successfully parsed messages are split into submessages, which are passed
  * to corresponding RTPS reader entities.
  * 
+ * @see RTPSReader
  * @author mcr70
  */
-class RTPSMessageHandler implements Runnable {
-	private static final Logger log = LoggerFactory.getLogger(RTPSMessageHandler.class);
-
+class RTPSMessageReceiver implements Runnable {
+	private static final Logger logger = LoggerFactory.getLogger(RTPSMessageReceiver.class);
+	
 	private final RTPSParticipant participant;
 	private final BlockingQueue<byte[]> queue;
 
@@ -44,7 +47,7 @@ class RTPSMessageHandler implements Runnable {
 	
 	private boolean running = true;
 
-	RTPSMessageHandler(RTPSParticipant p, BlockingQueue<byte[]> queue) {
+	RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue) {
 		this.participant = p;
 		this.queue = queue;
 	}
@@ -54,10 +57,10 @@ class RTPSMessageHandler implements Runnable {
 	public void run() {
 		while(running) {
 			try {
-				// NOTE: We can have only one MessageHandler. pending samples concept relies on it.
+				// NOTE: We can have only one MessageReceiver. pending samples concept relies on it.
 				byte[] bytes = queue.take();
 				Message msg = new Message(new RTPSByteBuffer(bytes));
-				log.debug("Parsed RTPS message {}", msg);
+				logger.debug("Parsed RTPS message {}", msg);
 
 				handleMessage(msg);
 			} catch (InterruptedException e) {
@@ -65,7 +68,7 @@ class RTPSMessageHandler implements Runnable {
 			}
 		}
 		
-		log.debug("RTPSMessageHandler exiting");
+		logger.debug("RTPSMessageReceiver exiting");
 	}
 	
 	
@@ -80,11 +83,9 @@ class RTPSMessageHandler implements Runnable {
 		GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 		
 		if (participant.getGuid().getPrefix().equals(sourceGuidPrefix)) {
-			log.debug("Discarding message originating from this participant");
+			logger.debug("Discarding message originating from this participant");
 			return;
 		}
-
-		log.debug("Got Message from {}", sourceGuidPrefix);	
 		
 		Set<RTPSReader<?>> dataReceivers = new HashSet<>();
 		List<SubMessage> subMessages = msg.getSubMessages();
@@ -110,7 +111,7 @@ class RTPSMessageHandler implements Runnable {
 					}
 				}
 				catch(IOException ioe) {
-					log.warn("Failed to handle data", ioe);
+					logger.warn("Failed to handle data", ioe);
 				}
 				break;
 			case HEARTBEAT:
@@ -135,7 +136,7 @@ class RTPSMessageHandler implements Runnable {
 				if (ir.multicastFlag()) {
 					replyLocators.addAll(ir.getMulticastLocatorList());
 				}
-				log.warn("InfoReply not handled");
+				logger.warn("InfoReply not handled");
 				break;
 			case INFOREPLYIP4: // TODO: HB, AC & DATA needs to use these Locators, if present
 				InfoReplyIp4 ir4 = (InfoReplyIp4) subMsg;
@@ -143,17 +144,17 @@ class RTPSMessageHandler implements Runnable {
 				if (ir4.multicastFlag()) {
 					LocatorUDPv4_t multicastLocator = ir4.getMulticastLocator();
 				}
-				log.warn("InfoReplyIp4 not handled");
+				logger.warn("InfoReplyIp4 not handled");
 				break;
 			case GAP:
 				handleGap(sourceGuidPrefix, (Gap)subMsg);
 				break;
 			default: 
-				log.warn("SubMessage not handled: {}", subMsg);
+				logger.warn("SubMessage not handled: {}", subMsg);
 			}
 		}
 		
-		log.trace("Releasing samples for {} readers", dataReceivers.size());
+		logger.trace("Releasing samples for {} readers", dataReceivers.size());
 		for (RTPSReader<?> reader : dataReceivers) {
 			reader.releasePendingSamples();
 		}
@@ -168,7 +169,7 @@ class RTPSMessageHandler implements Runnable {
 			writer.onAckNack(sourceGuidPrefix, ackNack);
 		}
 		else {
-			log.debug("No Writer({}) to handle AckNack from {}", ackNack.getWriterId(), ackNack.getReaderId());
+			logger.debug("No Writer({}) to handle AckNack from {}", ackNack.getWriterId(), ackNack.getReaderId());
 		}
 	}
 
@@ -185,7 +186,7 @@ class RTPSMessageHandler implements Runnable {
 			return reader;
 		}
 		else {
-			log.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
+			logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
 		}
 		
 		return null;
@@ -198,7 +199,7 @@ class RTPSMessageHandler implements Runnable {
 			reader.onHeartbeat(senderGuidPrefix, hb);
 		}
 		else {
-			log.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
+			logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
 		}
 	}
 

@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PublicationData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSPublication";
+	public static final String BUILTIN_TYPE_NAME = "PUBLICATION_BUILT_IN_TOPIC_TYPE"; // TODO: for odds 3.5
 	
 	private static final Logger log = LoggerFactory.getLogger(PublicationData.class);
 	
@@ -29,6 +30,7 @@ public class PublicationData extends DiscoveredData {
 		Iterator<Parameter> iter = parameterList.getParameters().iterator();
 		while (iter.hasNext()) {
 			Parameter param = iter.next();
+			addParameter(param);
 
 			log.trace("{}", param);
 			switch(param.getParameterId()) {
@@ -53,9 +55,6 @@ public class PublicationData extends DiscoveredData {
 				if (param instanceof QosPolicy) {
 					addQosPolicy((QosPolicy) param);
 				}
-				else {
-					log.warn("Parameter {} not handled: {}", param.getParameterId(), param);
-				}
 			}
 		}
 		
@@ -66,7 +65,7 @@ public class PublicationData extends DiscoveredData {
 		// Resolve possible inconsistencies
 		resolveInconsistencies();
 	}
-	
+
 	public PublicationData(String topicName, String typeName, Guid key, QualityOfService qos) {
 		super(typeName, topicName, key, qos);
 	}
