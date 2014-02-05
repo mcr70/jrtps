@@ -119,6 +119,8 @@ public class Participant {
 		
 		logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
+		createUnknownParticipantData(domainId);
+		
 		meta_mcLoc = Locator.defaultDiscoveryMulticastLocator(domainId);
 		meta_ucLoc = Locator.defaultMetatrafficUnicastLocator(domainId, participantId);
 		mcLoc = Locator.defaultUserMulticastLocator(domainId);
@@ -142,7 +144,6 @@ public class Participant {
 		this.leaseManager = new ParticipantLeaseManager(this, discoveredParticipants);
 		addRunnable(leaseManager);
 	}
-
 
 	private void createBuiltinEntities() {
 		// ----  Builtin marshallers  ---------------
@@ -168,10 +169,14 @@ public class Participant {
 		
 		// ----  Create a Writers for SEDP  ---------
 		DataWriter<PublicationData> wdWriter = 
-				createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
+				createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, 
+						PublicationData.BUILTIN_TYPE_NAME, //PublicationData.class.getName(), 
+						sedpQoS);
 
 		DataWriter<SubscriptionData> rdWriter = 
-				createDataWriter(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);
+				createDataWriter(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, 
+						SubscriptionData.BUILTIN_TYPE_NAME, //SubscriptionData.class.getName(), 
+						sedpQoS);
 
 
 		// NOTE: It is not mandatory to publish TopicData
@@ -179,21 +184,29 @@ public class Participant {
 
 		// ----  Create a Reader for SPDP  -----------------------
 		DataReader<ParticipantData> pdReader = 
-				createDataReader(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
+				createDataReader(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, 
+						ParticipantData.BUILTIN_TYPE_NAME, //ParticipantData.class.getName(), 
+						spdpQoS);
 		pdReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 		// ----  Create a Readers for SEDP  ---------
 		DataReader<PublicationData> wdReader = 
-				createDataReader(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.class.getName(), sedpQoS);
+				createDataReader(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, 
+						PublicationData.BUILTIN_TYPE_NAME, //PublicationData.class.getName(), 
+						sedpQoS);
 		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredParticipants, discoveredWriters));
 
 		DataReader<SubscriptionData> rdReader = 
-				createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, SubscriptionData.class.getName(), sedpQoS);
+				createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, 
+						SubscriptionData.BUILTIN_TYPE_NAME, //SubscriptionData.class.getName(), 
+						sedpQoS);
 		rdReader.addListener(new BuiltinSubscriptionDataListener(this, discoveredParticipants, discoveredReaders));
 
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		DataReader<TopicData> tReader = 
-				createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class, TopicData.class.getName(), sedpQoS);
+				createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class, 
+						TopicData.BUILTIN_TYPE_NAME, //TopicData.class.getName(), 
+						sedpQoS);
 		tReader.addListener(new BuiltinTopicDataListener(this));
 
 		// Create entities for ParticipantMessage ---------------
@@ -205,19 +218,22 @@ public class Participant {
 		createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
 
 		// ----  Create a Writer for SPDP  -----------------------
-		DataWriter<ParticipantData> pdWriter = 
-				createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, ParticipantData.class.getName(), spdpQoS);
+		DataWriter<ParticipantData> spdp_writer = 
+				createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, 
+						ParticipantData.BUILTIN_TYPE_NAME, //ParticipantData.class.getName(), 
+						spdpQoS);
 		ParticipantData pd = createSPDPParticipantData();
-		pdWriter.write(pd);
 
 		// Add a matched reader for SPDP writer 
-//		SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-//				new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
-//		pdWriter.getRTPSWriter().addMatchedReader(sd);
+		SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
+				new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
+		spdp_writer.getRTPSWriter().addMatchedReader(sd);
+
+		spdp_writer.write(pd);
 		
 		
 		// TODO: We should get rid of resender thread. Each RTPSWriter has an announce thread.
-		createSPDPResender(config.getSPDPResendPeriod(), pdWriter.getRTPSWriter());
+		createSPDPResender(config.getSPDPResendPeriod(), spdp_writer.getRTPSWriter());
 	}
 
 	/**
@@ -485,6 +501,7 @@ public class Participant {
 				boolean running = true;
 				Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 				while (running) {
+					logger.debug("start SPDP resend");
 					spdp_w.notifyReader(guid);
 					//spdp_w.sendData(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0);
 					try {
@@ -691,5 +708,12 @@ public class Participant {
 
 	void ignoreParticipant(GuidPrefix prefix) {
 		rtps_participant.ignoreParticipant(prefix);
+	}
+
+
+	private void createUnknownParticipantData(int domainId) {
+		ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, 
+				null, null, null, Locator.defaultDiscoveryMulticastLocator(domainId));
+		discoveredParticipants.put(GuidPrefix.GUIDPREFIX_UNKNOWN, pd);
 	}
 }

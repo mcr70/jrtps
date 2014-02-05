@@ -112,34 +112,13 @@ public class Endpoint {
 	 * the overflow will get sent. 
 	 * 
 	 * @param m Message to send
-	 * @param targetPrefix GuidPrefix of the target participant
+	 * @param proxy proxy of the remote entity
 	 * @return true, if an overflow occured during send.
 	 */
-	protected boolean sendMessage(Message m, GuidPrefix targetPrefix) {
-		boolean overFlowed = false;
-		Locator locator = getParticipantLocators(targetPrefix);
-		
-		if (locator != null) {
-			try {
-				UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO: No need to create and close all the time
-				overFlowed = w.sendMessage(m);
-				w.close();
-			} 
-			catch(IOException e) {
-				log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
-			}
-		}
-		else {
-			log.debug("[{}] Unknown participant {}, will not send message", getGuid().getEntityId(), targetPrefix);
-			//participant.ignoreParticipant(targetPrefix);
-		}
-		
-		return overFlowed;
-	}
-
 	protected boolean sendMessage(Message m, Proxy proxy) {
 		boolean overFlowed = false;
-		Locator locator = proxy.getUnicastLocator();
+		Locator locator = proxy.getLocator();
+		log.debug("Sending message to {}", locator);
 		
 		if (locator != null) {
 			try {
@@ -175,6 +154,7 @@ public class Endpoint {
 	protected void addLocators(Proxy proxy) {
 		// Set the default locators from ParticipantData
 		ParticipantData pd = discoveredParticipants.get(proxy.getGuid().getPrefix());
+		
 		if (proxy.getGuid().getEntityId().isBuiltinEntity()) {
 			proxy.setUnicastLocator(pd.getMetatrafficUnicastLocator());
 			proxy.setMulticastLocator(pd.getMetatrafficMulticastLocator());

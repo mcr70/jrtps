@@ -10,8 +10,18 @@ public class Proxy {
 	private Locator ucLocator;
 	private Locator mcLocator;
 
+	private boolean preferUnicast = true;
+	
 	protected Proxy(DiscoveredData dd) {
 		discoveredData = dd;
+	}
+	
+	public Locator getLocator() {
+		if (preferUnicast && ucLocator != null) {
+			return ucLocator;
+		}
+		
+		return mcLocator;
 	}
 	
 	/**
