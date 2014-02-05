@@ -39,7 +39,8 @@ import org.slf4j.LoggerFactory;
  */
 public class ParticipantData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSParticipant";
-
+	public static final String BUILTIN_TYPE_NAME = "PARTICIPANT_BUILT_IN_TOPIC_TYPE"; // TODO: for odds 3.5
+	
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
 	
 	private ProtocolVersion_t protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
@@ -332,7 +333,9 @@ public class ParticipantData extends DiscoveredData {
 
 	public String toString() {
 		return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + 
-				", lease duration " + getLeaseDuration() + ", locators " + getAllLocators() + 
+				", lease duration " + getLeaseDuration() + 
+				", u_uc: " + unicastLocator + ", u_mc: " + multicastLocator + 
+				", m_uc: " + metatrafficUnicastLocator + ", m_mc: " + metatrafficMulticastLocator +
 				", " + qos;
 	}
 }

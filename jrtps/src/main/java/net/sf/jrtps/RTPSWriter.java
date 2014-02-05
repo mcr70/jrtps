@@ -96,7 +96,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	public void notifyReaders() {		
 		if (readerProxies.size() > 0) {
-			log.trace("[{}] Notifying {} matched readers of changes in history cache", getGuid().getEntityId(), readerProxies.size());
+			log.debug("[{}] Notifying {} matched readers of changes in history cache", getGuid().getEntityId(), readerProxies.size());
 
 			for (ReaderProxy proxy : readerProxies.values()) {
 				Guid guid = proxy.getSubscriptionData().getKey();
@@ -107,23 +107,23 @@ public class RTPSWriter<T> extends Endpoint {
 
 
 	public void notifyReader(Guid guid) {
+		log.debug("Notifying {}", guid);
 		ReaderProxy proxy = readerProxies.get(guid);
-
-		// TODO: 8.4.2.2.3 Writers must send periodic HEARTBEAT Messages (reliable only)
-		if (proxy != null && proxy.isReliable()) {
-			sendHeartbeat(guid.getPrefix(), guid.getEntityId());
+		
+		if (proxy == null) {
+			log.warn("Will not notify, no proxy for {}", guid);
+			return;
+		}
+		
+		if (proxy.isReliable()) {
+			sendHeartbeat(proxy);
 		}
 		else {
-			long readersHighestSeqNum = 0;
-			if (proxy != null) { // Might be null, if destination is GuidPrefix.UNKNOWN (SPDP)
-				readersHighestSeqNum = proxy.getReadersHighestSeqNum();
-			}
+			long readersHighestSeqNum = proxy.getReadersHighestSeqNum();
 
-			sendData(guid.getPrefix(), guid.getEntityId(), readersHighestSeqNum);
+			sendData(proxy, readersHighestSeqNum);
 
-			if (proxy != null) {
-				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
-			}
+			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 		}
 	}
 
@@ -133,8 +133,8 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Heartbeat message of the liveliness of this writer.
 	 */
 	public void assertLiveliness() {
-		for (Guid guid : readerProxies.keySet()) {
-			sendHeartbeat(guid.getPrefix(), guid.getEntityId(), true); // Send Heartbeat regardless of readers QosReliability
+		for (ReaderProxy proxy : readerProxies.values()) {
+			sendHeartbeat(proxy, true); // Send Heartbeat regardless of readers QosReliability
 		}
 	}
 
@@ -157,7 +157,7 @@ public class RTPSWriter<T> extends Endpoint {
 		ReaderProxy proxy = new ReaderProxy(readerData);
 		addLocators(proxy);
 		readerProxies.put(readerData.getKey(), proxy);
-
+		
 		QosDurability readerDurability = 
 				(QosDurability) readerData.getQualityOfService().getPolicy(QosDurability.class);
 
@@ -169,14 +169,11 @@ public class RTPSWriter<T> extends Endpoint {
 			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 		}
 		else { 
-			// Otherwise, send either HB, or our history
-			Guid guid = readerData.getKey();
-
 			if (proxy.isReliable()) {
-				sendHeartbeat(guid.getPrefix(), guid.getEntityId());
+				sendHeartbeat(proxy);
 			}
 			else {
-				sendData(guid.getPrefix(), guid.getEntityId(), proxy.getReadersHighestSeqNum());
+				sendData(proxy, proxy.getReadersHighestSeqNum());
 				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
 			}
 		}
@@ -246,7 +243,7 @@ public class RTPSWriter<T> extends Endpoint {
 				log.trace("[{}] Wait for nack response delay: {} ms", getGuid().getEntityId(), nackResponseDelay);
 				getParticipant().waitFor(nackResponseDelay);
 
-				sendData(senderPrefix, ackNack.getReaderId(), ackNack.getReaderSNState().getBitmapBase() - 1);
+				sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
 			}
 			else {
 				log.debug("[{}] Ignoring AckNack whose count is {}, since proxys count is {}", getGuid().getEntityId(), ackNack.getCount(), proxy.getLatestAckNackCount());
@@ -266,7 +263,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param readerId
 	 * @param readersHighestSeqNum
 	 */
-	private void sendData(GuidPrefix targetPrefix, EntityId readerId, long readersHighestSeqNum) {
+	private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
 		Message m = new Message(getGuid().getPrefix());
 		SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
@@ -296,7 +293,7 @@ public class RTPSWriter<T> extends Endpoint {
 					}
 
 					log.trace("Marshalling {}", cc.getData());
-					Data data = createData(readerId, cc);
+					Data data = createData(proxy.getGuid().getEntityId(), cc);
 					m.addSubMessage(data);
 				}
 			}
@@ -305,39 +302,33 @@ public class RTPSWriter<T> extends Endpoint {
 			}
 		}
 
-		log.debug("[{}] Sending Data: {}-{} to {}", getGuid().getEntityId(), firstSeqNum, lastSeqNum, targetPrefix);
+		log.debug("[{}] Sending Data: {}-{} to {}", getGuid().getEntityId(), firstSeqNum, lastSeqNum, proxy);
 
-		boolean overFlowed = sendMessage(m, targetPrefix); 
+		boolean overFlowed = sendMessage(m, proxy); 
 		if (overFlowed) {
 			log.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
-			sendHeartbeat(targetPrefix, readerId);
+			sendHeartbeat(proxy);
 		}
 	}
 
-	private void sendHeartbeat(GuidPrefix senderPrefix, EntityId readerId) {
-		sendHeartbeat(senderPrefix, readerId, false);
+	private void sendHeartbeat(ReaderProxy proxy) {
+		sendHeartbeat(proxy, false);
 	}
 
-	private void sendHeartbeat(GuidPrefix targetPrefix, EntityId readerId, boolean livelinessFlag) {
+	private void sendHeartbeat(ReaderProxy proxy, boolean livelinessFlag) {
 		Message m = new Message(getGuid().getPrefix());
-		Heartbeat hb = createHeartbeat(readerId);
+		Heartbeat hb = createHeartbeat(proxy.getGuid().getEntityId());
 		hb.livelinessFlag(livelinessFlag);
 		m.addSubMessage(hb);
 
 		log.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getGuid().getEntityId(), 
 				hb.getCount(), hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), 
-				hb.finalFlag(), hb.livelinessFlag(), targetPrefix);
+				hb.finalFlag(), hb.livelinessFlag(), proxy.getGuid());
 
-		//		Exception e = new Exception();
-		//		e.printStackTrace();
-
-		sendMessage(m, targetPrefix);
+		sendMessage(m, proxy);
 
 		if (!livelinessFlag) {
-			ReaderProxy proxy = readerProxies.get(new Guid(targetPrefix, readerId));
-			if (proxy != null) {
-				proxy.heartbeatSent();
-			}
+			proxy.heartbeatSent();
 		}		
 	}
 

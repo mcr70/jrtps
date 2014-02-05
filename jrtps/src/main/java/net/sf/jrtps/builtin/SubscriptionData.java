@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
  */
 public class SubscriptionData extends DiscoveredData {
 	public static final String BUILTIN_TOPIC_NAME = "DCPSSubscription";
+	public static final String BUILTIN_TYPE_NAME = "SUBSCRIPTION_BUILT_IN_TOPIC_TYPE"; // TODO: for odds 3.5
 	
 	private static final Logger log = LoggerFactory.getLogger(SubscriptionData.class);
 
