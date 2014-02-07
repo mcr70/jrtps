@@ -4,7 +4,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import net.sf.jrtps.SPDPQualityOfService;
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.DefaultMulticastLocator;
 import net.sf.jrtps.message.parameter.DefaultUnicastLocator;
@@ -120,7 +120,7 @@ public class ParticipantData extends DiscoveredData {
 			Locator u_ucLocator, Locator u_mcLocator, 
 			Locator m_ucLocator, Locator m_mcLocator) {
 		super();
-		qos = new SPDPQualityOfService();
+		qos = QualityOfService.getSPDPQualityOfService();
 		
 		guidPrefix = prefix;
 		availableBuiltinEndpoints = endpoints;
@@ -152,7 +152,7 @@ public class ParticipantData extends DiscoveredData {
 	 * @param parameterList
 	 */
 	public ParticipantData(ParameterList parameterList) {
-		qos = new SPDPQualityOfService();
+		qos = QualityOfService.getSPDPQualityOfService();
 		Iterator<Parameter> iterator = parameterList.getParameters().iterator();
 		
 		while (iterator.hasNext()) {

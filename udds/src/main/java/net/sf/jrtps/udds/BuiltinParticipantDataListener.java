@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.SEDPQualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -91,7 +90,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 	 * @param builtinEndpoints
 	 */
 	private void handleBuiltinEnpointSet(GuidPrefix prefix, int builtinEndpoints) {
-		QualityOfService sedpQoS = new SEDPQualityOfService();
+		QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService();
 
 		BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
 		log.debug("handleBuiltinEndpointSet {}", eps);

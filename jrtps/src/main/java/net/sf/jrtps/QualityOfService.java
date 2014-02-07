@@ -24,6 +24,7 @@ import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.message.parameter.QosTransportPriority;
 import net.sf.jrtps.message.parameter.TopicPolicy;
+import net.sf.jrtps.types.Duration;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +38,8 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("rawtypes")
 public class QualityOfService {
 	private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
-
+	private static final QualityOfService sedpQos = createSEDPQualityOfService();
+	private static final QualityOfService spdpQos = createSPDPQualityOfService();
 	private HashMap<Class<? extends QosPolicy>, QosPolicy> policies = new HashMap<>();
 
 	/**
@@ -234,6 +236,56 @@ public class QualityOfService {
 		} 
 
 		// QosUserData, QosGroupData, QosTopicData is omitted. 		
+	}
+	
+	/**
+	 * Gets the QualityOfService used in Simple Endpoint Discovery Protocol(SEDP)
+	 * @return QualityOfService for SEDP
+	 */
+	public static QualityOfService getSEDPQualityOfService() {
+		return sedpQos;
+	}
+
+	/**
+	 * Gets the QualityOfService used in Simple Participant Discovery Protocol(SPDP)
+	 * @return QualityOfService for SPDP
+	 */
+	public static QualityOfService getSPDPQualityOfService() {
+		return spdpQos;
+	}
+	
+	
+	private static QualityOfService createSEDPQualityOfService() {
+		QualityOfService qos = new QualityOfService();
+		try {
+			qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT)); // TODO: OSPL uses TRANSIENT, while TRANSIENT_LOCAL would be correct
+			qos.setPolicy(new QosPresentation(QosPresentation.Kind.TOPIC, false, false));
+			qos.setPolicy(new QosDeadline(Duration.INFINITE));
+			qos.setPolicy(new QosOwnership(QosOwnership.Kind.SHARED));
+			qos.setPolicy(new QosLiveliness(QosLiveliness.Kind.AUTOMATIC, new Duration(0,0)));
+			qos.setPolicy(new QosTimeBasedFilter(new Duration(0)));
+			qos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(100)));
+			qos.setPolicy(new QosDestinationOrder(QosDestinationOrder.Kind.BY_RECEPTION_TIMESTAMP));
+			qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
+			qos.setPolicy(new QosResourceLimits(Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE));
+		} catch (InconsistentPolicy e) {
+			throw new RuntimeException("Internal error", e);
+		}
+		
+		return qos;
+	}
+
+	private static QualityOfService createSPDPQualityOfService() {
+		QualityOfService qos = new QualityOfService();
+		try {
+			qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
+			qos.setPolicy(new QosReliability(QosReliability.Kind.BEST_EFFORT, new Duration(0)));
+		} catch (InconsistentPolicy e) {
+			throw new RuntimeException("Internal error", e);
+		}
+		
+		return qos;
+
 	}
 	
 	public String toString() {
