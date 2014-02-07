@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.MulticastLocator;
@@ -68,33 +69,6 @@ public class Endpoint {
 		return configuration;
 	}
 	
-	/**
-	 * Gets all locators for given participant.
-	 * 
-	 * @param prefix GuidPrefix of the participant
-	 * @return Locator_t
-	 */
-	private Locator getParticipantLocators(GuidPrefix prefix) {
-		log.trace("[{}] getParticipantLocators() for {}: {}", getGuid().getEntityId(), prefix, discoveredParticipants.keySet());
-		
-		if (prefix == null || GuidPrefix.GUIDPREFIX_UNKNOWN.equals(prefix)) {
-			return Locator.defaultDiscoveryMulticastLocator(participant.getDomainId());			
-		}
-		
-		ParticipantData pd = discoveredParticipants.get(prefix);
-		if (pd != null) {
-			if (guid.getEntityId().isBuiltinEntity()) {
-				return pd.getMetatrafficUnicastLocator();
-			}
-			else {
-				return pd.getUnicastLocator();
-			}
-		}
-
-		return null;
-	}
-
-
 	void setDiscoveredParticipants(Map<GuidPrefix, ParticipantData> discoveredParticipants) {
 		this.discoveredParticipants = discoveredParticipants;
 	}
@@ -115,7 +89,7 @@ public class Endpoint {
 	 * @param proxy proxy of the remote entity
 	 * @return true, if an overflow occured during send.
 	 */
-	protected boolean sendMessage(Message m, Proxy proxy) {
+	protected boolean sendMessage(Message m, RemoteProxy proxy) {
 		boolean overFlowed = false;
 		Locator locator = proxy.getLocator();
 		log.debug("Sending message to {}", locator);
@@ -146,37 +120,40 @@ public class Endpoint {
 		return participant;
 	}
 
-
 	/**
-	 * Adds locators to given proxy.
-	 * @param proxy
+	 * Gets locators for given remote Guid
+	 * @param dd
+	 * @return unicast and multicast locator
 	 */
-	protected void addLocators(Proxy proxy) {
-		// Set the default locators from ParticipantData
-		ParticipantData pd = discoveredParticipants.get(proxy.getGuid().getPrefix());
+	LocatorPair getLocators(DiscoveredData dd) {
+		Guid remoteGuid = dd.getKey();
+		LocatorPair locators = new LocatorPair();
 		
-		if (proxy.getGuid().getEntityId().isBuiltinEntity()) {
-			proxy.setUnicastLocator(pd.getMetatrafficUnicastLocator());
-			proxy.setMulticastLocator(pd.getMetatrafficMulticastLocator());
+		// Set the default locators from ParticipantData
+		ParticipantData pd = discoveredParticipants.get(remoteGuid.getPrefix());
+		
+		if (remoteGuid.getEntityId().isBuiltinEntity()) {
+			locators.ucLocator = pd.getMetatrafficUnicastLocator();
+			locators.mcLocator = pd.getMetatrafficMulticastLocator();
 		}
 		else {
-			proxy.setUnicastLocator(pd.getUnicastLocator());
-			proxy.setMulticastLocator(pd.getMulticastLocator());			
+			locators.ucLocator = pd.getUnicastLocator();
+			locators.mcLocator = pd.getMulticastLocator();			
 		}
 		
 		// Then check if proxys discovery data contains locator info
-		List<Parameter> params = proxy.getDiscoveredData().getParameters();
+		List<Parameter> params = dd.getParameters();
 		for (Parameter p : params) {
 			if (p instanceof UnicastLocator) {
 				UnicastLocator ul = (UnicastLocator) p;
-				proxy.setUnicastLocator(ul.getLocator());
+				locators.ucLocator = ul.getLocator();
 			}
 			else if (p instanceof MulticastLocator) {
 				MulticastLocator mc = (MulticastLocator) p;
-				proxy.setMulticastLocator(mc.getLocator());
+				locators.mcLocator = mc.getLocator();
 			}
 		}
 		
-		log.debug("Locators for {}: {}, {}", proxy.getGuid(), proxy.getUnicastLocator(), proxy.getMulticastLocator());
+		return locators;
 	}
 }

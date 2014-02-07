@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  *
  */
-public class WriterProxy extends Proxy {
+public class WriterProxy extends RemoteProxy {
 	private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 
 	private Heartbeat latestHeartBeat;
@@ -23,8 +23,8 @@ public class WriterProxy extends Proxy {
 	private volatile long livelinessTimestamp;
 	private volatile long seqNumMax = 0;
 
-	WriterProxy(PublicationData wd) {
-		super(wd);
+	WriterProxy(PublicationData wd, LocatorPair lPair) {
+		super(wd, lPair.ucLocator, lPair.mcLocator);
 	}
 
 
@@ -48,8 +48,8 @@ public class WriterProxy extends Proxy {
 	}
 	
 	/**
-	 * Gets the WriterData associated with this WriterProxy.
-	 * @return WriterData
+	 * Gets the PublicationData associated with this WriterProxy.
+	 * @return PublicationData
 	 */
 	public PublicationData getPublicationData() {
 		return (PublicationData) getDiscoveredData();

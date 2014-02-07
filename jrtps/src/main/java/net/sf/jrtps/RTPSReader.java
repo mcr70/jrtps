@@ -18,6 +18,7 @@ import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.types.Time;
 
@@ -95,11 +96,13 @@ public class RTPSReader<T> extends Endpoint {
 	 * @return WriterProxy
 	 */
 	public WriterProxy addMatchedWriter(PublicationData writerData) {
-		WriterProxy wp = new WriterProxy(writerData);
-		addLocators(wp);
+		LocatorPair locators = getLocators(writerData);
+		WriterProxy wp = new WriterProxy(writerData, locators);
+
 		writerProxies.put(writerData.getKey(), wp);	
 
-		log.debug("[{}] Added matchedWriter {}", getGuid().getEntityId(), writerData);
+		log.debug("[{}] Added matchedWriter {}, uc:{}, mc:{}", getGuid().getEntityId(), writerData, 
+				wp.getUnicastLocator(), wp.getMulticastLocator());
 
 		return wp;
 	}
@@ -274,7 +277,7 @@ public class RTPSReader<T> extends Endpoint {
 			log.debug("[{}] Creating proxy for SPDP writer {}", getGuid().getEntityId(), writerGuid); 
 			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
 					writerGuid, new SPDPQualityOfService());
-			wp = new WriterProxy(pd);
+			wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant().getDomainId())));
 
 			writerProxies.put(writerGuid, wp);	
 		}
