@@ -328,8 +328,14 @@ public class RTPSReader<T> extends Endpoint {
 		}
 	}
 
-
-	public boolean isMatchedWith(PublicationData writerData) {
-		return writerProxies.get(writerData.getKey()) != null;
+	/**
+	 * Checks, if this RTPSReader is already matched with a RTPSWriter represented by
+	 * given PublicationData.
+	 * 
+	 * @param pubData
+	 * @return true if matched
+	 */
+	public boolean isMatchedWith(PublicationData pubData) {
+		return writerProxies.get(pubData.getKey()) != null;
 	}
 }

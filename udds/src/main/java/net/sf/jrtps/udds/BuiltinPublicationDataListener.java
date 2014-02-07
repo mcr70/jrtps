@@ -6,11 +6,8 @@ import java.util.Map;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
-import net.sf.jrtps.WriterProxy;
-import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.types.Guid;
-import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,46 +15,44 @@ import org.slf4j.LoggerFactory;
 class BuiltinPublicationDataListener extends BuiltinListener implements SampleListener<PublicationData> {
 	private static final Logger log = LoggerFactory.getLogger(BuiltinPublicationDataListener.class);
 
-	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 	private Map<Guid, PublicationData> discoveredWriters;
 
-	BuiltinPublicationDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants, Map<Guid, PublicationData> discoveredWriters) {
+	BuiltinPublicationDataListener(Participant p, Map<Guid, PublicationData> discoveredWriters) {
 		super(p);
-		this.discoveredParticipants = discoveredParticipants; 
 		this.discoveredWriters = discoveredWriters;
 	}
 
 	@Override
 	public void onSamples(List<Sample<PublicationData>> samples) {
-		for (Sample<PublicationData> wdSample : samples) {
-			PublicationData writerData = wdSample.getData();
+		for (Sample<PublicationData> pdSample : samples) {
+			PublicationData pd = pdSample.getData();
 
-			Guid key = writerData.getKey();
-			if (discoveredWriters.put(key, writerData) == null) {
-				log.debug("Discovered a new publication {} for topic {}, type {}", key, writerData.getTopicName(), writerData.getTypeName());
-				fireWriterDetected(writerData);
+			Guid key = pd.getKey();
+			if (discoveredWriters.put(key, pd) == null) {
+				log.debug("Discovered a new publication {} for topic {}, type {}", key, pd.getTopicName(), pd.getTypeName());
+				fireWriterDetected(pd);
 			}
 
-			List<DataReader<?>> readers = participant.getReadersForTopic(writerData.getTopicName());
+			List<DataReader<?>> readers = participant.getReadersForTopic(pd.getTopicName());
 			for (DataReader<?> r : readers) {
-				if (!r.getRTPSReader().isMatchedWith(writerData)) {
-					if (wdSample.isDisposed()) {
-						r.getRTPSReader().removeMatchedWriter(writerData);
+				if (!r.getRTPSReader().isMatchedWith(pd) && !pdSample.isDisposed()) {
+					// Not associated and sample is not a dispose -> do associate
+					QualityOfService offered = pd.getQualityOfService();
+					QualityOfService requested = r.getRTPSReader().getQualityOfService();
+					log.trace("Check for compatible QoS for {} and {}", pd.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
+
+					if (offered.isCompatibleWith(requested)) {
+						r.getRTPSReader().addMatchedWriter(pd);
+						fireWriterMatched(r, pd);
 					}
 					else {
-						QualityOfService offered = writerData.getQualityOfService();
-						QualityOfService requested = r.getRTPSReader().getQualityOfService();
-						log.trace("Check for compatible QoS for {} and {}", writerData.getKey().getEntityId(), r.getRTPSReader().getGuid().getEntityId());
-
-						if (offered.isCompatibleWith(requested)) {
-							WriterProxy proxy = r.getRTPSReader().addMatchedWriter(writerData);
-							fireWriterMatched(r, writerData);
-						}
-						else {
-							log.warn("Discovered writer had incompatible QoS with reader. {}, {}", writerData, r.getRTPSReader().getQualityOfService());
-							fireInconsistentQoS(r, writerData);
-						}
+						log.warn("Discovered writer had incompatible QoS with reader. {}, {}", pd, r.getRTPSReader().getQualityOfService());
+						fireInconsistentQoS(r, pd);
 					}
+				}
+				else if (r.getRTPSReader().isMatchedWith(pd) && pdSample.isDisposed()) {
+					// Associated and sample is dispose -> remove association
+					r.getRTPSReader().removeMatchedWriter(pd);
 				}
 			}
 		}

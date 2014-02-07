@@ -8,15 +8,28 @@ import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
 
+/**
+ * Marshaller for builtin data for topic <i>DCPSParticipantMessage</i>.
+ * With jRTPS, instances of this topic is of type ParticipantMessage.
+ * 
+ * @author mcr70
+ */
 public class ParticipantMessageMarshaller implements Marshaller<ParticipantMessage> {
 	
 	private int bufferSize = 256;
 
+	/**
+	 * ParticipantMessage data has always a key.
+	 * @return true
+	 */
 	@Override
 	public boolean hasKey() {
 		return true; // hardcoded. key is guid
 	}
 
+	/**
+	 * Extracts a key from given ParticipantMessage. 
+	 */
 	@Override
 	public byte[] extractKey(ParticipantMessage data) {
 		byte[] prefix = data.getGuidPrefix().getBytes();
