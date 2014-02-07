@@ -11,6 +11,11 @@ import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.Guid;
 
+/**
+ * Base class for data, that is received during discovery.
+ * 
+ * @author mcr70
+ */
 public class DiscoveredData {
 	// While reading data from stream, qos policies might come in 'wrong' order.
 	// This list keeps track of inconsistencies occured

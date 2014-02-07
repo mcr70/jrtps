@@ -191,13 +191,13 @@ public class Participant {
 				createDataReader(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, 
 						PublicationData.BUILTIN_TYPE_NAME, //PublicationData.class.getName(), 
 						sedpQoS);
-		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredParticipants, discoveredWriters));
+		wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredWriters));
 
 		DataReader<SubscriptionData> rdReader = 
 				createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, 
 						SubscriptionData.BUILTIN_TYPE_NAME, //SubscriptionData.class.getName(), 
 						sedpQoS);
-		rdReader.addListener(new BuiltinSubscriptionDataListener(this, discoveredParticipants, discoveredReaders));
+		rdReader.addListener(new BuiltinSubscriptionDataListener(this, discoveredReaders));
 
 		// NOTE: It is not mandatory to publish TopicData, create reader anyway. Maybe someone publishes TopicData.
 		DataReader<TopicData> tReader = 
@@ -219,17 +219,17 @@ public class Participant {
 				createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class, 
 						ParticipantData.BUILTIN_TYPE_NAME, //ParticipantData.class.getName(), 
 						spdpQoS);
-		ParticipantData pd = createSPDPParticipantData();
+		// TODO: Need to add GuidPrefix.UNKNOWN also to discovered participants, with 
+		//       leaseTime forever. 
 
-		// Add a matched reader for SPDP writer 
+		// Add a matched reader for SPDP writer
 		SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
 				new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
 		spdp_writer.getRTPSWriter().addMatchedReader(sd);
-
+		
+		ParticipantData pd = createSPDPParticipantData();
 		spdp_writer.write(pd);
 
-
-		// TODO: We should get rid of resender thread. Each RTPSWriter has an announce thread.
 		createSPDPResender(config.getSPDPResendPeriod(), spdp_writer.getRTPSWriter());
 	}
 

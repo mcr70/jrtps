@@ -27,11 +27,20 @@ import net.sf.jrtps.message.parameter.TypeName;
 public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> {
 	private static final Logger log = LoggerFactory.getLogger(SubscriptionDataMarshaller.class);
 
+	/**
+	 * SubscriptionData has always a key.
+	 * @return true
+	 */
 	@Override
 	public boolean hasKey() {
 		return true; // Always true. Key is PID_KEY_HASH.
 	}
 
+	/**
+	 * Extracts the key from PublicationData. Guid of of the reader represented by
+	 * SubscriptionData is the key.
+	 * @return Guid as byte array 
+	 */
 	@Override
 	public byte[] extractKey(SubscriptionData data) {
 		return data.getKey().getBytes();

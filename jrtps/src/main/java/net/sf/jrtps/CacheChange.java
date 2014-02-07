@@ -41,7 +41,18 @@ public class CacheChange implements Comparable<CacheChange> {
 	 * @author mcr70
 	 */
 	public enum Kind {
-		WRITE, DISPOSE, UNREGISTER;
+		/**
+		 * Writer updates an instance.
+		 */
+		WRITE, 
+		/**
+		 * Writer disposes an instance.
+		 */
+		DISPOSE, 
+		/**
+		 * Writer unregisters an instance.
+		 */
+		UNREGISTER;
 	}
 
 	/**

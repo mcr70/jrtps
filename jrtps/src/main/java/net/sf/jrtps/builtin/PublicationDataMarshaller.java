@@ -21,17 +21,25 @@ import org.slf4j.LoggerFactory;
  * Marshaller for builtin data for topic <i>DCPSPublication</i>.
  * With jRTPS, instances of this topic is of type PublicationData.
  * 
- * @see PublicationData
  * @author mcr70
  */
 public class PublicationDataMarshaller implements Marshaller<PublicationData> {
 	private static final Logger log = LoggerFactory.getLogger(PublicationDataMarshaller.class);
 
+	/**
+	 * PublicationData has always a key.
+	 * @return true
+	 */
 	@Override
 	public boolean hasKey() {
-		return true; // Always true. Key is PID_KEY_HASH.
+		return true; 
 	}
 
+	/**
+	 * Extracts the key from PublicationData. Guid of of the writer represented by
+	 * PublicationData is the key.
+	 * @return Guid as byte array 
+	 */
 	@Override
 	public byte[] extractKey(PublicationData data) {
 		return data.getKey().getBytes();

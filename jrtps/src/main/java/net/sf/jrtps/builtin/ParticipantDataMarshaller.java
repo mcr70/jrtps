@@ -17,8 +17,8 @@ import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Locator;
 
 /**
- * ParticipantDataMarshaller is able to marshall / unmarshall builtin ParticipantData
- * instances to / from RTPSByteBuffer.
+ * Marshaller for builtin data for topic <i>DCPSParticipant</i>.
+ * With jRTPS, instances of this topic is of type ParticipantData.
  * 
  * @author mcr70
  */

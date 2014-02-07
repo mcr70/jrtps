@@ -5,8 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 /**
  * This Parameter identifies the kinds of built-in SEDP endpoints that are available in the Participant.
  * 
- * @author mika.riekkinen
- *
+ * @author mcr70
  */
 public class EndpointSet extends Parameter {
 	public static final int DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER = 0x00000001 << 0;
