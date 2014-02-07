@@ -276,7 +276,7 @@ public class RTPSReader<T> extends Endpoint {
 		if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
 			log.debug("[{}] Creating proxy for SPDP writer {}", getGuid().getEntityId(), writerGuid); 
 			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(), 
-					writerGuid, new SPDPQualityOfService());
+					writerGuid, QualityOfService.getSPDPQualityOfService());
 			wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant().getDomainId())));
 
 			writerProxies.put(writerGuid, wp);	

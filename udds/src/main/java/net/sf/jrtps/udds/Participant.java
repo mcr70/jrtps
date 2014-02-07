@@ -20,8 +20,6 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.RTPSReader;
 import net.sf.jrtps.RTPSWriter;
-import net.sf.jrtps.SEDPQualityOfService;
-import net.sf.jrtps.SPDPQualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
@@ -153,8 +151,8 @@ public class Participant {
 		setMarshaller(SubscriptionData.class, new SubscriptionDataMarshaller());
 		setMarshaller(TopicData.class, new TopicDataMarshaller());
 
-		QualityOfService spdpQoS = new SPDPQualityOfService(); // QoS for SPDP
-		QualityOfService sedpQoS = new SEDPQualityOfService(); // QoS for SEDP
+		QualityOfService spdpQoS = QualityOfService.getSPDPQualityOfService(); // QoS for SPDP
+		QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService(); // QoS for SEDP
 		QualityOfService pmQoS = new QualityOfService();   // QoS for ParticipantMessages
 
 		try {
@@ -168,15 +166,14 @@ public class Participant {
 
 
 		// ----  Create a Writers for SEDP  ---------
-		DataWriter<PublicationData> wdWriter = 
-				createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, 
-						PublicationData.BUILTIN_TYPE_NAME, //PublicationData.class.getName(), 
-						sedpQoS);
 
-		DataWriter<SubscriptionData> rdWriter = 
-				createDataWriter(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, 
-						SubscriptionData.BUILTIN_TYPE_NAME, //SubscriptionData.class.getName(), 
-						sedpQoS);
+		createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, 
+				PublicationData.BUILTIN_TYPE_NAME, //PublicationData.class.getName(), 
+				sedpQoS);
+
+		createDataWriter(SubscriptionData.BUILTIN_TOPIC_NAME, SubscriptionData.class, 
+				SubscriptionData.BUILTIN_TYPE_NAME, //SubscriptionData.class.getName(), 
+				sedpQoS);
 
 
 		// NOTE: It is not mandatory to publish TopicData
