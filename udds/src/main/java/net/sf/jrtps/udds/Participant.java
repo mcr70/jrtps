@@ -116,11 +116,11 @@ public class Participant {
 		threadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize);
 		threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
 		threadPoolExecutor.setRemoveOnCancelPolicy(true);
-		
+
 		logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
 		createUnknownParticipantData(domainId);
-		
+
 		meta_mcLoc = Locator.defaultDiscoveryMulticastLocator(domainId);
 		meta_ucLoc = Locator.defaultMetatrafficUnicastLocator(domainId, participantId);
 		mcLoc = Locator.defaultUserMulticastLocator(domainId);
@@ -131,7 +131,7 @@ public class Participant {
 		locators.add(meta_ucLoc);
 		locators.add(mcLoc);
 		locators.add(ucLoc);
-		
+
 		rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators,
 				discoveredParticipants);
 		rtps_participant.start();
@@ -140,7 +140,7 @@ public class Participant {
 		createBuiltinEntities();
 
 		livelinessManager.start();
-		
+
 		this.leaseManager = new ParticipantLeaseManager(this, discoveredParticipants);
 		addRunnable(leaseManager);
 	}
@@ -166,7 +166,7 @@ public class Participant {
 			throw new RuntimeException(e);
 		}
 
-		
+
 		// ----  Create a Writers for SEDP  ---------
 		DataWriter<PublicationData> wdWriter = 
 				createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, 
@@ -230,8 +230,8 @@ public class Participant {
 		spdp_writer.getRTPSWriter().addMatchedReader(sd);
 
 		spdp_writer.write(pd);
-		
-		
+
+
 		// TODO: We should get rid of resender thread. Each RTPSWriter has an announce thread.
 		createSPDPResender(config.getSPDPResendPeriod(), spdp_writer.getRTPSWriter());
 	}
@@ -263,7 +263,7 @@ public class Participant {
 	 */
 	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
 		logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
-		
+
 		Marshaller<?> m = getMarshaller(type);
 		RTPSReader<T> rtps_reader = null;
 		if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
@@ -378,7 +378,7 @@ public class Participant {
 
 			rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName, wCache, qos);
 		}
-		
+
 		DataWriter<T> writer = new DataWriter<T>(this, type, rtps_writer, wCache);
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
@@ -387,20 +387,20 @@ public class Participant {
 		DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(PublicationData.BUILTIN_TOPIC_NAME).get(0);
 		PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
 		pw.write(wd);
-		
+
 		return writer;
 	}
 
 
-//	/**
-//	 * Sets the default Marshaller. Default marshaller is used if no other Marshaller 
-//	 * could not be used.
-//	 * d
-//	 * @param m
-//	 */
-//	public void setDefaultMarshaller(Marshaller<?> m) {
-//		defaultMarshaller = m;
-//	}
+	//	/**
+	//	 * Sets the default Marshaller. Default marshaller is used if no other Marshaller 
+	//	 * could not be used.
+	//	 * d
+	//	 * @param m
+	//	 */
+	//	public void setDefaultMarshaller(Marshaller<?> m) {
+	//		defaultMarshaller = m;
+	//	}
 
 	/**
 	 * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is
@@ -453,7 +453,7 @@ public class Participant {
 			}
 			else {
 				logger.error("No marshaller registered for {} and it is not Serializable", type);
-			
+
 				throw new IllegalArgumentException("No marshaller found for " + type);
 			}
 		}
@@ -495,28 +495,23 @@ public class Participant {
 	}
 
 	private void createSPDPResender(final Duration period, final RTPSWriter<ParticipantData> spdp_w) {
+
+
 		Runnable resendRunnable = new Runnable() {
+			Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+
 			@Override
 			public void run() {
-				boolean running = true;
-				Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
-				while (running) {
-					logger.debug("start SPDP resend");
-					spdp_w.notifyReader(guid);
-					//spdp_w.sendData(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER, 0);
-					try {
-						running = !threadPoolExecutor.awaitTermination(period.asMillis(), TimeUnit.MILLISECONDS);
-					} catch (InterruptedException e) {
-						running = false;
-					}
-				}
+				logger.debug("starting SPDP resend");
+				spdp_w.notifyReader(guid);
 			}
 		};
 
 		logger.debug("[{}] Starting resend thread with period {}", 
 				rtps_participant.getGuid().getEntityId(), period);		
 
-		threadPoolExecutor.execute(resendRunnable);
+		threadPoolExecutor.scheduleAtFixedRate(resendRunnable, 0, period.asMillis(), TimeUnit.MILLISECONDS);
+		//threadPoolExecutor.execute(resendRunnable);
 	}
 
 
@@ -543,7 +538,7 @@ public class Participant {
 
 		return null;
 	}
-	
+
 	/**
 	 * Finds a Writer with given entity id.
 	 * @param writerId
@@ -576,7 +571,7 @@ public class Participant {
 
 		return __writers;
 	}
-	
+
 	/**
 	 * Get local readers that read from a given topic.
 	 * 
@@ -624,7 +619,7 @@ public class Participant {
 				// Ignore. We are shutting down.
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -641,7 +636,7 @@ public class Participant {
 				return (DataReader<T>) dr;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -658,7 +653,7 @@ public class Participant {
 				return (DataWriter<T>) dw;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -685,15 +680,15 @@ public class Participant {
 			for (DataWriter<?> dw : writers) {
 				dw.getRTPSWriter().removeMatchedReaders(prefix);
 			}
-			
+
 			logger.debug("Notifying participant lost status for {} listeners, {}", entityListeners.size(), pd);
 			for (EntityListener el : entityListeners) {
 				el.participantLost(pd);
 			}
 		}
 	}
-	
-	
+
+
 	List<SubscriptionData> getDiscoveredReaders(GuidPrefix prefix) {
 		List<SubscriptionData> __readers = new LinkedList<>();
 		for (SubscriptionData sd : discoveredReaders.values()) {
@@ -701,7 +696,7 @@ public class Participant {
 				__readers.add(sd);
 			}
 		}
-		
+
 		return __readers;
 	}
 
