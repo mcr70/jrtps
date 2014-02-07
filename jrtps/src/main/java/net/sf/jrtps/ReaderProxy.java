@@ -9,7 +9,7 @@ import net.sf.jrtps.message.parameter.QosReliability;
  *
  * @author mcr70
  */
-public class ReaderProxy extends Proxy {
+public class ReaderProxy extends RemoteProxy {
 	private final boolean expectsInlineQoS;
 	
 	private AckNack latestAckNack;
@@ -17,12 +17,12 @@ public class ReaderProxy extends Proxy {
 	private boolean active = true;
 	private long heartbeatSentTime = 0; // set to 0 after acknack
 	
-	ReaderProxy(SubscriptionData readerData) {
-		this(readerData, false);
+	ReaderProxy(SubscriptionData readerData, LocatorPair locators) {
+		this(readerData, locators, false);
 	}
 
-	ReaderProxy(SubscriptionData rd, boolean expectsInlineQoS) {
-		super(rd);
+	ReaderProxy(SubscriptionData rd, LocatorPair lPair, boolean expectsInlineQoS) {
+		super(rd, lPair.ucLocator, lPair.mcLocator);
 		this.expectsInlineQoS = expectsInlineQoS;
 	}
 
@@ -43,16 +43,6 @@ public class ReaderProxy extends Proxy {
 		return expectsInlineQoS;
 	}
 	
-	/**
-	 * Return true, if remote reader represented by this ReaderProxy is configured to be reliable.
-	 * 
-	 * @return true, if this ReaderProxy represents a reliable reader
-	 */
-	boolean isReliable() {
-		QosReliability policy = (QosReliability) getDiscoveredData().getQualityOfService().getPolicy(QosReliability.class);
-
-		return policy.getKind() == QosReliability.Kind.RELIABLE;
-	}
 	
 	long getReadersHighestSeqNum() {
 		return readersHighestSeqNum;
