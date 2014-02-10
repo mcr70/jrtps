@@ -47,6 +47,13 @@ public class Configuration {
             } catch (IOException e) {
                 log.warn("Failed to read configuration {}. Using defaults.", resourceName, e);
             }
+            finally {
+                try {
+                    is.close();
+                } catch (IOException e) {
+                    log.warn("Failed to read configuration {}. Using defaults.", resourceName, e);
+                }
+            }
         } else {
             log.warn("Failed to read configuration {}. Using defaults.", resourceName);
         }

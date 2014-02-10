@@ -47,40 +47,45 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             // }
 
             ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
-            if (d == null && pd.getGuidPrefix() != null) {
-                if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().getPrefix())) {
-                    log.trace("Ignoring self");
-                } else {
-                    log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
-                    discoveredParticipants.put(pd.getGuidPrefix(), pd);
+            if (d == null) {
+                if (pd.getGuidPrefix() != null) {
+                    if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().getPrefix())) {
+                        log.trace("Ignoring self");
+                    } else {
+                        log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
+                        discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
-                    // PublicationData spdp_pd = new
-                    // PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
-                    // ParticipantData.class.getName(),
-                    // new Guid(pd.getGuidPrefix(),
-                    // EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER), new
-                    // SPDPQualityOfService());
-                    // DataReader<?> spdp_r =
-                    // participant.getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
-                    // spdp_r.getRTPSReader().addMatchedWriter(spdp_pd);
+                        // PublicationData spdp_pd = new
+                        // PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
+                        // ParticipantData.class.getName(),
+                        // new Guid(pd.getGuidPrefix(),
+                        // EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER), new
+                        // SPDPQualityOfService());
+                        // DataReader<?> spdp_r =
+                        // participant.getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+                        // spdp_r.getRTPSReader().addMatchedWriter(spdp_pd);
 
-                    fireParticipantDetected(pd);
+                        fireParticipantDetected(pd);
 
-                    // First, make sure remote participant knows about us.
-                    DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
-                    SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
-                            ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
-                                    EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());
-                    pw.getRTPSWriter().addMatchedReader(rd);
+                        // First, make sure remote participant knows about us.
+                        DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
+                        SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
+                                ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
+                                        EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());
+                        pw.getRTPSWriter().addMatchedReader(rd);
 
-                    // Then, announce our builtin endpoints
-                    handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
+                        // Then, announce our builtin endpoints
+                        handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
+                    }
+                }
+                else {
+                    log.warn("Discovered ParticipantData did not have a guid prefix");
                 }
             } else {
                 log.debug("Renewed lease for {}, new expiration time is {}", pd.getGuidPrefix(),
                         new Date(pd.getLeaseExpirationTime()));
                 d.renewLease(); // TODO: Should we always store the new
-                                // ParticipantData to discoveredParticipants.
+                // ParticipantData to discoveredParticipants.
             }
         }
     }

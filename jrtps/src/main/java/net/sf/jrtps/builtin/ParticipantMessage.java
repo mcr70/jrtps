@@ -22,8 +22,8 @@ public class ParticipantMessage {
         this.prefix = prefix;
         this.kind = kind;
         this.data = data;
-    }
-
+    }  
+    
     public GuidPrefix getGuidPrefix() {
         return prefix;
     }

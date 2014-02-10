@@ -71,6 +71,8 @@ public class VendorId_t {
             case 9:
                 sb.append("ETRI Electronics and Telecommunication Research Institute");
                 break;
+            default:
+                sb.append("unknown");
             }
             sb.append(')');
         } else if (bytes[0] == (byte) 0xca && bytes[1] == (byte) 0xfe) {
