@@ -6,8 +6,8 @@ import net.sf.jrtps.Sample;
 import net.sf.jrtps.SampleListener;
 
 public class ExternalizableHelloListener implements SampleListener<ExternalizableHelloMessage> {
-	@Override
-	public void onSamples(List<Sample<ExternalizableHelloMessage>> samples) {
-		System.out.println("*** Got samples: " + samples);
-	}
+    @Override
+    public void onSamples(List<Sample<ExternalizableHelloMessage>> samples) {
+        System.out.println("*** Got samples: " + samples);
+    }
 }

@@ -7,8 +7,8 @@ import net.sf.jrtps.SampleListener;
 
 public class MsgListener implements SampleListener<Msg> {
 
-	@Override
-	public void onSamples(List<Sample<Msg>> samples) {
-		System.out.println("Got samples: " + samples);
-	}
+    @Override
+    public void onSamples(List<Sample<Msg>> samples) {
+        System.out.println("Got samples: " + samples);
+    }
 }

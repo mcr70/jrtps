@@ -11,7 +11,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.SequenceNumber;
 
-
 /**
  * see 8.3.7.3 DataFrag
  * 
@@ -19,157 +18,156 @@ import net.sf.jrtps.types.SequenceNumber;
  * 
  */
 public class DataFrag extends SubMessage {
-	public static final int KIND = 0x16;
-	
-	private short extraFlags;
-	private EntityId readerId;
-	private EntityId writerId;
-	private SequenceNumber writerSN;
-	private int fragmentStartingNum;
-	private int fragmentsInSubmessage;
-	private int fragmentSize;
-	private int sampleSize;
+    public static final int KIND = 0x16;
 
-	private List<Parameter> parameterList = new LinkedList<Parameter>();
-	private byte[] serializedPayload;
+    private short extraFlags;
+    private EntityId readerId;
+    private EntityId writerId;
+    private SequenceNumber writerSN;
+    private int fragmentStartingNum;
+    private int fragmentsInSubmessage;
+    private int fragmentSize;
+    private int sampleSize;
 
-	
-	public DataFrag(SubMessageHeader smh, RTPSByteBuffer bb) {
-		super(smh);
-		
-		readMessage(bb);
-	}
+    private List<Parameter> parameterList = new LinkedList<Parameter>();
+    private byte[] serializedPayload;
 
+    public DataFrag(SubMessageHeader smh, RTPSByteBuffer bb) {
+        super(smh);
 
-	public boolean inlineQosFlag() {
-		return (header.flags & 0x2) != 0;
-	}
+        readMessage(bb);
+    }
 
-	public boolean keyFlag() {
-		return (header.flags & 0x4) != 0;
-	}
+    public boolean inlineQosFlag() {
+        return (header.flags & 0x2) != 0;
+    }
 
-	public EntityId getReaderId() {
-		return readerId;
-	}
+    public boolean keyFlag() {
+        return (header.flags & 0x4) != 0;
+    }
 
-	public EntityId getWriterId() {
-		return writerId;
-	}
-	
-	public SequenceNumber getWriterSequenceNumber() {
-		return writerSN;
-	}
+    public EntityId getReaderId() {
+        return readerId;
+    }
 
-	public int getFragmentStartingNumber() {
-		return fragmentStartingNum;
-	}
-	
-	public int getFragmentsInSubmessage() {
-		return fragmentsInSubmessage;
-	}
-	
-	public int getFragmentSize() {
-		return fragmentSize;
-	}
-	
-	public int getSampleSize() { // getDataSize()
-		return sampleSize;
-	}
-	
-	public List<Parameter> getParameterList() {
-		return parameterList;
-	}
-	
-	public byte[] getSerializedPayload() {
-		return serializedPayload;
-	}
-	
-	
-	private void readMessage(RTPSByteBuffer bb) {
-		int start_count = bb.position(); // start of bytes read so far from the beginning
-		
-		this.extraFlags = (short) bb.read_short();
-		int octetsToInlineQos = bb.read_short() & 0xffff;
-		
-		int currentCount = bb.position(); // count bytes to inline qos
+    public EntityId getWriterId() {
+        return writerId;
+    }
 
-		this.readerId = EntityId.readEntityId(bb);
-		this.writerId = EntityId.readEntityId(bb);		
-		this.writerSN = new SequenceNumber(bb);
-		
-		this.fragmentStartingNum = bb.read_long(); // ulong
-		this.fragmentsInSubmessage = bb.read_short(); // ushort
-		this.fragmentSize = bb.read_short(); // ushort
-		this.sampleSize = bb.read_long(); // ulong
-		
-		int bytesRead = bb.position() - currentCount;
-		int unknownOctets = octetsToInlineQos - bytesRead;
-		
-		for (int i = 0; i < unknownOctets; i++) {
-			//System.out.println("SKIP");
-			bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3 octetsToInlineQos
-		}
-		
-		if (inlineQosFlag()) {
-			readParameterList(bb);
-		}
-		
-		// TODO: alignment
-		int end_count = bb.position(); // end of bytes read so far from the beginning
+    public SequenceNumber getWriterSequenceNumber() {
+        return writerSN;
+    }
 
-		this.serializedPayload = new byte[header.submessageLength - (end_count-start_count)];
-		bb.read(serializedPayload);
-	}
+    public int getFragmentStartingNumber() {
+        return fragmentStartingNum;
+    }
 
-	/**
-	 * 
-	 * @param bb
-	 * @throws IOException 
-	 * @see 9.4.2.11 ParameterList
-	 */
-	private void readParameterList(RTPSByteBuffer bb) {
-		while (true) {
-			bb.align(4);
-			Parameter param = ParameterFactory.readParameter(bb);
-			parameterList.add(param);
-			if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
-				break; // TODO: Add some control token to CDRInputStream that counts bytes read and 
-				       //       fails if expected_read_count+1 is reached 
-			}
-		}
-	}
+    public int getFragmentsInSubmessage() {
+        return fragmentsInSubmessage;
+    }
 
-	@Override
-	public void writeTo(RTPSByteBuffer buffer) {
-		buffer.write_short(extraFlags);
-		
-		short octets_to_inline_qos = EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH + 
-				4 + 2 + 2 + 4;  
-		buffer.write_short(octets_to_inline_qos);
+    public int getFragmentSize() {
+        return fragmentSize;
+    }
 
-		readerId.writeTo(buffer);
-		writerId.writeTo(buffer);
-		writerSN.writeTo(buffer);
-		
-		buffer.write_long(fragmentStartingNum);
-		buffer.write_short((short) fragmentsInSubmessage);
-		buffer.write_short((short) fragmentSize);
-		buffer.write_long(sampleSize);
-		
-		if (inlineQosFlag()) {
-			writeParameterList(buffer);
-		}		
+    public int getSampleSize() { // getDataSize()
+        return sampleSize;
+    }
 
-		buffer.write(serializedPayload); // TODO: check this
-	}
+    public List<Parameter> getParameterList() {
+        return parameterList;
+    }
 
+    public byte[] getSerializedPayload() {
+        return serializedPayload;
+    }
 
-	private void writeParameterList(RTPSByteBuffer buffer) {
-		for (Parameter param: parameterList) {
-			param.writeTo(buffer); 
-		}
-		
-		// TODO: last Parameter must be PID_SENTINEL
-	}
+    private void readMessage(RTPSByteBuffer bb) {
+        int start_count = bb.position(); // start of bytes read so far from the
+                                         // beginning
+
+        this.extraFlags = (short) bb.read_short();
+        int octetsToInlineQos = bb.read_short() & 0xffff;
+
+        int currentCount = bb.position(); // count bytes to inline qos
+
+        this.readerId = EntityId.readEntityId(bb);
+        this.writerId = EntityId.readEntityId(bb);
+        this.writerSN = new SequenceNumber(bb);
+
+        this.fragmentStartingNum = bb.read_long(); // ulong
+        this.fragmentsInSubmessage = bb.read_short(); // ushort
+        this.fragmentSize = bb.read_short(); // ushort
+        this.sampleSize = bb.read_long(); // ulong
+
+        int bytesRead = bb.position() - currentCount;
+        int unknownOctets = octetsToInlineQos - bytesRead;
+
+        for (int i = 0; i < unknownOctets; i++) {
+            // System.out.println("SKIP");
+            bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3
+                             // octetsToInlineQos
+        }
+
+        if (inlineQosFlag()) {
+            readParameterList(bb);
+        }
+
+        // TODO: alignment
+        int end_count = bb.position(); // end of bytes read so far from the
+                                       // beginning
+
+        this.serializedPayload = new byte[header.submessageLength - (end_count - start_count)];
+        bb.read(serializedPayload);
+    }
+
+    /**
+     * 
+     * @param bb
+     * @throws IOException
+     * @see 9.4.2.11 ParameterList
+     */
+    private void readParameterList(RTPSByteBuffer bb) {
+        while (true) {
+            bb.align(4);
+            Parameter param = ParameterFactory.readParameter(bb);
+            parameterList.add(param);
+            if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
+                break; // TODO: Add some control token to CDRInputStream that
+                       // counts bytes read and
+                       // fails if expected_read_count+1 is reached
+            }
+        }
+    }
+
+    @Override
+    public void writeTo(RTPSByteBuffer buffer) {
+        buffer.write_short(extraFlags);
+
+        short octets_to_inline_qos = EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH + 4 + 2 + 2 + 4;
+        buffer.write_short(octets_to_inline_qos);
+
+        readerId.writeTo(buffer);
+        writerId.writeTo(buffer);
+        writerSN.writeTo(buffer);
+
+        buffer.write_long(fragmentStartingNum);
+        buffer.write_short((short) fragmentsInSubmessage);
+        buffer.write_short((short) fragmentSize);
+        buffer.write_long(sampleSize);
+
+        if (inlineQosFlag()) {
+            writeParameterList(buffer);
+        }
+
+        buffer.write(serializedPayload); // TODO: check this
+    }
+
+    private void writeParameterList(RTPSByteBuffer buffer) {
+        for (Parameter param : parameterList) {
+            param.writeTo(buffer);
+        }
+
+        // TODO: last Parameter must be PID_SENTINEL
+    }
 }

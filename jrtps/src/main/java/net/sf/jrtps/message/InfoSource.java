@@ -14,66 +14,66 @@ import net.sf.jrtps.types.VendorId_t;
  * 
  */
 public class InfoSource extends SubMessage {
-	public static final int KIND = 0x0c;
-	
-	private ProtocolVersion_t protocolVersion;
-	private VendorId_t vendorId;
-	private GuidPrefix guidPrefix;
+    public static final int KIND = 0x0c;
 
-	public InfoSource(GuidPrefix guidPrefix) {
-		super(new SubMessageHeader(KIND));
-		
-		this.protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
-		this.vendorId = VendorId_t.VENDORID_JRTPS;
-		this.guidPrefix = guidPrefix;
-	}
-	
-	InfoSource(SubMessageHeader smh, RTPSByteBuffer is) {
-		super(smh);
-		
-		readMessage(is);
-	}
+    private ProtocolVersion_t protocolVersion;
+    private VendorId_t vendorId;
+    private GuidPrefix guidPrefix;
 
-	/**
-	 * Indicates the protocol used to encapsulate subsequent Submessages.
-	 */
-	public ProtocolVersion_t getProtocolVersion() {
-		return protocolVersion;
-	}
-	
-	/**
-	 * Indicates the VendorId of the vendor that encapsulated subsequent Submessages.
-	 */
-	public VendorId_t getVendorId() {
-		return vendorId;
-	}
-	
-	/**
-	 * Identifies the Participant that is the container of the RTPS Writer
-	 * entities that are the source of the Submessages that follow.
-	 */
-	public GuidPrefix getGuidPrefix() {
-		return guidPrefix;
-	}
-	
-	
-	private void readMessage(RTPSByteBuffer bb) {
-		bb.read_long(); // unused
-		
-		protocolVersion = new ProtocolVersion_t(bb);
-		vendorId = new VendorId_t(bb);
-		guidPrefix = new GuidPrefix(bb);
-	}
+    public InfoSource(GuidPrefix guidPrefix) {
+        super(new SubMessageHeader(KIND));
 
-	@Override
-	public void writeTo(RTPSByteBuffer buffer) {
-		buffer.write_long(0); // TODO: check this
-		protocolVersion.writeTo(buffer);
-		vendorId.writeTo(buffer);
-		guidPrefix.writeTo(buffer);
-	}
-	
-	public String toString() {
-		return super.toString() + ", " + guidPrefix;
-	}
+        this.protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
+        this.vendorId = VendorId_t.VENDORID_JRTPS;
+        this.guidPrefix = guidPrefix;
+    }
+
+    InfoSource(SubMessageHeader smh, RTPSByteBuffer is) {
+        super(smh);
+
+        readMessage(is);
+    }
+
+    /**
+     * Indicates the protocol used to encapsulate subsequent Submessages.
+     */
+    public ProtocolVersion_t getProtocolVersion() {
+        return protocolVersion;
+    }
+
+    /**
+     * Indicates the VendorId of the vendor that encapsulated subsequent
+     * Submessages.
+     */
+    public VendorId_t getVendorId() {
+        return vendorId;
+    }
+
+    /**
+     * Identifies the Participant that is the container of the RTPS Writer
+     * entities that are the source of the Submessages that follow.
+     */
+    public GuidPrefix getGuidPrefix() {
+        return guidPrefix;
+    }
+
+    private void readMessage(RTPSByteBuffer bb) {
+        bb.read_long(); // unused
+
+        protocolVersion = new ProtocolVersion_t(bb);
+        vendorId = new VendorId_t(bb);
+        guidPrefix = new GuidPrefix(bb);
+    }
+
+    @Override
+    public void writeTo(RTPSByteBuffer buffer) {
+        buffer.write_long(0); // TODO: check this
+        protocolVersion.writeTo(buffer);
+        vendorId.writeTo(buffer);
+        guidPrefix.writeTo(buffer);
+    }
+
+    public String toString() {
+        return super.toString() + ", " + guidPrefix;
+    }
 }

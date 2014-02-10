@@ -17,65 +17,64 @@ import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Locator;
 
 /**
- * Marshaller for builtin data for topic <i>DCPSParticipant</i>.
- * With jRTPS, instances of this topic is of type ParticipantData.
+ * Marshaller for builtin data for topic <i>DCPSParticipant</i>. With jRTPS,
+ * instances of this topic is of type ParticipantData.
  * 
  * @author mcr70
  */
 public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
 
-	@Override
-	public boolean hasKey() {
-		return false; // hardcoded. Key is remote participants GUID
-	}
+    @Override
+    public boolean hasKey() {
+        return false; // hardcoded. Key is remote participants GUID
+    }
 
-	@Override
-	public byte[] extractKey(ParticipantData data) {
-		return new byte[0];
-		//return data.getGuid().getBytes();
-	}
+    @Override
+    public byte[] extractKey(ParticipantData data) {
+        return new byte[0];
+        // return data.getGuid().getBytes();
+    }
 
-	@Override
-	public ParticipantData unmarshall(DataEncapsulation data) {
-		ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
-		ParticipantData pd = new ParticipantData(plEnc.getParameterList());
-		
-		return pd;
-	}
+    @Override
+    public ParticipantData unmarshall(DataEncapsulation data) {
+        ParameterListEncapsulation plEnc = (ParameterListEncapsulation) data;
+        ParticipantData pd = new ParticipantData(plEnc.getParameterList());
 
-	
-	@Override
-	public DataEncapsulation marshall(ParticipantData pd) {
-		ParameterList payloadParams = new ParameterList();
+        return pd;
+    }
 
-		payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
-		payloadParams.add(new VendorId(pd.getVendorId()));
+    @Override
+    public DataEncapsulation marshall(ParticipantData pd) {
+        ParameterList payloadParams = new ParameterList();
 
-		Locator unicastLocator = pd.getUnicastLocator();
-		if (unicastLocator != null) {
-			payloadParams.add(new DefaultUnicastLocator(unicastLocator));			
-		}
+        payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
+        payloadParams.add(new VendorId(pd.getVendorId()));
 
-		Locator multicastLocator = pd.getMulticastLocator();
-		if (multicastLocator != null) {
-			payloadParams.add(new DefaultMulticastLocator(multicastLocator));
-		}
+        Locator unicastLocator = pd.getUnicastLocator();
+        if (unicastLocator != null) {
+            payloadParams.add(new DefaultUnicastLocator(unicastLocator));
+        }
 
-		Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
-		if (metaUnicastLocator != null) {
-			payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
-		}
+        Locator multicastLocator = pd.getMulticastLocator();
+        if (multicastLocator != null) {
+            payloadParams.add(new DefaultMulticastLocator(multicastLocator));
+        }
 
-		Locator metaMulticastLocator = pd.getMetatrafficMulticastLocator();
-		if (metaMulticastLocator != null) {
-			payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
-		}
+        Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
+        if (metaUnicastLocator != null) {
+            payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
+        }
 
-		payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
-		payloadParams.add(new ParticipantGuid(pd.getGuid()));
-		payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
-		payloadParams.add(new Sentinel());
-		
-		return new ParameterListEncapsulation(payloadParams);
-	}
+        Locator metaMulticastLocator = pd.getMetatrafficMulticastLocator();
+        if (metaMulticastLocator != null) {
+            payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
+        }
+
+        payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
+        payloadParams.add(new ParticipantGuid(pd.getGuid()));
+        payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
+        payloadParams.add(new Sentinel());
+
+        return new ParameterListEncapsulation(payloadParams);
+    }
 }

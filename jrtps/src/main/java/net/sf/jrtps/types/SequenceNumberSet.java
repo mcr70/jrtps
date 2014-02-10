@@ -12,118 +12,124 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class SequenceNumberSet {
-	private final SequenceNumber bitmapBase;
-	private final int[] bitmaps;
-	private final int numBits;
+    private final SequenceNumber bitmapBase;
+    private final int[] bitmaps;
+    private final int numBits;
 
-	public SequenceNumberSet(long base, int[] bitmaps) {
-		this.bitmapBase = new SequenceNumber(base);
-		this.bitmaps = bitmaps;
-		this.numBits = bitmaps.length * 32;
-	}
+    public SequenceNumberSet(long base, int[] bitmaps) {
+        this.bitmapBase = new SequenceNumber(base);
+        this.bitmaps = bitmaps;
+        this.numBits = bitmaps.length * 32;
+    }
 
-	public SequenceNumberSet(RTPSByteBuffer bb) {
-		bitmapBase = new SequenceNumber(bb);
+    public SequenceNumberSet(RTPSByteBuffer bb) {
+        bitmapBase = new SequenceNumber(bb);
 
-		numBits = bb.read_long();
-		int count =  (numBits+31) / 32;
-		bitmaps = new int[count];
+        numBits = bb.read_long();
+        int count = (numBits + 31) / 32;
+        bitmaps = new int[count];
 
-		for (int i = 0; i < bitmaps.length; i++) {
-			bitmaps[i] = bb.read_long();
-		}
-	}
+        for (int i = 0; i < bitmaps.length; i++) {
+            bitmaps[i] = bb.read_long();
+        }
+    }
 
-	/**
-	 * Gets the bitmap base.
-	 * @return bitmap base
-	 */
-	public long getBitmapBase() {
-		return bitmapBase.getAsLong();
-	}
+    /**
+     * Gets the bitmap base.
+     * 
+     * @return bitmap base
+     */
+    public long getBitmapBase() {
+        return bitmapBase.getAsLong();
+    }
 
-	/**
-	 * Gets the number of bits in bitmaps.
-	 * @return number of bits
-	 */
-	public int getNumBits() {
-		return numBits;
-	}
-	
-	/**
-	 * Gets the bitmaps as an array of ints.
-	 * @return bitmaps
-	 */
-	public int[] getBitmaps() {
-		return bitmaps;
-	}
-	
-	public List<Long> getSequenceNumbers() {
-		List<Long> seqNums = new LinkedList<Long>();
+    /**
+     * Gets the number of bits in bitmaps.
+     * 
+     * @return number of bits
+     */
+    public int getNumBits() {
+        return numBits;
+    }
 
-		long seqNum = bitmapBase.getAsLong();
+    /**
+     * Gets the bitmaps as an array of ints.
+     * 
+     * @return bitmaps
+     */
+    public int[] getBitmaps() {
+        return bitmaps;
+    }
 
-		for (int i = 0; i < bitmaps.length; i++) {
-			int bitmap = bitmaps[i];
+    public List<Long> getSequenceNumbers() {
+        List<Long> seqNums = new LinkedList<Long>();
 
-			for (int j = 0; j < 32; j++) {
-				if ((bitmap & 0x8000000) == 0x8000000) { // id the MSB matches, add a new seqnum
-					seqNums.add(seqNum);
-				}
+        long seqNum = bitmapBase.getAsLong();
 
-				seqNum++;
-				bitmap = bitmap << 1;
-			}
-		}
+        for (int i = 0; i < bitmaps.length; i++) {
+            int bitmap = bitmaps[i];
 
-		return seqNums;
-	}
+            for (int j = 0; j < 32; j++) {
+                if ((bitmap & 0x8000000) == 0x8000000) { // id the MSB matches,
+                                                         // add a new seqnum
+                    seqNums.add(seqNum);
+                }
 
-	public List<Long> getMissingSequenceNumbers() {
-		List<Long> seqNums = new LinkedList<Long>();
+                seqNum++;
+                bitmap = bitmap << 1;
+            }
+        }
 
-		long seqNum = bitmapBase.getAsLong();
+        return seqNums;
+    }
 
-		for (int i = 0; i < bitmaps.length; i++) {
-			int bitmap = bitmaps[i];
+    public List<Long> getMissingSequenceNumbers() {
+        List<Long> seqNums = new LinkedList<Long>();
 
-			for (int j = 0; j < 32; j++) {
-				if ((bitmap & 0x8000000) == 0x0) { // id the MSB does not matches, add a new seqnum
-					seqNums.add(seqNum);
-				}
+        long seqNum = bitmapBase.getAsLong();
 
-				seqNum++;
-				bitmap = bitmap << 1;
-			}
-		}
+        for (int i = 0; i < bitmaps.length; i++) {
+            int bitmap = bitmaps[i];
 
-		return seqNums;
-	}
+            for (int j = 0; j < 32; j++) {
+                if ((bitmap & 0x8000000) == 0x0) { // id the MSB does not
+                                                   // matches, add a new seqnum
+                    seqNums.add(seqNum);
+                }
 
-	public void writeTo(RTPSByteBuffer buffer) {
-		bitmapBase.writeTo(buffer);
+                seqNum++;
+                bitmap = bitmap << 1;
+            }
+        }
 
-//		buffer.write_long(bitmaps.length);
-		//buffer.write_long(bitmaps.length * 32);
-		buffer.write_long(numBits);
-		for (int i = 0; i < bitmaps.length; i++) {
-			buffer.write_long(bitmaps[i]);
-		}
-	}
+        return seqNums;
+    }
 
-	@Override
-	public String toString() {
-		StringBuffer sb = new StringBuffer(bitmapBase.toString());
-		sb.append("/" + numBits);
-		sb.append(":[");
-		for (int i = 0; i < bitmaps.length; i++) {
-			sb.append("0x");
-			sb.append(String.format("%04x", bitmaps[i]));
+    public void writeTo(RTPSByteBuffer buffer) {
+        bitmapBase.writeTo(buffer);
 
-			if (i < bitmaps.length - 1) sb.append(' ');
-		}
-		sb.append(']');
+        // buffer.write_long(bitmaps.length);
+        // buffer.write_long(bitmaps.length * 32);
+        buffer.write_long(numBits);
+        for (int i = 0; i < bitmaps.length; i++) {
+            buffer.write_long(bitmaps[i]);
+        }
+    }
 
-		return sb.toString();
-	}
+    @Override
+    public String toString() {
+        StringBuffer sb = new StringBuffer(bitmapBase.toString());
+        sb.append("/" + numBits);
+        sb.append(":[");
+        for (int i = 0; i < bitmaps.length; i++) {
+            sb.append("0x");
+            sb.append(String.format("%04x", bitmaps[i]));
+
+            if (i < bitmaps.length - 1)
+                sb.append(' ');
+        }
+        sb.append(']');
+
+        return sb.toString();
+    }
 }
