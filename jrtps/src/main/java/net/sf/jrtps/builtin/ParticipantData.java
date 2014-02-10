@@ -313,6 +313,12 @@ public class ParticipantData extends DiscoveredData {
 		this.leaseExpirationTime = System.currentTimeMillis() + leaseDuration.asMillis();
 	}
 
+	
+	public void setLeaseDuration(Duration duration) {
+		this.leaseDuration = duration;
+		renewLease();
+	}
+	
 	/**
 	 * Checks, if the lease has been expired or not.
 	 * @return true, if lease has been expired
