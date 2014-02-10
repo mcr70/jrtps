@@ -49,7 +49,7 @@ public class Guid {
     public boolean equals(Object other) {
         if (other instanceof Guid) {
             Guid o = (Guid) other;
-            return o != null && getPrefix().equals(o.getPrefix()) && getEntityId().equals(o.getEntityId());
+            return getPrefix().equals(o.getPrefix()) && getEntityId().equals(o.getEntityId());
         }
         return false;
     }

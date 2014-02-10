@@ -48,7 +48,7 @@ public abstract class DataEncapsulation {
         byte[] encapsulationHeader = new byte[2];
         bb.read(encapsulationHeader);
 
-        short eh = (short) (((short) encapsulationHeader[0] << 8) | encapsulationHeader[1]);
+        short eh = (short) (((short) encapsulationHeader[0] << 8) | (encapsulationHeader[1] & 0xff));
 
         switch (eh) {
         case 0:

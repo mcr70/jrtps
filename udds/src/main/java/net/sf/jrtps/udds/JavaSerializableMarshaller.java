@@ -114,6 +114,10 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
         } catch (ClassNotFoundException e) {
             throw new IOException(e);
         }
+        finally {
+            ois.close();
+        }
+        
         return (Serializable) o;
     }
 
@@ -130,7 +134,12 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
         RTPSByteBuffer bb = cdrEnc.getBuffer();
 
         ObjectOutputStream os = new ObjectOutputStream(bb.getOutputStream());
-        os.writeObject(data);
+        try {
+            os.writeObject(data);
+        }
+        finally{
+            os.close();
+        }
 
         return cdrEnc;
     }

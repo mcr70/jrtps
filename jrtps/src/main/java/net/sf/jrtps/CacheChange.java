@@ -93,7 +93,7 @@ public class CacheChange implements Comparable<CacheChange> {
         this.sequenceNumber = seqNum;
         this.data = data;
         this.timeStamp = timeStamp;
-        this.hashCode = new Long(sequenceNumber).hashCode();
+        this.hashCode = Long.valueOf(sequenceNumber).hashCode();
         this.marshaller = m;
 
         if (m.hasKey()) {
