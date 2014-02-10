@@ -2,25 +2,24 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-
 public class ParticipantManualLivelinessCount extends Parameter {
-	int count;
-	
-	ParticipantManualLivelinessCount() {
-		super(ParameterEnum.PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
-	}
+    int count;
 
-	@Override
-	public void read(RTPSByteBuffer bb, int length)  {
-		this.count = bb.read_long();
-	}
-	
-	@Override
-	public void writeTo(RTPSByteBuffer buffer) {
-		buffer.write_long(count);
-	}
-	
-	public int getCount() {
-		return count;
-	}
+    ParticipantManualLivelinessCount() {
+        super(ParameterEnum.PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
+    }
+
+    @Override
+    public void read(RTPSByteBuffer bb, int length) {
+        this.count = bb.read_long();
+    }
+
+    @Override
+    public void writeTo(RTPSByteBuffer buffer) {
+        buffer.write_long(count);
+    }
+
+    public int getCount() {
+        return count;
+    }
 }

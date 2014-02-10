@@ -27,184 +27,180 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSMessageReceiver is a consumer to BlockingQueue<byte[]>. A network receiver 
- * produces byte arrays into this queue. These byte[] are parsed into RTPS messages 
- * by this class. <p> 
+ * RTPSMessageReceiver is a consumer to BlockingQueue<byte[]>. A network
+ * receiver produces byte arrays into this queue. These byte[] are parsed into
+ * RTPS messages by this class.
+ * <p>
  * 
- * Successfully parsed messages are split into submessages, which are passed
- * to corresponding RTPS reader entities.
+ * Successfully parsed messages are split into submessages, which are passed to
+ * corresponding RTPS reader entities.
  * 
  * @see RTPSReader
  * @author mcr70
  */
 class RTPSMessageReceiver implements Runnable {
-	private static final Logger logger = LoggerFactory.getLogger(RTPSMessageReceiver.class);
-	
-	private final RTPSParticipant participant;
-	private final BlockingQueue<byte[]> queue;
+    private static final Logger logger = LoggerFactory.getLogger(RTPSMessageReceiver.class);
 
-	private Set<GuidPrefix> ignoredParticipants = new HashSet<>();
-	
-	private boolean running = true;
+    private final RTPSParticipant participant;
+    private final BlockingQueue<byte[]> queue;
 
-	RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue) {
-		this.participant = p;
-		this.queue = queue;
-	}
+    private Set<GuidPrefix> ignoredParticipants = new HashSet<>();
 
+    private boolean running = true;
 
-	@Override
-	public void run() {
-		while(running) {
-			try {
-				// NOTE: We can have only one MessageReceiver. pending samples concept relies on it.
-				byte[] bytes = queue.take();
-				Message msg = new Message(new RTPSByteBuffer(bytes));
-				logger.debug("Parsed RTPS message {}", msg);
+    RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue) {
+        this.participant = p;
+        this.queue = queue;
+    }
 
-				handleMessage(msg);
-			} catch (InterruptedException e) {
-				running = false;
-			}
-		}
-		
-		logger.debug("RTPSMessageReceiver exiting");
-	}
-	
-	
-	/**
-	 * Handles incoming Message. Each sub message is transferred to corresponding
-	 * reader.
-	 * @param msg
-	 */
-	private void handleMessage(Message msg) {
-		Time timestamp = null;
-		GuidPrefix destGuidPrefix = GuidPrefix.GUIDPREFIX_UNKNOWN;
-		GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
-		
-		if (participant.getGuid().getPrefix().equals(sourceGuidPrefix)) {
-			logger.debug("Discarding message originating from this participant");
-			return;
-		}
-		
-		Set<RTPSReader<?>> dataReceivers = new HashSet<>();
-		List<SubMessage> subMessages = msg.getSubMessages();
-		
-		for (SubMessage subMsg : subMessages) {
-			switch (subMsg.getKind()) {
-			case ACKNACK:
-				if (ignoredParticipants.contains(sourceGuidPrefix)) {
-					continue;
-				}
-		
-				handleAckNack(sourceGuidPrefix, (AckNack)subMsg);
-				break;
-			case DATA:
-				if (ignoredParticipants.contains(sourceGuidPrefix)) {
-					continue;
-				}
+    @Override
+    public void run() {
+        while (running) {
+            try {
+                // NOTE: We can have only one MessageReceiver. pending samples
+                // concept relies on it.
+                byte[] bytes = queue.take();
+                Message msg = new Message(new RTPSByteBuffer(bytes));
+                logger.debug("Parsed RTPS message {}", msg);
 
-				try {
-					RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data)subMsg);
-					if (r != null) {
-						dataReceivers.add(r);
-					}
-				}
-				catch(IOException ioe) {
-					logger.warn("Failed to handle data", ioe);
-				}
-				break;
-			case HEARTBEAT:
-				if (ignoredParticipants.contains(sourceGuidPrefix)) {
-					continue;
-				}
+                handleMessage(msg);
+            } catch (InterruptedException e) {
+                running = false;
+            }
+        }
 
-				handleHeartbeat(sourceGuidPrefix, (Heartbeat)subMsg);
-				break;
-			case INFODESTINATION: 
-				destGuidPrefix = ((InfoDestination)subMsg).getGuidPrefix(); 
-				break;
-			case INFOSOURCE: 
-				sourceGuidPrefix = ((InfoSource)subMsg).getGuidPrefix(); 
-				break;
-			case INFOTIMESTAMP: 
-				timestamp = ((InfoTimestamp)subMsg).getTimeStamp(); 
-				break;
-			case INFOREPLY: // TODO: HB, AC & DATA needs to use replyLocators, if present 
-				InfoReply ir = (InfoReply) subMsg;
-				List<Locator> replyLocators = ir.getUnicastLocatorList();
-				if (ir.multicastFlag()) {
-					replyLocators.addAll(ir.getMulticastLocatorList());
-				}
-				logger.warn("InfoReply not handled");
-				break;
-			case INFOREPLYIP4: // TODO: HB, AC & DATA needs to use these Locators, if present
-				InfoReplyIp4 ir4 = (InfoReplyIp4) subMsg;
-				LocatorUDPv4_t unicastLocator = ir4.getUnicastLocator();
-				if (ir4.multicastFlag()) {
-					LocatorUDPv4_t multicastLocator = ir4.getMulticastLocator();
-				}
-				logger.warn("InfoReplyIp4 not handled");
-				break;
-			case GAP:
-				handleGap(sourceGuidPrefix, (Gap)subMsg);
-				break;
-			default: 
-				logger.warn("SubMessage not handled: {}", subMsg);
-			}
-		}
-		
-		logger.trace("Releasing samples for {} readers", dataReceivers.size());
-		for (RTPSReader<?> reader : dataReceivers) {
-			reader.releasePendingSamples();
-		}
-	}
+        logger.debug("RTPSMessageReceiver exiting");
+    }
 
+    /**
+     * Handles incoming Message. Each sub message is transferred to
+     * corresponding reader.
+     * 
+     * @param msg
+     */
+    private void handleMessage(Message msg) {
+        Time timestamp = null;
+        GuidPrefix destGuidPrefix = GuidPrefix.GUIDPREFIX_UNKNOWN;
+        GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 
+        if (participant.getGuid().getPrefix().equals(sourceGuidPrefix)) {
+            logger.debug("Discarding message originating from this participant");
+            return;
+        }
 
-	private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
-		RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
+        Set<RTPSReader<?>> dataReceivers = new HashSet<>();
+        List<SubMessage> subMessages = msg.getSubMessages();
 
-		if (writer != null) {
-			writer.onAckNack(sourceGuidPrefix, ackNack);
-		}
-		else {
-			logger.debug("No Writer({}) to handle AckNack from {}", ackNack.getWriterId(), ackNack.getReaderId());
-		}
-	}
+        for (SubMessage subMsg : subMessages) {
+            switch (subMsg.getKind()) {
+            case ACKNACK:
+                if (ignoredParticipants.contains(sourceGuidPrefix)) {
+                    continue;
+                }
 
-	private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
-		RTPSReader<?> reader = participant.getReader(gap.getReaderId(), gap.getWriterId());
-		reader.handleGap(sourceGuidPrefix, gap);
-	}
+                handleAckNack(sourceGuidPrefix, (AckNack) subMsg);
+                break;
+            case DATA:
+                if (ignoredParticipants.contains(sourceGuidPrefix)) {
+                    continue;
+                }
 
-	private RTPSReader<?> handleData(GuidPrefix sourcePrefix, Time timestamp, Data data) throws IOException {
-		RTPSReader<?> reader = participant.getReader(data.getReaderId(), data.getWriterId());
+                try {
+                    RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data) subMsg);
+                    if (r != null) {
+                        dataReceivers.add(r);
+                    }
+                } catch (IOException ioe) {
+                    logger.warn("Failed to handle data", ioe);
+                }
+                break;
+            case HEARTBEAT:
+                if (ignoredParticipants.contains(sourceGuidPrefix)) {
+                    continue;
+                }
 
-		if (reader != null) {
-			reader.createSample(sourcePrefix, data, timestamp);
-			return reader;
-		}
-		else {
-			logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
-		}
-		
-		return null;
-	}
+                handleHeartbeat(sourceGuidPrefix, (Heartbeat) subMsg);
+                break;
+            case INFODESTINATION:
+                destGuidPrefix = ((InfoDestination) subMsg).getGuidPrefix();
+                break;
+            case INFOSOURCE:
+                sourceGuidPrefix = ((InfoSource) subMsg).getGuidPrefix();
+                break;
+            case INFOTIMESTAMP:
+                timestamp = ((InfoTimestamp) subMsg).getTimeStamp();
+                break;
+            case INFOREPLY: // TODO: HB, AC & DATA needs to use replyLocators,
+                            // if present
+                InfoReply ir = (InfoReply) subMsg;
+                List<Locator> replyLocators = ir.getUnicastLocatorList();
+                if (ir.multicastFlag()) {
+                    replyLocators.addAll(ir.getMulticastLocatorList());
+                }
+                logger.warn("InfoReply not handled");
+                break;
+            case INFOREPLYIP4: // TODO: HB, AC & DATA needs to use these
+                               // Locators, if present
+                InfoReplyIp4 ir4 = (InfoReplyIp4) subMsg;
+                LocatorUDPv4_t unicastLocator = ir4.getUnicastLocator();
+                if (ir4.multicastFlag()) {
+                    LocatorUDPv4_t multicastLocator = ir4.getMulticastLocator();
+                }
+                logger.warn("InfoReplyIp4 not handled");
+                break;
+            case GAP:
+                handleGap(sourceGuidPrefix, (Gap) subMsg);
+                break;
+            default:
+                logger.warn("SubMessage not handled: {}", subMsg);
+            }
+        }
 
-	private void handleHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {		
-		RTPSReader<?> reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
-	
-		if (reader != null) {
-			reader.onHeartbeat(senderGuidPrefix, hb);
-		}
-		else {
-			logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
-		}
-	}
+        logger.trace("Releasing samples for {} readers", dataReceivers.size());
+        for (RTPSReader<?> reader : dataReceivers) {
+            reader.releasePendingSamples();
+        }
+    }
 
+    private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
+        RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
 
-	void ignoreParticipant(GuidPrefix prefix) {
-		ignoredParticipants.add(prefix);
-	}
+        if (writer != null) {
+            writer.onAckNack(sourceGuidPrefix, ackNack);
+        } else {
+            logger.debug("No Writer({}) to handle AckNack from {}", ackNack.getWriterId(), ackNack.getReaderId());
+        }
+    }
+
+    private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
+        RTPSReader<?> reader = participant.getReader(gap.getReaderId(), gap.getWriterId());
+        reader.handleGap(sourceGuidPrefix, gap);
+    }
+
+    private RTPSReader<?> handleData(GuidPrefix sourcePrefix, Time timestamp, Data data) throws IOException {
+        RTPSReader<?> reader = participant.getReader(data.getReaderId(), data.getWriterId());
+
+        if (reader != null) {
+            reader.createSample(sourcePrefix, data, timestamp);
+            return reader;
+        } else {
+            logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
+        }
+
+        return null;
+    }
+
+    private void handleHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {
+        RTPSReader<?> reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
+
+        if (reader != null) {
+            reader.onHeartbeat(senderGuidPrefix, hb);
+        } else {
+            logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
+        }
+    }
+
+    void ignoreParticipant(GuidPrefix prefix) {
+        ignoredParticipants.add(prefix);
+    }
 }
