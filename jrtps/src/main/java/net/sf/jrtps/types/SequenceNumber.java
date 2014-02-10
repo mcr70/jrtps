@@ -24,14 +24,30 @@ public class SequenceNumber {
     }
 
     public SequenceNumber(long seqNum) {
-        low = (int) (seqNum & 0xffff); // TODO: check this
-        high = (int) ((seqNum >> 32) & 0xffff);
+        low = (int) (seqNum & 0xffffffff);
+        high = (int) ((seqNum >> 32) & 0xffffffff);
     }
 
     public long getAsLong() {
-        return ((high << 32) | low);
+        return ((long)high << 32) | ((long)low & 0xFFFFFFFF);
     }
 
+    /**
+     * High bytes, used for testing
+     * @return high bytes
+     */
+    int getHighBytes() {
+        return high;
+    }
+    
+    /**
+     * low bytes, used for testing
+     * @return low bytes
+     */
+    int getLowBytes() {
+        return low;
+    }
+    
     public String toString() {
         return "" + getAsLong();
     }
