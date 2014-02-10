@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 
 /**
  * This annotation provides means to tag fields as being part of a RTPS(DDS) key.
- * RTPS(DDS) key uniquely identifies an instance of an Object in domain/topic.<br>
+ * A key uniquely identifies an instance of an Object in domain/topic.<br>
  * 
  * A default index is set to 0, which allows fields to be annotated with a simple Key annotation:<p>
  * <pre>
@@ -36,7 +36,7 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface Key {
 	/**
-	 * Get the index of the key. RTPS(DDS) key may be composed of multiple fields.
+	 * Get the index of the key. A key may be composed of multiple fields.
 	 * This annotation method provides means to set those fields in a known order.
 	 * Key fields are ordered according to their index.
 	 * <p>

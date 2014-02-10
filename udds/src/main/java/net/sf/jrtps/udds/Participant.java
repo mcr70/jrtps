@@ -706,6 +706,10 @@ public class Participant {
 	private void createUnknownParticipantData(int domainId) {
 		ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, 
 				null, null, null, Locator.defaultDiscoveryMulticastLocator(domainId));
+		
+		// Set the lease duration to max integer. I.e. Never expires.
+		pd.setLeaseDuration(new Duration(Integer.MAX_VALUE));
+		
 		discoveredParticipants.put(GuidPrefix.GUIDPREFIX_UNKNOWN, pd);
 	}
 }
