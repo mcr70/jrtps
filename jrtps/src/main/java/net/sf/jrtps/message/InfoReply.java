@@ -33,7 +33,7 @@ public class InfoReply extends SubMessage {
         this.unicastLocatorList = unicastLocators;
         this.multicastLocatorList = multicastLocators;
 
-        if (multicastLocatorList != null || multicastLocatorList.size() > 0) {
+        if (multicastLocatorList != null && multicastLocatorList.size() > 0) {
             header.flags |= 0x2;
         }
     }
