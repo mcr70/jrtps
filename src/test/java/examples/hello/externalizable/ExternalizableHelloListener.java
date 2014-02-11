@@ -2,8 +2,8 @@ package examples.hello.externalizable;
 
 import java.util.List;
 
-import net.sf.jrtps.Sample;
-import net.sf.jrtps.SampleListener;
+import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.SampleListener;
 
 public class ExternalizableHelloListener implements SampleListener<ExternalizableHelloMessage> {
     @Override

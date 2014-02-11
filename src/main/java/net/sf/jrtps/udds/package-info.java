@@ -1,5 +1,6 @@
 /**
- * uDDS package provides a simple client to jRTPS.
+ * uDDS package provides a simple DDS implementation that utilizes jRTPS. <p>
+ * 
  * uDDS aims to be a simplistic version of DDS specification by OMG.
  * Idea is to simplify writing code to DDS domain, while keeping programming interface
  * as simple as possible.<p>

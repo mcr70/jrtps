@@ -4,9 +4,9 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.RTPSWriter;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.message.parameter.QosLiveliness;
+import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Duration;
 
 import org.slf4j.Logger;

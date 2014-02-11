@@ -1,9 +1,10 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 
@@ -103,11 +104,11 @@ public class CacheChange implements Comparable<CacheChange> {
         }
     }
 
-    Object getData() {
+    public Object getData() {
         return data;
     }
 
-    DataEncapsulation getDataEncapsulation() throws IOException {
+    public DataEncapsulation getDataEncapsulation() throws IOException {
         if (marshalledData == null) {
             marshalledData = marshaller.marshall(data);
         }
@@ -129,15 +130,15 @@ public class CacheChange implements Comparable<CacheChange> {
      * 
      * @return timestamp
      */
-    long getTimeStamp() {
+    public long getTimeStamp() {
         return timeStamp;
     }
 
-    boolean hasKey() {
+    public boolean hasKey() {
         return marshaller.hasKey();
     }
 
-    KeyHash getKey() {
+    public KeyHash getKey() {
         return keyHash;
     }
 
@@ -164,7 +165,7 @@ public class CacheChange implements Comparable<CacheChange> {
         return new KeyHash(bytes);
     }
 
-    Kind getKind() {
+    public Kind getKind() {
         return kind;
     }
 

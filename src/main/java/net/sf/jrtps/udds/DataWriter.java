@@ -3,7 +3,7 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.RTPSWriter;
+import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Guid;
 
 /**

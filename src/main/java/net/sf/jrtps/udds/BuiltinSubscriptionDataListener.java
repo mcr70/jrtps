@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.Sample;
-import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.SampleListener;
 import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
@@ -44,8 +44,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
             List<DataWriter<?>> writers = participant.getWritersForTopic(sd.getTopicName());
             for (DataWriter<?> w : writers) {
                 if (!w.getRTPSWriter().isMatchedWith(sd) && !sdSample.isDisposed()) {
-                    // Not associated and sample is not a dispose -> do
-                    // associate
+                    // Not associated and sample is not a dispose -> do associate
                     QualityOfService requested = sd.getQualityOfService();
                     QualityOfService offered = w.getRTPSWriter().getQualityOfService();
                     log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), sd

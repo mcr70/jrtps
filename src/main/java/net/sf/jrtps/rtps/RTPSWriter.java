@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -9,6 +9,9 @@ import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
+import net.sf.jrtps.Configuration;
+import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
@@ -30,7 +33,7 @@ import org.slf4j.LoggerFactory;
 /**
  * RTPSWriter implements RTPS writer endpoint. RTPSWriter will not communicate
  * with unknown readers. It is expected that DDS implementation explicitly call
- * addMatchedReader(ReaderData) and removeMatchedReader(ReaderData).
+ * addMatchedReader(SubscriptionData) and removeMatchedReader(SubscriptionData).
  * 
  * Samples are written through an implementation of WriterCache, which will be
  * given when creating RTPSWriter with RTPSParticipant. When RTPSWriter needs to
@@ -394,6 +397,13 @@ public class RTPSWriter<T> extends Endpoint {
         return true;
     }
 
+    /**
+     * Checks, if this RTPSWriter is already matched with a RTPSReader
+     * represented by given SubscriptionData.
+     * 
+     * @param readerData
+     * @return true if matched
+     */
     public boolean isMatchedWith(SubscriptionData readerData) {
         return readerProxies.get(readerData.getKey()) != null;
     }

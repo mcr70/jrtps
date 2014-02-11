@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import net.sf.jrtps.CacheChange;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
@@ -19,6 +18,7 @@ import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
+import net.sf.jrtps.rtps.CacheChange;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
