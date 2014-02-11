@@ -1,3 +1,5 @@
+0.6.0
+    - Combined udds & jrtps. Now there is only one artifact: net.sf.jrtps:jrtps.
 0.5.6
 	- Rearranged udds test to examples. Initial interoperability tests for 
 	  OpenSplice and OpenDDS. Not interoperable for now :|
