@@ -52,7 +52,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                     if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().getPrefix())) {
                         log.trace("Ignoring self");
                     } else {
-                        log.debug("A new Participant detected: {}, {}", pd, pd.getQualityOfService());
+                        log.debug("A new Participant detected: {}, parameters received: {}", pd.getGuidPrefix(), pd.getParameters());
                         discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
                         // PublicationData spdp_pd = new

@@ -101,21 +101,15 @@ public class Endpoint {
      */
     protected boolean sendMessage(Message m, RemoteProxy proxy) {
         boolean overFlowed = false;
+        //proxy.preferMulticast(true);
         Locator locator = proxy.getLocator();
         log.debug("Sending message to {}", locator);
 
         if (locator != null) {
             try {
-                UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); // TODO:
-                                                                                     // No
-                                                                                     // need
-                                                                                     // to
-                                                                                     // create
-                                                                                     // and
-                                                                                     // close
-                                                                                     // all
-                                                                                     // the
-                                                                                     // time
+                UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); 
+                // TODO: No need to create and close all the time
+
                 overFlowed = w.sendMessage(m);
                 w.close();
             } catch (IOException e) {
