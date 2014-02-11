@@ -244,6 +244,7 @@ public class Participant {
      * Create a new DataReader for given type T. DataReader is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
      * Typename of the DataReader is set to fully qualified class name.
+     * QualityOfService with default values will be used.
      * 
      * @param type
      * @return a DataReader<T>
@@ -252,21 +253,27 @@ public class Participant {
         return createDataReader(type, new QualityOfService());
     }
 
+    /**
+     * Create a new DataReader for given type T. DataReader is bound to a topic
+     * named c.getSimpleName(), which corresponds to class name of the argument.
+     * Typename of the DataReader is set to fully qualified class name.
+     * 
+     * @param type 
+     * @param qos QualityOfService used
+     * @return
+     */
     public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
         return createDataReader(type.getSimpleName(), type, type.getName(), qos);
     }
 
     /**
-     * Create DataReader with given topicName and typeName.
+     * Create a DataReader. All the properties(topicName, type, typeName, qos) of the DataReader 
+     * is given in parameters.
      * 
-     * @param topicName
-     *            name of the topic
-     * @param type
-     *            type of the DataReader
-     * @param typeName
-     *            name of the type
-     * @param qos
-     *            QualityOfService
+     * @param topicName name of the topic
+     * @param type type of the DataReader
+     * @param typeName name of the type
+     * @param qos QualityOfService
      * @return a DataReader<T>
      */
     public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
@@ -319,8 +326,7 @@ public class Participant {
      * Typename of the DataWriter is set to fully qualified class name. A
      * default QualityOfService is used.
      * 
-     * @param c
-     *            A class, that is used with created DataWriter.
+     * @param c A class, that is used with created DataWriter.
      * @return a DataWriter<T>
      */
     public <T> DataWriter<T> createDataWriter(Class<T> c) {
@@ -332,10 +338,8 @@ public class Participant {
      * named c.getSimpleName(), which corresponds to class name of the argument.
      * Typename of the DataWriter is set to fully qualified class name.
      * 
-     * @param c
-     *            A class, that is used with created DataWriter.
-     * @param qos
-     *            QualityOfService
+     * @param c A class, that is used with created DataWriter.
+     * @param qos QualityOfService
      * @return a DataWriter<T>
      */
     public <T> DataWriter<T> createDataWriter(Class<T> c, QualityOfService qos) {
@@ -343,16 +347,13 @@ public class Participant {
     }
 
     /**
-     * Create DataWriter with given topicName and typeName.
+     * Create a DataWriter. All the properties(topicName, type, typeName, qos) of the DataWriter 
+     * is given in parameters.
      * 
-     * @param topicName
-     *            name of the topic
-     * @param type
-     *            type of the DataWriter
-     * @param typeName
-     *            name of the type. typeName gets sent to remote readers.
-     * @param qos
-     *            QualityOfService
+     * @param topicName name of the topic
+     * @param type type of the DataWriter
+     * @param typeName name of the type. typeName gets sent to remote readers.
+     * @param qos QualityOfService
      * @return a DataWriter<T>
      */
     public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
