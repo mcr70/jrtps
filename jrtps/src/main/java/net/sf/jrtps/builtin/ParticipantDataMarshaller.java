@@ -9,6 +9,7 @@ import net.sf.jrtps.message.parameter.DefaultUnicastLocator;
 import net.sf.jrtps.message.parameter.MetatrafficMulticastLocator;
 import net.sf.jrtps.message.parameter.MetatrafficUnicastLocator;
 import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.ParticipantBuiltinEndpoints;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
@@ -48,7 +49,21 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
         ParameterList payloadParams = new ParameterList();
 
         payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
+        payloadParams.add(new ParticipantGuid(pd.getGuid()));
         payloadParams.add(new VendorId(pd.getVendorId()));
+
+        payloadParams.add(new ParticipantBuiltinEndpoints(pd.getBuiltinEndpoints()));
+        payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
+        
+        Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
+        if (metaUnicastLocator != null) {
+            payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
+        }
+
+        Locator metaMulticastLocator = pd.getMetatrafficMulticastLocator();
+        if (metaMulticastLocator != null) {
+            payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
+        }
 
         Locator unicastLocator = pd.getUnicastLocator();
         if (unicastLocator != null) {
@@ -60,19 +75,7 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
             payloadParams.add(new DefaultMulticastLocator(multicastLocator));
         }
 
-        Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
-        if (metaUnicastLocator != null) {
-            payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
-        }
-
-        Locator metaMulticastLocator = pd.getMetatrafficMulticastLocator();
-        if (metaMulticastLocator != null) {
-            payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
-        }
-
         payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
-        payloadParams.add(new ParticipantGuid(pd.getGuid()));
-        payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
         payloadParams.add(new Sentinel());
 
         return new ParameterListEncapsulation(payloadParams);

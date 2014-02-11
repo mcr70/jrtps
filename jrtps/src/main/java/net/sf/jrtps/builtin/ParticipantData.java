@@ -165,17 +165,14 @@ public class ParticipantData extends DiscoveredData {
 
         while (iterator.hasNext()) {
             Parameter param = iterator.next();
-
-            log.trace("{}", param);
+            addParameter(param);
+            
             switch (param.getParameterId()) {
             case PID_PARTICIPANT_GUID:
                 this.guidPrefix = ((ParticipantGuid) param).getParticipantGuid().getPrefix();
                 break;
-            case PID_PARTICIPANT_BUILTIN_ENDPOINTS: // Handle
-                                                    // PARTICIPANT_BUILTIN_ENDPOINTS
-                                                    // (opendds) and
-            case PID_BUILTIN_ENDPOINT_SET: // BUILTIN_ENDPOINT_SET (opensplice)
-                                           // the same way
+            case PID_PARTICIPANT_BUILTIN_ENDPOINTS: // Handle PARTICIPANT_BUILTIN_ENDPOINTS (opendds)
+            case PID_BUILTIN_ENDPOINT_SET:          // BUILTIN_ENDPOINT_SET (ospl) the same way
                 availableBuiltinEndpoints = ((EndpointSet) param).getEndpointSet();
                 break;
             case PID_PROTOCOL_VERSION:
@@ -302,16 +299,6 @@ public class ParticipantData extends DiscoveredData {
         metaLocators.add(metatrafficUnicastLocator);
 
         return metaLocators;
-    }
-
-    private Set<Locator> getAllLocators() {
-        Set<Locator> allLocators = new HashSet<Locator>();
-        allLocators.add(multicastLocator);
-        allLocators.add(unicastLocator);
-        allLocators.add(metatrafficMulticastLocator);
-        allLocators.add(metatrafficUnicastLocator);
-
-        return allLocators;
     }
 
     /**

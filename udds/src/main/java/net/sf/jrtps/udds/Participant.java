@@ -30,7 +30,6 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
-import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
@@ -234,9 +233,11 @@ public class Participant {
         spdp_writer.getRTPSWriter().addMatchedReader(sd);
 
         ParticipantData pd = createSPDPParticipantData();
+        logger.debug("Created ParticipantData: {}", pd);
+        
         spdp_writer.write(pd);
 
-        createSPDPResender(config.getSPDPResendPeriod(), spdp_writer.getRTPSWriter());
+        createSPDPResender(config.getSPDPResendPeriod(), spdp_writer);
     }
 
     /**
@@ -489,8 +490,6 @@ public class Participant {
         ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
                 meta_ucLoc, meta_mcLoc);
 
-        logger.debug("Created ParticipantData: {}", pd);
-
         return pd;
     }
 
@@ -503,20 +502,21 @@ public class Participant {
             eps |= dw.getRTPSWriter().endpointSetId();
         }
 
-        logger.debug("{}", new BuiltinEndpointSet(eps));
-
         return eps;
     }
 
-    private void createSPDPResender(final Duration period, final RTPSWriter<ParticipantData> spdp_w) {
+    private void createSPDPResender(final Duration period, final DataWriter<ParticipantData> spdp_writer) {
 
         Runnable resendRunnable = new Runnable() {
-            Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+            //Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 
             @Override
             public void run() {
                 logger.debug("starting SPDP resend");
-                spdp_w.notifyReader(guid);
+                ParticipantData pd = createSPDPParticipantData();
+                
+                spdp_writer.write(pd);
+                //spdp_writer.getRTPSWriter().notifyReader(guid);
             }
         };
 
