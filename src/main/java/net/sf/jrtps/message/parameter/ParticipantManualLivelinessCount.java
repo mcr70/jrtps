@@ -3,12 +3,12 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class ParticipantManualLivelinessCount extends Parameter {
-    private volatile int count;
+    private int count;
 
     /**
      * Constructs a new ParticipantManualLivelinessCount
      */
-    public ParticipantManualLivelinessCount() {
+    ParticipantManualLivelinessCount() {
         super(ParameterEnum.PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
     }
 
@@ -22,11 +22,15 @@ public class ParticipantManualLivelinessCount extends Parameter {
         buffer.write_long(count);
     }
 
+    /**
+     * Gets the count value.
+     * @return count
+     */
     public int getCount() {
         return count;
     }
     
-    public void incrementCount() {
-        count++;
+    public String toString() {
+        return super.toString() + "(" + count + ")";
     }
 }
