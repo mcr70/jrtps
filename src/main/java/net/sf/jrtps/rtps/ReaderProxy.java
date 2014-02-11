@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;

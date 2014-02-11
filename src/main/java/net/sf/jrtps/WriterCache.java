@@ -2,6 +2,8 @@ package net.sf.jrtps;
 
 import java.util.SortedSet;
 
+import net.sf.jrtps.rtps.CacheChange;
+
 /**
  * WriterCache represents writers history cache from the RTPSWriter point of
  * view. RTPSWriter uses WriterCache to construct Data and HeartBeat messages to

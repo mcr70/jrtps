@@ -5,13 +5,13 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.Sample;
-import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.SampleListener;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;

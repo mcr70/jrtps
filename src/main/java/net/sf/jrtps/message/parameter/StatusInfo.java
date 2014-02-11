@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.CacheChange;
+import net.sf.jrtps.rtps.CacheChange;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.slf4j.Logger;

@@ -77,7 +77,7 @@ public class Configuration {
      * 
      * @return heartbeat period in milliseconds
      */
-    int getHeartbeatPeriod() {
+    public int getHeartbeatPeriod() {
         return getIntProperty("rtps.writer.heartbeat-period", 10000);
     }
 
@@ -89,7 +89,7 @@ public class Configuration {
      * 
      * @return Nack response delay
      */
-    int getNackResponseDelay() {
+    public int getNackResponseDelay() {
         return getIntProperty("rtps.writer.nack-response-delay", 200);
     }
 
@@ -122,11 +122,11 @@ public class Configuration {
      * 
      * @return heartbeat response delay
      */
-    int getHeartbeatResponseDelay() {
+    public int getHeartbeatResponseDelay() {
         return getIntProperty("rtps.reader.heartbeat-response-delay", 500);
     }
 
-    int getBufferSize() {
+    public int getBufferSize() {
         return getIntProperty("jrtps.buffer-size", 16384);
     }
 

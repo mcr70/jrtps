@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.util.HashSet;

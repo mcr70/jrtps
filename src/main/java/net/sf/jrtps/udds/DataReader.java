@@ -1,7 +1,7 @@
 package net.sf.jrtps.udds;
 
-import net.sf.jrtps.RTPSReader;
-import net.sf.jrtps.SampleListener;
+import net.sf.jrtps.rtps.RTPSReader;
+import net.sf.jrtps.rtps.SampleListener;
 
 /**
  * This class represents a strongly typed DataReader in spirit of DDS

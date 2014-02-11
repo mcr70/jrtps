@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.Sample;
-import net.sf.jrtps.SampleListener;
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.SampleListener;
 import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;

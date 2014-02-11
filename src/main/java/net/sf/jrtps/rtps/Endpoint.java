@@ -1,9 +1,11 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
+import net.sf.jrtps.Configuration;
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;

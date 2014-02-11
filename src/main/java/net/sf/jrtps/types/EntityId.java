@@ -2,12 +2,10 @@ package net.sf.jrtps.types;
 
 import java.util.Arrays;
 
-import net.sf.jrtps.RTPSParticipant;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantMessage;
-import net.sf.jrtps.builtin.SubscriptionData;
-import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**

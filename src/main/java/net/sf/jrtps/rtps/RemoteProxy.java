@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.QosReliability;
@@ -75,7 +75,7 @@ public class RemoteProxy {
     /**
      * Gets the DiscoveredData associated with this Proxy.
      * 
-     * @return
+     * @return DiscoveredData
      */
     public DiscoveredData getDiscoveredData() {
         return discoveredData;

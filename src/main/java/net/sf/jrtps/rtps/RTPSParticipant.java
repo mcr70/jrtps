@@ -1,4 +1,4 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import java.net.SocketException;
 import java.util.HashSet;
@@ -13,6 +13,10 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import net.sf.jrtps.Configuration;
+import net.sf.jrtps.Marshaller;
+import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.transport.UDPReceiver;
 import net.sf.jrtps.types.EntityId;
