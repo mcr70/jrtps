@@ -1,17 +1,18 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
 		<groupId>org.sonatype.oss</groupId>
 		<artifactId>oss-parent</artifactId>
 		<version>7</version>
-        <relativePath />
+		<relativePath />
 	</parent>
 
 	<groupId>net.sf.jrtps</groupId>
 	<artifactId>jrtps</artifactId>
 	<version>0.6.1-SNAPSHOT</version>
-    <packaging>jar</packaging>
+	<packaging>jar</packaging>
 
 	<name>jRTPS</name>
 	<description>jRTPS - An implememtation of RTPS protocol by OMG</description>
@@ -30,7 +31,7 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-		
+
 	<profiles>
 		<profile>
 			<id>dist</id>
@@ -40,6 +41,39 @@
 			<modules>
 				<module>dist</module>
 			</modules>
+		</profile>
+		<profile>
+			<id>site</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
+			<distributionManagement>
+				<site>
+					<id>jrtps.site</id>
+					<name>jRTPS</name>
+					<url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url>
+				</site>
+			</distributionManagement>
+			<build>
+				<pluginManagement>
+					<plugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-site-plugin</artifactId>
+							<version>3.3</version>
+							<dependencies>
+								<dependency> <!-- add support for ssh/scp -->
+									<groupId>org.apache.maven.wagon</groupId>
+									<artifactId>wagon-ssh</artifactId>
+									<version>1.0</version>
+								</dependency>
+							</dependencies>
+						</plugin>
+					</plugins>
+				</pluginManagement>
+			</build>
+
 		</profile>
 	</profiles>
 
@@ -88,7 +122,7 @@
 				<artifactId>maven-bundle-plugin</artifactId>
 				<version>2.3.7</version>
 				<extensions>true</extensions>
-				
+
 				<executions>
 					<execution>
 						<id>bundle</id>
@@ -97,7 +131,7 @@
 							<goal>bundle</goal>
 						</goals>
 					</execution>
-				</executions>				
+				</executions>
 				<configuration>
 					<instructions>
 						<Export-Package>{local-packages}</Export-Package>
@@ -141,15 +175,5 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
-	
-	 <!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
-<!--	<distributionManagement>
-		<site>
-			<id>jrtps.site</id>
-			<name>jRTPS</name>
-			<url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url>
-		</site>
-	</distributionManagement>
--->
 
 </project>
