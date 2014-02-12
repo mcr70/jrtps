@@ -1,4 +1,4 @@
 ssh -t mcr70,jrtps@shell.sourceforge.net create
 
-mvn site:site
-mvn site:deploy
+mvn site:site -Psite
+mvn site:deploy -Psite
