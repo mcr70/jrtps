@@ -1,3 +1,8 @@
+0.6.0
+    - moved RTPS entities (RTPSParticipant, RTPSReader, ...) to net.sf.jrtps.rtps package.
+    - Combined udds & jrtps. Now there is only one artifact: net.sf.jrtps:jrtps.
+    - FIX: SequenceNumber long conversion
+
 0.5.6
 	- Rearranged udds test to examples. Initial interoperability tests for 
 	  OpenSplice and OpenDDS. Not interoperable for now :|
