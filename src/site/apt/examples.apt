@@ -1,4 +1,21 @@
 
+Creating a Participant
+ 
+ This is how you create a Participant. In the constructor, you tell the DDS domain you wish to
+ join, and a participantId that is used. These two parameters affects what port numbers are 
+ assigned to Participant being created. 
 
-Examples
++---
+  Participant p = new Participant(0, 2); // Create participant; domainId 0, participantId 2
++---
 
+
+Creating a DataWriter
+ 
+ To create a DataWriter, you need to specify at least the type of the Data that will be written by
+ the created DataWriter. To create a DataWriter, that will write messages of type /HelloMessage/,
+ you type 
+
++---
+  DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
++---
