@@ -207,18 +207,11 @@ public class ParticipantData extends DiscoveredData {
             default:
                 if (param instanceof QosPolicy) {
                     addQosPolicy((QosPolicy) param);
-                } else {
-                    addParameter(param);
                 }
             }
         }
 
-        if (getParameters().size() > 0) {
-            log.warn("Unhandled parameters encountered: {}", getParameters());
-        }
-
-        if (super.typeName == null) { // Other vendors may use different
-                                      // typeName
+        if (super.typeName == null) { // Other vendors may use different typeName
             super.typeName = ParticipantData.class.getName();
         }
 
