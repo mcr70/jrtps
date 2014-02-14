@@ -1,0 +1,27 @@
+Configuration
+
+ During startup, each Participant loads a configuration file named jrtps.properties
+ from the classpath. If this file is not found, default values are used. Following 
+ configuration file describes the defaults used.
+ 
++---
+
+# ---  RTPS related configuration parameters
+rtps.writer.heartbeat-period=5000
+rtps.writer.nack-response-delay = 200
+rtps.reader.heartbeat-response-delay = 100
+rtps.spdp.resend-data-period=5000
+
+# ---  jRTPS tuning parameters  ------------------
+# jRTPS uses ScheduledThreadPoolExecutor for its thread management. 
+jrtps.thread-pool.core-size=10
+
+# Size of the input queue 
+jrtps.message-queue.size=10
+
+# Configure buffer-size. This is the buffer size used to hold a RTPS Message.´
+# For readers, this is the size of UDP Datagram buffer.
+jrtps.buffer-size = 16384
+
++---
+ 

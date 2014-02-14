@@ -12,7 +12,7 @@ class JRTPSThreadFactory implements ThreadFactory {
     private int count = 0;
     
     public JRTPSThreadFactory(int domainId, int participantId) {
-        prefix = "jrtps-" + domainId + "/" + participantId + "-t";
+        prefix = "jrtps-d" + domainId + "." + participantId + "-t";
     }
     
     @Override

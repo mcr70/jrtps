@@ -10,4 +10,5 @@ Maven dependency
 <dependency>
 +-----
 
- jRTPS itself depends only on slf4j.api
+ jRTPS itself depends only on slf4j.api. Alternatively, you may download jRTPS from
+ {{http://maven.org}}
