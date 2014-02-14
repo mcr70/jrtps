@@ -1,29 +1,29 @@
 udds examples
 
  {{{./apidocs/net/sf/jrtps/udds/package-summary.html}udds}} provides a minimalistic DDS api, 
- that can be used to write data into DDS domain.
+ that can be used to read and write data into DDS domain.
  
 
 * Creating a Participant
  
- This is how you create a <Participant>. In the constructor, you tell the DDS domain you wish to
- join, and a participantId that is used. These two parameters affects what port numbers are 
+ This is how you create a <Participant>. In the constructor, you tell which DDS domain you wish to
+ join, and the participantId that is used. These two parameters affects what port numbers are 
  assigned to <Participant> being created. 
 
 +---
-  Participant p = new Participant(0, 2); // Create participant; domainId 0, participantId 2
+ Participant p = new Participant(0, 2); // Create participant; domainId 0, participantId 2
 +---
 
 
 * Creating a DataWriter
  
  To create a <DataWriter>, you need to specify at least the type of the Data that will be written by
- the created DataWriter. To create aand <DataWriter>, that will write messages of type <HelloMessage>,
- you can do this
+ the created DataWriter. Using a <DataWriter>, that will write messages of type <HelloMessage>,
+ can be as simple as this:
 
 +---
-  DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
-  dw.write(new HelloMessage(i, "Hello"));
+ DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
+ dw.write(new HelloMessage(i, "Hello"));
 +---
 
  Note, that in the example above, a builtin <Marshaller> is used, which uses java
@@ -32,8 +32,8 @@ udds examples
  
 * Creating a DataReader
 
- Creating a <DataReader> is as simple as creating a <DataWriter>.
+ Creating a <DataReader> is done similarily
  
 +---
-  DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
+ DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
 +--- 
