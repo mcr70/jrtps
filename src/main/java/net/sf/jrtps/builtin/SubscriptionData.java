@@ -73,8 +73,7 @@ public class SubscriptionData extends DiscoveredData {
             }
         }
 
-        if (super.typeName == null) { // Other vendors may use different
-                                      // typeName
+        if (super.typeName == null) { // Other vendors may use different typeName
             super.typeName = SubscriptionData.class.getName();
         }
 
