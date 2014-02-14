@@ -7,8 +7,8 @@ import java.util.List;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
-import net.sf.jrtps.types.LocatorUDPv4_t;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.types.LocatorUDPv4_t;
 
 import org.junit.Test;
 
@@ -134,9 +134,9 @@ public class MessageTests {
 	}
 
 	/**
-	 * Writes a message to internally created bytebuffer. 
+	 * Writes a message to a byte array. 
 	 * @param m
-	 * @return
+	 * @return byte[]
 	 */
 	private byte[] write(Message m) {
 		RTPSByteBuffer bb1 = new RTPSByteBuffer(new byte[1024]);
@@ -150,7 +150,7 @@ public class MessageTests {
 	/**
 	 * Gets bytes from biven buffer. Buffer is flipped and a new array is created.
 	 * @param bb
-	 * @return
+	 * @return byte[]
 	 */
 	private byte[] getBytes(RTPSByteBuffer bb) {
 		byte[] bytes = new byte[bb.position()];
@@ -165,7 +165,7 @@ public class MessageTests {
 	 * resulting Message has nothing to do with original byte array.
 	 * 
 	 * @param bytes
-	 * @return
+	 * @return Message
 	 */
 	private Message read(byte[] bytes) {
 		byte[] __bytes = new byte[bytes.length];

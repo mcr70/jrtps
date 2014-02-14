@@ -6,6 +6,7 @@
 		</links>
 
 		<menu name="Overview">
+            <item name="Overview" href="index.html" />
 			<item name="Usage" href="usage.html" />
 			<item name="Examples" href="examples.html" />
 		</menu>

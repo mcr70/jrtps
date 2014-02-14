@@ -1,3 +1,8 @@
+0.6.1
+    - Documentation is being generated with maven site plugin
+    - jRTPS thread names contains domainId.participantId, which is 
+      useful in debugging.
+	
 0.6.0
     - moved RTPS entities (RTPSParticipant, RTPSReader, ...) to net.sf.jrtps.rtps package.
     - Combined udds & jrtps. Now there is only one artifact: net.sf.jrtps:jrtps.

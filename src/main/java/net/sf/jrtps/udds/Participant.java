@@ -114,7 +114,8 @@ public class Participant {
 
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
-        threadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize);
+        threadPoolExecutor = 
+                new ScheduledThreadPoolExecutor(corePoolSize, new JRTPSThreadFactory(domainId, participantId));
         threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         threadPoolExecutor.setRemoveOnCancelPolicy(true);
 
@@ -260,7 +261,7 @@ public class Participant {
      * 
      * @param type 
      * @param qos QualityOfService used
-     * @return
+     * @return a DataReader<T>
      */
     public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
         return createDataReader(type.getSimpleName(), type, type.getName(), qos);
