@@ -1,4 +1,14 @@
+# To ensure, that site deploy will work, open a shell to SF
 ssh -t mcr70,jrtps@shell.sourceforge.net create
 
+# Commit and push before making a release
+hg commit
+hg push
+
+# relese
+mvn release:prepare -Psite 
+mvn release:perform -Psite
+
+# To deploy only site
 mvn site:site -Psite
 mvn site:deploy -Psite

@@ -2,11 +2,14 @@
 
 <configuration debug="false">
 
+	<!-- consolePlugin sends log records to eclipse logback-beagle plugin. 
+		 When running on eclipse, beagle-plugin merges logs from different examples.
+		 See http://logback.qos.ch/beagle/ for more details -->
     <consolePlugin/>
 
 	<appender name="console" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
-			<pattern>%d{HH:mm:ss.SSS} %-5p %20.20c{10} %16.16t - %m%n</pattern>
+			<pattern>%d{HH:mm:ss.SSS} %-5p %20.20c{10} %13.13t - %m%n</pattern>
 		</encoder>
 	</appender>
 
