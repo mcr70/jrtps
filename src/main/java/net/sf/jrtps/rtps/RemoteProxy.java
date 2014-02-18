@@ -2,6 +2,7 @@ package net.sf.jrtps.rtps;
 
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.Locator;
 
@@ -88,8 +89,8 @@ public class RemoteProxy {
      * @return true, if this RemoteProxy represents a reliable entity
      */
     public boolean isReliable() {
-        QosReliability policy = (QosReliability) getDiscoveredData().getQualityOfService().getPolicy(
-                QosReliability.class);
+        QosReliability policy = 
+                (QosReliability) getDiscoveredData().getQualityOfService().getPolicy(QosReliability.class);
 
         return policy.getKind() == QosReliability.Kind.RELIABLE;
     }
@@ -103,6 +104,17 @@ public class RemoteProxy {
         return discoveredData.getKey();
     }
 
+    /**
+     * Gets the EntityId of this Endpoint. This is method behaves the same as calling
+     * getGuid().getEntityId().
+     * 
+     * @return EntityId
+     */
+    public EntityId getEntityId() {
+        return getGuid().getEntityId();
+    }
+    
+    
     /**
      * Sets whether or not to prefer multicast. Default is not to prefer
      * multicast.

@@ -74,6 +74,16 @@ public class Endpoint {
         return guid;
     }
 
+    /**
+     * Gets the EntityId of this Endpoint. This is method behaves the same as calling
+     * getGuid().getEntityId().
+     * 
+     * @return EntityId
+     */
+    public EntityId getEntityId() {
+        return guid.getEntityId();
+    }
+    
     Configuration getConfiguration() {
         return configuration;
     }

@@ -65,8 +65,6 @@ public class DataWriter<T> extends Entity<T> {
      * @param instance
      */
     public void dispose(T instance) {
-        // TODO: see 8.7.4 Changes in the Instance Lifecycle State
-        // see 9.6.3.4 StatusInfo_t (PID_STATUS_INFO)
         LinkedList<T> ll = new LinkedList<>();
         ll.add(instance);
         dispose(ll);

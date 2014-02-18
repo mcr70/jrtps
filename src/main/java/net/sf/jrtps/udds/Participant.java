@@ -135,7 +135,7 @@ public class Participant {
         locators.add(ucLoc);
 
         rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators,
-                discoveredParticipants);
+                discoveredParticipants, config);
         rtps_participant.start();
 
         this.livelinessManager = new WriterLivelinessManager(this);
@@ -224,9 +224,6 @@ public class Participant {
         DataWriter<ParticipantData> spdp_writer = createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME,
                 ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
                 spdpQoS);
-        // TODO: Need to add GuidPrefix.UNKNOWN also to discovered participants,
-        // with
-        // leaseTime forever.
 
         // Add a matched reader for SPDP writer
         SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(),
@@ -384,8 +381,7 @@ public class Participant {
             myKey[1] = (byte) (myIdx >> 8 & 0xff);
             myKey[2] = (byte) (myIdx >> 16 & 0xff);
 
-            int kind = 0x02; // User defined writer, with key, see 9.3.1.2
-                             // Mapping of the EntityId_t
+            int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
             if (!m.hasKey()) {
                 kind = 0x03; // User defined writer, no key
             }
@@ -407,16 +403,6 @@ public class Participant {
         return writer;
     }
 
-    // /**
-    // * Sets the default Marshaller. Default marshaller is used if no other
-    // Marshaller
-    // * could not be used.
-    // * d
-    // * @param m
-    // */
-    // public void setDefaultMarshaller(Marshaller<?> m) {
-    // defaultMarshaller = m;
-    // }
 
     /**
      * Sets a type specific Marshaller. When creating entities, a type specific
@@ -525,7 +511,6 @@ public class Participant {
         logger.debug("[{}] Starting resend thread with period {}", rtps_participant.getGuid().getEntityId(), period);
 
         threadPoolExecutor.scheduleAtFixedRate(resendRunnable, 0, period.asMillis(), TimeUnit.MILLISECONDS);
-        // threadPoolExecutor.execute(resendRunnable);
     }
 
     /**
@@ -545,7 +530,7 @@ public class Participant {
      */
     DataReader<?> getReader(EntityId readerId) {
         for (DataReader<?> reader : readers) {
-            if (reader.getRTPSReader().getGuid().getEntityId().equals(readerId)) {
+            if (reader.getRTPSReader().getEntityId().equals(readerId)) {
                 return reader;
             }
         }
@@ -561,7 +546,7 @@ public class Participant {
      */
     DataWriter<?> getWriter(EntityId writerId) {
         for (DataWriter<?> writer : writers) {
-            if (writer.getRTPSWriter().getGuid().getEntityId().equals(writerId)) {
+            if (writer.getRTPSWriter().getEntityId().equals(writerId)) {
                 return writer;
             }
         }

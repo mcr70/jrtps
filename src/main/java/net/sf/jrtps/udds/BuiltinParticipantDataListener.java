@@ -41,11 +41,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             ParticipantData pd = pdSample.getData();
             log.debug("Considering Participant {}", pd.getGuidPrefix());
 
-            // if (pd.getGuidPrefix().getBytes()[7] != 98) {
-            // participant.ignoreParticipant(pd.getGuidPrefix());
-            // continue;
-            // }
-
             ParticipantData d = discoveredParticipants.get(pd.getGuidPrefix());
             if (d == null) {
                 if (pd.getGuidPrefix() != null) {
@@ -54,16 +49,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                     } else {
                         log.debug("A new Participant detected: {}, parameters received: {}", pd.getGuidPrefix(), pd.getParameters());
                         discoveredParticipants.put(pd.getGuidPrefix(), pd);
-
-                        // PublicationData spdp_pd = new
-                        // PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
-                        // ParticipantData.class.getName(),
-                        // new Guid(pd.getGuidPrefix(),
-                        // EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER), new
-                        // SPDPQualityOfService());
-                        // DataReader<?> spdp_r =
-                        // participant.getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
-                        // spdp_r.getRTPSReader().addMatchedWriter(spdp_pd);
 
                         fireParticipantDetected(pd);
 
@@ -81,7 +66,8 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                 else {
                     log.warn("Discovered ParticipantData did not have a guid prefix");
                 }
-            } else {
+            } 
+            else {
                 log.debug("Renewed lease for {}, new expiration time is {}", pd.getGuidPrefix(),
                         new Date(pd.getLeaseExpirationTime()));
                 d.renewLease(); // TODO: Should we always store the new
