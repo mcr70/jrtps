@@ -38,6 +38,7 @@ public class Locator {
 
     public Locator(InetAddress addr, int port) {
         this.port = port;
+        
         byte[] bytes = addr.getAddress();
 
         if (bytes.length == 4) {

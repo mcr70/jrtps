@@ -58,14 +58,10 @@ public class CacheChange implements Comparable<CacheChange> {
     /**
      * Constructor for CacheChange
      * 
-     * @param m
-     *            Marhsaller
-     * @param kind
-     *            Kind
-     * @param seqNum
-     *            sequence Number
-     * @param data
-     *            data
+     * @param m Marhsaller
+     * @param kind Kind
+     * @param seqNum sequence Number
+     * @param data data
      */
     public CacheChange(Marshaller m, Kind kind, long seqNum, Object data) {
         this(m, kind, seqNum, data, System.currentTimeMillis());
@@ -74,16 +70,11 @@ public class CacheChange implements Comparable<CacheChange> {
     /**
      * Constructor for CacheChange.
      * 
-     * @param m
-     *            Marhsaller
-     * @param kind
-     *            Kind
-     * @param seqNum
-     *            sequence Number
-     * @param data
-     *            data
-     * @param timeStamp
-     *            timestamp to use
+     * @param m Marhsaller
+     * @param kind Kind
+     * @param seqNum sequence Number
+     * @param data data
+     * @param timeStamp timestamp to use
      * @throws RuntimeException
      *             if this cache change has a key, and it needs to be coverted
      *             to MD5 hash, but there is no MD5 algorithm available for this

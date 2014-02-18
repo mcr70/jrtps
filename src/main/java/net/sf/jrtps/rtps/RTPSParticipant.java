@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 public class RTPSParticipant {
     private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
 
-    private final Configuration config = new Configuration();
+    private final Configuration config;
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
     /**
@@ -75,22 +75,19 @@ public class RTPSParticipant {
      * each other through SPDP. Each participant has a uniques unicast locator
      * to access its endpoints.
      * 
-     * @param domainId
-     *            Domain ID of the participant
-     * @param participantId
-     *            Participant ID
-     * @param locators
-     *            a Set of Locators
-     * 
-     * @see EntityId
+     * @param domainId Domain ID of the participant
+     * @param participantId Participant ID
+     * @param locators a Set of Locators
+     * @param config Configuration used
      */
     public RTPSParticipant(int domainId, int participantId, ScheduledThreadPoolExecutor tpe, Set<Locator> locators,
-            Map<GuidPrefix, ParticipantData> discoveredParticipants) {
+            Map<GuidPrefix, ParticipantData> discoveredParticipants, Configuration config) {
         this.domainId = domainId;
         this.participantId = participantId;
         this.threadPoolExecutor = tpe;
         this.locators = locators;
         this.discoveredParticipants = discoveredParticipants;
+        this.config = config;
 
         Random r = new Random(System.currentTimeMillis());
         int vmid = r.nextInt();
@@ -340,6 +337,10 @@ public class RTPSParticipant {
         return null;
     }
 
+    /**
+     * Ignores messages originating from given Participant 
+     * @param prefix GuidPrefix of the participant to ignore
+     */
     public void ignoreParticipant(GuidPrefix prefix) {
         handler.ignoreParticipant(prefix);
     }
