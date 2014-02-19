@@ -11,13 +11,18 @@ import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.Guid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Base class for data, that is received during discovery.
  * 
  * @author mcr70
  */
 public class DiscoveredData {
-    // While reading data from stream, qos policies might come in 'wrong' order.
+    private static final Logger logger = LoggerFactory.getLogger(DiscoveredData.class);
+
+	// While reading data from stream, qos policies might come in 'wrong' order.
     // This list keeps track of inconsistencies occured
     private List<QosPolicy<?>> inconsistenPolicies = new LinkedList<>();
     private List<Parameter> params = new LinkedList<>();
@@ -71,6 +76,7 @@ public class DiscoveredData {
      */
     protected void resolveInconsistencies() throws InconsistentPolicy {
         if (inconsistenPolicies.size() > 0) {
+        	logger.debug("resolveInconsistencies: {}", inconsistenPolicies);
             resolveInconsistencies(inconsistenPolicies);
         }
     }
@@ -107,7 +113,7 @@ public class DiscoveredData {
 
         int __size = inconsistenPolicies.size();
 
-        if (size != __size) {
+        if (size != __size) { // If the size changes, recursively call again
             resolveInconsistencies(inconsistentPolicies);
         } else {
             if (inconsistentPolicies.size() > 0) {

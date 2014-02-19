@@ -88,11 +88,11 @@ public class QualityOfService {
                 }
             }
         } else if (policy instanceof QosHistory) { // ------------------ HISTORY
-                                                   // ------------------
             QosResourceLimits rl = (QosResourceLimits) policies.get(QosResourceLimits.class);
             if (rl != null) {
                 QosHistory h = (QosHistory) policy;
-                if (rl.getMaxSamplesPerInstance() < h.getDepth()) {
+
+                if (rl.getMaxSamplesPerInstance() != -1 && rl.getMaxSamplesPerInstance() < h.getDepth()) {
                     throw new InconsistentPolicy("HISTORY.depth must be <= RESOURCE_LIMITS.max_samples_per_instance");
                 }
             }
