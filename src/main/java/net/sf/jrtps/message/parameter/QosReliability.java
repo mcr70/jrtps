@@ -9,7 +9,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
     // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for
     // BEST_EFFORT and 2 for RELIABLE
     private static final int BEST_EFFORT_INT = 1;
-    private static final int RELIABLE_INT = 3;
+    private static final int RELIABLE_INT = 2;
 
     private int kind;
     private Duration max_blocking_time;
@@ -44,7 +44,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
         switch (kind) {
         case BEST_EFFORT_INT:
             return Kind.BEST_EFFORT;
-        case 2: // TODO: OSPL treats 2 as reliable
+        //case 2: // TODO: OSPL treats 2 as reliable
         case RELIABLE_INT:
             return Kind.RELIABLE;
         }

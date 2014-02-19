@@ -111,6 +111,8 @@ public class RTPSReader<T> extends Endpoint {
         log.debug("[{}] Added matchedWriter {}, uc:{}, mc:{}", getEntityId(), writerData,
                 wp.getUnicastLocator(), wp.getMulticastLocator());
 
+        sendAckNack(wp);
+        
         return wp;
     }
 

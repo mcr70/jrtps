@@ -84,7 +84,7 @@ public class QosDurability extends Parameter implements DataReaderPolicy<QosDura
      * @return default QosDurability
      */
     public static QosDurability defaultDurability() {
-        return new QosDurability(Kind.VOLATILE);
+        return new QosDurability(Kind.TRANSIENT);
     }
 
     public String toString() {
