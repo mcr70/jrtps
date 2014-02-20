@@ -10,14 +10,12 @@ public class QosDurabilityService extends Parameter implements DataWriterPolicy<
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        readBytes(bb, length); // TODO: default reading. just reads to byte[] in
-                               // super class.
+        readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
     }
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        writeBytes(bb); // TODO: default writing. just writes byte[] in super
-                        // class
+        writeBytes(bb); // TODO: default writing. just writes byte[] in super class
     }
 
     @Override
@@ -25,8 +23,8 @@ public class QosDurabilityService extends Parameter implements DataWriterPolicy<
         return true; // Always true // TODO: check this
     }
 
-    public static QosPolicy defaultDurabilityService() {
-        // TODO Auto-generated method stub
-        return null;
+    public static QosDurabilityService defaultDurabilityService() {
+        // TODO: Check default QosDurabilityService
+        return new QosDurabilityService();
     }
 }

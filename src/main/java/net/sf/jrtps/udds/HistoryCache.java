@@ -61,9 +61,9 @@ class HistoryCache<T> implements WriterCache {
     HistoryCache(Marshaller<T> marshaller, QualityOfService qos) {
         this.marshaller = marshaller;
 
-        resource_limits = (QosResourceLimits) qos.getPolicy(QosResourceLimits.class);
-        history = (QosHistory) qos.getPolicy(QosHistory.class);
-        reliability = (QosReliability) qos.getPolicy(QosReliability.class);
+        resource_limits = qos.getResourceLimits();
+        history = qos.getHistory();
+        reliability = qos.getReliability();
     }
 
     void setDataWriter(DataWriter<T> dw) {

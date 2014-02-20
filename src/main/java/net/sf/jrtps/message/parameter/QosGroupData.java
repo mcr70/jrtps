@@ -23,4 +23,9 @@ public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroup
     public boolean isCompatible(QosGroupData other) {
         return true; // Always true
     }
+
+    public static QosGroupData defaultGroupData() {
+        // TODO: check default GroupData
+        return new QosGroupData();
+    }
 }

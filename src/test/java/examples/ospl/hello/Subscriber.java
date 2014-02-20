@@ -11,7 +11,7 @@ public class Subscriber {
                                                // participant 1
         p.setMarshaller(Msg.class, new MsgMarshaller());
 
-        DataReader<Msg> dr = p.createDataReader("HelloWorldData_Msg", Msg.class, "HelloWorldData::Msg", new MsgQoS());
+        DataReader<Msg> dr = p.createDataReader("HelloWorldData_Msg", Msg.class, "HelloWorldData.Msg", new MsgQoS());
         MsgListener hl = new MsgListener();
         dr.addListener(hl);
 

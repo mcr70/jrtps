@@ -89,8 +89,7 @@ public class RemoteProxy {
      * @return true, if this RemoteProxy represents a reliable entity
      */
     public boolean isReliable() {
-        QosReliability policy = 
-                (QosReliability) getDiscoveredData().getQualityOfService().getPolicy(QosReliability.class);
+        QosReliability policy = getDiscoveredData().getQualityOfService().getReliability();
 
         return policy.getKind() == QosReliability.Kind.RELIABLE;
     }
