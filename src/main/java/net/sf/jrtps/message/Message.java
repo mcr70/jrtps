@@ -98,9 +98,15 @@ public class Message {
                 }
 
                 int smEnd = bb.position();
-                if (smEnd - smStart != smh.submessageLength && smh.submessageLength != 0) {
-                    log.warn("SubMessage length differs for {} != {} for {}", smEnd - smStart, smh.submessageLength,
-                            sm.getKind());
+                int smLength = smEnd - smStart;
+                if (smLength != smh.submessageLength && smh.submessageLength != 0) {
+                    log.warn("SubMessage length differs for {} != {} for {}", smLength, smh.submessageLength, sm);
+                    if (smLength < smh.submessageLength) {
+                    	byte[] unknownBytes = new byte[smh.submessageLength - smLength];
+                    	log.debug("Trying to skip {} bytes", unknownBytes.length);
+                    	
+                    	bb.read(unknownBytes);
+                    }
                 }
 
                 log.trace("SubMsg in:  {}", sm);
