@@ -36,8 +36,8 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 
             Guid key = sd.getKey();
             if (discoveredReaders.put(key, sd) == null) {
-                log.debug("Discovered a new subscription {} for topic {}, type {}", key, sd.getTopicName(),
-                        sd.getTypeName());
+                log.debug("Discovered a new subscription {} for topic {}, type {}, QoS: {}", key, sd.getTopicName(),
+                        sd.getTypeName(), sd.getQualityOfService());
                 fireReaderDetected(sd);
             }
 

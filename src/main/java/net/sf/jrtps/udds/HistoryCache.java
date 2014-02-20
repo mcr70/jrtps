@@ -93,7 +93,8 @@ class HistoryCache<T> implements WriterCache {
             if (inst == null) {
                 log.trace("[{}] Creating new instance {}", writer.getGuid().getEntityId(), key);
                 instanceCount++;
-                if (instanceCount > resource_limits.getMaxInstances()) {
+                if (resource_limits.getMaxInstances() != -1 && 
+                		instanceCount > resource_limits.getMaxInstances()) {
                     instanceCount = resource_limits.getMaxInstances();
                     throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
                 }
@@ -102,14 +103,16 @@ class HistoryCache<T> implements WriterCache {
                 instances.put(key, inst);
             }
 
-            if (inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
+            if (resource_limits.getMaxSamplesPerInstance() != -1 && 
+            		inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
                 throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
             }
 
             log.trace("[{}] Creating cache change {}", writer.getGuid().getEntityId(), seqNum + 1);
             CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
             sampleCount += inst.addSample(aChange);
-            if (sampleCount > resource_limits.getMaxSamples()) {
+            if (resource_limits.getMaxSamples() != -1 && 
+            		sampleCount > resource_limits.getMaxSamples()) {
                 inst.history.removeLast();
                 sampleCount = resource_limits.getMaxSamples();
                 throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());

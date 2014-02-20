@@ -29,8 +29,8 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
 
             Guid key = pd.getKey();
             if (discoveredWriters.put(key, pd) == null) {
-                log.debug("Discovered a new publication {} for topic {}, type {}", key, pd.getTopicName(),
-                        pd.getTypeName());
+                log.debug("Discovered a new publication {} for topic {}, type {}, QoS: {}", key, pd.getTopicName(),
+                        pd.getTypeName(), pd.getQualityOfService());
                 fireWriterDetected(pd);
             }
 

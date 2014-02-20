@@ -3,21 +3,33 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroupData>, PublisherPolicy<QosGroupData> {
-    QosGroupData() {
+	private byte[] groupData;
+
+	public QosGroupData(byte[] groupData) {
+        super(ParameterEnum.PID_GROUP_DATA);
+        if (groupData == null) {
+        	throw new NullPointerException("groupData cannot be null");
+        }
+        
+		this.groupData = groupData;
+    }
+	
+	QosGroupData() {
         super(ParameterEnum.PID_GROUP_DATA);
     }
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        readBytes(bb, length); // TODO: default reading. just reads to byte[] in
-                               // super class.
+    	int len = bb.read_long();
+    	this.groupData = new byte[len];
+    	bb.read(groupData);
     }
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        writeBytes(bb); // TODO: default writing. just writes byte[] in super
-                        // class
-    }
+       	bb.write_long(groupData.length);
+    	bb.write(groupData);
+     }
 
     @Override
     public boolean isCompatible(QosGroupData other) {
@@ -25,7 +37,6 @@ public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroup
     }
 
     public static QosGroupData defaultGroupData() {
-        // TODO: check default GroupData
-        return new QosGroupData();
+        return new QosGroupData(new byte[0]);
     }
 }
