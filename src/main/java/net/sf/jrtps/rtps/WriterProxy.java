@@ -120,7 +120,6 @@ public class WriterProxy extends RemoteProxy {
     }
 
     void applyGap(Gap gap) {
-        log.debug("Applying {}", gap);
         SequenceNumberSet gapList = gap.getGapList();
         long bitmapBase = gapList.getBitmapBase();
         if (bitmapBase - 1 > seqNumMax) {

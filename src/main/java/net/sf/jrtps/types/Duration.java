@@ -9,8 +9,8 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class Duration implements Comparable<Duration> {
-    // TODO: check infinite duration
-    public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, 0);
+    // INFINITE: dds v1.2, IDL DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC,
+    public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, Integer.MAX_VALUE);
     public int sec;
     public int nano;
 
@@ -37,7 +37,7 @@ public class Duration implements Comparable<Duration> {
         this.sec = sec;
         this.nano = nano;
     }
-
+    
     /**
      * Constructs Duration_t from RTPSByteBuffer.
      * 

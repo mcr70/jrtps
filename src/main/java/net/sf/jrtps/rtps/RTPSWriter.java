@@ -162,8 +162,7 @@ public class RTPSWriter<T> extends Endpoint {
         ReaderProxy proxy = new ReaderProxy(readerData, locators);
         readerProxies.put(readerData.getKey(), proxy);
 
-        QosDurability readerDurability = (QosDurability) readerData.getQualityOfService()
-                .getPolicy(QosDurability.class);
+        QosDurability readerDurability = readerData.getQualityOfService().getDurability();
 
         if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
             // VOLATILE readers are marked having received all the samples so
@@ -399,7 +398,7 @@ public class RTPSWriter<T> extends Endpoint {
     }
 
     boolean isReliable() {
-        QosReliability policy = (QosReliability) getQualityOfService().getPolicy(QosReliability.class);
+        QosReliability policy = getQualityOfService().getReliability();
 
         return policy.getKind() == QosReliability.Kind.RELIABLE;
     }

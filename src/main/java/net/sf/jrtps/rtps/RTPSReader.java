@@ -105,13 +105,12 @@ public class RTPSReader<T> extends Endpoint {
     public WriterProxy addMatchedWriter(PublicationData writerData) {
         LocatorPair locators = getLocators(writerData);
         WriterProxy wp = new WriterProxy(writerData, locators);
-
         writerProxies.put(writerData.getKey(), wp);
 
         log.debug("[{}] Added matchedWriter {}, uc:{}, mc:{}", getEntityId(), writerData,
                 wp.getUnicastLocator(), wp.getMulticastLocator());
 
-        sendAckNack(wp);
+        //sendAckNack(wp);
         
         return wp;
     }
@@ -327,7 +326,7 @@ public class RTPSReader<T> extends Endpoint {
     }
 
     private boolean isReliable() {
-        QosReliability reliability = (QosReliability) getQualityOfService().getPolicy(QosReliability.class);
+        QosReliability reliability = getQualityOfService().getReliability();
         return reliability.getKind() == QosReliability.Kind.RELIABLE;
     }
 
@@ -342,6 +341,7 @@ public class RTPSReader<T> extends Endpoint {
 
         WriterProxy wp = getWriterProxy(writerGuid);
         if (wp != null) {
+            log.debug("[{}] Applying {}", getEntityId(), gap);
             wp.applyGap(gap);
         }
     }
