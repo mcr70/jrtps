@@ -156,13 +156,13 @@ public class Participant {
         setMarshaller(TopicData.class, new TopicDataMarshaller());
 
         QualityOfService spdpQoS = QualityOfService.getSPDPQualityOfService(); // QoS
-                                                                               // for
-                                                                               // SPDP
+        // for
+        // SPDP
         QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService(); // QoS
-                                                                               // for
-                                                                               // SEDP
+        // for
+        // SEDP
         QualityOfService pmQoS = new QualityOfService(); // QoS for
-                                                         // ParticipantMessages
+        // ParticipantMessages
 
         try {
             pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
@@ -183,8 +183,7 @@ public class Participant {
                 sedpQoS);
 
         // NOTE: It is not mandatory to publish TopicData
-        // createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER,
-        // TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
+        // createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
         // ---- Create a Reader for SPDP -----------------------
         DataReader<ParticipantData> pdReader = createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
@@ -232,7 +231,7 @@ public class Participant {
 
         ParticipantData pd = createSPDPParticipantData();
         logger.debug("Created ParticipantData: {}", pd);
-        
+
         spdp_writer.write(pd);
 
         createSPDPResender(config.getSPDPResendPeriod(), spdp_writer);
@@ -297,7 +296,7 @@ public class Participant {
             myKey[2] = (byte) (myIdx >> 16 & 0xff);
 
             int kind = 0x07; // User defined reader, with key, see 9.3.1.2
-                             // Mapping of the EntityId_t
+            // Mapping of the EntityId_t
             if (!m.hasKey()) {
                 kind = 0x04; // User defined reader, no key
             }
@@ -309,12 +308,13 @@ public class Participant {
         DataReader<T> reader = new DataReader<T>(this, type, rtps_reader);
         readers.add(reader);
 
-        @SuppressWarnings("unchecked")
-        DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
-                SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
-        SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
-        sw.write(rd);
-
+        if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+            @SuppressWarnings("unchecked")
+            DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
+                    SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
+            SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
+            sw.write(rd);
+        }
         return reader;
     }
 
@@ -394,11 +394,14 @@ public class Participant {
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
-        @SuppressWarnings("unchecked")
-        DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
-                PublicationData.BUILTIN_TOPIC_NAME).get(0);
-        PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
-        pw.write(wd);
+        if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+            @SuppressWarnings("unchecked")
+            DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
+                    PublicationData.BUILTIN_TOPIC_NAME).get(0);
+            PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
+            pw.write(wd);
+            System.out.println("************  " + wd);
+        }
 
         return writer;
     }
@@ -435,7 +438,7 @@ public class Participant {
      */
     public void close() {
         threadPoolExecutor.shutdown(); // won't accept new tasks, remaining
-                                       // tasks keeps on running.
+        // tasks keeps on running.
         rtps_participant.close();
         threadPoolExecutor.shutdownNow(); // Shutdown now.
     }
@@ -502,7 +505,7 @@ public class Participant {
             public void run() {
                 logger.debug("starting SPDP resend");
                 ParticipantData pd = createSPDPParticipantData();
-                
+
                 spdp_writer.write(pd);
                 //spdp_writer.getRTPSWriter().notifyReader(guid);
             }
