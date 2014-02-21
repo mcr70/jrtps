@@ -133,11 +133,9 @@ public class Configuration {
     /**
      * Gets a named integer property from configuration.
      * 
-     * @param key
-     *            Key of the propooerty
-     * @param defltValue
-     *            default value used, if property is not set, or it could not be
-     *            converted to int
+     * @param key Key of the property
+     * @param defltValue default value used, if property is not set, or it could not be
+     *        converted to int
      * @return integer value
      */
     public int getIntProperty(String key, int defltValue) {
@@ -152,6 +150,27 @@ public class Configuration {
         }
 
         return i;
+    }
+
+    /**
+     * Gets a named boolean property from configuration.
+     * 
+     * @param key Key of the property
+     * @param defltValue default value used, if property is not set, or it could not be converted to boolean
+     * @return boolean value
+     */
+    public boolean getBooleanProperty(String key, boolean defltValue) {
+        String value = props.getProperty(key);
+        boolean b = defltValue;
+        if (value != null) {
+            try {
+                b = Boolean.parseBoolean(value);
+            } catch (NumberFormatException nfe) {
+                log.warn("Failed to convert value of {}: {} to boolean", key, value);
+            }
+        }
+
+        return b;
     }
 
     /**
@@ -172,4 +191,9 @@ public class Configuration {
     public int getMessageQueueSize() {
         return getIntProperty("jrtps.message-queue.size", 10);
     }
+
+    public boolean getPublishBuiltinEntities() {
+        return getBooleanProperty("jrtps.publish-builtin-data", false);
+    }
+
 }
