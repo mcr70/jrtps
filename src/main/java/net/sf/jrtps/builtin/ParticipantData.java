@@ -215,6 +215,8 @@ public class ParticipantData extends DiscoveredData {
             super.typeName = ParticipantData.class.getName();
         }
 
+        log.debug("Parameters of discovered participant: {}", getParameters());
+
         renewLease();
     }
 

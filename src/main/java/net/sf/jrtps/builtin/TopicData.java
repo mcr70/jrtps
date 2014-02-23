@@ -44,10 +44,11 @@ public class TopicData extends DiscoveredData {
             }
         }
 
-        if (super.typeName == null) { // Other vendors may use different
-                                      // typeName
+        if (super.typeName == null) { // Other vendors may use different typeName
             super.typeName = TopicData.class.getName();
         }
+
+        log.debug("Parameters of discovered topic: {}", getParameters());
 
         resolveInconsistencies();
     }
