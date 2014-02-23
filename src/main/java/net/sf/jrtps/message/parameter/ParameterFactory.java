@@ -37,68 +37,35 @@ public class ParameterFactory {
         case 0x0001:
             param = new Sentinel();
             break;
-        case 0x002c:
-            param = new QosUserData();
-            break;
-        case 0x0005:
-            param = new TopicName();
-            break;
-        case 0x0007:
-            param = new TypeName();
-            break;
-        case 0x002d:
-            param = new QosGroupData();
-            break;
-        case 0x002e:
-            param = new QosTopicData();
-            break;
-        case 0x001d:
-            param = new QosDurability();
-            break;
-        case 0x001e:
-            param = new QosDurabilityService();
-            break;
-        case 0x0023:
-            param = new QosDeadline();
-            break;
-        case 0x0027:
-            param = new QosLatencyBudget();
-            break;
-        case 0x001b:
-            param = new QosLiveliness();
-            break;
-        case 0x001a:
-            param = new QosReliability();
-            break;
-        case 0x002b:
-            param = new QosLifespan();
-            break;
-        case 0x0025:
-            param = new QosDestinationOrder();
-            break;
-        case 0x0040:
-            param = new QosHistory();
-            break;
-        case 0x0041:
-            param = new QosResourceLimits();
-            break;
-        case 0x001f:
-            param = new QosOwnership();
-            break;
-        case 0x0006:
-            param = new QosOwnershipStrength();
-            break;
-        case 0x0021:
-            param = new QosPresentation();
-            break;
-        case 0x0029:
-            param = new QosPartition();
+        case 0x0002:
+            param = new ParticipantLeaseDuration();
             break;
         case 0x0004:
             param = new QosTimeBasedFilter();
             break;
-        case 0x0049:
-            param = new QosTransportPriority();
+        case 0x0005:
+            param = new TopicName();
+            break;
+        case 0x0006:
+            param = new QosOwnershipStrength();
+            break;
+        case 0x0007:
+            param = new TypeName();
+            break;
+        case 0x000b:
+            param = new MetatrafficMulticastIPAddress();
+            break;
+        case 0x000c:
+            param = new DefaultUnicastIPAddress();
+            break;
+        case 0x000d:
+            param = new MetatrafficUnicastPort();
+            break;
+        case 0x000e:
+            param = new DefaultUnicastPort();
+            break;
+        case 0x0011:
+            param = new MulticastIPAddress();
             break;
         case 0x0015:
             param = new ProtocolVersion();
@@ -106,20 +73,56 @@ public class ParameterFactory {
         case 0x0016:
             param = new VendorId();
             break;
+        case 0x001a:
+            param = new QosReliability();
+            break;
+        case 0x001b:
+            param = new QosLiveliness();
+            break;
+        case 0x001d:
+            param = new QosDurability();
+            break;
+        case 0x001e:
+            param = new QosDurabilityService();
+            break;
+        case 0x001f:
+            param = new QosOwnership();
+            break;
+        case 0x0021:
+            param = new QosPresentation();
+            break;
+        case 0x0023:
+            param = new QosDeadline();
+            break;
+        case 0x0025:
+            param = new QosDestinationOrder();
+            break;
+        case 0x0027:
+            param = new QosLatencyBudget();
+            break;
+        case 0x0029:
+            param = new QosPartition();
+            break;
+        case 0x002b:
+            param = new QosLifespan();
+            break;
+        case 0x002c:
+            param = new QosUserData();
+            break;
+        case 0x002d:
+            param = new QosGroupData();
+            break;
+        case 0x002e:
+            param = new QosTopicData();
+            break;
         case 0x002f:
             param = new UnicastLocator();
             break;
         case 0x0030:
             param = new MulticastLocator();
             break;
-        case 0x0011:
-            param = new MulticastIPAddress();
-            break;
         case 0x0031:
             param = new DefaultUnicastLocator();
-            break;
-        case 0x0048:
-            param = new DefaultMulticastLocator();
             break;
         case 0x0032:
             param = new MetatrafficUnicastLocator();
@@ -127,38 +130,35 @@ public class ParameterFactory {
         case 0x0033:
             param = new MetatrafficMulticastLocator();
             break;
-        case 0x000c:
-            param = new DefaultUnicastIPAddress();
+        case 0x0034:
+            param = new ParticipantManualLivelinessCount();
             break;
-        case 0x000e:
-            param = new DefaultUnicastPort();
+        case 0x0035:
+            param = new ContentFilterProperty();
             break;
-        case 0x0045:
-            param = new MetatrafficUnicastIPAddress();
+        case 0x0040:
+            param = new QosHistory();
             break;
-        case 0x000d:
-            param = new MetatrafficUnicastPort();
-            break;
-        case 0x000b:
-            param = new MetatrafficMulticastIPAddress();
-            break;
-        case 0x0046:
-            param = new MetatrafficMulticastPort();
+        case 0x0041:
+            param = new QosResourceLimits();
             break;
         case 0x0043:
             param = new ExpectsInlineQos();
             break;
-        case 0x0034:
-            param = new ParticipantManualLivelinessCount();
-            break;
         case 0x0044:
             param = new ParticipantBuiltinEndpoints();
             break;
-        case 0x0002:
-            param = new ParticipantLeaseDuration();
+        case 0x0045:
+            param = new MetatrafficUnicastIPAddress();
             break;
-        case 0x0035:
-            param = new ContentFilterProperty();
+        case 0x0046:
+            param = new MetatrafficMulticastPort();
+            break;
+        case 0x0048:
+            param = new DefaultMulticastLocator();
+            break;
+        case 0x0049:
+            param = new QosTransportPriority();
             break;
         case 0x0050:
             param = new ParticipantGuid();
@@ -172,14 +172,29 @@ public class ParameterFactory {
         case 0x0053:
             param = new GroupEntityId();
             break;
+        case 0x0055:
+            param = new ContentFilterInfo();
+            break;
+        case 0x0056:
+            param = new CoherentSet();
+            break;
+        case 0x0057:
+            param = new DirectedWrite();
+            break;
         case 0x0058:
             param = new BuiltinEndpointSet();
             break;
         case 0x0059:
             param = new PropertyList();
             break;
+        case 0x005a: // TODO: see also 0x0070. 0x005a is used in builtin data as builtinTopicKey
+            param = new KeyHash(); // see x-types doc, page 183
+            break;   // RTPS spec does not have 0x005a, but ospl uses it anyway
         case 0x0060:
             param = new TypeMaxSizeSerialized();
+            break;
+        case 0x0061:
+            param = new OriginalWriterInfo();
             break;
         case 0x0062:
             param = new EntityName();
@@ -190,20 +205,8 @@ public class ParameterFactory {
         case 0x0071:
             param = new StatusInfo();
             break;
-        // Table 9.14:
-        case 0x0055:
-            param = new ContentFilterInfo();
-            break;
-        case 0x0056:
-            param = new CoherentSet();
-            break;
-        case 0x0057:
-            param = new DirectedWrite();
-            break;
-        case 0x0061:
-            param = new OriginalWriterInfo();
-            break;
-        // Table 9.17: deprecated ids
+
+            // Table 9.17: deprecated ids
         case 0x0003:
             param = new Persistence();
             break;
@@ -238,21 +241,17 @@ public class ParameterFactory {
             param = new ReliabilityOffered();
             break;
 
-        // TODO: Handle Illegal parameter for OSPL 5.5
-        case 0x005a:
-            param = new KeyHash();
-            break; // TODO: NOT IN SPEC, BUT OSPL 5.5 USES 0x5a as KeyHash
-
         default:
             if ((paramId & 0x8000) == 0x8000) {
                 param = new VendorSpecificParameter(paramId);
-            } else if ((paramId & 0x4000) == 0x4000) { // 9.6.2.2.1 ParameterId
-                                                       // space
+            } 
+            else if ((paramId & 0x4000) == 0x4000) { // 9.6.2.2.1 ParameterId space
                 // Incompatible QoS
                 log.error("Found unknown Parameter -> Mark it as incompatible QoS");
                 // TODO: what is a clean way of rejecting
                 return null; // throw new IncompatibleQosException(...);
-            } else {
+            } 
+            else {
                 // Ignore
                 param = new UnknownParameter(paramId);
                 log.error("Ignoring unknown Parameter {}", param);
