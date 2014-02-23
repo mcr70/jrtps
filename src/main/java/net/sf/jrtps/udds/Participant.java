@@ -155,14 +155,9 @@ public class Participant {
         setMarshaller(SubscriptionData.class, new SubscriptionDataMarshaller());
         setMarshaller(TopicData.class, new TopicDataMarshaller());
 
-        QualityOfService spdpQoS = QualityOfService.getSPDPQualityOfService(); // QoS
-        // for
-        // SPDP
-        QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService(); // QoS
-        // for
-        // SEDP
-        QualityOfService pmQoS = new QualityOfService(); // QoS for
-        // ParticipantMessages
+        QualityOfService spdpQoS = QualityOfService.getSPDPQualityOfService(); 
+        QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService();
+        QualityOfService pmQoS = new QualityOfService();
 
         try {
             pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
@@ -400,7 +395,6 @@ public class Participant {
                     PublicationData.BUILTIN_TOPIC_NAME).get(0);
             PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
             pw.write(wd);
-            System.out.println("************  " + wd);
         }
 
         return writer;
