@@ -62,11 +62,12 @@ public class PublicationData extends DiscoveredData {
             }
         }
 
-        if (super.typeName == null) { // Other vendors may use different
-                                      // typeName
+        if (super.typeName == null) { // Other vendors may use different typeName
             super.typeName = PublicationData.class.getName();
         }
 
+        log.debug("Parameters of discovered publication: {}", getParameters());
+        
         // Resolve possible inconsistencies
         resolveInconsistencies();
     }

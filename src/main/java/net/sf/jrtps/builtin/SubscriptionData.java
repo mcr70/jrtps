@@ -77,6 +77,8 @@ public class SubscriptionData extends DiscoveredData {
             super.typeName = SubscriptionData.class.getName();
         }
 
+        log.debug("Parameters of discovered subscription: {}", getParameters());
+
         resolveInconsistencies();
     }
 
