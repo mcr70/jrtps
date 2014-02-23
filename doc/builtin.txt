@@ -1,0 +1,80 @@
+From x-types_ptc_11-03-11.pdf, Annex D: DDS Built-in Topic Data Types
+
+@Extensibility(MUTABLE_EXTENSIBILITY)
+struct ParticipantBuiltinTopicData {
+    @ID(0x0050) @Key BuiltinTopicKey_t key;
+    @ID(0x002C) UserDataQosPolicy user_data;
+};
+
+@Extensibility(MUTABLE_EXTENSIBILITY)
+struct PublicationBuiltinTopicData {
+    @ID(0x005A) @Key BuiltinTopicKey_t key;
+    @ID(0x0050) BuiltinTopicKey_t participant_key;
+    @ID(0x0005) string<256> topic_name;
+    @ID(0x0007) string<256> type_name;
+    @ID(0x0072) @Optional DDS::TypeObject type;
+    @ID(0x001D) DurabilityQosPolicy durability;
+    @ID(0x001E) DurabilityServiceQosPolicy durability_service;
+    @ID(0x0023) DeadlineQosPolicy deadline;
+    @ID(0x0027) LatencyBudgetQosPolicy latency_budget;
+    @ID(0x001B) LivelinessQosPolicy liveliness;
+    @ID(0x001A) ReliabilityQosPolicy reliability;
+    @ID(0x002B) LifespanQosPolicy lifespan;
+    @ID(0x002C) UserDataQosPolicy user_data;
+    @ID(0x001F) OwnershipQosPolicy ownership;
+    @ID(0x0006) OwnershipStrengthQosPolicy ownership_strength;
+    @ID(0x0025) DestinationOrderQosPolicy destination_order;
+    @ID(0x0021) PresentationQosPolicy presentation;
+    @ID(0x0029) PartitionQosPolicy partition;
+    @ID(0x002E) TopicDataQosPolicy topic_data;
+    @ID(0x002D) GroupDataQosPolicy group_data;
+    @ID(0x0073) DataRepresentationQosPolicy representation;
+    @ID(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+};
+
+@Extensibility(MUTABLE_EXTENSIBILITY)
+struct SubscriptionBuiltinTopicData {
+    @ID(0x005A) @Key BuiltinTopicKey_t key;
+    @ID(0x0050) BuiltinTopicKey_t participant_key;
+    @ID(0x0005) string<256> topic_name;
+    @ID(0x0007) string<256> type_name;
+    @ID(0x0072) @Optional DDS::TypeObject type;
+    @ID(0x001D) DurabilityQosPolicy durability;
+    @ID(0x0023) DeadlineQosPolicy deadline;
+    @ID(0x0027) LatencyBudgetQosPolicy latency_budget;
+    @ID(0x001B) LivelinessQosPolicy liveliness;
+    @ID(0x001A) ReliabilityQosPolicy reliability;
+    @ID(0x001F) OwnershipQosPolicy ownership;
+    @ID(0x0025) DestinationOrderQosPolicy destination_order;
+    @ID(0x002C) UserDataQosPolicy user_data;
+    @ID(0x0004) TimeBasedFilterQosPolicy time_based_filter;
+    @ID(0x0021) PresentationQosPolicy presentation;
+    @ID(0x0029) PartitionQosPolicy partition;
+    @ID(0x002E) TopicDataQosPolicy topic_data;
+    @ID(0x002D) GroupDataQosPolicy group_data;
+    @ID(0x0073) DataRepresentationQosPolicy representation;
+    @ID(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+};
+
+@Extensibility(MUTABLE_EXTENSIBILITY)
+struct TopicBuiltinTopicData {
+    @ID(0x005A) @Key BuiltinTopicKey_t key;
+    @ID(0x0005) string<256> name;
+    @ID(0x0007) string<256> type_name;
+    @ID(0x0072) @Optional DDS::TypeObject type;
+    @ID(0x001D) DurabilityQosPolicy durability;
+    @ID(0x001E) DurabilityServiceQosPolicy durability_service;
+    @ID(0x0023) DeadlineQosPolicy deadline;
+    @ID(0x0027) LatencyBudgetQosPolicy latency_budget;
+    @ID(0x001B) LivelinessQosPolicy liveliness;
+    @ID(0x001A) ReliabilityQosPolicy reliability;
+    @ID(0x0049) TransportPriorityQosPolicy transport_priority;
+    @ID(0x002B) LifespanQosPolicy lifespan;
+    @ID(0x0025) DestinationOrderQosPolicy destination_order;
+    @ID(0x0040) HistoryQosPolicy history;
+    @ID(0x0041) ResourceLimitsQosPolicy resource_limits;
+    @ID(0x001F) OwnershipQosPolicy ownership;
+    @ID(0x002E) TopicDataQosPolicy topic_data;
+    @ID(0x0073) DataRepresentationQosPolicy representation;
+    @ID(0x0074) TypeConsistencyEnforcementQosPolicy type_consistency;
+};
