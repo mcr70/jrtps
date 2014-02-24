@@ -1,3 +1,6 @@
+0.6.2
+    - Configuration: rtps.writer.push-mode=true|false, jrtps.publish-builtin-data=true|false
+    
 0.6.1
     - Documentation is being generated with maven site plugin
     - jRTPS thread names contains domainId.participantId, which is 
