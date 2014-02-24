@@ -23,7 +23,6 @@ public class Configuration {
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
     // --- Writer configurations -------------
-    private boolean pushMode = true;
     private long nackSuppressionDuration = 0; // 0
 
     // --- Reader configurations -------------
@@ -63,13 +62,17 @@ public class Configuration {
      * Configures the mode in which the Writer operates. If pushMode==true, then
      * the Writer will push changes to the reader. If pushMode==false, changes
      * will only be announced via heartbeats and only be sent as response to the
-     * request of a reader.
+     * request of a reader. Note, that pushMode is applicable only to reliable writers.
+     * Best effort writers are always in push mode.<p>
+     * 
+     * Default value for pushMode is true
      * 
      * @return pushMode
      */
-    boolean pushMode() {
-        return pushMode;
+    public boolean getPushMode() {
+        return getBooleanProperty("rtps.writer.push-mode", true);
     }
+
 
     /**
      * Protocol tuning parameter that allows the RTPS Writer to repeatedly
@@ -125,6 +128,7 @@ public class Configuration {
     public int getHeartbeatResponseDelay() {
         return getIntProperty("rtps.reader.heartbeat-response-delay", 500);
     }
+
 
     public int getBufferSize() {
         return getIntProperty("jrtps.buffer-size", 16384);

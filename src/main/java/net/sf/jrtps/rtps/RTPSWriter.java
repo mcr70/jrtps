@@ -48,15 +48,18 @@ import org.slf4j.LoggerFactory;
 public class RTPSWriter<T> extends Endpoint {
     private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
 
-    private Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
+    private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
     private final WriterCache writer_cache;
     private final int nackResponseDelay;
-    private int heartbeatPeriod;
-
+    private final int heartbeatPeriod;
+    private final boolean pushMode;
+    
     private int hbCount; // heartbeat counter. incremented each time hb is sent
 
     private ScheduledFuture<?> hbAnnounceTask;
+
+    
 
     RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache wCache,
             QualityOfService qos, Configuration configuration) {
@@ -65,14 +68,16 @@ public class RTPSWriter<T> extends Endpoint {
         this.writer_cache = wCache;
         this.nackResponseDelay = configuration.getNackResponseDelay();
         this.heartbeatPeriod = configuration.getHeartbeatPeriod();
-
+        this.pushMode = configuration.getPushMode();
+        
         if (isReliable()) {
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
                     log.debug("[{}] Starting periodical notification", getEntityId());
                     try {
-                        notifyReaders();
+                        // periodical notification is handled always as pushMode == false
+                        notifyReaders(false);
                     } catch (Exception e) {
                         log.error("Got exception while doing periodical notification", e);
                     }
@@ -98,19 +103,39 @@ public class RTPSWriter<T> extends Endpoint {
      * multiple changes, before announcing the state to readers.
      */
     public void notifyReaders() {
+        notifyReaders(this.pushMode);
+    }
+    
+    /**
+     * Notify readers. Heartbeat announce thread calls this method always with 'false' as pushMode.
+     * @param pushMode 
+     */
+    private void notifyReaders(boolean pushMode) {
         if (readerProxies.size() > 0) {
             log.debug("[{}] Notifying {} matched readers of changes in history cache", getEntityId(),
                     readerProxies.size());
 
             for (ReaderProxy proxy : readerProxies.values()) {
                 Guid guid = proxy.getSubscriptionData().getKey();
-                notifyReader(guid);
+                notifyReader(guid, pushMode);
             }
         }
     }
-
+        
+    /**
+     * Notifies a remote reader with given Guid of the changes available in this writer.
+     * 
+     * @param guid
+     */
     public void notifyReader(Guid guid) {
-        log.debug("Notifying {}", guid);
+        notifyReader(guid, this.pushMode);
+    }
+    
+    /**
+     * Notify a reader. Heartbeat announce thread calls this method always with 'false' as pushMode.
+     * @param pushMode 
+     */
+    private void notifyReader(Guid guid, boolean pushMode) {
         ReaderProxy proxy = readerProxies.get(guid);
 
         if (proxy == null) {
@@ -118,14 +143,17 @@ public class RTPSWriter<T> extends Endpoint {
             return;
         }
 
-        if (proxy.isReliable()) {
+        // Send HB only if proxy is reliable and we are not configured to be in pushMode
+        if (proxy.isReliable() && !pushMode) {
             sendHeartbeat(proxy);
-        } else {
-            long readersHighestSeqNum = proxy.getReadersHighestSeqNum();
-
+        } 
+        else {
+            long readersHighestSeqNum = proxy.getReadersHighestSeqNum();            
             sendData(proxy, readersHighestSeqNum);
-
-            proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+            
+            if (!proxy.isReliable()) {
+                proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+            }
         }
     }
 
@@ -165,19 +193,13 @@ public class RTPSWriter<T> extends Endpoint {
         QosDurability readerDurability = readerData.getQualityOfService().getDurability();
 
         if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
-            // VOLATILE readers are marked having received all the samples so
-            // far
+            // VOLATILE readers are marked having received all the samples so far
             log.trace("[{}] Setting highest seqNum to {} for VOLATILE reader", getEntityId(),
                     writer_cache.getSeqNumMax());
 
             proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
         } else {
-            if (proxy.isReliable()) {
-                sendHeartbeat(proxy);
-            } else {
-                sendData(proxy, proxy.getReadersHighestSeqNum());
-                proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
-            }
+            notifyReader(proxy.getGuid());
         }
 
         log.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
@@ -272,7 +294,7 @@ public class RTPSWriter<T> extends Endpoint {
         SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
         if (changes.size() == 0) {
-            log.debug("[{}] sendData() called for {}, but no changes since {}.", getEntityId(),
+            log.debug("[{}] Remote reader already has all the data", getEntityId(),
                     proxy, readersHighestSeqNum);
             return;
         }
