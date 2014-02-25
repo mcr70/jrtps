@@ -35,7 +35,7 @@ public class MsgQoS extends QualityOfService {
     		
     		setPolicy(new QosLiveliness(QosLiveliness.Kind.AUTOMATIC, new Duration(Integer.MAX_VALUE, -1)));
     		setPolicy(new QosUserData(new byte[] {0,0,0,0}));
-    		setPolicy(new QosPartition(new String[0]));
+    		setPolicy(new QosPartition(new String[]{"hello"}));
     		setPolicy(new QosOwnership(QosOwnership.Kind.SHARED));
     		
     		setPolicy(new QosDeadline(new Duration(Integer.MAX_VALUE, -1)));
