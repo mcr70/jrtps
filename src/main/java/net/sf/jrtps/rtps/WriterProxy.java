@@ -22,8 +22,13 @@ public class WriterProxy extends RemoteProxy {
     private volatile long livelinessTimestamp;
     private volatile long seqNumMax = 0;
 
-    WriterProxy(PublicationData wd, LocatorPair lPair) {
+	private final int hbSuppressionDuration;
+	private long latestHeartBeatReceiveTime;
+
+
+    WriterProxy(PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration) {
         super(wd, lPair.ucLocator, lPair.mcLocator);
+		hbSuppressionDuration = heartbeatSuppressionDuration;
     }
 
     /**
@@ -102,13 +107,21 @@ public class WriterProxy extends RemoteProxy {
      * @return true, if Heartbeat was accepted
      */
     boolean heartbeatReceived(Heartbeat hb) {
-        if (latestHeartBeat == null) {
+        long hbReceiveTime = System.currentTimeMillis();
+        
+        // First HB is always accepted
+    	if (latestHeartBeat == null) {
             latestHeartBeat = hb;
+            latestHeartBeatReceiveTime = hbReceiveTime;
             return true;
         }
 
-        if (hb.getCount() > latestHeartBeat.getCount()) {
+    	// Accept only if count > than previous, and enough time (suppression duration) has
+    	// elapsed since previous HB
+        if (hb.getCount() > latestHeartBeat.getCount() && 
+        		hbReceiveTime > latestHeartBeatReceiveTime + hbSuppressionDuration) {
             latestHeartBeat = hb;
+            latestHeartBeatReceiveTime = hbReceiveTime;
             return true;
         }
 

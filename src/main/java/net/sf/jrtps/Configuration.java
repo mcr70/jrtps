@@ -114,9 +114,11 @@ public class Configuration {
      * Protocol tuning parameter that allows the RTPS Reader to ignore
      * HEARTBEATs that arrive 'too soon' after a previous HEARTBEAT was
      * received.
+     * 
+     * @return heartbeat suppression duration in milliseconds
      */
-    long getHeartbeatSuppressionDuration() {
-        return heartbeatSuppressionDuration;
+    public int getHeartbeatSuppressionDuration() {
+        return getIntProperty("rtps.reader.heartbeat-suppression-duration", 0);
     }
 
     /**
