@@ -1,5 +1,6 @@
 0.6.2
-    - Configuration: rtps.writer.push-mode=true|false, jrtps.publish-builtin-data=true|false
+    - Configuration: rtps.writer.push-mode=true|false, jrtps.publish-builtin-data=true|false,
+      jrtps.prefer-multicast
     
 0.6.1
     - Documentation is being generated with maven site plugin
