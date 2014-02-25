@@ -374,9 +374,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER; // TODO:
-                                                                                   // Check
-                                                                                   // this
+            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_ANNOUNCER;
         }
     }
 
@@ -394,9 +392,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR; // TODO:
-                                                                                  // Check
-                                                                                  // this
+            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PARTICIPANT_DETECTOR;
         }
     }
 
@@ -414,9 +410,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER; // TODO:
-                                                                                        // Check
-                                                                                        // this
+            return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER;
         }
     }
 
@@ -434,9 +428,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER; // TODO:
-                                                                                        // Check
-                                                                                        // this
+            return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER;
         }
     }
 
