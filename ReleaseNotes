@@ -1,5 +1,6 @@
 0.6.2
-    - Configuration: rtps.writer.push-mode=true|false, rtps.reader.heartbeat-suppression-duration,
+    - Configuration: rtps.writer.push-mode=true|false, 
+      rtps.reader.heartbeat-suppression-duration, rtps.writer.nack-suppression-duration, 
       jrtps.publish-builtin-data=true|false, jrtps.prefer-multicast=true|false
     
 0.6.1
