@@ -49,6 +49,7 @@ public class RTPSReader<T> extends Endpoint {
     private final Marshaller<?> marshaller;
     private final List<Sample<T>> pendingSamples = new LinkedList<>();
     private final int heartbeatResponseDelay;
+    private final int heartbeatSuppressionDuration;
 
     private int ackNackCount = 0;
 
@@ -58,6 +59,7 @@ public class RTPSReader<T> extends Endpoint {
 
         this.marshaller = marshaller;
         this.heartbeatResponseDelay = configuration.getHeartbeatResponseDelay();
+        this.heartbeatSuppressionDuration = configuration.getHeartbeatSuppressionDuration();
     }
 
     /**
@@ -104,7 +106,7 @@ public class RTPSReader<T> extends Endpoint {
      */
     public WriterProxy addMatchedWriter(PublicationData writerData) {
         LocatorPair locators = getLocators(writerData);
-        WriterProxy wp = new WriterProxy(writerData, locators);
+        WriterProxy wp = new WriterProxy(writerData, locators, heartbeatSuppressionDuration);
         wp.preferMulticast(getConfiguration().preferMulticast());
         
         writerProxies.put(writerData.getKey(), wp);
@@ -296,7 +298,7 @@ public class RTPSReader<T> extends Endpoint {
             PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
             wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
-                    .getDomainId())));
+                    .getDomainId())), 0);
 
             writerProxies.put(writerGuid, wp);
         }
