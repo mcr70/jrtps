@@ -188,6 +188,8 @@ public class RTPSWriter<T> extends Endpoint {
     public ReaderProxy addMatchedReader(SubscriptionData readerData) {
         LocatorPair locators = getLocators(readerData);
         ReaderProxy proxy = new ReaderProxy(readerData, locators);
+        proxy.preferMulticast(getConfiguration().preferMulticast());
+        
         readerProxies.put(readerData.getKey(), proxy);
 
         QosDurability readerDurability = readerData.getQualityOfService().getDurability();

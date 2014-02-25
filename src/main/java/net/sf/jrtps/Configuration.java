@@ -196,8 +196,19 @@ public class Configuration {
         return getIntProperty("jrtps.message-queue.size", 10);
     }
 
+    /**
+     * get whether or not multicast is preferred.
+     * @return true or false
+     */
+    public boolean preferMulticast() {
+        return getBooleanProperty("jrtps.prefer-multicast", true);
+    }
+    
+    /**
+     * Boolean configuration option. If true, builtin data for builtin entities is published.
+     * @return true or false
+     */
     public boolean getPublishBuiltinEntities() {
         return getBooleanProperty("jrtps.publish-builtin-data", false);
     }
-
 }
