@@ -245,11 +245,9 @@ public class RTPSReader<T> extends Endpoint {
                         sendAckNack(wp);
                     }
                 }
-            } else {
-                log.debug("[{}] Ignoring Heartbeat whose count is {}, since proxys count is {}", getGuid()
-                        .getEntityId(), hb.getCount(), wp.getLatestHeartbeatCount());
             }
-        } else {
+        } 
+        else {
             log.warn("[{}] Discarding Heartbeat from unknown writer {}, {}", getEntityId(), senderGuidPrefix,
                     hb.getWriterId());
         }

@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
 public class WriterProxy extends RemoteProxy {
     private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 
-    private Heartbeat latestHeartBeat;
+    private Heartbeat latestHeartbeat;
 
     private volatile long livelinessTimestamp;
     private volatile long seqNumMax = 0;
 
 	private final int hbSuppressionDuration;
-	private long latestHeartBeatReceiveTime;
+	private long latestHBReceiveTime;
 
 
     WriterProxy(PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration) {
@@ -44,11 +44,11 @@ public class WriterProxy extends RemoteProxy {
 	 * 
 	 */
     boolean isAllReceived() {
-        if (latestHeartBeat == null) {
+        if (latestHeartbeat == null) {
             return false;
         }
 
-        return latestHeartBeat.getLastSequenceNumber() == getGreatestDataSeqNum();
+        return latestHeartbeat.getLastSequenceNumber() == getGreatestDataSeqNum();
     }
 
     /**
@@ -110,20 +110,23 @@ public class WriterProxy extends RemoteProxy {
         long hbReceiveTime = System.currentTimeMillis();
         
         // First HB is always accepted
-    	if (latestHeartBeat == null) {
-            latestHeartBeat = hb;
-            latestHeartBeatReceiveTime = hbReceiveTime;
+    	if (latestHeartbeat == null) {
+            latestHeartbeat = hb;
+            latestHBReceiveTime = hbReceiveTime;
             return true;
         }
 
     	// Accept only if count > than previous, and enough time (suppression duration) has
     	// elapsed since previous HB
-        if (hb.getCount() > latestHeartBeat.getCount() && 
-        		hbReceiveTime > latestHeartBeatReceiveTime + hbSuppressionDuration) {
-            latestHeartBeat = hb;
-            latestHeartBeatReceiveTime = hbReceiveTime;
+        if (hb.getCount() > latestHeartbeat.getCount() && 
+        		hbReceiveTime > latestHBReceiveTime + hbSuppressionDuration) {
+            latestHeartbeat = hb;
+            latestHBReceiveTime = hbReceiveTime;
             return true;
         }
+
+        log.debug("Heartbeat was not accepted; count {} < proxys count {}, or suppression duration not elapsed; {} < {}", 
+        		hb.getCount(), latestHeartbeat.getCount(), hbReceiveTime, latestHBReceiveTime + hbSuppressionDuration);
 
         return false;
     }
@@ -141,10 +144,10 @@ public class WriterProxy extends RemoteProxy {
     }
 
     int getLatestHeartbeatCount() {
-        if (latestHeartBeat == null) {
+        if (latestHeartbeat == null) {
             return 0;
         }
 
-        return latestHeartBeat.getCount();
+        return latestHeartbeat.getCount();
     }
 }

@@ -22,12 +22,6 @@ import org.slf4j.LoggerFactory;
 public class Configuration {
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
-    // --- Writer configurations -------------
-    private long nackSuppressionDuration = 0; // 0
-
-    // --- Reader configurations -------------
-    private long heartbeatSuppressionDuration = 0; // 0 ms
-
     private final Properties props;
 
     public Configuration() {
@@ -106,8 +100,8 @@ public class Configuration {
      * @return Nack supression duration
      * 
      */
-    long nackSupressionDuration() {
-        return nackSuppressionDuration;
+    public int getNackSuppressionDuration() {
+        return getIntProperty("rtps.writer.nack-suppression-duration", 0);
     }
 
     /**
@@ -213,4 +207,5 @@ public class Configuration {
     public boolean getPublishBuiltinEntities() {
         return getBooleanProperty("jrtps.publish-builtin-data", false);
     }
+
 }
