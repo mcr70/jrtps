@@ -1,7 +1,0 @@
-jrtps-0.6.1
-	This release is provided as-is. In short, one can get started 
-	by using classes in net.sf.jrtps.udds package, which is a minimalistic 
-	set of classes that can be used to start communicating over RTPS.
-
-	A Maintenance release. Documentation is being generated with
-	maven site plugin
