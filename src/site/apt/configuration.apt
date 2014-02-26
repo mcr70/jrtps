@@ -7,21 +7,71 @@ Configuration
 +---
 
 # ---  RTPS related configuration parameters
-rtps.writer.heartbeat-period=5000
+rtps.writer.push-mode = true
+rtps.writer.heartbeat-period = 5000
 rtps.writer.nack-response-delay = 200
-rtps.reader.heartbeat-response-delay = 100
-rtps.spdp.resend-data-period=5000
+rtps.writer.nack-suppression-duration = 0
+rtps.reader.heartbeat-response-delay = 500
+rtps.reader.heartbeat-suppression-duration = 0
+rtps.spdp.resend-data-period = 30000
 
 # ---  jRTPS tuning parameters  ------------------
-# jRTPS uses ScheduledThreadPoolExecutor for its thread management. 
-jrtps.thread-pool.core-size=10
-
-# Size of the input queue 
-jrtps.message-queue.size=10
-
-# Configure buffer-size. This is the buffer size used to hold a RTPS Message.´
-# For readers, this is the size of UDP Datagram buffer.
+jrtps.thread-pool.core-size = 10
+jrtps.message-queue.size = 10
 jrtps.buffer-size = 16384
+jrtps.publish-builtin-data = false
+jrtps.prefer-multicast = true
 
 +---
  
+* RTPS specific configuration
+
+  * <<{rtps.writer.push-mode}>>
+  This configuration parameter affects how writer communicates changes to readers.
+  If push-mode is false, writer will announce new data to readers by sending a <<<Heartbeat>>>
+  message. If set to true, writer will send the changes to all matched writers directly.
+
+  * <<{rtps.writer.heartbeat-period}>>
+  This configuration parameter tells how often writer will advertise the changes it has by
+  sending a <<<Heartbeat>>> message. Note, that <<<Heartbeats>>> will be sent regardless of push-mode
+
+  * <<{rtps.writer.nack-response-delay}>>
+  When writer receives a <<<AckNack>>> message, it will wait <<<nack-response-delay>>> before  
+  it considers how to respond to reader.
+  
+  * <<{rtps.writer.nack-suppression-duration}>>
+  This parameter let's writer discard reception of <<<AckNack>>> message, if it arrives 'too soon'.
+  
+  * <<{rtps.reader.heartbeat-response-delay}>>
+  Reader waits this amount of time before reacting on writers <<<Heartbeat>>> message.
+
+  * <<{rtps.reader.heartbeat-suppression-duration}>>
+  This parameter allows reader to discard reception <<<Heartbeat>>> messages that arrive 'too soon'.
+
+  * <<{rtps.spdp.resend-data-period}>>
+  Period, that SPDP writer uses to announce its presence on the network.
+
+
+* jRTPS specific configuration
+ 
+  * <<{jrtps.thread-pool.core-size}>>
+  jRTPS uses ScheduledThreadPoolExecutor for its thread management. This parameter tells the number of 
+  threads in the pool.
+ 
+  * <<{jrtps.message-queue.size}>>
+  During reception, each UDP datagram received is placed into this queue. If the queue becomes full,
+  receiver will block
+
+  * <<{jrtps.buffer-size}>>
+  Size of the buffer used. This is the maximum size of the UDP packet. During sending, if an overflow
+  occurs only submessages that were successfully written to buffer will get actually sent. This overflow
+  is detected, and if it occured during sending of <<<Data>>>, a <<<Heartbeat>>> message will be sent
+  
+  * <<{jrtps.publish-builtin-data}>>
+  Determines whether or not to publish data for builtin entities. This defaults to false, since 
+  builtin readers already know this data.
+  
+  * <<{jrtps.prefer-multicast}>>
+  A remote entity may advertise both unicast address and multicast address. This flag tells which one to
+  prefer. Note, that if remote entity advertises only one or the other, this flag has no effect. 
+  

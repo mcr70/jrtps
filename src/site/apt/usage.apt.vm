@@ -1,6 +1,6 @@
-Maven dependency
+Getting started
 
- To get starting with developing against jRTPS, add this dependency your pom.xml
+ To get started in developing with jRTPS, add this dependency to your pom.xml
 
 +-----
 <dependency>
@@ -10,5 +10,9 @@ Maven dependency
 <dependency>
 +-----
 
- jRTPS itself depends only on slf4j.api. Alternatively, you may download jRTPS from
- {{http://maven.org}}
+ jRTPS itself depends only on 
+ {{{http://search.maven.org/#search|ga|1|g:"org.slf4j"%20AND%20a:"slf4j-api"%20AND%20v:"${slf4j-version}"}slf4j-api}}
+ Alternatively, you may download jRTPS from
+ {{{http://search.maven.org/#search|ga|1|g:"${project.groupId}"%20AND%20a:"${project.artifactId}"%20AND%20v:"${project.version}"}maven.org}}
+ 
+ 

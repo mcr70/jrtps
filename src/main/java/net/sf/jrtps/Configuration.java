@@ -175,19 +175,19 @@ public class Configuration {
 
     /**
      * Get the default SPDP announcement rate.
-     * 
+     * see 9.6.1.4.2 Default announcement rate
      * @return resend period.
      */
     public Duration getSPDPResendPeriod() {
-        int millis = getIntProperty("rtps.spdp.resend-data-period", 30000); // see
-                                                                            // 9.6.1.4.2
-                                                                            // Default
-                                                                            // announcement
-                                                                            // rate
+        int millis = getIntProperty("rtps.spdp.resend-data-period", 30000); 
 
         return new Duration(millis);
     }
 
+    /**
+     * Gets the size of message queue. 
+     * @return queue size
+     */
     public int getMessageQueueSize() {
         return getIntProperty("jrtps.message-queue.size", 10);
     }
@@ -207,5 +207,4 @@ public class Configuration {
     public boolean getPublishBuiltinEntities() {
         return getBooleanProperty("jrtps.publish-builtin-data", false);
     }
-
 }

@@ -16,11 +16,15 @@
 	<name>jRTPS</name>
 	<description>jRTPS - An implementation of RTPS protocol by OMG</description>
 
+    <properties>
+       <slf4j-version>1.7.6</slf4j-version>
+    </properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
-			<version>1.7.6</version>
+			<version>${slf4j-version}</version>
 		</dependency>
 
 		<dependency>
