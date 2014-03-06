@@ -3,7 +3,7 @@
  * 
  * uDDS aims to be a simplistic version of DDS specification by OMG.
  * Idea is to simplify writing code to DDS domain, while keeping programming interface
- * as simple as possible.<p>
+ * as simple as possible.
  * 
  * While using jRTPS, uDDS can talk to any vendors DDS implementation, as long as RTPS 
  * is used as a communication protocol. There might(and probably will) be some limitations
