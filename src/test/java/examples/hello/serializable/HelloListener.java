@@ -3,7 +3,7 @@ package examples.hello.serializable;
 import java.util.List;
 
 import net.sf.jrtps.rtps.Sample;
-import net.sf.jrtps.rtps.SampleListener;
+import net.sf.jrtps.udds.SampleListener;
 
 public class HelloListener implements SampleListener<HelloMessage> {
     @Override

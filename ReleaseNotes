@@ -1,3 +1,7 @@
+0.6.3
+    - net.sf.jrtps.rtps.SampleListener is moved to udds package. RTPSListener is added to rtps layer.
+      This allows creation of reader side filtering without bloating rtps layer. 
+    
 0.6.2
     - Configuration: rtps.writer.push-mode=true|false, 
       rtps.reader.heartbeat-suppression-duration, rtps.writer.nack-suppression-duration, 

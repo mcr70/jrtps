@@ -45,7 +45,7 @@ public class RTPSReader<T> extends Endpoint {
     private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
     private final Map<Guid, WriterProxy> writerProxies = new ConcurrentHashMap<>();
-    private final List<SampleListener<T>> sampleListeners = new LinkedList<SampleListener<T>>();
+    private final List<RTPSListener<T>> listeners = new LinkedList<RTPSListener<T>>();
     private final Marshaller<?> marshaller;
     private final List<Sample<T>> pendingSamples = new LinkedList<>();
     private final int heartbeatResponseDelay;
@@ -63,25 +63,23 @@ public class RTPSReader<T> extends Endpoint {
     }
 
     /**
-     * Adds a SampleListener to this RTPSReader.
+     * Adds a RTPSListener to this RTPSReader.
      * 
-     * @param listener
-     *            SampleListener to add.
+     * @param listener RTPSListener to add.
      */
-    public void addListener(SampleListener<T> listener) {
-        log.trace("[{}] Adding SampleListener {} for topic {}", getEntityId(), listener, getTopicName());
-        sampleListeners.add(listener);
+    public void addListener(RTPSListener<T> listener) {
+        log.trace("[{}] Adding RTPSListener {} for topic {}", getEntityId(), listener, getTopicName());
+        listeners.add(listener);
     }
 
     /**
-     * Removes a SampleListener from this RTPSReader.
+     * Removes a RTPSListener from this RTPSReader.
      * 
-     * @param listener
-     *            SampleListener to remove
+     * @param listener RTPSListener to remove
      */
-    public void removeListener(SampleListener<T> listener) {
-        log.trace("[{}] Removing SampleListener {} from topic {}", getEntityId(), listener, getTopicName());
-        sampleListeners.remove(listener);
+    public void removeListener(RTPSListener<T> listener) {
+        log.trace("[{}] Removing RTPSListener {} from topic {}", getEntityId(), listener, getTopicName());
+        listeners.remove(listener);
     }
 
     /**
@@ -321,7 +319,7 @@ public class RTPSReader<T> extends Endpoint {
         log.trace("[{}] Got {} samples", getEntityId(), ll.size());
 
         if (ll.size() > 0) {
-            for (SampleListener<T> sl : sampleListeners) {
+            for (RTPSListener<T> sl : listeners) {
                 sl.onSamples(ll);
             }
         }
