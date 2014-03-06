@@ -3,12 +3,16 @@ package net.sf.jrtps.rtps;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * ReaderProxy represents a remote reader.
  * 
  * @author mcr70
  */
 public class ReaderProxy extends RemoteProxy {
+    private static final Logger log = LoggerFactory.getLogger(ReaderProxy.class);
     private final boolean expectsInlineQoS;
 
     private AckNack latestAckNack;
@@ -16,13 +20,18 @@ public class ReaderProxy extends RemoteProxy {
     private boolean active = true;
     private long heartbeatSentTime = 0; // set to 0 after acknack
 
+	private long latestAckNackReceiveTime;
+
+	private final int anSuppressionDuration;
+
     ReaderProxy(SubscriptionData readerData, LocatorPair locators) {
-        this(readerData, locators, false);
+        this(readerData, locators, false, 0);
     }
 
-    ReaderProxy(SubscriptionData rd, LocatorPair lPair, boolean expectsInlineQoS) {
+    ReaderProxy(SubscriptionData rd, LocatorPair lPair, boolean expectsInlineQoS, int anSuppressionDuration) {
         super(rd, lPair.ucLocator, lPair.mcLocator);
         this.expectsInlineQoS = expectsInlineQoS;
+		this.anSuppressionDuration = anSuppressionDuration;
     }
 
     /**
@@ -81,16 +90,29 @@ public class ReaderProxy extends RemoteProxy {
      * @return true, if AckNack was accepted
      */
     boolean ackNackReceived(AckNack ackNack) {
+        long anReceiveTime = System.currentTimeMillis();
+        
+        // First AN is always accepted
         if (latestAckNack == null) {
             latestAckNack = ackNack;
+            latestAckNackReceiveTime = anReceiveTime;
+
             return true;
         }
 
-        if (ackNack.getCount() > latestAckNack.getCount()) {
-            latestAckNack = ackNack;
+    	// Accept only if count > than previous, and enough time (suppression duration) has
+    	// elapsed since previous AN
+        if (ackNack.getCount() > latestAckNack.getCount() && 
+        		anReceiveTime > latestAckNackReceiveTime + anSuppressionDuration) {
+        	latestAckNack = ackNack;
+            latestAckNackReceiveTime = anReceiveTime;
+
             return true;
         }
 
+        log.debug("AckNack was not accepted; count {} < proxys count {}, or suppression duration not elapsed; {} < {}", 
+        		ackNack.getCount(), latestAckNack.getCount(), anReceiveTime, latestAckNackReceiveTime + anSuppressionDuration);
+        
         return false;
     }
 }
