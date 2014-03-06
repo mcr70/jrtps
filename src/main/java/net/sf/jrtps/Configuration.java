@@ -22,12 +22,6 @@ import org.slf4j.LoggerFactory;
 public class Configuration {
     private static final Logger log = LoggerFactory.getLogger(Configuration.class);
 
-    // --- Writer configurations -------------
-    private long nackSuppressionDuration = 0; // 0
-
-    // --- Reader configurations -------------
-    private long heartbeatSuppressionDuration = 0; // 0 ms
-
     private final Properties props;
 
     public Configuration() {
@@ -106,17 +100,19 @@ public class Configuration {
      * @return Nack supression duration
      * 
      */
-    long nackSupressionDuration() {
-        return nackSuppressionDuration;
+    public int getNackSuppressionDuration() {
+        return getIntProperty("rtps.writer.nack-suppression-duration", 0);
     }
 
     /**
      * Protocol tuning parameter that allows the RTPS Reader to ignore
      * HEARTBEATs that arrive 'too soon' after a previous HEARTBEAT was
      * received.
+     * 
+     * @return heartbeat suppression duration in milliseconds
      */
-    long getHeartbeatSuppressionDuration() {
-        return heartbeatSuppressionDuration;
+    public int getHeartbeatSuppressionDuration() {
+        return getIntProperty("rtps.reader.heartbeat-suppression-duration", 0);
     }
 
     /**
@@ -179,19 +175,19 @@ public class Configuration {
 
     /**
      * Get the default SPDP announcement rate.
-     * 
+     * see 9.6.1.4.2 Default announcement rate
      * @return resend period.
      */
     public Duration getSPDPResendPeriod() {
-        int millis = getIntProperty("rtps.spdp.resend-data-period", 30000); // see
-                                                                            // 9.6.1.4.2
-                                                                            // Default
-                                                                            // announcement
-                                                                            // rate
+        int millis = getIntProperty("rtps.spdp.resend-data-period", 30000); 
 
         return new Duration(millis);
     }
 
+    /**
+     * Gets the size of message queue. 
+     * @return queue size
+     */
     public int getMessageQueueSize() {
         return getIntProperty("jrtps.message-queue.size", 10);
     }

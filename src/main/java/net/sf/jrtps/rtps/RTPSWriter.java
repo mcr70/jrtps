@@ -187,7 +187,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     public ReaderProxy addMatchedReader(SubscriptionData readerData) {
         LocatorPair locators = getLocators(readerData);
-        ReaderProxy proxy = new ReaderProxy(readerData, locators);
+        ReaderProxy proxy = new ReaderProxy(readerData, locators, false, getConfiguration().getNackSuppressionDuration());
         proxy.preferMulticast(getConfiguration().preferMulticast());
         
         readerProxies.put(readerData.getKey(), proxy);
@@ -274,11 +274,9 @@ public class RTPSWriter<T> extends Endpoint {
                 getParticipant().waitFor(nackResponseDelay);
 
                 sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
-            } else {
-                log.debug("[{}] Ignoring AckNack whose count is {}, since proxys count is {}", getEntityId(),
-                        ackNack.getCount(), proxy.getLatestAckNackCount());
             }
-        } else {
+        } 
+        else {
             log.warn("[{}] Discarding AckNack from unknown reader {}", getEntityId(), ackNack.getReaderId());
         }
     }
