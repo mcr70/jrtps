@@ -4,7 +4,6 @@ import java.util.List;
 
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.rtps.Sample;
-import net.sf.jrtps.rtps.SampleListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -6,7 +6,7 @@ hg commit
 hg push
 
 # relese
-mvn release:prepare -Psite 
+mvn release:prepare 
 mvn release:perform -Psite
 
 # To deploy only site

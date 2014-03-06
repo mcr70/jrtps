@@ -8,7 +8,6 @@ import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.message.parameter.QosLiveliness.Kind;
 import net.sf.jrtps.rtps.Sample;
-import net.sf.jrtps.rtps.SampleListener;
 import net.sf.jrtps.rtps.WriterProxy;
 import net.sf.jrtps.types.GuidPrefix;
 
