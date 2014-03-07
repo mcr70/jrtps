@@ -7,8 +7,7 @@ import net.sf.jrtps.udds.Participant;
 
 public class HelloReader {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-        Participant p = new Participant(0, 1); // Create participant; domain 0,
-                                               // participant 2
+        Participant p = new Participant(0, 1); // domain 0, participant 1
 
         DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
         HelloListener hl = new HelloListener(); // implements DataListener

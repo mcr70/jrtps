@@ -10,8 +10,7 @@ import net.sf.jrtps.udds.Participant;
 public class HelloDisposer {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, SocketException,
             InterruptedException {
-        Participant p = new Participant(0, 3); // Create participant; domain 0,
-                                               // participant 4
+        Participant p = new Participant(0, 3); // domain 0, participant 3
 
         DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
 
@@ -23,8 +22,7 @@ public class HelloDisposer {
         dw.dispose(msgs); // Dispose all the HelloMessages on one call
 
         System.out.println("\n*** Waiting 2 seconds before closing ***\n");
-        Thread.sleep(2000); // Give some time for the recipients to receive
-                            // before closing
+        Thread.sleep(2000); // Give some time for the recipients to receive before closing
 
         p.close();
     }

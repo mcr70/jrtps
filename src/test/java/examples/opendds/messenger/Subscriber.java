@@ -7,8 +7,8 @@ import net.sf.jrtps.udds.Participant;
 
 public class Subscriber {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-        Participant p = new Participant(0, 1); // Create participant; domain 0,
-                                               // participant 1
+        Participant p = new Participant(0, 1); // domain 0, participant 1
+
         p.setMarshaller(Message.class, new MessageMarshaller());
 
         DataReader<Message> dr = p.createDataReader("Movie Discussion List", Message.class,
