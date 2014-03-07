@@ -32,8 +32,16 @@ udds examples
  
 * Creating a DataReader
 
- Creating a <DataReader> is done similarily
+ Creating a <DataReader> is done similarily. To get data from DataReader, one can add a <SampleListener>
+ to it.
  
 +---
  DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
+ 
+ dr.addListener(new SampleListener<HelloMessage>() {
+   public void onSamples(List<Sample<HelloMessage>> samples) {
+       System.out.println("Got samples: " + samples);
+   }
+ });
+ 
 +--- 
