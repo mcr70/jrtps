@@ -8,8 +8,7 @@ import net.sf.jrtps.udds.Participant;
 public class ExternalizableHelloWriter {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, SocketException,
             InterruptedException {
-        Participant p = new Participant(0, 2); // Create participant; domain 0,
-                                               // participant 3
+        Participant p = new Participant(0, 2); // domain 0, participant 2
 
         DataWriter<ExternalizableHelloMessage> dw = p.createDataWriter(ExternalizableHelloMessage.class);
 

@@ -3,7 +3,7 @@ package examples.ospl.hello;
 import java.util.List;
 
 import net.sf.jrtps.rtps.Sample;
-import net.sf.jrtps.rtps.SampleListener;
+import net.sf.jrtps.udds.SampleListener;
 
 public class MsgListener implements SampleListener<Msg> {
 

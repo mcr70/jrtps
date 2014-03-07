@@ -1,7 +1,9 @@
 package net.sf.jrtps.udds;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.sf.jrtps.rtps.RTPSReader;
-import net.sf.jrtps.rtps.SampleListener;
 
 /**
  * This class represents a strongly typed DataReader in spirit of DDS
@@ -15,6 +17,7 @@ import net.sf.jrtps.rtps.SampleListener;
  *            Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity<T> {
+    private Map<SampleListener<T>, RTPSListenerAdapter<T>> adapters = new HashMap<>();
     private RTPSReader<T> rtps_reader;
 
     /**
@@ -27,26 +30,33 @@ public class DataReader<T> extends Entity<T> {
         this.rtps_reader = reader;
     }
 
+
     /**
-     * Adds a new listener for this DataReader.
-     * 
-     * @param listener
-     *            a DataListener to add.
+     * Adds a SampleListener to this DataReader
+     * @param listener Listener to add
      */
     public void addListener(SampleListener<T> listener) {
-        rtps_reader.addListener(listener);
+        synchronized (adapters) {
+            RTPSListenerAdapter<T> adapter = new RTPSListenerAdapter<>(listener);
+            adapters.put(listener, adapter);
+            rtps_reader.addListener(adapter);            
+        }
     }
 
     /**
-     * Removes a listener.
-     * 
-     * @param listener
-     *            DataListener to remove
+     * Removes a given SampleListener from this DataReader.
+     * @param listener A listener to remove
      */
     public void removeListener(SampleListener<T> listener) {
-        rtps_reader.removeListener(listener);
+        synchronized (adapters) {
+            RTPSListenerAdapter<T> adapter = adapters.remove(listener);
+            rtps_reader.removeListener(adapter);
+        }
     }
 
+    /**
+     * Package access
+     */
     RTPSReader<T> getRTPSReader() {
         return rtps_reader;
     }

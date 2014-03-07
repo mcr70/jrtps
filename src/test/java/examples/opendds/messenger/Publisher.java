@@ -5,8 +5,8 @@ import net.sf.jrtps.udds.Participant;
 
 public class Publisher {
     public static void main(String[] args) throws Exception {
-        Participant p = new Participant(0, 2); // Create participant; domain 0,
-                                               // participant 2
+        Participant p = new Participant(0, 2); // domain 0, participant 2
+
         p.setMarshaller(Message.class, new MessageMarshaller());
 
         DataWriter<Message> dw = p.createDataWriter("Movie Discussion List", Message.class,
