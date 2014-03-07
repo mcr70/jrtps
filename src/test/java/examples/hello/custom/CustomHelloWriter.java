@@ -8,8 +8,8 @@ import net.sf.jrtps.udds.Participant;
 public class CustomHelloWriter {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, SocketException,
             InterruptedException {
-        Participant p = new Participant(0, 2); // Create participant; domain 0,
-                                               // participant 3
+        Participant p = new Participant(0, 2); // domain 0, participant 2
+        
         p.setMarshaller(CustomHelloMessage.class, new CustomMarshaller());
 
         DataWriter<CustomHelloMessage> dw = p.createDataWriter(CustomHelloMessage.class);
