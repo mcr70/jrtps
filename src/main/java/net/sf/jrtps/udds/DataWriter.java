@@ -35,25 +35,24 @@ public class DataWriter<T> extends Entity<T> {
     }
 
     /**
-     * Writes an instance to subscribed data readers.
+     * Writes a sample to subscribed data readers.
      * 
-     * @param instance
+     * @param sample
      */
-    public void write(T instance) {
+    public void write(T sample) {
         LinkedList<T> ll = new LinkedList<>();
-        ll.add(instance);
+        ll.add(sample);
         write(ll);
     }
 
     /**
-     * Writes a List of instances to subscribed data readers.
+     * Writes a List of samples to subscribed data readers.
      * 
-     * @param instances
-     *            a List of instances
+     * @param samples a List of samples
      */
-    public void write(List<T> instances) {
+    public void write(List<T> samples) {
         try {
-            hCache.write(instances);
+            hCache.write(samples);
         } finally {
             notifyReaders();
         }
