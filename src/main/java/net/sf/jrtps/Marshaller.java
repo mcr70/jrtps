@@ -2,7 +2,7 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 
 /**
  * Marshaller is used to transform Object to/from different data encodings.

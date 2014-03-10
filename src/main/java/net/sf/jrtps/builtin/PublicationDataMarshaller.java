@@ -4,8 +4,8 @@ import java.util.Set;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.DataEncapsulation;
-import net.sf.jrtps.message.data.ParameterListEncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
+import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;

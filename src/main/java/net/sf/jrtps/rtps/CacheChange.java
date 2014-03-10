@@ -5,7 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 
 /**

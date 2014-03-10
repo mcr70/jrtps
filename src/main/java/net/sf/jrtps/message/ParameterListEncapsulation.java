@@ -1,4 +1,4 @@
-package net.sf.jrtps.message.data;
+package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

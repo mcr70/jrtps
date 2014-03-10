@@ -10,9 +10,9 @@ Getting started
 <dependency>
 +-----
 
+ Alternatively, you may download jRTPS from
+ {{{http://search.maven.org/#search|ga|1|g:"${project.groupId}"%20AND%20a:"${project.artifactId}"%20AND%20v:"${project.version}"}maven.org}}.
  jRTPS itself depends only on 
  {{{http://search.maven.org/#search|ga|1|g:"org.slf4j"%20AND%20a:"slf4j-api"%20AND%20v:"${slf4j-version}"}slf4j-api}}
- Alternatively, you may download jRTPS from
- {{{http://search.maven.org/#search|ga|1|g:"${project.groupId}"%20AND%20a:"${project.artifactId}"%20AND%20v:"${project.version}"}maven.org}}
  
  
