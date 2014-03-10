@@ -1,4 +1,4 @@
-package net.sf.jrtps.message.data;
+package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -6,7 +6,8 @@ import java.nio.ByteOrder;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
- * CDREncapsulation.
+ * CDREncapsulation is a general purpose binary DataEncapsulation. It holds a RTPSByteBuffer,
+ * which can be used by marshallers.
  * 
  * @author mcr70
  * 
@@ -43,6 +44,11 @@ public class CDREncapsulation extends DataEncapsulation {
         return serializedPayload;
     }
 
+    /**
+     * Gets a RTPSByteBuffer, which can be used to marshall/unmarshall data.
+     * 
+     * @return RTPSByteBuffer
+     */
     public RTPSByteBuffer getBuffer() {
         return bb;
     }

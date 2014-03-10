@@ -11,8 +11,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.CDREncapsulation;
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.CDREncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.slf4j.Logger;
