@@ -1,9 +1,11 @@
 package net.sf.jrtps.udds;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import net.sf.jrtps.rtps.RTPSReader;
+import net.sf.jrtps.rtps.Sample;
 
 /**
  * This class represents a strongly typed DataReader in spirit of DDS
@@ -53,11 +55,71 @@ public class DataReader<T> extends Entity<T> {
             rtps_reader.removeListener(adapter);
         }
     }
-
+    
     /**
      * Package access
      */
     RTPSReader<T> getRTPSReader() {
         return rtps_reader;
     }
+
+    // ----  Experimental code follows  ------------------------
+    /**
+     * Adds a reader side Filter. When samples are received, they are evaluated with
+     * all the Filters this DataReader has. If a Sample is accepted by all of the Filters,
+     * it is added to history cache of this reader, and clients are notified of new samples.
+     *  
+     * @param filter
+     */
+    void addFilter(Filter<T> filter) {
+        // QosOwnership could be implemented with Filters.
+        // QosResourceLimits could be implemented with Filters.
+    }
+    
+    /**
+     * Gets a List of instances this DataReader knows. Each Sample returned
+     * is the latest sample of that instance.
+     * 
+     * @return a List of instances
+     */
+    List<Sample<T>> getInstances() {
+        return null;
+    }
+    /**
+     * Gets the latest Sample of given instance.
+     * @param s 
+     * @return
+     */
+    Sample<T> getInstance(Sample<T> s) {
+        return getInstanceHistory(s).get(0);
+    }
+    /**
+     * Gets a history of given instance. If this DataReader is associated with a topic
+     * that has no key, all the samples are returned. 
+     * 
+     * @param s A Sample representing an instance. 
+     * @return a history of an instance. In returned List, index 0 represents most recent Sample.
+     */
+    List<Sample<T>> getInstanceHistory(Sample<T> s) {
+        return null;
+    }
+    /**
+     * Gets all the samples this DataReader knows about. Samples are returned in the order
+     * they have been received.
+     * @return all the Samples
+     */
+    List<Sample<T>> getSamples() {
+        return getSamplesSince(0);
+    }
+    List<Sample<T>> getSamplesSince(long seqNum) {
+        return null;
+    }
+    List<Sample<T>> getSamplesSince(Sample<T> s) {
+        return null;
+    }
+
+    List<Sample<T>> takeSamples() {
+        return null;
+    }
+    // ----  End of experimental code
 }
