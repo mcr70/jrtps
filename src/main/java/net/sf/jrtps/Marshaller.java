@@ -21,7 +21,9 @@ public interface Marshaller<T> {
 
     /**
      * Extracts a key from given object. If null is returned, it is assumed to
-     * be the same as a byte array of length 0.
+     * be the same as a byte array of length 0. Returned byte array can be of any length.
+     * However, if the byte arrays length is greater than 15, it is internally converted to
+     * a MD5 hash. 
      * 
      * @param data
      * @return key
