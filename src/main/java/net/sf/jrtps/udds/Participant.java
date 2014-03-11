@@ -406,7 +406,7 @@ public class Participant {
      * Marshaller is preferred over default Marshaller. Default Marshaller is
      * JavaSerializationMarshaller, which uses java serialization.
      * 
-     * @see JavaSerializableMarshaller
+     * @see SerializableMarshaller
      * 
      * @param type
      * @param m
@@ -448,11 +448,11 @@ public class Participant {
         Marshaller<?> m = marshallers.get(type);
         if (m == null) {
             if (Externalizable.class.isAssignableFrom(type)) {
-                m = new JavaExternalizableMarshaller((Class<? extends Externalizable>) type);
+                m = new ExternalizableMarshaller((Class<? extends Externalizable>) type);
             } else if (Serializable.class.isAssignableFrom(type)) {
-                m = new JavaSerializableMarshaller(type);
+                m = new SerializableMarshaller(type);
             } else {
-                logger.error("No marshaller registered for {} and it is not Serializable", type);
+                logger.error("No marshaller registered for {} and it is not Serializable or Externalizable", type);
 
                 throw new IllegalArgumentException("No marshaller found for " + type);
             }
