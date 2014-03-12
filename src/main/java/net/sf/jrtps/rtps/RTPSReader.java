@@ -195,7 +195,7 @@ public class RTPSReader<T> extends Endpoint {
                 Object obj = marshaller.unmarshall(data.getDataEncapsulation());
                 log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
 
-                pendingSamples.add(new Sample(obj, timestamp, data.getStatusInfo()));
+                pendingSamples.add(new Sample(writerGuid, obj, timestamp, data.getStatusInfo()));
             } else {
                 log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
                         data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
