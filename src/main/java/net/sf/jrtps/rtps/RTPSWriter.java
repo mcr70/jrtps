@@ -152,6 +152,7 @@ public class RTPSWriter<T> extends Endpoint {
             sendData(proxy, readersHighestSeqNum);
             
             if (!proxy.isReliable()) {
+            	// For best effort readers, update readers highest seqnum
                 proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
             }
         }
@@ -176,7 +177,6 @@ public class RTPSWriter<T> extends Endpoint {
         }
 
         readerProxies.clear();
-        // writer_cache.clear();
     }
 
     /**
