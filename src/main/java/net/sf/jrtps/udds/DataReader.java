@@ -1,6 +1,7 @@
 package net.sf.jrtps.udds;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -71,10 +72,31 @@ public class DataReader<T> extends Entity<T> {
      *  
      * @param filter
      */
-    void addFilter(Filter<T> filter) {
+    void addFilter(SampleFilter<T> filter) {
         // QosOwnership could be implemented with Filters.
         // QosResourceLimits could be implemented with Filters.
     }
+    
+    /**
+     * Gets samples that match Filter. History cache is scanned through and for each
+     * Sample, a Filter is applied. Only the accepted Samples are returned.
+     * 
+     * @param filter
+     * @return A List of Samples that matched given Filter
+     */
+    List<Sample<T>> getSamples(SampleFilter<T> filter) {
+        List<Sample<T>> filteredSampled = new LinkedList<>();
+        
+        List<Sample<T>> samples = getSamples();
+        for (Sample<T> sample : samples) {
+            if (filter.acceptSample(sample)) {
+                filteredSampled.add(sample);
+            }
+        }
+        
+        return filteredSampled;
+    }
+
     
     /**
      * Gets a List of instances this DataReader knows. Each Sample returned
@@ -111,12 +133,14 @@ public class DataReader<T> extends Entity<T> {
     List<Sample<T>> getSamples() {
         return getSamplesSince(0);
     }
-    List<Sample<T>> getSamplesSince(long seqNum) {
+    List<Sample<T>> getSamplesSince(long timeMillis) {
         return null;
     }
     List<Sample<T>> getSamplesSince(Sample<T> s) {
-        return null;
+        return getSamplesSince(s.getTimestamp());
     }
+    
+    
 
     List<Sample<T>> takeSamples() {
         return null;
