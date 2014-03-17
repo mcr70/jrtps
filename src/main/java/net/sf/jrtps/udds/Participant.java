@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -87,6 +88,8 @@ public class Participant {
 
     private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
 
+    private Guid guid;
+
     /**
      * Create a Participant with domainId 0 and participantId 0.
      * 
@@ -134,7 +137,14 @@ public class Participant {
         locators.add(mcLoc);
         locators.add(ucLoc);
 
-        rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators,
+        Random r = new Random(System.currentTimeMillis());
+        int vmid = r.nextInt();
+        byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
+                (byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
+
+        this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+        
+        rtps_participant = new RTPSParticipant(guid, domainId, threadPoolExecutor, locators,
                 discoveredParticipants, config);
         rtps_participant.start();
 
