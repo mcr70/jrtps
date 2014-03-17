@@ -12,7 +12,7 @@ import net.sf.jrtps.rtps.CacheChange;
  * @author mcr70
  * 
  */
-public interface WriterCache {
+interface WriterCache {
     /**
      * Gets the smallest sequence number available in history cache.
      * 

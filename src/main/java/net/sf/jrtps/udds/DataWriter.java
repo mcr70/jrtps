@@ -3,6 +3,7 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.rtps.HistoryCache;
 import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Guid;
 
@@ -26,12 +27,10 @@ public class DataWriter<T> extends Entity<T> {
      * 
      * @param topicName
      */
-    DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+    DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer) {
         super(p, type, writer.getTopicName());
         this.rtps_writer = writer;
-        this.hCache = hCache;
-
-        hCache.setDataWriter(this);
+        this.hCache = writer.getHistoryCache();
     }
 
     /**

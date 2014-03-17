@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
@@ -50,7 +50,7 @@ public class RTPSWriter<T> extends Endpoint {
 
     private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
-    private final WriterCache writer_cache;
+    private final HistoryCache<T> writer_cache;
     private final int nackResponseDelay;
     private final int heartbeatPeriod;
     private final boolean pushMode;
@@ -61,11 +61,11 @@ public class RTPSWriter<T> extends Endpoint {
 
     
 
-    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache wCache,
+    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<T> m,
             QualityOfService qos, Configuration configuration) {
         super(participant, entityId, topicName, qos, configuration);
 
-        this.writer_cache = wCache;
+        this.writer_cache = new HistoryCache<>(getGuid(), m, qos);
         this.nackResponseDelay = configuration.getNackResponseDelay();
         this.heartbeatPeriod = configuration.getHeartbeatPeriod();
         this.pushMode = configuration.getPushMode();
@@ -423,5 +423,9 @@ public class RTPSWriter<T> extends Endpoint {
         QosReliability policy = getQualityOfService().getReliability();
 
         return policy.getKind() == QosReliability.Kind.RELIABLE;
+    }
+
+    public HistoryCache<T> getHistoryCache() {
+        return writer_cache;
     }
 }
