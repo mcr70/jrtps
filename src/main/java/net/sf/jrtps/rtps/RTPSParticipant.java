@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -56,16 +55,11 @@ public class RTPSParticipant {
     private final List<RTPSWriter<?>> writerEndpoints = new LinkedList<>();
 
     private final Guid guid;
-
-    /**
-     * Locators of this RTPSParticipant
-     */
     private final Set<Locator> locators;
 
-    private final int domainId;
-    private final int participantId;
-
     private RTPSMessageReceiver handler;
+
+    private int domainId;
 
     /**
      * Creates a new participant with given domainId and participantId. Domain
@@ -79,23 +73,15 @@ public class RTPSParticipant {
      * @param locators a Set of Locators
      * @param config Configuration used
      */
-    public RTPSParticipant(int domainId, int participantId, ScheduledThreadPoolExecutor tpe, Set<Locator> locators,
+    public RTPSParticipant(Guid guid, int domainId, ScheduledThreadPoolExecutor tpe, Set<Locator> locators,
             Map<GuidPrefix, ParticipantData> discoveredParticipants, Configuration config) {
-        this.domainId = domainId;
-        this.participantId = participantId;
+        this.guid = guid;
+        this.domainId = domainId; // TODO: We should get rid of domainId here
+
         this.threadPoolExecutor = tpe;
         this.locators = locators;
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
-
-        Random r = new Random(System.currentTimeMillis());
-        int vmid = r.nextInt();
-        byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
-                (byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
-
-        this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
-
-        log.info("Creating participant {} for domain {}", participantId, domainId);
     }
 
     /**
@@ -175,7 +161,7 @@ public class RTPSParticipant {
      * all the history caches of all entities will be cleared.
      */
     public void close() {
-        log.debug("Closing RTPSParticipant {} in domain {}", participantId, domainId);
+        log.debug("Closing RTPSParticipant {}", guid);
 
         for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce
                                                   // thread
@@ -202,7 +188,7 @@ public class RTPSParticipant {
      * 
      * @return domainId
      */
-    public int getDomainId() {
+    int getDomainId() {
         return domainId;
     }
 
