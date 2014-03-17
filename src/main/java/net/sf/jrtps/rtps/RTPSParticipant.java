@@ -16,7 +16,6 @@ import java.util.concurrent.TimeUnit;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.transport.UDPReceiver;
 import net.sf.jrtps.types.EntityId;
@@ -162,8 +161,8 @@ public class RTPSParticipant {
      * 
      * @return RTPSWriter
      */
-    public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, WriterCache wCache, QualityOfService qos) {
-        RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, wCache, qos, config);
+    public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, Marshaller<T> m, QualityOfService qos) {
+        RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, m, qos, config);
         writer.setDiscoveredParticipants(discoveredParticipants);
 
         writerEndpoints.add(writer);
