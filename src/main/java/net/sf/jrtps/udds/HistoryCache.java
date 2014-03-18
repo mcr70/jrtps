@@ -17,7 +17,6 @@ import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.rtps.CacheChange;
 import net.sf.jrtps.rtps.WriterCache;
-import net.sf.jrtps.rtps.CacheChange.Kind;
 import net.sf.jrtps.types.EntityId;
 
 import org.slf4j.Logger;
@@ -29,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Samples on the reader side are made available through HistoryCache.
  */
-public class HistoryCache<T> implements WriterCache {
+class HistoryCache<T> implements WriterCache {
     private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
@@ -129,8 +128,7 @@ public class HistoryCache<T> implements WriterCache {
         }
 
         // TODO: CacheChange.sequenceNumber must be set only if it is
-        // succesfully
-        // inserted into cache
+        // succesfully inserted into cache
         int addSample(CacheChange aChange) {
             log.trace("[{}] Adding sample {}", entityId, aChange.getSequenceNumber());
             int historySizeChange = 1;
