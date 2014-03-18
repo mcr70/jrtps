@@ -10,6 +10,7 @@
 			<item name="Getting started" href="usage.html" />
             <item name="Examples" href="examples.html" />
             <item name="Configuration" href="configuration.html" />
+            <item name="Quality of Service" href="qos.html" />
 		</menu>
 
 		<!-- <menu ref="reports"/> -->
