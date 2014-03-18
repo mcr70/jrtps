@@ -1,4 +1,4 @@
-package net.sf.jrtps.rtps;
+package net.sf.jrtps.udds;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -15,7 +15,10 @@ import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
-import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.rtps.CacheChange;
+import net.sf.jrtps.rtps.WriterCache;
+import net.sf.jrtps.rtps.CacheChange.Kind;
+import net.sf.jrtps.types.EntityId;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +29,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Samples on the reader side are made available through HistoryCache.
  */
-public class HistoryCache<T> {
+public class HistoryCache<T> implements WriterCache {
     private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
@@ -50,10 +53,10 @@ public class HistoryCache<T> {
             }));
 
     private final Marshaller<T> marshaller;
-    private final Guid guid;
+    private final EntityId entityId;
 
-    HistoryCache(Guid guid, Marshaller<T> marshaller, QualityOfService qos) {
-        this.guid = guid;
+    HistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
+        this.entityId = eId;
         this.marshaller = marshaller;
 
         resource_limits = qos.getResourceLimits();
@@ -74,13 +77,13 @@ public class HistoryCache<T> {
     }
 
     private void addSample(CacheChange.Kind kind, List<T> samples) {
-        log.trace("[{}] add {} samples of kind {}", guid.getEntityId(), samples.size(), kind);
+        log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
 
         for (T sample : samples) {
             InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
             Instance inst = instances.get(key);
             if (inst == null) {
-                log.trace("[{}] Creating new instance {}", guid.getEntityId(), key);
+                log.trace("[{}] Creating new instance {}", entityId, key);
                 instanceCount++;
                 if (resource_limits.getMaxInstances() != -1 && 
                 		instanceCount > resource_limits.getMaxInstances()) {
@@ -97,7 +100,7 @@ public class HistoryCache<T> {
                 throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
             }
 
-            log.trace("[{}] Creating cache change {}", guid.getEntityId(), seqNum + 1);
+            log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
             CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
             sampleCount += inst.addSample(aChange);
             if (resource_limits.getMaxSamples() != -1 && 
@@ -129,12 +132,12 @@ public class HistoryCache<T> {
         // succesfully
         // inserted into cache
         int addSample(CacheChange aChange) {
-            log.trace("[{}] Adding sample {}", guid.getEntityId(), aChange.getSequenceNumber());
+            log.trace("[{}] Adding sample {}", entityId, aChange.getSequenceNumber());
             int historySizeChange = 1;
             history.add(aChange);
 
             if (history.size() > maxSize) {
-                log.trace("[{}] Removing oldest sample from history", guid.getEntityId());
+                log.trace("[{}] Removing oldest sample from history", entityId);
                 CacheChange cc = history.removeFirst(); // Discard oldest sample
                 changes.remove(cc); // Removed oldest instance sample from a set of changes.
 
@@ -182,20 +185,21 @@ public class HistoryCache<T> {
      *            sequence number to compare to
      * @return a SortedSet of changes
      */
-    SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
-        log.trace("[{}] getChangesSince({})", guid.getEntityId(), sequenceNumber);
+    @Override
+    public SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
+        log.trace("[{}] getChangesSince({})", entityId, sequenceNumber);
 
         synchronized (changes) {
             for (CacheChange cc : changes) {
                 if (cc.getSequenceNumber() > sequenceNumber) {
                     SortedSet<CacheChange> tailSet = changes.tailSet(cc);
-                    log.trace("[{}] returning {}", guid.getEntityId(), tailSet);
+                    log.trace("[{}] returning {}", entityId, tailSet);
                     return tailSet;
                 }
             }
         }
 
-        log.trace("[{}] No chances to return for seq num {}", guid.getEntityId(), sequenceNumber);
+        log.trace("[{}] No chances to return for seq num {}", entityId, sequenceNumber);
         return new TreeSet<>();
     }
 
@@ -204,7 +208,8 @@ public class HistoryCache<T> {
      * 
      * @return seqNumMin
      */
-    long getSeqNumMin() {
+    @Override
+    public long getSeqNumMin() {
         if (changes.size() == 0) {
             return 0;
         }
@@ -216,7 +221,8 @@ public class HistoryCache<T> {
      * 
      * @return seqNumMax
      */
-    long getSeqNumMax() {
+    @Override
+    public long getSeqNumMax() {
         if (changes.size() == 0) {
             return 0;
         }

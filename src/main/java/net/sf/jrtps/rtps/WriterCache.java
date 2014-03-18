@@ -1,8 +1,6 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
 import java.util.SortedSet;
-
-import net.sf.jrtps.rtps.CacheChange;
 
 /**
  * WriterCache represents writers history cache from the RTPSWriter point of
@@ -12,7 +10,7 @@ import net.sf.jrtps.rtps.CacheChange;
  * @author mcr70
  * 
  */
-interface WriterCache {
+public interface WriterCache {
     /**
      * Gets the smallest sequence number available in history cache.
      * 
