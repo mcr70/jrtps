@@ -1,13 +1,16 @@
 Quality of Service
 
  Quality Of Service is a way to configure system, and to make a contract between readers and writers 
- of the expected behavior. 
+ of the expected behavior. During discovery, participants interchange Quality Of Service information
+ of each entity they manage. For any given topic, its readers and writers can start communication
+ if their Quality of Service is compatible.
 
 * Reliability
 
  Reliability QoS determines how samples are communicated from writers to readers. RELIABLE kind
  causes RTPS entities to exchange <HeartBeat> and <AckNack> messages. I.e. readers will report
- back to writers what samples they have received, and what are still missing.
+ back to writers what samples they have received, and what are still missing. By using these messages,
+ writers can eventually communicate all the changes in correct order to readers.
  
  When BEST_EFFORT kind is used, writers just sends samples to readers. That is the only promise
  writer makes about delivery of messages. Samples might be lost during transmission, or reader
