@@ -26,8 +26,23 @@ Quality of Service
  offered.kind >= requested.kind
 +------
  
- where RELIABLE > BEST_EFFORT
+ where BEST_EFFORT \< RELIABLE
  
  
+* Durability
 
+ Durability QoS is used to control how historical data is communicated to readers.
+ If VOLATILE kind is used, readers will not get any historical data. A reader will
+ start getting samples only after reader and writer has been matched.
+ jRTPS writers checks durability of reader during matching. If kind is VOLATILE, 
+ writer will mark reader as received all the samples so far. In all other
+ cases, writer will notify readers of the changes available.
  
+ Durability QoS between reader and writer is compatible, if 
+ 
++------
+ offered.kind >= requested.kind
++------
+ 
+ where VOLATILE \< TRANSIENT_LOCAL \< TRANSIENT \< PERSISTENT
+  
