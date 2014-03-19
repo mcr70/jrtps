@@ -1,6 +1,7 @@
 package net.sf.jrtps.udds;
 
 import java.util.LinkedList;
+import java.util.List;
 
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.rtps.CacheChange;
@@ -31,12 +32,25 @@ class Instance <T> {
         history.addFirst(aChange);
 
         if (history.size() > maxSize) {
-            return history.removeFirst(); // Discard oldest sample
+            return history.removeLast(); // Discard oldest sample
         }
 
         return null;
     }
 
+    /**
+     * Gets the history of this instance.
+     * 
+     * @return
+     */
+    List<CacheChange<T>> getHistory() {
+       return new LinkedList<>(history); 
+    }
+    
+    CacheChange<T> getLatest() {
+        return history.getFirst();
+    }
+    
     void removeLatest() {
         history.removeFirst();
     }
