@@ -1,10 +1,8 @@
 package net.sf.jrtps.udds;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -90,89 +88,29 @@ class HistoryCache<T> implements WriterCache {
                     throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
                 }
 
-                inst = new Instance(key, history.getDepth());
+                inst = new Instance(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
                 instances.put(key, inst);
             }
 
-            if (resource_limits.getMaxSamplesPerInstance() != -1 && 
-            		inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
-                throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
-            }
 
             log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
-            CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
-            sampleCount += inst.addSample(aChange);
+            CacheChange newChange = new CacheChange(marshaller, kind, ++seqNum, sample);
+            CacheChange removedSample = inst.addSample(newChange);
+            if (removedSample != null) {
+                sampleCount++;
+            }
+            
             if (resource_limits.getMaxSamples() != -1 && 
             		sampleCount > resource_limits.getMaxSamples()) {
-                inst.history.removeLast();
+                inst.removeLatest();
                 sampleCount = resource_limits.getMaxSamples();
                 throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
             }
-            changes.add(aChange);
+            
+            changes.add(newChange);
         }
     }
 
-    private class Instance {
-        private final InstanceKey key;
-        private final LinkedList<CacheChange> history = new LinkedList<>();
-        private final int maxSize;
-
-        Instance(InstanceKey key, int historySize) {
-            this.key = key;
-            this.maxSize = historySize;
-        }
-
-        @Override
-        public int hashCode() {
-            return key.hashCode();
-        }
-
-        // TODO: CacheChange.sequenceNumber must be set only if it is
-        // succesfully inserted into cache
-        int addSample(CacheChange aChange) {
-            log.trace("[{}] Adding sample {}", entityId, aChange.getSequenceNumber());
-            int historySizeChange = 1;
-            history.add(aChange);
-
-            if (history.size() > maxSize) {
-                log.trace("[{}] Removing oldest sample from history", entityId);
-                CacheChange cc = history.removeFirst(); // Discard oldest sample
-                changes.remove(cc); // Removed oldest instance sample from a set of changes.
-
-                historySizeChange = 0;
-            }
-
-            return historySizeChange;
-        }
-    }
-
-    private class InstanceKey {
-        private byte[] key;
-
-        InstanceKey(byte[] key) {
-            this.key = key;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof HistoryCache.InstanceKey) {
-                InstanceKey other = (InstanceKey) o;
-
-                return Arrays.equals(key, other.key);
-            }
-
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(key);
-        }
-
-        public String toString() {
-            return "Key: " + Arrays.toString(key);
-        }
-    }
 
     /**
      * Gets all the changes, whose sequence number is greater than given
