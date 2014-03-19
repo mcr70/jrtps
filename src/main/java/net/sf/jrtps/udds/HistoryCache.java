@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Samples on the reader side are made available through HistoryCache.
  */
-class HistoryCache<T> implements WriterCache {
+class HistoryCache<T> implements WriterCache<T> {
     private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
@@ -35,9 +35,8 @@ class HistoryCache<T> implements WriterCache {
     
     private volatile int seqNum; // sequence number of a change
 
-    // Main collection to hold instances. ResourceLimits is checked against this
-    // map
-    private final Map<InstanceKey, Instance> instances = new LinkedHashMap<>();
+    // Main collection to hold instances. ResourceLimits is checked against this map
+    private final Map<InstanceKey, Instance<T>> instances = new LinkedHashMap<>();
     // An ordered set of cache changes.
     private final SortedSet<CacheChange<T>> changes = Collections.synchronizedSortedSet(new TreeSet<>(
             new Comparator<CacheChange<T>>() {
@@ -76,13 +75,13 @@ class HistoryCache<T> implements WriterCache {
 
         for (T sample : samples) {
             InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
-            CacheChange newChange = new CacheChange(marshaller, kind, ++seqNum, sample);
+            CacheChange<T> newChange = new CacheChange<T>(marshaller, kind, ++seqNum, sample);
             
             if (kind != CacheChange.Kind.DISPOSE) {
                 instances.remove(key);
             }
             else {
-                Instance inst = instances.get(key);
+                Instance<T> inst = instances.get(key);
                 
                 if (inst == null) {
                     log.trace("[{}] Creating new instance {}", entityId, key);
@@ -92,13 +91,13 @@ class HistoryCache<T> implements WriterCache {
                         throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
                     }
 
-                    inst = new Instance(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
+                    inst = new Instance<T>(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
                     instances.put(key, inst);
                 }   
 
                 log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
                 
-                CacheChange removedSample = inst.addSample(newChange);
+                CacheChange<T> removedSample = inst.addSample(newChange);
                 if (removedSample != null) {
                     synchronized (changes) {
                         changes.remove(removedSample);
