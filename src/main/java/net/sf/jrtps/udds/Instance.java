@@ -5,9 +5,9 @@ import java.util.LinkedList;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.rtps.CacheChange;
 
-class Instance {
+class Instance <T> {
     private final InstanceKey key;
-    private final LinkedList<CacheChange> history = new LinkedList<>();
+    private final LinkedList<CacheChange<T>> history = new LinkedList<>();
     private final int maxSize;
     private final int maxSamplesPerInstance;
 
@@ -22,7 +22,7 @@ class Instance {
         return key.hashCode();
     }
 
-    CacheChange addSample(CacheChange aChange) {
+    CacheChange<T> addSample(CacheChange<T> aChange) {
         if (maxSamplesPerInstance != -1 && 
                 history.size() >= maxSamplesPerInstance) {
             throw new OutOfResources("max_samples_per_instance=" + maxSamplesPerInstance);
