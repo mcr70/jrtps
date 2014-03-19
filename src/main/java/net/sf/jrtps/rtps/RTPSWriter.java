@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -290,7 +289,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
         Message m = new Message(getGuid().getPrefix());
-        SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
+        LinkedList<CacheChange<T>> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
         if (changes.size() == 0) {
             log.debug("[{}] Remote reader already has all the data", getEntityId(),
@@ -302,7 +301,7 @@ public class RTPSWriter<T> extends Endpoint {
 
         EntityId proxyEntityId = proxy.getEntityId();
 
-        for (CacheChange cc : changes) {
+        for (CacheChange<T> cc : changes) {
             try {
                 long timeStamp = cc.getTimeStamp();
                 if (timeStamp > prevTimeStamp) {
@@ -326,8 +325,8 @@ public class RTPSWriter<T> extends Endpoint {
             m.addSubMessage(hb);
         }
 
-        long firstSeqNum = changes.first().getSequenceNumber();
-        long lastSeqNum = changes.last().getSequenceNumber();
+        long firstSeqNum = changes.getFirst().getSequenceNumber();
+        long lastSeqNum = changes.getLast().getSequenceNumber();
         
         log.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
 

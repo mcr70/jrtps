@@ -3,6 +3,7 @@ package net.sf.jrtps.udds;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
@@ -32,19 +33,16 @@ class HistoryCache<T> implements WriterCache {
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
     
-    private int sampleCount = 0;
-    private int instanceCount = 0; // instanceCount might be smaller than
-                                   // instances.size() (dispose)
     private volatile int seqNum; // sequence number of a change
 
     // Main collection to hold instances. ResourceLimits is checked against this
     // map
     private final Map<InstanceKey, Instance> instances = new LinkedHashMap<>();
     // An ordered set of cache changes.
-    private final SortedSet<CacheChange> changes = Collections.synchronizedSortedSet(new TreeSet<>(
-            new Comparator<CacheChange>() {
+    private final SortedSet<CacheChange<T>> changes = Collections.synchronizedSortedSet(new TreeSet<>(
+            new Comparator<CacheChange<T>>() {
                 @Override
-                public int compare(CacheChange o1, CacheChange o2) {
+                public int compare(CacheChange<T> o1, CacheChange<T> o2) {
                     return (int) (o1.getSequenceNumber() - o2.getSequenceNumber());
                 }
             }));
@@ -78,36 +76,44 @@ class HistoryCache<T> implements WriterCache {
 
         for (T sample : samples) {
             InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
-            Instance inst = instances.get(key);
-            if (inst == null) {
-                log.trace("[{}] Creating new instance {}", entityId, key);
-                instanceCount++;
-                if (resource_limits.getMaxInstances() != -1 && 
-                		instanceCount > resource_limits.getMaxInstances()) {
-                    instanceCount = resource_limits.getMaxInstances();
-                    throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
-                }
-
-                inst = new Instance(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
-                instances.put(key, inst);
-            }
-
-
-            log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
             CacheChange newChange = new CacheChange(marshaller, kind, ++seqNum, sample);
-            CacheChange removedSample = inst.addSample(newChange);
-            if (removedSample != null) {
-                sampleCount++;
+            
+            if (kind != CacheChange.Kind.DISPOSE) {
+                instances.remove(key);
+            }
+            else {
+                Instance inst = instances.get(key);
+                
+                if (inst == null) {
+                    log.trace("[{}] Creating new instance {}", entityId, key);
+
+                    if (resource_limits.getMaxInstances() != -1 && 
+                            instances.size() >= resource_limits.getMaxInstances()) {
+                        throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
+                    }
+
+                    inst = new Instance(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
+                    instances.put(key, inst);
+                }   
+
+                log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
+                
+                CacheChange removedSample = inst.addSample(newChange);
+                if (removedSample != null) {
+                    synchronized (changes) {
+                        changes.remove(removedSample);
+                    }
+                }
             }
             
             if (resource_limits.getMaxSamples() != -1 && 
-            		sampleCount > resource_limits.getMaxSamples()) {
-                inst.removeLatest();
-                sampleCount = resource_limits.getMaxSamples();
+                    samples.size() >= resource_limits.getMaxSamples()) {
                 throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
             }
-            
-            changes.add(newChange);
+
+            synchronized (changes) {
+                changes.add(newChange);
+            }
         }
     }
 
@@ -122,21 +128,22 @@ class HistoryCache<T> implements WriterCache {
      * @return a SortedSet of changes
      */
     @Override
-    public SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
+    public LinkedList<CacheChange<T>> getChangesSince(long sequenceNumber) {
         log.trace("[{}] getChangesSince({})", entityId, sequenceNumber);
 
         synchronized (changes) {
-            for (CacheChange cc : changes) {
+            for (CacheChange<T> cc : changes) {
                 if (cc.getSequenceNumber() > sequenceNumber) {
-                    SortedSet<CacheChange> tailSet = changes.tailSet(cc);
+                    SortedSet<CacheChange<T>> tailSet = changes.tailSet(cc);
                     log.trace("[{}] returning {}", entityId, tailSet);
-                    return tailSet;
+
+                    return new LinkedList<CacheChange<T>>(tailSet);
                 }
             }
         }
 
         log.trace("[{}] No chances to return for seq num {}", entityId, sequenceNumber);
-        return new TreeSet<>();
+        return new LinkedList<>();
     }
 
     /**
@@ -146,10 +153,14 @@ class HistoryCache<T> implements WriterCache {
      */
     @Override
     public long getSeqNumMin() {
-        if (changes.size() == 0) {
-            return 0;
+        long seqNumMin = 0;
+        synchronized (changes) {
+            if (changes.size() > 0) {
+                seqNumMin = changes.first().getSequenceNumber();
+            }
         }
-        return changes.first().getSequenceNumber();
+        
+        return seqNumMin;
     }
 
     /**
@@ -159,17 +170,13 @@ class HistoryCache<T> implements WriterCache {
      */
     @Override
     public long getSeqNumMax() {
-        if (changes.size() == 0) {
-            return 0;
+        long seqNumMax = 0;
+        synchronized (changes) {
+            if (changes.size() > 0) {
+                seqNumMax = changes.last().getSequenceNumber();
+            }
         }
-        return changes.last().getSequenceNumber();
-    }
-
-    /**
-     * Clears all the references to data in this HistoryCache
-     */
-    void clear() {
-        instances.clear();
-        changes.clear();
+        
+        return seqNumMax;
     }
 }
