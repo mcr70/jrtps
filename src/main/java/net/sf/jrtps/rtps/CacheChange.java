@@ -13,15 +13,15 @@ import net.sf.jrtps.message.parameter.KeyHash;
  * 
  * @author mcr70
  */
-public class CacheChange implements Comparable<CacheChange> {
+public class CacheChange<T> implements Comparable<CacheChange<T>> {
     private final long sequenceNumber;
-    private final Object data;
+    private final T data;
     private final Kind kind;
     private final long timeStamp;
     private final int hashCode;
     private final KeyHash keyHash;
 
-    private Marshaller marshaller;
+    private Marshaller<T> marshaller;
     private DataEncapsulation marshalledData;
 
     private static MessageDigest md5 = null;
@@ -63,7 +63,7 @@ public class CacheChange implements Comparable<CacheChange> {
      * @param seqNum sequence Number
      * @param data data
      */
-    public CacheChange(Marshaller m, Kind kind, long seqNum, Object data) {
+    public CacheChange(Marshaller<T> m, Kind kind, long seqNum, T data) {
         this(m, kind, seqNum, data, System.currentTimeMillis());
     }
 
@@ -80,7 +80,7 @@ public class CacheChange implements Comparable<CacheChange> {
      *             to MD5 hash, but there is no MD5 algorithm available for this
      *             platform.
      */
-    public CacheChange(Marshaller m, Kind kind, long seqNum, Object data, long timeStamp) {
+    public CacheChange(Marshaller<T> m, Kind kind, long seqNum, T data, long timeStamp) {
         this.kind = kind;
         this.sequenceNumber = seqNum;
         this.data = data;
@@ -95,7 +95,7 @@ public class CacheChange implements Comparable<CacheChange> {
         }
     }
 
-    public Object getData() {
+    public T getData() {
         return data;
     }
 
@@ -177,12 +177,11 @@ public class CacheChange implements Comparable<CacheChange> {
     }
 
     @Override
-    public int compareTo(CacheChange o) {
+    public int compareTo(CacheChange<T> o) {
         return (int) (sequenceNumber - o.sequenceNumber);
     }
 
     public String toString() {
         return "change: " + sequenceNumber;
     }
-
 }
