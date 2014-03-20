@@ -14,9 +14,13 @@ import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
+import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.rtps.CacheChange;
+import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.WriterCache;
 import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +31,7 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Samples on the reader side are made available through HistoryCache.
  */
-class HistoryCache<T> implements WriterCache<T> {
+class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
@@ -117,6 +121,7 @@ class HistoryCache<T> implements WriterCache<T> {
     }
 
 
+    // ----  WriterCache implementation follows  -------------------------
     /**
      * Gets all the changes, whose sequence number is greater than given
      * sequence number. If there is no such changes found, an empty set is
@@ -177,5 +182,22 @@ class HistoryCache<T> implements WriterCache<T> {
         }
         
         return seqNumMax;
+    }
+
+    
+    // ----  ReaderCache implementation follows  -------------------------
+    @Override
+    public void changesBegin(int id) {
+        // TODO Auto-generated method stub
+    }
+
+    @Override
+    public void addChange(Guid writerGuid, T data, Time timestamp, StatusInfo sInfo) {
+        // TODO Auto-generated method stub        
+    }
+
+    @Override
+    public void changesEnd(int id) {
+        // TODO Auto-generated method stub        
     }
 }

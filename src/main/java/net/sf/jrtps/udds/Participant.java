@@ -281,18 +281,19 @@ public class Participant {
     public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
         logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 
-        Marshaller<?> m = getMarshaller(type);
-        RTPSReader<T> rtps_reader = null;
+        Marshaller<T> m = getMarshaller(type);
+        EntityId eId = null;
+        
         if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, m, qos);
+            eId = EntityId.SEDP_BUILTIN_TOPIC_READER;
         } else if (SubscriptionData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, topicName, m, qos);
+            eId = EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER;
         } else if (PublicationData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, topicName, m, qos);
+            eId = EntityId.SEDP_BUILTIN_PUBLICATIONS_READER;
         } else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, topicName, m, qos);
+            eId = EntityId.SPDP_BUILTIN_PARTICIPANT_READER;
         } else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, topicName, m, qos);
+            eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER;
         } else {
             int myIdx = userEntityIdx++;
             byte[] myKey = new byte[3];
@@ -306,10 +307,13 @@ public class Participant {
                 kind = 0x04; // User defined reader, no key
             }
 
-            rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m,
-                    qos);
+            eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
 
+        HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
+        RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, m, hc, qos);
+
+        
         DataReader<T> reader = new DataReader<T>(this, type, rtps_reader);
         readers.add(reader);
 
@@ -320,6 +324,7 @@ public class Participant {
             SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
             sw.write(rd);
         }
+        
         return reader;
     }
 
@@ -362,7 +367,7 @@ public class Participant {
     public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
         logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 
-        Marshaller<T> m = (Marshaller<T>) getMarshaller(type);
+        Marshaller<T> m = getMarshaller(type);
         EntityId eId = null;
         if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
             eId = EntityId.SEDP_BUILTIN_TOPIC_WRITER;
@@ -391,9 +396,7 @@ public class Participant {
 
         
         HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
-        RTPSWriter<T> rtps_writer = null;
-
-        rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
+        RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
 
         DataWriter<T> writer = new DataWriter<>(this, type, rtps_writer, hc);
         writers.add(writer);
