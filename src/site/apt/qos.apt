@@ -31,12 +31,15 @@ Quality of Service
  
 * Durability
 
- Durability QoS is used to control how historical data is communicated to readers.
+ Durability QoS is used to control how historical data is made available to readers.
  If VOLATILE kind is used, readers will not get any historical data. A reader will
  start getting samples only after reader and writer has been matched.
  jRTPS writers checks durability of reader during matching. If kind is VOLATILE, 
  writer will mark reader as received all the samples so far. In all other
  cases, writer will notify readers of the changes available.
+ 
+ Setting Durability of udds <DataWriter>s to a kind greater than TRANSIENT_LOCAL has no effect
+ other than making a difference during QoS compatibility checking.
  
  Durability QoS between reader and writer is compatible, if 
  
