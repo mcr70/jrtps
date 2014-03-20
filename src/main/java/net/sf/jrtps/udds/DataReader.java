@@ -110,7 +110,7 @@ public class DataReader<T> extends Entity<T> {
     /**
      * Gets the latest Sample of given instance.
      * @param s 
-     * @return
+     * @return Latest Sample
      */
     Sample<T> getInstance(Sample<T> s) {
         return getInstanceHistory(s).get(0);

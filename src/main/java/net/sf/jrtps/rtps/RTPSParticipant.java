@@ -68,8 +68,9 @@ public class RTPSParticipant {
      * each other through SPDP. Each participant has a uniques unicast locator
      * to access its endpoints.
      * 
+     * @param guid Guid, that is assigned to this participant. Every entity created by this
+     *        RTPSParticipant will share the GuidPrefix of this Guid. 
      * @param domainId Domain ID of the participant
-     * @param participantId Participant ID
      * @param locators a Set of Locators
      * @param config Configuration used
      */
