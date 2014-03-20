@@ -125,8 +125,9 @@ public class RTPSParticipant {
      * 
      * @return RTPSReader
      */
-    public <T> RTPSReader<T> createReader(EntityId eId, String topicName, Marshaller<?> marshaller, QualityOfService qos) {
-        RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, qos, config);
+    public <T> RTPSReader<T> createReader(EntityId eId, String topicName, Marshaller<T> marshaller, 
+            ReaderCache<T> rCache, QualityOfService qos) {
+        RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, rCache, qos, config);
         reader.setDiscoveredParticipants(discoveredParticipants);
 
         readerEndpoints.add(reader);
@@ -148,7 +149,7 @@ public class RTPSParticipant {
      * 
      * @return RTPSWriter
      */
-    public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, WriterCache wCache, QualityOfService qos) {
+    public <T> RTPSWriter<T> createWriter(EntityId eId, String topicName, WriterCache<T> wCache, QualityOfService qos) {
         RTPSWriter<T> writer = new RTPSWriter<T>(this, eId, topicName, wCache, qos, config);
         writer.setDiscoveredParticipants(discoveredParticipants);
 

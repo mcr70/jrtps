@@ -106,9 +106,17 @@ class RTPSMessageReceiver implements Runnable {
                 }
 
                 try {
-                    RTPSReader<?> r = handleData(sourceGuidPrefix, timestamp, (Data) subMsg);
+                    Data data = (Data) subMsg;
+                    RTPSReader<?> r = participant.getReader(data.getReaderId(), data.getWriterId());
+                    
                     if (r != null) {
-                        dataReceivers.add(r);
+                        if (!dataReceivers.add(r)) {
+                            r.startMessageProcessing(msg.hashCode());
+                        }
+                        r.createSample(sourceGuidPrefix, data, timestamp);
+                    }
+                    else {
+                        logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
                     }
                 } catch (IOException ioe) {
                     logger.warn("Failed to handle data", ioe);
@@ -158,7 +166,7 @@ class RTPSMessageReceiver implements Runnable {
 
         logger.trace("Releasing samples for {} readers", dataReceivers.size());
         for (RTPSReader<?> reader : dataReceivers) {
-            reader.releasePendingSamples();
+            reader.stopMessageProcessing(msg.hashCode());
         }
     }
 
@@ -175,19 +183,6 @@ class RTPSMessageReceiver implements Runnable {
     private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
         RTPSReader<?> reader = participant.getReader(gap.getReaderId(), gap.getWriterId());
         reader.handleGap(sourceGuidPrefix, gap);
-    }
-
-    private RTPSReader<?> handleData(GuidPrefix sourcePrefix, Time timestamp, Data data) throws IOException {
-        RTPSReader<?> reader = participant.getReader(data.getReaderId(), data.getWriterId());
-
-        if (reader != null) {
-            reader.createSample(sourcePrefix, data, timestamp);
-            return reader;
-        } else {
-            logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
-        }
-
-        return null;
     }
 
     private void handleHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {

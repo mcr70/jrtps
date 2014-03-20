@@ -46,18 +46,22 @@ public class RTPSReader<T> extends Endpoint {
 
 	private final Map<Guid, WriterProxy> writerProxies = new ConcurrentHashMap<>();
 	private final List<RTPSListener<T>> listeners = new LinkedList<RTPSListener<T>>();
-	private final Marshaller<?> marshaller;
+	private final Marshaller<T> marshaller;
+	private final ReaderCache<T> rCache;
 	private final List<Sample<T>> pendingSamples = new LinkedList<>();
 	private final int heartbeatResponseDelay;
 	private final int heartbeatSuppressionDuration;
 
 	private int ackNackCount = 0;
 
-	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<?> marshaller,
-			QualityOfService qos, Configuration configuration) {
+    
+
+	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<T> marshaller,
+			ReaderCache<T> rCache, QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
 		this.marshaller = marshaller;
+        this.rCache = rCache;
 		this.heartbeatResponseDelay = configuration.getHeartbeatResponseDelay();
 		this.heartbeatSuppressionDuration = configuration.getHeartbeatSuppressionDuration();
 	}
@@ -179,7 +183,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @param data
 	 * @param timestamp
 	 * @throws IOException
-	 * @see #releasePendingSamples()
+	 * @see #stopMessageProcessing()
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	void createSample(GuidPrefix sourcePrefix, Data data, Time timestamp) throws IOException {
@@ -188,9 +192,12 @@ public class RTPSReader<T> extends Endpoint {
 		WriterProxy wp = getWriterProxy(writerGuid);
 		if (wp != null) {
 			if (wp.acceptData(data.getWriterSequenceNumber())) {
-				Object obj = marshaller.unmarshall(data.getDataEncapsulation());
+				T obj = marshaller.unmarshall(data.getDataEncapsulation());
 				log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
 
+				rCache.addChange(writerGuid, obj, timestamp, data.getStatusInfo());
+				
+				// TODO: get rid of pendingSamples. replace with rCache.
 				pendingSamples.add(new Sample(writerGuid, obj, timestamp, data.getStatusInfo()));
 			} else {
 				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
@@ -299,16 +306,29 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	/**
-	 * Releases pending samples. Data is unmarshalled and added to pending
-	 * samples. Once RTPSMessageHandler has finished with the whole RTPSMessage,
-	 * it will call releasePendingSamples of each RTPSReader that has received
-	 * some Data messages.
+	 * This methods is called by RTPSMessageReceiver to signal that a message reception has begun.
+	 * This method is called for the first message received for this RTPSReader.
 	 * 
+	 * @param msgId Id of the message
+	 * @see #stopMessageProcessing(int)
+	 */
+    void startMessageProcessing(int msgId) {
+        rCache.changesBegin(msgId);
+    }
+
+	/**
+	 * This method is called by RTPSMessageReceiver to signal that a message reception is done.
+	 * 
+     * @param msgId Id of the message
+     * @see #startMessageProcessing(int)
 	 * @see #createSample(GuidPrefix, Data, Time)
 	 */
-	void releasePendingSamples() {
+	void stopMessageProcessing(int msgId) {
 		LinkedList<Sample<T>> ll = new LinkedList<>();
 
+		rCache.changesEnd(msgId);
+
+		// TODO: get rid of pendingSamples. replace with rCache.
 		ll.addAll(pendingSamples);
 		pendingSamples.clear();
 
@@ -352,4 +372,5 @@ public class RTPSReader<T> extends Endpoint {
 	public boolean isMatchedWith(PublicationData pubData) {
 		return writerProxies.get(pubData.getKey()) != null;
 	}
+
 }
