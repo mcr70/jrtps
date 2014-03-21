@@ -4,15 +4,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.OutOfResources;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.CacheChange;
 
 class Instance <T> {
-    private final InstanceKey key;
+    private final KeyHash key;
     private final LinkedList<CacheChange<T>> history = new LinkedList<>();
     private final int maxSize;
     private final int maxSamplesPerInstance;
 
-    Instance(InstanceKey key, int historySize, int maxSamplesPerInstance) {
+    Instance(KeyHash key, int historySize, int maxSamplesPerInstance) {
         this.key = key;
         this.maxSize = historySize;
         this.maxSamplesPerInstance = maxSamplesPerInstance;

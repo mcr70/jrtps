@@ -2,6 +2,7 @@ package net.sf.jrtps.udds;
 
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -12,10 +13,12 @@ import java.util.TreeSet;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.rtps.CacheChange;
+import net.sf.jrtps.rtps.CacheChange.Kind;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.WriterCache;
 import net.sf.jrtps.types.EntityId;
@@ -36,11 +39,11 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
-    
+
     private volatile int seqNum; // sequence number of a change
 
     // Main collection to hold instances. ResourceLimits is checked against this map
-    private final Map<InstanceKey, Instance<T>> instances = new LinkedHashMap<>();
+    private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
     // An ordered set of cache changes.
     private final SortedSet<CacheChange<T>> changes = Collections.synchronizedSortedSet(new TreeSet<>(
             new Comparator<CacheChange<T>>() {
@@ -78,48 +81,56 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
 
         for (T sample : samples) {
-            InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
             CacheChange<T> newChange = new CacheChange<T>(marshaller, kind, ++seqNum, sample);
-            
-            if (kind != CacheChange.Kind.DISPOSE) {
-                instances.remove(key);
-            }
-            else {
-                Instance<T> inst = instances.get(key);
-                
-                if (inst == null) {
-                    log.trace("[{}] Creating new instance {}", entityId, key);
-
-                    if (resource_limits.getMaxInstances() != -1 && 
-                            instances.size() >= resource_limits.getMaxInstances()) {
-                        throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
-                    }
-
-                    inst = new Instance<T>(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
-                    instances.put(key, inst);
-                }   
-
-                log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
-                
-                CacheChange<T> removedSample = inst.addSample(newChange);
-                if (removedSample != null) {
-                    synchronized (changes) {
-                        changes.remove(removedSample);
-                    }
-                }
-            }
-            
-            if (resource_limits.getMaxSamples() != -1 && 
-                    samples.size() >= resource_limits.getMaxSamples()) {
-                throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
-            }
-
-            synchronized (changes) {
-                changes.add(newChange);
-            }
+            addChange(newChange);
         }
     }
 
+    
+    private void addChange(CacheChange<T> cc) {
+        // TODO: InstanceKey should take KeyHash as constructor, not byte[]
+        //       Alternatively, we could use KeyHash as a key to instances Map
+        KeyHash key = cc.getKey();
+        Kind kind = cc.getKind();
+        
+        if (kind != CacheChange.Kind.DISPOSE) {
+            instances.remove(key);
+        }
+        else {
+            Instance<T> inst = instances.get(key);
+
+            if (inst == null) {
+                log.trace("[{}] Creating new instance {}", entityId, key);
+
+                if (resource_limits.getMaxInstances() != -1 && 
+                        instances.size() >= resource_limits.getMaxInstances()) {
+                    throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
+                }
+
+                inst = new Instance<T>(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
+                instances.put(key, inst);
+            }   
+
+            log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
+
+            CacheChange<T> removedSample = inst.addSample(cc);
+            if (removedSample != null) {
+                synchronized (changes) {
+                    changes.remove(removedSample);
+                }
+            }
+        }
+
+        if (resource_limits.getMaxSamples() != -1 && 
+                changes.size() >= resource_limits.getMaxSamples()) {
+            throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
+        }
+
+        synchronized (changes) {
+            changes.add(cc);
+        }
+    }
+    
 
     // ----  WriterCache implementation follows  -------------------------
     /**
@@ -163,7 +174,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
                 seqNumMin = changes.first().getSequenceNumber();
             }
         }
-        
+
         return seqNumMin;
     }
 
@@ -180,24 +191,60 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
                 seqNumMax = changes.last().getSequenceNumber();
             }
         }
-        
+
         return seqNumMax;
     }
 
-    
+
+    Map<Integer, List<CacheChange<T>>> incomingChanges = new HashMap<>();
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
-        // TODO Auto-generated method stub
+        log.debug("changesBegin({})", id);
+        List<CacheChange<T>> pendingSamples = new LinkedList<>();
+        incomingChanges.put(id, pendingSamples);
     }
 
     @Override
     public void addChange(int id, Guid writerGuid, T data, Time timestamp, StatusInfo sInfo) {
-        // TODO Auto-generated method stub        
+        List<CacheChange<T>> pendingSamples = incomingChanges.get(id); 
+        CacheChange.Kind kind = null;
+
+        // TODO: assuming that StatusInfo cannot be combination of kinds 
+        if (sInfo.isDisposed()) {
+            kind = CacheChange.Kind.DISPOSE;
+        }
+        else if (sInfo.isUnregistered()) {
+            kind = CacheChange.Kind.UNREGISTER;
+        }
+        else {
+            kind = CacheChange.Kind.WRITE;
+        }
+
+        CacheChange<T> cc = new CacheChange<T>(marshaller, kind, ++seqNum, data, timestamp.timeMillis());
+        pendingSamples.add(cc);
     }
 
     @Override
     public void changesEnd(int id) {
-        // TODO Auto-generated method stub        
+        log.debug("changesEnd({})", id);        
+
+        List<CacheChange<T>> pendingSamples = incomingChanges.get(id); 
+
+        for (CacheChange<T> cc : pendingSamples) {
+            long latestSampleTime = 0;
+            if (changes.size() > 0) {
+                latestSampleTime = changes.last().getTimeStamp();
+            }
+
+            if (cc.getTimeStamp() < latestSampleTime) {
+                log.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
+                        cc.getTimeStamp(), latestSampleTime);
+                return;
+            }
+            else {
+                addChange(cc);
+            }
+        }
     }
 }
