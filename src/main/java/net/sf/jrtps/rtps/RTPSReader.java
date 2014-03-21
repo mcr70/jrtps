@@ -268,7 +268,7 @@ public class RTPSReader<T> extends Endpoint {
      * @see #stopMessageProcessing()
      */
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    void createSample(GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
+    void createSample(int id, GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
         Guid writerGuid = new Guid(sourcePrefix, data.getWriterId());
 
         WriterProxy wp = getWriterProxy(writerGuid);
@@ -277,7 +277,7 @@ public class RTPSReader<T> extends Endpoint {
                 T obj = marshaller.unmarshall(data.getDataEncapsulation());
                 log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
 
-                rCache.addChange(writerGuid, obj, timeStamp, data.getStatusInfo());
+                rCache.addChange(id, writerGuid, obj, timeStamp, data.getStatusInfo());
                 
                 // TODO: get rid of pendingSamples. replace with rCache.
                 pendingSamples.add(new Sample(writerGuid, obj, timeStamp, data.getStatusInfo()));

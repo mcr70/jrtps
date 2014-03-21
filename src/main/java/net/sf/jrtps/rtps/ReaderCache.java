@@ -25,7 +25,7 @@ public interface ReaderCache<T> {
      * Adds a new change to ReaderCache. It is the responsibility of the implementing class
      * to decide whether or not this Sample is actually made available to applications or not.
      */
-    void addChange(Guid writerGuid, T data, Time timestamp, StatusInfo sInfo);
+    void addChange(int id, Guid writerGuid, T data, Time timestamp, StatusInfo sInfo);
     
     /**
      * Notifies implementing class that there are no more samples coming from the RTPS layer.

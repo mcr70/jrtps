@@ -79,6 +79,7 @@ class RTPSMessageReceiver implements Runnable {
      * @param msg
      */
     private void handleMessage(Message msg) {
+        int msgId = msg.hashCode();
         Time timestamp = null;
         GuidPrefix destGuidPrefix = GuidPrefix.GUIDPREFIX_UNKNOWN;
         GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
@@ -111,9 +112,9 @@ class RTPSMessageReceiver implements Runnable {
                     
                     if (r != null) {
                         if (dataReceivers.add(r)) {
-                            r.startMessageProcessing(msg.hashCode());
+                            r.startMessageProcessing(msgId);
                         }
-                        r.createSample(sourceGuidPrefix, data, timestamp);
+                        r.createSample(msgId, sourceGuidPrefix, data, timestamp);
                     }
                     else {
                         logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
@@ -166,7 +167,7 @@ class RTPSMessageReceiver implements Runnable {
 
         logger.trace("Releasing samples for {} readers", dataReceivers.size());
         for (RTPSReader<?> reader : dataReceivers) {
-            reader.stopMessageProcessing(msg.hashCode());
+            reader.stopMessageProcessing(msgId);
         }
     }
 

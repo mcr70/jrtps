@@ -192,7 +192,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
     @Override
-    public void addChange(Guid writerGuid, T data, Time timestamp, StatusInfo sInfo) {
+    public void addChange(int id, Guid writerGuid, T data, Time timestamp, StatusInfo sInfo) {
         // TODO Auto-generated method stub        
     }
 
