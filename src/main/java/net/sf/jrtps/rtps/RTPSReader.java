@@ -306,7 +306,7 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	/**
-	 * This methods is called by RTPSMessageReceiver to signal that a message reception has begun.
+	 * This methods is called by RTPSMessageReceiver to signal that a message reception has started.
 	 * This method is called for the first message received for this RTPSReader.
 	 * 
 	 * @param msgId Id of the message

@@ -110,7 +110,7 @@ class RTPSMessageReceiver implements Runnable {
                     RTPSReader<?> r = participant.getReader(data.getReaderId(), data.getWriterId());
                     
                     if (r != null) {
-                        if (!dataReceivers.add(r)) {
+                        if (dataReceivers.add(r)) {
                             r.startMessageProcessing(msg.hashCode());
                         }
                         r.createSample(sourceGuidPrefix, data, timestamp);
