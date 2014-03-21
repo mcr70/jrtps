@@ -173,43 +173,17 @@ public class RTPSReader<T> extends Endpoint {
 	}
 
 	/**
-	 * Handle incoming Data message. Data is unmarshalled and added to pending
-	 * samples. Once RTPSMessageHandler has finished with the whole RTPSMessage,
-	 * it will call releasePendingSamples of each RTPSReader that has received
-	 * some Data messages.
-	 * 
-	 * @param sourcePrefix
-	 *            GuidPrefix of the remote participant sending Data message
-	 * @param data
-	 * @param timestamp
-	 * @throws IOException
-	 * @see #stopMessageProcessing()
-	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	void createSample(GuidPrefix sourcePrefix, Data data, Time timestamp) throws IOException {
-		Guid writerGuid = new Guid(sourcePrefix, data.getWriterId());
+     * Checks, if this RTPSReader is already matched with a RTPSWriter
+     * represented by given PublicationData.
+     * 
+     * @param pubData
+     * @return true if matched
+     */
+    public boolean isMatchedWith(PublicationData pubData) {
+    	return writerProxies.get(pubData.getKey()) != null;
+    }
 
-		WriterProxy wp = getWriterProxy(writerGuid);
-		if (wp != null) {
-			if (wp.acceptData(data.getWriterSequenceNumber())) {
-				T obj = marshaller.unmarshall(data.getDataEncapsulation());
-				log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
-
-				rCache.addChange(writerGuid, obj, timestamp, data.getStatusInfo());
-				
-				// TODO: get rid of pendingSamples. replace with rCache.
-				pendingSamples.add(new Sample(writerGuid, obj, timestamp, data.getStatusInfo()));
-			} else {
-				log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
-						data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
-			}
-		} else {
-			log.warn("[{}] Discarding Data from unknown writer {}, {}", getEntityId(), sourcePrefix,
-					data.getWriterId());
-		}
-	}
-
-	/**
+    /**
 	 * Handle incoming HeartBeat message.
 	 * 
 	 * @param senderGuidPrefix
@@ -254,58 +228,23 @@ public class RTPSReader<T> extends Endpoint {
 		}
 	}
 
-	private void sendAckNack(WriterProxy wp) {
-		log.trace("[{}] Wait for heartbeat response delay: {} ms", getEntityId(), heartbeatResponseDelay);
-		getParticipant().waitFor(heartbeatResponseDelay);
-
-		Message m = new Message(getGuid().getPrefix());
-
-		AckNack an = createAckNack(wp); // If all the data is already received,
-		// set finalFlag to true,
-		an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
-
-		m.addSubMessage(an);
-
-		GuidPrefix targetPrefix = wp.getGuid().getPrefix();
-
-		log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getEntityId(), an.getCount(),
-				an.getReaderSNState(), an.finalFlag(), targetPrefix);
-
-		sendMessage(m, wp);
-		// sendMessage(m, targetPrefix);
-	}
-
-	private AckNack createAckNack(WriterProxy wp) {
-		// This is a simple AckNack, that can be optimized if store
-		// out-of-order data samples in a separate cache.
-
-		long seqNumFirst = wp.getGreatestDataSeqNum(); // Positively ACK all
-		// that we have..
-		int[] bitmaps = new int[] { 0 }; // Negatively ACK rest
-		SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1, bitmaps);
-
-		AckNack an = new AckNack(getEntityId(), wp.getEntityId(), snSet, ++ackNackCount);
-
-		return an;
-	}
-
-	private WriterProxy getWriterProxy(Guid writerGuid) {
-		WriterProxy wp = writerProxies.get(writerGuid);
-
-		if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
-			log.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
-			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
-					ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
-			wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
-					.getDomainId())), 0);
-
-			writerProxies.put(writerGuid, wp);
-		}
-
-		return wp;
-	}
-
 	/**
+     * Handles Gap submessage by updating WriterProxy.
+     * 
+     * @param sourceGuidPrefix
+     * @param gap
+     */
+    void handleGap(GuidPrefix sourcePrefix, Gap gap) {
+    	Guid writerGuid = new Guid(sourcePrefix, gap.getWriterId());
+    
+    	WriterProxy wp = getWriterProxy(writerGuid);
+    	if (wp != null) {
+    		log.debug("[{}] Applying {}", getEntityId(), gap);
+    		wp.applyGap(gap);
+    	}
+    }
+
+    /**
 	 * This methods is called by RTPSMessageReceiver to signal that a message reception has started.
 	 * This method is called for the first message received for this RTPSReader.
 	 * 
@@ -316,6 +255,44 @@ public class RTPSReader<T> extends Endpoint {
         rCache.changesBegin(msgId);
     }
 
+    /**
+     * Handle incoming Data message. Data is unmarshalled and added to pending
+     * samples. Once RTPSMessageHandler has finished with the whole RTPSMessage,
+     * it will call stopMessageProcessing of each RTPSReader that has received
+     * some Data messages.
+     * 
+     * @param sourcePrefix GuidPrefix of the remote participant sending Data message
+     * @param data Data SubMessage
+     * @param timeStamp timestamp of the data
+     * @throws IOException
+     * @see #stopMessageProcessing()
+     */
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    void createSample(GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
+        Guid writerGuid = new Guid(sourcePrefix, data.getWriterId());
+
+        WriterProxy wp = getWriterProxy(writerGuid);
+        if (wp != null) {
+            if (wp.acceptData(data.getWriterSequenceNumber())) {
+                T obj = marshaller.unmarshall(data.getDataEncapsulation());
+                log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
+
+                rCache.addChange(writerGuid, obj, timeStamp, data.getStatusInfo());
+                
+                // TODO: get rid of pendingSamples. replace with rCache.
+                pendingSamples.add(new Sample(writerGuid, obj, timeStamp, data.getStatusInfo()));
+            } else {
+                log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
+                        data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
+            }
+        } else {
+            log.warn("[{}] Discarding Data from unknown writer {}, {}", getEntityId(), sourcePrefix,
+                    data.getWriterId());
+        }
+    }
+
+    
+    
 	/**
 	 * This method is called by RTPSMessageReceiver to signal that a message reception is done.
 	 * 
@@ -341,36 +318,59 @@ public class RTPSReader<T> extends Endpoint {
 		}
 	}
 
-	private boolean isReliable() {
+	private void sendAckNack(WriterProxy wp) {
+    	log.trace("[{}] Wait for heartbeat response delay: {} ms", getEntityId(), heartbeatResponseDelay);
+    	getParticipant().waitFor(heartbeatResponseDelay);
+    
+    	Message m = new Message(getGuid().getPrefix());
+    
+    	AckNack an = createAckNack(wp); // If all the data is already received,
+    	// set finalFlag to true,
+    	an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
+    
+    	m.addSubMessage(an);
+    
+    	GuidPrefix targetPrefix = wp.getGuid().getPrefix();
+    
+    	log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getEntityId(), an.getCount(),
+    			an.getReaderSNState(), an.finalFlag(), targetPrefix);
+    
+    	sendMessage(m, wp);
+    	// sendMessage(m, targetPrefix);
+    }
+
+    private AckNack createAckNack(WriterProxy wp) {
+    	// This is a simple AckNack, that can be optimized if store
+    	// out-of-order data samples in a separate cache.
+    
+    	long seqNumFirst = wp.getGreatestDataSeqNum(); // Positively ACK all
+    	// that we have..
+    	int[] bitmaps = new int[] { 0 }; // Negatively ACK rest
+    	SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1, bitmaps);
+    
+    	AckNack an = new AckNack(getEntityId(), wp.getEntityId(), snSet, ++ackNackCount);
+    
+    	return an;
+    }
+
+    private WriterProxy getWriterProxy(Guid writerGuid) {
+    	WriterProxy wp = writerProxies.get(writerGuid);
+    
+    	if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
+    		log.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
+    		PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
+    				ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
+    		wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
+    				.getDomainId())), 0);
+    
+    		writerProxies.put(writerGuid, wp);
+    	}
+    
+    	return wp;
+    }
+
+    private boolean isReliable() {
 		QosReliability reliability = getQualityOfService().getReliability();
 		return reliability.getKind() == QosReliability.Kind.RELIABLE;
 	}
-
-	/**
-	 * Handles Gap submessage by updating WriterProxy.
-	 * 
-	 * @param sourceGuidPrefix
-	 * @param gap
-	 */
-	void handleGap(GuidPrefix sourcePrefix, Gap gap) {
-		Guid writerGuid = new Guid(sourcePrefix, gap.getWriterId());
-
-		WriterProxy wp = getWriterProxy(writerGuid);
-		if (wp != null) {
-			log.debug("[{}] Applying {}", getEntityId(), gap);
-			wp.applyGap(gap);
-		}
-	}
-
-	/**
-	 * Checks, if this RTPSReader is already matched with a RTPSWriter
-	 * represented by given PublicationData.
-	 * 
-	 * @param pubData
-	 * @return true if matched
-	 */
-	public boolean isMatchedWith(PublicationData pubData) {
-		return writerProxies.get(pubData.getKey()) != null;
-	}
-
 }
