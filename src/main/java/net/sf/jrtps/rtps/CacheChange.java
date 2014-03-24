@@ -9,6 +9,7 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.StatusInfo;
+import net.sf.jrtps.types.Guid;
 
 /**
  * This class represents a sample in history cache.
@@ -30,6 +31,7 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
 
     private static MessageDigest md5 = null;
     private static NoSuchAlgorithmException noSuchAlgorithm = null;
+    private Guid writerGuid;
     static {
         try {
             md5 = MessageDigest.getInstance("MD5");
@@ -101,7 +103,8 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
     }
 
     
-    public CacheChange(Marshaller<T> m, long seqNum, Data data, long timeStamp) throws IOException {
+    public CacheChange(Guid writerGuid, Marshaller<T> m, long seqNum, Data data, long timeStamp) throws IOException {
+        this.writerGuid = writerGuid;
         this.marshaller = m;
         this.sequenceNumber = seqNum;
         this.timeStamp = timeStamp;
@@ -155,6 +158,14 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
         return keyHash;
     }
 
+    public StatusInfo getStatusInfo() {
+        return sInfo;
+    }
+    
+    public Guid getWriterGuid() {
+        return writerGuid;
+    }
+    
     private KeyHash extractKey() {
         byte[] key = this.marshaller.extractKey(data);
         if (key == null) {

@@ -13,7 +13,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.transport.UDPReceiver;
@@ -125,9 +124,8 @@ public class RTPSParticipant {
      * 
      * @return RTPSReader
      */
-    public <T> RTPSReader<T> createReader(EntityId eId, String topicName, Marshaller<T> marshaller, 
-            ReaderCache<T> rCache, QualityOfService qos) {
-        RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, marshaller, rCache, qos, config);
+    public <T> RTPSReader<T> createReader(EntityId eId, String topicName, ReaderCache<T> rCache, QualityOfService qos) {
+        RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, rCache, qos, config);
         reader.setDiscoveredParticipants(discoveredParticipants);
 
         readerEndpoints.add(reader);

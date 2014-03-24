@@ -1,9 +1,7 @@
 package net.sf.jrtps.udds;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
@@ -20,17 +18,18 @@ import net.sf.jrtps.rtps.Sample;
  *            Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity<T> {
-    private Map<SampleListener<T>, RTPSListenerAdapter<T>> adapters = new HashMap<>();
-    private RTPSReader<T> rtps_reader;
+    private final RTPSReader<T> rtps_reader;
+    private final HistoryCache<T> hCache;
 
     /**
      * Package access. This class is only instantiated by Participant class.
      * 
      * @param topicName
      */
-    DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
+    DataReader(Participant p, Class<T> type, RTPSReader<T> reader, HistoryCache<T> hCache) {
         super(p, type, reader.getTopicName());
         this.rtps_reader = reader;
+        this.hCache = hCache;
     }
 
 
@@ -39,11 +38,7 @@ public class DataReader<T> extends Entity<T> {
      * @param listener Listener to add
      */
     public void addListener(SampleListener<T> listener) {
-        synchronized (adapters) {
-            RTPSListenerAdapter<T> adapter = new RTPSListenerAdapter<>(listener);
-            adapters.put(listener, adapter);
-            rtps_reader.addListener(adapter);            
-        }
+        hCache.addListener(listener);
     }
 
     /**
@@ -51,10 +46,7 @@ public class DataReader<T> extends Entity<T> {
      * @param listener A listener to remove
      */
     public void removeListener(SampleListener<T> listener) {
-        synchronized (adapters) {
-            RTPSListenerAdapter<T> adapter = adapters.remove(listener);
-            rtps_reader.removeListener(adapter);
-        }
+        hCache.removeListener(listener);
     }
     
     /**

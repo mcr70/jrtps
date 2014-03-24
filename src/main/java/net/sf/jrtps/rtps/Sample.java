@@ -14,14 +14,21 @@ import net.sf.jrtps.types.Time;
 public class Sample<T> {
 	private Guid writerGuid;
     private T obj;
-    private Time timestamp;
+    private long timestamp;
     private StatusInfo sInfo;
 
     Sample(Guid writerGuid, T obj, Time timestamp, StatusInfo sInfo) {
         this.writerGuid = writerGuid;
 		this.obj = obj;
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.timeMillis();
         this.sInfo = sInfo;
+    }
+
+    public Sample(CacheChange<T> cc) {
+        this.obj = cc.getData();
+        this.timestamp = cc.getTimeStamp();
+        this.sInfo = cc.getStatusInfo();
+        this.writerGuid = cc.getWriterGuid();
     }
 
     /**
@@ -39,7 +46,7 @@ public class Sample<T> {
      * @return timestamp in millis.
      */
     public long getTimestamp() {
-        return timestamp.timeMillis();
+        return timestamp;
     }
 
     /**
