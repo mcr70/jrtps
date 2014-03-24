@@ -5,8 +5,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import net.sf.jrtps.Marshaller;
+import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.StatusInfo;
 
 /**
  * This class represents a sample in history cache.
@@ -16,13 +18,15 @@ import net.sf.jrtps.message.parameter.KeyHash;
 public class CacheChange<T> implements Comparable<CacheChange<T>> {
     private final long sequenceNumber;
     private final T data;
-    private final Kind kind;
+    //private final Kind kind;
     private final long timeStamp;
     private final int hashCode;
+    private final StatusInfo sInfo;
     private final KeyHash keyHash;
-
-    private Marshaller<T> marshaller;
+    private final Marshaller<T> marshaller;
+    
     private DataEncapsulation marshalledData;
+    
 
     private static MessageDigest md5 = null;
     private static NoSuchAlgorithmException noSuchAlgorithm = null;
@@ -81,7 +85,8 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
      *             platform.
      */
     public CacheChange(Marshaller<T> m, Kind kind, long seqNum, T data, long timeStamp) {
-        this.kind = kind;
+        //this.kind = kind;
+        this.sInfo = new StatusInfo(kind);
         this.sequenceNumber = seqNum;
         this.data = data;
         this.timeStamp = timeStamp;
@@ -95,13 +100,30 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
         }
     }
 
+    
+    public CacheChange(Marshaller<T> m, long seqNum, Data data, long timeStamp) throws IOException {
+        this.marshaller = m;
+        this.sequenceNumber = seqNum;
+        this.timeStamp = timeStamp;
+        this.hashCode = Long.valueOf(sequenceNumber).hashCode();
+        this.sInfo = data.getStatusInfo();
+        this.data = m.unmarshall(data.getDataEncapsulation());
+        
+        if (m.hasKey()) {
+            this.keyHash = extractKey();
+        }
+        else {
+            this.keyHash = null;
+        }
+    }
+    
     public T getData() {
         return data;
     }
 
     public DataEncapsulation getDataEncapsulation() throws IOException {
         if (marshalledData == null) {
-            marshalledData = marshaller.marshall(data);
+            marshalledData = this.marshaller.marshall(data);
         }
 
         return marshalledData;
@@ -126,7 +148,7 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
     }
 
     public boolean hasKey() {
-        return marshaller.hasKey();
+        return this.marshaller.hasKey();
     }
 
     public KeyHash getKey() {
@@ -134,7 +156,7 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
     }
 
     private KeyHash extractKey() {
-        byte[] key = marshaller.extractKey(data);
+        byte[] key = this.marshaller.extractKey(data);
         if (key == null) {
             key = new byte[0];
         }
@@ -157,7 +179,15 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
     }
 
     public Kind getKind() {
-        return kind;
+        // TODO: this method should be removed
+        if (sInfo.isDisposed()) {
+            return Kind.DISPOSE;
+        }
+        else if (sInfo.isUnregistered()) {
+            return Kind.UNREGISTER;
+        }
+        
+        return Kind.WRITE;
     }
 
     // TODO: should we implement equals() and hashCode(). If so, it would be for
