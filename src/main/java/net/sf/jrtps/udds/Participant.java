@@ -311,10 +311,9 @@ public class Participant {
         }
 
         HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
-        RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, m, hc, qos);
+        RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, hc, qos);
 
-        
-        DataReader<T> reader = new DataReader<T>(this, type, rtps_reader);
+        DataReader<T> reader = new DataReader<T>(this, type, rtps_reader, hc);
         readers.add(reader);
 
         if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {

@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
@@ -45,10 +44,7 @@ public class RTPSReader<T> extends Endpoint {
 	private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
 
 	private final Map<Guid, WriterProxy> writerProxies = new ConcurrentHashMap<>();
-	private final List<RTPSListener<T>> listeners = new LinkedList<RTPSListener<T>>();
-	private final Marshaller<T> marshaller;
 	private final ReaderCache<T> rCache;
-	private final List<Sample<T>> pendingSamples = new LinkedList<>();
 	private final int heartbeatResponseDelay;
 	private final int heartbeatSuppressionDuration;
 
@@ -56,34 +52,13 @@ public class RTPSReader<T> extends Endpoint {
 
     
 
-	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, Marshaller<T> marshaller,
+	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, 
 			ReaderCache<T> rCache, QualityOfService qos, Configuration configuration) {
 		super(participant, entityId, topicName, qos, configuration);
 
-		this.marshaller = marshaller;
         this.rCache = rCache;
 		this.heartbeatResponseDelay = configuration.getHeartbeatResponseDelay();
 		this.heartbeatSuppressionDuration = configuration.getHeartbeatSuppressionDuration();
-	}
-
-	/**
-	 * Adds a RTPSListener to this RTPSReader.
-	 * 
-	 * @param listener RTPSListener to add.
-	 */
-	public void addListener(RTPSListener<T> listener) {
-		log.trace("[{}] Adding RTPSListener {} for topic {}", getEntityId(), listener, getTopicName());
-		listeners.add(listener);
-	}
-
-	/**
-	 * Removes a RTPSListener from this RTPSReader.
-	 * 
-	 * @param listener RTPSListener to remove
-	 */
-	public void removeListener(RTPSListener<T> listener) {
-		log.trace("[{}] Removing RTPSListener {} from topic {}", getEntityId(), listener, getTopicName());
-		listeners.remove(listener);
 	}
 
 	/**
@@ -267,7 +242,6 @@ public class RTPSReader<T> extends Endpoint {
      * @throws IOException
      * @see #stopMessageProcessing()
      */
-    @SuppressWarnings({ "unchecked", "rawtypes" })
     void createSample(int id, GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
         Guid writerGuid = new Guid(sourcePrefix, data.getWriterId());
 
@@ -276,10 +250,7 @@ public class RTPSReader<T> extends Endpoint {
             if (wp.acceptData(data.getWriterSequenceNumber())) {
                 log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
 
-                T obj = rCache.addChange(id, writerGuid, data, timeStamp, data.getStatusInfo());
-                
-                // TODO: get rid of pendingSamples. replace with rCache.
-                pendingSamples.add(new Sample(writerGuid, obj, timeStamp, data.getStatusInfo()));
+                rCache.addChange(id, writerGuid, data, timeStamp);
             } else {
                 log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
                         data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
@@ -300,21 +271,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * @see #createSample(GuidPrefix, Data, Time)
 	 */
 	void stopMessageProcessing(int msgId) {
-		LinkedList<Sample<T>> ll = new LinkedList<>();
-
 		rCache.changesEnd(msgId);
-
-		// TODO: get rid of pendingSamples. replace with rCache.
-		ll.addAll(pendingSamples);
-		pendingSamples.clear();
-
-		log.trace("[{}] Got {} samples", getEntityId(), ll.size());
-
-		if (ll.size() > 0) {
-			for (RTPSListener<T> sl : listeners) {
-				sl.onSamples(ll);
-			}
-		}
 	}
 
 	private void sendAckNack(WriterProxy wp) {

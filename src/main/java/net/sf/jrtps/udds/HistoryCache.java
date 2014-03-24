@@ -18,10 +18,10 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
-import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.rtps.CacheChange;
 import net.sf.jrtps.rtps.CacheChange.Kind;
 import net.sf.jrtps.rtps.ReaderCache;
+import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterCache;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -41,8 +41,11 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
+    private final Map<Integer, List<CacheChange<T>>> incomingChanges = new HashMap<>();
 
-    private volatile int seqNum; // sequence number of a change
+    private final List<SampleListener<T>> listeners = new LinkedList<>();
+    
+    private volatile long seqNum; // sequence number of a change
 
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
@@ -78,7 +81,16 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     public void write(List<T> samples) {
         addSample(CacheChange.Kind.WRITE, samples);
     }
+    
+    void addListener(SampleListener<T> aListener) {
+        listeners.add(aListener);
+    }
+    
+    void removeListener(SampleListener<T> aListener) {
+        listeners.remove(aListener);
+    }
 
+    
     private void addSample(CacheChange.Kind kind, List<T> samples) {
         log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
 
@@ -198,7 +210,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
 
-    Map<Integer, List<CacheChange<T>>> incomingChanges = new HashMap<>();
+
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
@@ -208,12 +220,12 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
     @Override
-    public T addChange(int id, Guid writerGuid, Data data, Time timestamp, StatusInfo sInfo) {
+    public T addChange(int id, Guid writerGuid, Data data, Time timestamp) {
         List<CacheChange<T>> pendingSamples = incomingChanges.get(id); 
         
         CacheChange<T> cc = null;
         try {
-            cc = new CacheChange<T>(marshaller, ++seqNum, data, timestamp.timeMillis());
+            cc = new CacheChange<T>(writerGuid, marshaller, ++seqNum, data, timestamp.timeMillis());
             pendingSamples.add(cc);
         } catch (IOException ioe) {
             log.warn("Failed to create CacheChange", ioe);
@@ -226,8 +238,9 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     public void changesEnd(int id) {
         log.debug("changesEnd({})", id);        
 
-        List<CacheChange<T>> pendingSamples = incomingChanges.get(id); 
+        List<CacheChange<T>> pendingSamples = incomingChanges.remove(id); 
 
+        // Add each pending CacheChange to HistoryCache
         for (CacheChange<T> cc : pendingSamples) {
             long latestSampleTime = 0;
             if (changes.size() > 0) {
@@ -243,5 +256,21 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
                 addChange(cc);
             }
         }
+        
+        // Notify listeners 
+        List<Sample<T>> samples = convertChangesToSamples(pendingSamples);
+        for (SampleListener<T> aListener : listeners) {
+            aListener.onSamples(new LinkedList<>(samples)); // each Listener has its own List
+        }
+    }
+
+    private List<Sample<T>> convertChangesToSamples(List<CacheChange<T>> changes) {
+        List<Sample<T>> samples = new LinkedList<>();
+
+        for (CacheChange<T> cc : changes) {
+            samples.add(new Sample<T>(cc));
+        }
+        
+        return samples;
     }
 }
