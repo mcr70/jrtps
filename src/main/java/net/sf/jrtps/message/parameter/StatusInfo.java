@@ -76,6 +76,8 @@ public class StatusInfo extends Parameter implements InlineParameter {
         return (flags[3] & 0x2) == 0x2;
     }
 
+    
+    
     public List<CacheChange.Kind> getChangeKinds() {
         List<CacheChange.Kind> ckList = new LinkedList<>();
         if (isDisposed()) {
