@@ -274,10 +274,9 @@ public class RTPSReader<T> extends Endpoint {
         WriterProxy wp = getWriterProxy(writerGuid);
         if (wp != null) {
             if (wp.acceptData(data.getWriterSequenceNumber())) {
-                T obj = marshaller.unmarshall(data.getDataEncapsulation());
                 log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
 
-                rCache.addChange(id, writerGuid, obj, timeStamp, data.getStatusInfo());
+                T obj = rCache.addChange(id, writerGuid, data, timeStamp, data.getStatusInfo());
                 
                 // TODO: get rid of pendingSamples. replace with rCache.
                 pendingSamples.add(new Sample(writerGuid, obj, timeStamp, data.getStatusInfo()));

@@ -1,5 +1,6 @@
 package net.sf.jrtps.rtps;
 
+import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.Time;
@@ -25,7 +26,7 @@ public interface ReaderCache<T> {
      * Adds a new change to ReaderCache. It is the responsibility of the implementing class
      * to decide whether or not this Sample is actually made available to applications or not.
      */
-    void addChange(int id, Guid writerGuid, T data, Time timestamp, StatusInfo sInfo);
+    T addChange(int id, Guid writerGuid, Data data, Time timestamp, StatusInfo sInfo);
     
     /**
      * Notifies implementing class that there are no more samples coming from the RTPS layer.

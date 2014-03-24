@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.TreeSet;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
@@ -206,23 +208,18 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
     @Override
-    public void addChange(int id, Guid writerGuid, T data, Time timestamp, StatusInfo sInfo) {
+    public T addChange(int id, Guid writerGuid, Data data, Time timestamp, StatusInfo sInfo) {
         List<CacheChange<T>> pendingSamples = incomingChanges.get(id); 
-        CacheChange.Kind kind = null;
-
-        // TODO: assuming that StatusInfo cannot be combination of kinds 
-        if (sInfo.isDisposed()) {
-            kind = CacheChange.Kind.DISPOSE;
+        
+        CacheChange<T> cc = null;
+        try {
+            cc = new CacheChange<T>(marshaller, ++seqNum, data, timestamp.timeMillis());
+            pendingSamples.add(cc);
+        } catch (IOException ioe) {
+            log.warn("Failed to create CacheChange", ioe);
         }
-        else if (sInfo.isUnregistered()) {
-            kind = CacheChange.Kind.UNREGISTER;
-        }
-        else {
-            kind = CacheChange.Kind.WRITE;
-        }
-
-        CacheChange<T> cc = new CacheChange<T>(marshaller, kind, ++seqNum, data, timestamp.timeMillis());
-        pendingSamples.add(cc);
+        
+        return cc.getData();
     }
 
     @Override
