@@ -2,6 +2,7 @@ package net.sf.jrtps.udds;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
@@ -91,13 +92,13 @@ public class DataReader<T> extends Entity<T> {
 
     
     /**
-     * Gets a List of instances this DataReader knows. Each Sample returned
+     * Gets a Set of instances this DataReader knows. Each Sample returned
      * is the latest sample of that instance.
      * 
-     * @return a List of instances
+     * @return a Set of instances
      */
-    List<Sample<T>> getInstances() {
-        return null;
+    public Set<Sample<T>> getInstances() {
+        return hCache.getInstances();
     }
     /**
      * Gets the latest Sample of given instance.

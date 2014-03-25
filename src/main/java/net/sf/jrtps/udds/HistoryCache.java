@@ -1,13 +1,16 @@
 package net.sf.jrtps.udds;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -102,19 +105,18 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
     
     private void addChange(CacheChange<T> cc) {
-        // TODO: InstanceKey should take KeyHash as constructor, not byte[]
-        //       Alternatively, we could use KeyHash as a key to instances Map
+        log.debug("addChange({})", cc);
         KeyHash key = cc.getKey();
         Kind kind = cc.getKind();
         
-        if (kind != CacheChange.Kind.DISPOSE) {
+        if (kind == CacheChange.Kind.DISPOSE) {
             instances.remove(key);
         }
         else {
             Instance<T> inst = instances.get(key);
 
             if (inst == null) {
-                log.trace("[{}] Creating new instance {}", entityId, key);
+                log.debug("[{}] Creating new instance {}", entityId, key);
 
                 if (resource_limits.getMaxInstances() != -1 && 
                         instances.size() >= resource_limits.getMaxInstances()) {
@@ -227,7 +229,8 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         try {
             cc = new CacheChange<T>(writerGuid, marshaller, ++seqNum, data, timestamp.timeMillis());
             pendingSamples.add(cc);
-        } catch (IOException ioe) {
+        } 
+        catch (IOException ioe) {
             log.warn("Failed to create CacheChange", ioe);
         }
         
@@ -272,5 +275,18 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         }
         
         return samples;
+    }
+
+
+    // --- experimental code follows. These are paired with the ones in DataReader  ----------------
+    Set<Sample<T>> getInstances() {
+        Set<Sample<T>> instSet = new HashSet<>();
+        
+        Collection<Instance<T>> values = instances.values();
+        for (Instance<T> inst : values) {
+            instSet.add(new Sample<T>(inst.getLatest()));
+        }
+        
+        return instSet;
     }
 }
