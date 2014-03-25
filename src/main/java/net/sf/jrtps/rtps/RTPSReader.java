@@ -249,7 +249,6 @@ public class RTPSReader<T> extends Endpoint {
         if (wp != null) {
             if (wp.acceptData(data.getWriterSequenceNumber())) {
                 log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
-
                 rCache.addChange(id, writerGuid, data, timeStamp);
             } else {
                 log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),

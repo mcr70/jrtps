@@ -20,7 +20,6 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
-import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.rtps.ChangeKind;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.Sample;
@@ -96,11 +95,11 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     
     private void addSample(ChangeKind kind, List<T> samples) {
         log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
-        StatusInfo sInfo = new StatusInfo(kind);
+        
         long ts = System.currentTimeMillis();
         
         for (T sample : samples) {
-            Sample<T> newChange = new Sample<T>(null, marshaller, ++seqNum, ts, sInfo, sample);
+            Sample<T> newChange = new Sample<T>(null, marshaller, ++seqNum, ts, kind, sample);
             addChange(newChange);
         }
     }
