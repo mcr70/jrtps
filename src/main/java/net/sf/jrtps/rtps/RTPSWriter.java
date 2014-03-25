@@ -48,7 +48,7 @@ public class RTPSWriter<T> extends Endpoint {
 
     private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
-    private final WriterCache writer_cache;
+    private final WriterCache<T> writer_cache;
     private final int nackResponseDelay;
     private final int heartbeatPeriod;
     private final boolean pushMode;
@@ -59,7 +59,7 @@ public class RTPSWriter<T> extends Endpoint {
 
     
 
-    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache wCache,
+    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache<T> wCache,
             QualityOfService qos, Configuration configuration) {
         super(participant, entityId, topicName, qos, configuration);
 
@@ -289,7 +289,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
         Message m = new Message(getGuid().getPrefix());
-        LinkedList<CacheChange<T>> changes = writer_cache.getChangesSince(readersHighestSeqNum);
+        LinkedList<Sample<T>> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
         if (changes.size() == 0) {
             log.debug("[{}] Remote reader already has all the data", getEntityId(),
@@ -298,12 +298,11 @@ public class RTPSWriter<T> extends Endpoint {
         }
         
         long prevTimeStamp = 0;
-
         EntityId proxyEntityId = proxy.getEntityId();
 
-        for (CacheChange<T> cc : changes) {
+        for (Sample<T> cc : changes) {
             try {
-                long timeStamp = cc.getTimeStamp();
+                long timeStamp = cc.getTimestamp();
                 if (timeStamp > prevTimeStamp) {
                     InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
                     m.addSubMessage(infoTS);
@@ -369,7 +368,7 @@ public class RTPSWriter<T> extends Endpoint {
         return hb;
     }
 
-    private Data createData(EntityId readerId, CacheChange cc) throws IOException {
+    private Data createData(EntityId readerId, Sample<T> cc) throws IOException {
         DataEncapsulation dEnc = cc.getDataEncapsulation();
         ParameterList inlineQos = new ParameterList();
 
@@ -377,7 +376,7 @@ public class RTPSWriter<T> extends Endpoint {
             inlineQos.add(cc.getKey());
         }
 
-        if (!cc.getKind().equals(CacheChange.Kind.WRITE)) { 
+        if (!cc.getKind().equals(ChangeKind.WRITE)) { 
             // Add status info for operations other than WRITE
             inlineQos.add(new StatusInfo(cc.getKind()));
         }

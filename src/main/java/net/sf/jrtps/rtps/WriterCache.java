@@ -11,7 +11,7 @@ import java.util.LinkedList;
  * @author mcr70
  * 
  */
-public interface WriterCache <T> {
+public interface WriterCache<T> {
     /**
      * Gets the smallest sequence number available in history cache.
      * 
@@ -33,5 +33,5 @@ public interface WriterCache <T> {
      * @param seqNum sequence number to compare
      * @return changes since given seqNum. Returned List is newly allocated.
      */
-    public LinkedList<CacheChange<T>> getChangesSince(long seqNum);
+    public LinkedList<Sample<T>> getChangesSince(long seqNum);
 }
