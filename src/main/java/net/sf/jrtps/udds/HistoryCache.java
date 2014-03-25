@@ -1,6 +1,5 @@
 package net.sf.jrtps.udds;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,8 +20,8 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
-import net.sf.jrtps.rtps.CacheChange;
-import net.sf.jrtps.rtps.CacheChange.Kind;
+import net.sf.jrtps.message.parameter.StatusInfo;
+import net.sf.jrtps.rtps.ChangeKind;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterCache;
@@ -44,7 +43,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
-    private final Map<Integer, List<CacheChange<T>>> incomingChanges = new HashMap<>();
+    private final Map<Integer, List<Sample<T>>> incomingChanges = new HashMap<>();
 
     private final List<SampleListener<T>> listeners = new LinkedList<>();
     
@@ -52,11 +51,12 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
+
     // An ordered set of cache changes.
-    private final SortedSet<CacheChange<T>> changes = Collections.synchronizedSortedSet(new TreeSet<>(
-            new Comparator<CacheChange<T>>() {
+    private final SortedSet<Sample<T>> changes = Collections.synchronizedSortedSet(new TreeSet<>(
+            new Comparator<Sample<T>>() {
                 @Override
-                public int compare(CacheChange<T> o1, CacheChange<T> o2) {
+                public int compare(Sample<T> o1, Sample<T> o2) {
                     return (int) (o1.getSequenceNumber() - o2.getSequenceNumber());
                 }
             }));
@@ -74,15 +74,15 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
     public void dispose(List<T> samples) {
-        addSample(CacheChange.Kind.DISPOSE, samples);
+        addSample(ChangeKind.DISPOSE, samples);
     }
 
     public void unregister(List<T> samples) {
-        addSample(CacheChange.Kind.UNREGISTER, samples);
+        addSample(ChangeKind.UNREGISTER, samples);
     }
 
     public void write(List<T> samples) {
-        addSample(CacheChange.Kind.WRITE, samples);
+        addSample(ChangeKind.WRITE, samples);
     }
     
     void addListener(SampleListener<T> aListener) {
@@ -94,22 +94,24 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
     
-    private void addSample(CacheChange.Kind kind, List<T> samples) {
+    private void addSample(ChangeKind kind, List<T> samples) {
         log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
-
+        StatusInfo sInfo = new StatusInfo(kind);
+        long ts = System.currentTimeMillis();
+        
         for (T sample : samples) {
-            CacheChange<T> newChange = new CacheChange<T>(marshaller, kind, ++seqNum, sample);
+            Sample<T> newChange = new Sample<T>(null, marshaller, ++seqNum, ts, sInfo, sample);
             addChange(newChange);
         }
     }
 
     
-    private void addChange(CacheChange<T> cc) {
+    private void addChange(Sample<T> cc) {
         log.debug("addChange({})", cc);
         KeyHash key = cc.getKey();
-        Kind kind = cc.getKind();
+        ChangeKind kind = cc.getKind();
         
-        if (kind == CacheChange.Kind.DISPOSE) {
+        if (kind == ChangeKind.DISPOSE) {
             instances.remove(key);
         }
         else {
@@ -129,7 +131,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
             log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
 
-            CacheChange<T> removedSample = inst.addSample(cc);
+            Sample<T> removedSample = inst.addSample(cc);
             if (removedSample != null) {
                 synchronized (changes) {
                     changes.remove(removedSample);
@@ -159,16 +161,16 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
      * @return a SortedSet of changes
      */
     @Override
-    public LinkedList<CacheChange<T>> getChangesSince(long sequenceNumber) {
+    public LinkedList<Sample<T>> getChangesSince(long sequenceNumber) {
         log.trace("[{}] getChangesSince({})", entityId, sequenceNumber);
 
         synchronized (changes) {
-            for (CacheChange<T> cc : changes) {
+            for (Sample<T> cc : changes) {
                 if (cc.getSequenceNumber() > sequenceNumber) {
-                    SortedSet<CacheChange<T>> tailSet = changes.tailSet(cc);
+                    SortedSet<Sample<T>> tailSet = changes.tailSet(cc);
                     log.trace("[{}] returning {}", entityId, tailSet);
 
-                    return new LinkedList<CacheChange<T>>(tailSet);
+                    return new LinkedList<Sample<T>>(tailSet);
                 }
             }
         }
@@ -217,42 +219,34 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public void changesBegin(int id) {
         log.debug("changesBegin({})", id);
-        List<CacheChange<T>> pendingSamples = new LinkedList<>();
+        List<Sample<T>> pendingSamples = new LinkedList<>();
         incomingChanges.put(id, pendingSamples);
     }
 
     @Override
-    public T addChange(int id, Guid writerGuid, Data data, Time timestamp) {
-        List<CacheChange<T>> pendingSamples = incomingChanges.get(id); 
+    public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
+        List<Sample<T>> pendingSamples = incomingChanges.get(id); 
         
-        CacheChange<T> cc = null;
-        try {
-            cc = new CacheChange<T>(writerGuid, marshaller, ++seqNum, data, timestamp.timeMillis());
-            pendingSamples.add(cc);
-        } 
-        catch (IOException ioe) {
-            log.warn("Failed to create CacheChange", ioe);
-        }
-        
-        return cc.getData();
+        Sample<T> cc = new Sample<T>(writerGuid, marshaller, ++seqNum, timestamp.timeMillis(), data);
+        pendingSamples.add(cc);
     }
 
     @Override
     public void changesEnd(int id) {
         log.debug("changesEnd({})", id);        
 
-        List<CacheChange<T>> pendingSamples = incomingChanges.remove(id); 
+        List<Sample<T>> pendingSamples = incomingChanges.remove(id); 
 
         // Add each pending CacheChange to HistoryCache
-        for (CacheChange<T> cc : pendingSamples) {
+        for (Sample<T> cc : pendingSamples) {
             long latestSampleTime = 0;
             if (changes.size() > 0) {
-                latestSampleTime = changes.last().getTimeStamp();
+                latestSampleTime = changes.last().getTimestamp();
             }
 
-            if (cc.getTimeStamp() < latestSampleTime) {
+            if (cc.getTimestamp() < latestSampleTime) {
                 log.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
-                        cc.getTimeStamp(), latestSampleTime);
+                        cc.getTimestamp(), latestSampleTime);
                 return;
             }
             else {
@@ -261,20 +255,9 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         }
         
         // Notify listeners 
-        List<Sample<T>> samples = convertChangesToSamples(pendingSamples);
         for (SampleListener<T> aListener : listeners) {
-            aListener.onSamples(new LinkedList<>(samples)); // each Listener has its own List
+            aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
         }
-    }
-
-    private List<Sample<T>> convertChangesToSamples(List<CacheChange<T>> changes) {
-        List<Sample<T>> samples = new LinkedList<>();
-
-        for (CacheChange<T> cc : changes) {
-            samples.add(new Sample<T>(cc));
-        }
-        
-        return samples;
     }
 
 
@@ -284,7 +267,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         
         Collection<Instance<T>> values = instances.values();
         for (Instance<T> inst : values) {
-            instSet.add(new Sample<T>(inst.getLatest()));
+            instSet.add(inst.getLatest());
         }
         
         return instSet;
