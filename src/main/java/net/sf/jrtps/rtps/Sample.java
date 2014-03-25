@@ -54,11 +54,12 @@ public class Sample<T> {
         this.timestamp = timestamp;        
     }
 
-    public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, StatusInfo sInfo, T obj) {
-        this(writerGuid, m, seqNum, timestamp, sInfo);        
+    public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, ChangeKind kind, T obj) {
+        this(writerGuid, m, seqNum, timestamp, new StatusInfo(kind));        
         this.obj = obj;
     }
 
+    // TODO: this should be made package private
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, Data data) {
         this(writerGuid, m, seqNum, timestamp, data.getStatusInfo());
         this.data = data;
