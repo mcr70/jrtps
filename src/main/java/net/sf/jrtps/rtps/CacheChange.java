@@ -223,6 +223,6 @@ public class CacheChange<T> implements Comparable<CacheChange<T>> {
     }
 
     public String toString() {
-        return "change: " + sequenceNumber;
+        return "change: " + sequenceNumber + ", " + getKind();
     }
 }
