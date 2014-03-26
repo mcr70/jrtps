@@ -45,6 +45,7 @@ class Instance <T> {
      * @return
      */
     List<Sample<T>> getHistory() {
+        // TODO: should we create new List here or not
        return new LinkedList<>(history); 
     }
     

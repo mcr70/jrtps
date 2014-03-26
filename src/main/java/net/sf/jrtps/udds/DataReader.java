@@ -97,46 +97,67 @@ public class DataReader<T> extends Entity<T> {
      * 
      * @return a Set of instances
      */
-    Set<Sample<T>> getInstances() {
+    public Set<Sample<T>> getInstances() {
         return hCache.getInstances();
     }
+
     /**
      * Gets the latest Sample of given instance.
      * @param s 
      * @return Latest Sample
      */
-    Sample<T> getInstance(Sample<T> s) {
+    public Sample<T> getInstance(Sample<T> s) {
         return getInstanceHistory(s).get(0);
     }
+
     /**
-     * Gets a history of given instance. If this DataReader is associated with a topic
-     * that has no key, all the samples are returned. 
+     * Gets a instance history of given Sample. History is presented as a List of Samples 
+     * that is ordered so that list item 0 is the most recent sample of that instance.<p>
      * 
-     * @param s A Sample representing an instance. 
-     * @return a history of an instance. In returned List, index 0 represents most recent Sample.
+     * If the Sample represents an instance, which is not known to this DataReader, null
+     * is returned.
+     * 
+     * @param sample
+     * @return instance history, or null if there was no matching instance.
      */
-    List<Sample<T>> getInstanceHistory(Sample<T> s) {
-        return null;
+    public List<Sample<T>> getInstanceHistory(Sample<T> s) {
+        return hCache.getInstanceHistory(s);
     }
+    
     /**
      * Gets all the samples this DataReader knows about. Samples are returned in the order
      * they have been received.
+     * 
      * @return all the Samples
      */
-    List<Sample<T>> getSamples() {
+    public List<Sample<T>> getSamples() {
         return getSamplesSince(0);
     }
-    List<Sample<T>> getSamplesSince(long timeMillis) {
-        return null;
+    
+    /**
+     * Gets all the samples since given timestamp.
+     * 
+     * @param timestamp
+     * @return Samples since given timestamp
+     */
+    public List<Sample<T>> getSamplesSince(long timestamp) {
+        return hCache.getSamplesSince(timestamp);
     }
-    List<Sample<T>> getSamplesSince(Sample<T> s) {
-        return getSamplesSince(s.getTimestamp());
+    
+    /**
+     * Gets all the Samples that have been received after given Sample.
+     * @param s
+     * @return all the samples that have been received after given Sample
+     */
+    public List<Sample<T>> getSamplesSince(Sample<T> s) {
+        return getSamplesSince(s.getSequenceNumber());
     }
     
     
 
     List<Sample<T>> takeSamples() {
-        return null;
+        return null; // NOT TO BE IMPLEMENTED
+        // trying to avoid read/take semantics
     }
     // ----  End of experimental code
 }
