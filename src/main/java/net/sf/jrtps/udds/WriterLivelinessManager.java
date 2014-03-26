@@ -17,13 +17,13 @@ import org.slf4j.LoggerFactory;
  * <p>
  * 
  * Local writers that have QosLiveliness kind set to AUTOMATIC, will have their
- * liveliness automatically asserted by this. class. Local writers with
+ * liveliness automatically asserted by this class. Local writers with
  * QosLiveliness kind set to MANUAL_BY_PARTICIPANT, will have their liveliness
- * asserted when application calls assertLiveliness() method of RTPSParticipant.
+ * asserted when application calls assertLiveliness() method of Participant.
  * <p>
  * 
  * @author mcr70
- * @see net.sf.jrtps.RTPSParticipant#assertLiveliness()
+ * @see net.sf.jrtps.udds.Participant#assertLiveliness()
  */
 class WriterLivelinessManager implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(WriterLivelinessManager.class);

@@ -48,4 +48,26 @@ Quality of Service
 +------
  
  where VOLATILE \< TRANSIENT_LOCAL \< TRANSIENT \< PERSISTENT
-  
+
+
+* Liveliness
+
+ Every RTPS writer is expected to support liveliness protocol. Liveliness QoS is used to
+ setup liveliness behavior of writers. 
+ 
+ By using Liveliness kind AUTOMATIC, udds Participant will automatically refresh liveliness 
+ of its writers periodically based on lease_duration. 
+ MANUAL_BY_PARTICIPANT liveliness needs application to refresh liveliness of its writers by
+ calling <Participant.assertLiveliness()>. MANUAL_BY_TOPIC kind is used when each writer needs
+ to individually call <DataWriter.assertLiveliness()>
+ 
+ Liveliness QoS between reader and writer is compatible, if 
+ 
++------
+ offered.kind >= requested.kind
+ offered.lease_duration <= requested.lease_duration
++------
+ 
+ where AUTOMATIC \< MANUAL_BY_PARTICIPANT \< MANUAL_BY_TOPIC
+ 
+ 

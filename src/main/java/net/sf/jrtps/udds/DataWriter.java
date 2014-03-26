@@ -3,6 +3,7 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Guid;
 
@@ -32,6 +33,16 @@ public class DataWriter<T> extends Entity<T> {
         this.hCache = hCache;
     }
 
+    /**
+     * Asserts liveliness of this DataWriter. Liveliness of writers must be asserted by a 
+     * call to this method, if QosLiveliness.Kind is set to MANUAL_BY_TOPIC.
+     * 
+     * @see QosLiveliness
+     */
+    public void assertLiveliness() {
+        rtps_writer.assertLiveliness();
+    }
+    
     /**
      * Writes a sample to subscribed data readers.
      * 
