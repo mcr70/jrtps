@@ -1,3 +1,6 @@
+0.7.0
+    - DataWriter.assertLiveliness() to support Liveliness kind MANUAL_BY_TOPIC.
+    
 0.6.4
     - Some refactoring, general bug fixing and documentation.
     - CacheChange is removed. Sample is used instead. 
