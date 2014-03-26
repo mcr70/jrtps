@@ -16,7 +16,7 @@ public class Time {
     public static final Time TIME_INVALID = new Time(-1, 0xffffffff);
     public static final Time TIME_INFINITE = new Time(0x7fffffff, 0xffffffff);
 
-    private final int seconds; // System.currentTimeMillis()
+    private final int seconds;
     private final int fraction;
 
     public Time(RTPSByteBuffer bb) {
@@ -31,7 +31,9 @@ public class Time {
 
     public Time(long systemCurrentMillis) {
         this.seconds = (int) (systemCurrentMillis / 1000);
-        long scm = this.seconds * 1000;
+        
+        long scm = ((long)this.seconds) * 1000; 
+        
         this.fraction = (int) (systemCurrentMillis - scm);
     }
 
@@ -46,6 +48,6 @@ public class Time {
     }
 
     public long timeMillis() {
-        return this.seconds * 1000 + fraction;
+        return ((long)this.seconds) * 1000 + fraction;
     }
 }

@@ -15,7 +15,7 @@ public class HelloReader {
        
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();
-
+        
         p.close();
     }
 }

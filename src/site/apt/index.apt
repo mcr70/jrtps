@@ -1,6 +1,6 @@
 Overview
 
  jRTPS is an implementation of {{{http://www.omg.org/spec/DDS-RTPS/2.1/}RTPS 2.1}} protocol by OMG.
- RTPS protocol is designed to provide interoperability for different 
+ RTPS protocol is designed to provide interoperability between different 
  {{{http://www.omg.org/spec/DDS/}DDS}} implementations.
  

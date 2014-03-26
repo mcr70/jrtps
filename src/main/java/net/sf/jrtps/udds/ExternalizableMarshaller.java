@@ -11,8 +11,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.CDREncapsulation;
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.CDREncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.slf4j.Logger;
@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This Marshaller marshalls objects by writing them to <i>ObjectOutput</i> and
- * reading from <i>ObjectInput</i>. JavaExternalizableMarshaller supports
+ * reading from <i>ObjectInput</i>. ExternalizableMarshaller supports
  * net.sf.jrtps.udds.Key annotation to form a Key for the marshalled Object.
  * 
  * @see java.io.ObjectOutput
@@ -29,8 +29,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class JavaExternalizableMarshaller implements Marshaller<Externalizable> {
-    private static final Logger log = LoggerFactory.getLogger(JavaExternalizableMarshaller.class);
+class ExternalizableMarshaller implements Marshaller<Externalizable> {
+    private static final Logger log = LoggerFactory.getLogger(ExternalizableMarshaller.class);
 
     private final int bufferSize;
     private final Field[] keyFields;
@@ -44,7 +44,7 @@ public class JavaExternalizableMarshaller implements Marshaller<Externalizable> 
      * 
      * @param type
      */
-    public JavaExternalizableMarshaller(Class<? extends Externalizable> type) {
+    public ExternalizableMarshaller(Class<? extends Externalizable> type) {
         this(type, 1024);
     }
 
@@ -57,7 +57,7 @@ public class JavaExternalizableMarshaller implements Marshaller<Externalizable> 
      *            the size of the buffer that is used during marshall and
      *            unmarshall
      */
-    public JavaExternalizableMarshaller(Class<? extends Externalizable> type, int bufferSize) {
+    public ExternalizableMarshaller(Class<? extends Externalizable> type, int bufferSize) {
         this.type = type;
         this.bufferSize = bufferSize;
         this.keyFields = getKeyFields(type);
@@ -184,5 +184,4 @@ public class JavaExternalizableMarshaller implements Marshaller<Externalizable> 
 
         return keyFields;
     }
-
 }

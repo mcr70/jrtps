@@ -191,8 +191,7 @@ public class Message {
 
                 log.trace("SubMsg out: {}", msg);
             } catch (BufferOverflowException boe) {
-                log.warn(
-                        "Buffer overflow occured after {} succesful sub-message writes, dropping rest of the sub messages",
+                log.warn("Buffer overflow occured after {} succesful sub-message writes, dropping rest of the sub messages",
                         subMessageCount);
                 buffer.getBuffer().position(subMsgStartPosition);
                 overFlowed = true;

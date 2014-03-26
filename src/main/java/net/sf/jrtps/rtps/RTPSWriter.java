@@ -5,20 +5,18 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.WriterCache;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosReliability;
@@ -50,7 +48,7 @@ public class RTPSWriter<T> extends Endpoint {
 
     private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
-    private final WriterCache writer_cache;
+    private final WriterCache<T> writer_cache;
     private final int nackResponseDelay;
     private final int heartbeatPeriod;
     private final boolean pushMode;
@@ -61,7 +59,7 @@ public class RTPSWriter<T> extends Endpoint {
 
     
 
-    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache wCache,
+    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache<T> wCache,
             QualityOfService qos, Configuration configuration) {
         super(participant, entityId, topicName, qos, configuration);
 
@@ -152,6 +150,7 @@ public class RTPSWriter<T> extends Endpoint {
             sendData(proxy, readersHighestSeqNum);
             
             if (!proxy.isReliable()) {
+            	// For best effort readers, update readers highest seqnum
                 proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
             }
         }
@@ -176,7 +175,6 @@ public class RTPSWriter<T> extends Endpoint {
         }
 
         readerProxies.clear();
-        // writer_cache.clear();
     }
 
     /**
@@ -291,7 +289,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
         Message m = new Message(getGuid().getPrefix());
-        SortedSet<CacheChange> changes = writer_cache.getChangesSince(readersHighestSeqNum);
+        LinkedList<Sample<T>> changes = writer_cache.getChangesSince(readersHighestSeqNum);
 
         if (changes.size() == 0) {
             log.debug("[{}] Remote reader already has all the data", getEntityId(),
@@ -300,12 +298,11 @@ public class RTPSWriter<T> extends Endpoint {
         }
         
         long prevTimeStamp = 0;
-
         EntityId proxyEntityId = proxy.getEntityId();
 
-        for (CacheChange cc : changes) {
+        for (Sample<T> cc : changes) {
             try {
-                long timeStamp = cc.getTimeStamp();
+                long timeStamp = cc.getTimestamp();
                 if (timeStamp > prevTimeStamp) {
                     InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
                     m.addSubMessage(infoTS);
@@ -327,8 +324,8 @@ public class RTPSWriter<T> extends Endpoint {
             m.addSubMessage(hb);
         }
 
-        long firstSeqNum = changes.first().getSequenceNumber();
-        long lastSeqNum = changes.last().getSequenceNumber();
+        long firstSeqNum = changes.getFirst().getSequenceNumber();
+        long lastSeqNum = changes.getLast().getSequenceNumber();
         
         log.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
 
@@ -371,7 +368,7 @@ public class RTPSWriter<T> extends Endpoint {
         return hb;
     }
 
-    private Data createData(EntityId readerId, CacheChange cc) throws IOException {
+    private Data createData(EntityId readerId, Sample<T> cc) throws IOException {
         DataEncapsulation dEnc = cc.getDataEncapsulation();
         ParameterList inlineQos = new ParameterList();
 
@@ -379,7 +376,7 @@ public class RTPSWriter<T> extends Endpoint {
             inlineQos.add(cc.getKey());
         }
 
-        if (!cc.getKind().equals(CacheChange.Kind.WRITE)) { 
+        if (!cc.getKind().equals(ChangeKind.WRITE)) { 
             // Add status info for operations other than WRITE
             inlineQos.add(new StatusInfo(cc.getKind()));
         }

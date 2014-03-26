@@ -3,8 +3,8 @@ package net.sf.jrtps.builtin;
 import java.io.IOException;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.CDREncapsulation;
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.CDREncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
 

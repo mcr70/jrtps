@@ -14,12 +14,23 @@ import net.sf.jrtps.types.Locator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * UDPWriter.
+ * 
+ * @author mcr70
+ */
 public class UDPWriter {
     private static final Logger log = LoggerFactory.getLogger(UDPWriter.class);
     private final Locator locator;
     private DatagramChannel channel;
     private int bufferSize;
 
+    /**
+     * Constructor for UDPWriter.
+     * @param locator Locator where the messages will be sent.
+     * @param bufferSize Size of the buffer that will be used to write messages. 
+     * @throws IOException
+     */
     public UDPWriter(Locator locator, int bufferSize) throws IOException {
         this.locator = locator;
         this.bufferSize = bufferSize;
@@ -27,6 +38,14 @@ public class UDPWriter {
         channel.connect(locator.getSocketAddress());
     }
 
+    /**
+     * Sends a Message to a Locator of this UDPWriter.
+     * If an overflow occurs during writing of Message, only submessages that
+     * were succesfully written will be sent.
+     * 
+     * @param m Message to send
+     * @return true, if Message did not fully fit into buffer of this UDPWriter
+     */
     public boolean sendMessage(Message m) {
         RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(bufferSize));
         buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);

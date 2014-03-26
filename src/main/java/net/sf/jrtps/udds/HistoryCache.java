@@ -1,212 +1,155 @@
 package net.sf.jrtps.udds;
 
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.TimeOutException;
-import net.sf.jrtps.WriterCache;
+import net.sf.jrtps.message.Data;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
-import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
-import net.sf.jrtps.rtps.CacheChange;
+import net.sf.jrtps.rtps.ChangeKind;
+import net.sf.jrtps.rtps.ReaderCache;
+import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.WriterCache;
+import net.sf.jrtps.types.EntityId;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-/*
- * This is an experimental class. It is not used at the moment. 
- * An effort to tie QosResourceLimits, QosHistory and QosReliability together. 
- * 
- * This class may be called from a DDS writer, or from RTPS writer. When called from
- * RTPS layer, RTPSWriter requests changes to be sent to remote readers. When called 
- * from DDS layer, a DDS Writer is adding new changes to history cache.
+/**
+ * HistoryCache holds Samples of entities. For writers, it is used to keep keep
+ * history of changes so that late joining readers are capable of getting the historical data.
+ * <p>
+ * Samples on the reader side are made available through HistoryCache.
  */
-class HistoryCache<T> implements WriterCache {
+class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
-    private final QosReliability reliability;
+    private final Map<Integer, List<Sample<T>>> incomingChanges = new HashMap<>();
 
-    private int sampleCount = 0;
-    private int instanceCount = 0; // instanceCount might be smaller than
-                                   // instances.size() (dispose)
-    private volatile int seqNum; // sequence number of a change
+    private final List<SampleListener<T>> listeners = new LinkedList<>();
+    
+    private volatile long seqNum; // sequence number of a change
 
-    // Main collection to hold instances. ResourceLimits is checked against this
-    // map
-    private final Map<InstanceKey, Instance> instances = new LinkedHashMap<>();
+    // Main collection to hold instances. ResourceLimits is checked against this map
+    private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
+
     // An ordered set of cache changes.
-    private final SortedSet<CacheChange> changes = Collections.synchronizedSortedSet(new TreeSet<>(
-            new Comparator<CacheChange>() {
+    private final SortedSet<Sample<T>> changes = Collections.synchronizedSortedSet(new TreeSet<>(
+            new Comparator<Sample<T>>() {
                 @Override
-                public int compare(CacheChange o1, CacheChange o2) {
+                public int compare(Sample<T> o1, Sample<T> o2) {
                     return (int) (o1.getSequenceNumber() - o2.getSequenceNumber());
                 }
             }));
 
     private final Marshaller<T> marshaller;
-    private DataWriter<T> writer;
+    private final EntityId entityId;
 
-    HistoryCache(Marshaller<T> marshaller, QualityOfService qos) {
+    HistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
+        this.entityId = eId;
         this.marshaller = marshaller;
 
         resource_limits = qos.getResourceLimits();
         history = qos.getHistory();
-        reliability = qos.getReliability();
+        qos.getReliability();
     }
 
-    void setDataWriter(DataWriter<T> dw) {
-        this.writer = dw;
-        log.debug("Created HistoryCache for {}: {}, {}, {}", new Object[] { dw.getGuid().getEntityId(), reliability,
-                history, resource_limits });
+    public void dispose(List<T> samples) {
+        addSample(ChangeKind.DISPOSE, samples);
     }
 
-    void dispose(List<T> samples) {
-        addSample(CacheChange.Kind.DISPOSE, samples);
+    public void unregister(List<T> samples) {
+        addSample(ChangeKind.UNREGISTER, samples);
     }
 
-    void unregister(List<T> samples) {
-        addSample(CacheChange.Kind.UNREGISTER, samples);
+    public void write(List<T> samples) {
+        addSample(ChangeKind.WRITE, samples);
+    }
+    
+    void addListener(SampleListener<T> aListener) {
+        listeners.add(aListener);
+    }
+    
+    void removeListener(SampleListener<T> aListener) {
+        listeners.remove(aListener);
     }
 
-    void write(List<T> samples) {
-        addSample(CacheChange.Kind.WRITE, samples);
-    }
-
-    private void addSample(CacheChange.Kind kind, List<T> samples) {
-        log.trace("[{}] add {} samples of kind {}", writer.getGuid().getEntityId(), samples.size(), kind);
-
+    
+    private void addSample(ChangeKind kind, List<T> samples) {
+        log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
+        
+        long ts = System.currentTimeMillis();
+        
         for (T sample : samples) {
-            InstanceKey key = new InstanceKey(marshaller.extractKey(sample));
-            Instance inst = instances.get(key);
+            Sample<T> newChange = new Sample<T>(null, marshaller, ++seqNum, ts, kind, sample);
+            addChange(newChange);
+        }
+    }
+
+    
+    private void addChange(Sample<T> cc) {
+        log.trace("addChange({})", cc);
+        KeyHash key = cc.getKey();
+        ChangeKind kind = cc.getKind();
+        
+        if (kind == ChangeKind.DISPOSE) {
+            instances.remove(key);
+        }
+        else {
+            Instance<T> inst = instances.get(key);
+
             if (inst == null) {
-                log.trace("[{}] Creating new instance {}", writer.getGuid().getEntityId(), key);
-                instanceCount++;
+                log.trace("[{}] Creating new instance {}", entityId, key);
+
                 if (resource_limits.getMaxInstances() != -1 && 
-                		instanceCount > resource_limits.getMaxInstances()) {
-                    instanceCount = resource_limits.getMaxInstances();
+                        instances.size() >= resource_limits.getMaxInstances()) {
                     throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
                 }
 
-                inst = new Instance(key, history.getDepth());
+                inst = new Instance<T>(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
                 instances.put(key, inst);
-            }
+            }   
 
-            if (resource_limits.getMaxSamplesPerInstance() != -1 && 
-            		inst.history.size() >= resource_limits.getMaxSamplesPerInstance()) {
-                throw new OutOfResources("max_samples_per_instance=" + resource_limits.getMaxSamplesPerInstance());
-            }
+            log.trace("[{}] Creating cache change {}", entityId, seqNum + 1);
 
-            log.trace("[{}] Creating cache change {}", writer.getGuid().getEntityId(), seqNum + 1);
-            CacheChange aChange = new CacheChange(marshaller, kind, ++seqNum, sample);
-            sampleCount += inst.addSample(aChange);
-            if (resource_limits.getMaxSamples() != -1 && 
-            		sampleCount > resource_limits.getMaxSamples()) {
-                inst.history.removeLast();
-                sampleCount = resource_limits.getMaxSamples();
-                throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
-            }
-            changes.add(aChange);
-        }
-    }
-
-    class Instance {
-        private final InstanceKey key;
-        private final LinkedList<CacheChange> history = new LinkedList<>();
-        private final int maxSize;
-
-        Instance(InstanceKey key, int historySize) {
-            this.key = key;
-            this.maxSize = historySize;
-        }
-
-        @Override
-        public int hashCode() {
-            return key.hashCode();
-        }
-
-        // TODO: CacheChange.sequenceNumber must be set only if it is
-        // succesfully
-        // inserted into cache
-        int addSample(CacheChange aChange) {
-            log.trace("[{}] Adding sample {}", writer.getGuid().getEntityId(), aChange.getSequenceNumber());
-            int historySizeChange = 1;
-            history.add(aChange);
-            if (history.size() > maxSize) {
-                if (reliability.getKind() == QosReliability.Kind.RELIABLE) {
-                    CacheChange oldestChange = history.getFirst();
-                    if (reliability.getMaxBlockingTime().asMillis() > 0
-                            && !writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
-                        // Block the writer and hope that readers acknowledge
-                        // all the changes
-
-                        // TODO: during acknack, we should check if there is no
-                        // need to block anymore.
-                        // I.e. we should notify blocked thread.
-
-                        log.trace("[{}] Blocking the writer for {} ms", writer.getGuid().getEntityId(), reliability
-                                .getMaxBlockingTime().asMillis());
-                        writer.getParticipant().waitFor(reliability.getMaxBlockingTime().asMillis());
-
-                        if (!writer.getRTPSWriter().isAcknowledgedByAll(oldestChange.getSequenceNumber())) {
-                            throw new TimeOutException("Blocked writer for "
-                                    + reliability.getMaxBlockingTime().asMillis()
-                                    + " ms, and readers have not acknowledged " + oldestChange.getSequenceNumber());
-                        }
-                    }
+            Sample<T> removedSample = inst.addSample(cc);
+            if (removedSample != null) {
+                synchronized (changes) {
+                    changes.remove(removedSample);
                 }
-
-                log.trace("[{}] Removing oldest sample from history", writer.getGuid().getEntityId());
-                CacheChange cc = history.removeFirst(); // Discard oldest sample
-                changes.remove(cc); // Removed oldest instance sample from a set
-                                    // of changes.
-
-                historySizeChange = 0;
             }
+        }
 
-            return historySizeChange;
+        if (resource_limits.getMaxSamples() != -1 && 
+                changes.size() >= resource_limits.getMaxSamples()) {
+            throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
+        }
+
+        synchronized (changes) {
+            changes.add(cc);
         }
     }
+    
 
-    class InstanceKey {
-        private byte[] key;
-
-        InstanceKey(byte[] key) {
-            this.key = key;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof HistoryCache<?>.InstanceKey) {
-                InstanceKey other = (InstanceKey) o;
-
-                return Arrays.equals(key, other.key);
-            }
-
-            return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(key);
-        }
-
-        public String toString() {
-            return "Key: " + Arrays.toString(key);
-        }
-    }
-
+    // ----  WriterCache implementation follows  -------------------------
     /**
      * Gets all the changes, whose sequence number is greater than given
      * sequence number. If there is no such changes found, an empty set is
@@ -217,21 +160,22 @@ class HistoryCache<T> implements WriterCache {
      * @return a SortedSet of changes
      */
     @Override
-    public SortedSet<CacheChange> getChangesSince(long sequenceNumber) {
-        log.trace("[{}] getChangesSince({})", writer.getGuid().getEntityId(), sequenceNumber);
+    public LinkedList<Sample<T>> getChangesSince(long sequenceNumber) {
+        log.trace("[{}] getChangesSince({})", entityId, sequenceNumber);
 
         synchronized (changes) {
-            for (CacheChange cc : changes) {
+            for (Sample<T> cc : changes) {
                 if (cc.getSequenceNumber() > sequenceNumber) {
-                    SortedSet<CacheChange> tailSet = changes.tailSet(cc);
-                    log.trace("[{}] returning {}", writer.getGuid().getEntityId(), tailSet);
-                    return tailSet;
+                    SortedSet<Sample<T>> tailSet = changes.tailSet(cc);
+                    log.trace("[{}] returning {}", entityId, tailSet);
+
+                    return new LinkedList<Sample<T>>(tailSet);
                 }
             }
         }
 
-        log.trace("[{}] No chances to return for seq num {}", writer.getGuid().getEntityId(), sequenceNumber);
-        return new TreeSet<>();
+        log.trace("[{}] No chances to return for seq num {}", entityId, sequenceNumber);
+        return new LinkedList<>();
     }
 
     /**
@@ -241,10 +185,14 @@ class HistoryCache<T> implements WriterCache {
      */
     @Override
     public long getSeqNumMin() {
-        if (changes.size() == 0) {
-            return 0;
+        long seqNumMin = 0;
+        synchronized (changes) {
+            if (changes.size() > 0) {
+                seqNumMin = changes.first().getSequenceNumber();
+            }
         }
-        return changes.first().getSequenceNumber();
+
+        return seqNumMin;
     }
 
     /**
@@ -254,17 +202,73 @@ class HistoryCache<T> implements WriterCache {
      */
     @Override
     public long getSeqNumMax() {
-        if (changes.size() == 0) {
-            return 0;
+        long seqNumMax = 0;
+        synchronized (changes) {
+            if (changes.size() > 0) {
+                seqNumMax = changes.last().getSequenceNumber();
+            }
         }
-        return changes.last().getSequenceNumber();
+
+        return seqNumMax;
     }
 
-    /**
-     * Clears all the references to data in this HistoryCache
-     */
-    void clear() {
-        instances.clear();
-        changes.clear();
+
+
+    // ----  ReaderCache implementation follows  -------------------------
+    @Override
+    public void changesBegin(int id) {
+        log.trace("changesBegin({})", id);
+        List<Sample<T>> pendingSamples = new LinkedList<>();
+        incomingChanges.put(id, pendingSamples);
+    }
+
+    @Override
+    public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
+        List<Sample<T>> pendingSamples = incomingChanges.get(id); 
+        
+        Sample<T> cc = new Sample<T>(writerGuid, marshaller, ++seqNum, timestamp.timeMillis(), data);
+        pendingSamples.add(cc);
+    }
+
+    @Override
+    public void changesEnd(int id) {
+        log.trace("changesEnd({})", id);        
+
+        List<Sample<T>> pendingSamples = incomingChanges.remove(id); 
+
+        // Add each pending CacheChange to HistoryCache
+        for (Sample<T> cc : pendingSamples) {
+            long latestSampleTime = 0;
+            if (changes.size() > 0) {
+                latestSampleTime = changes.last().getTimestamp();
+            }
+
+            if (cc.getTimestamp() < latestSampleTime) {
+                log.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
+                        cc.getTimestamp(), latestSampleTime);
+                return;
+            }
+            else {
+                addChange(cc);
+            }
+        }
+        
+        // Notify listeners 
+        for (SampleListener<T> aListener : listeners) {
+            aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
+        }
+    }
+
+
+    // --- experimental code follows. These are paired with the ones in DataReader  ----------------
+    Set<Sample<T>> getInstances() {
+        Set<Sample<T>> instSet = new HashSet<>();
+        
+        Collection<Instance<T>> values = instances.values();
+        for (Instance<T> inst : values) {
+            instSet.add(inst.getLatest());
+        }
+        
+        return instSet;
     }
 }

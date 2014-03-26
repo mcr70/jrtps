@@ -153,8 +153,8 @@
         <site>
             <id>jrtps.site</id>
             <name>jRTPS</name>
-            <url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url>
-            <!-- <url>file:///tmp//jrtps/site</url> -->
+            <url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url> 
+            <!-- <url>file:///tmp//jrtps/site</url> --> 
         </site>
     </distributionManagement>
 

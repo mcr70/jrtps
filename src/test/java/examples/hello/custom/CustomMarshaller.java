@@ -1,24 +1,23 @@
 package examples.hello.custom;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.CDREncapsulation;
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.CDREncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class CustomMarshaller implements Marshaller<CustomHelloMessage> {
 
     @Override
     public boolean hasKey() {
-        return true;
+        return true; // userID is our key
     }
 
     @Override
     public byte[] extractKey(CustomHelloMessage data) {
-        byte[] bytes = new byte[1];
-        bytes[0] = (byte) data.userID;
-        return bytes;
+    	return ByteBuffer.allocate(4).putInt(data.userID).array();
     }
 
     @Override
@@ -43,5 +42,4 @@ public class CustomMarshaller implements Marshaller<CustomHelloMessage> {
 
         return cdrEnc;
     }
-
 }
