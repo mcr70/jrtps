@@ -5,10 +5,10 @@ ssh -t mcr70,jrtps@shell.sourceforge.net create
 hg commit
 hg push
 
-# relese
+# relese, -Psf causes deployment if site to sourceforge
+# without -Psf, site is deployed to /tmp/jrtps/site
 mvn release:prepare 
-mvn release:perform -Psite
+mvn release:perform -Psf
 
 # To deploy only site
-mvn site:site -Psite
-mvn site:deploy -Psite
+mvn site site:deploy -Psf
