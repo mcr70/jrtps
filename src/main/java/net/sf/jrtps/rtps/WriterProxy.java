@@ -67,17 +67,13 @@ public class WriterProxy extends RemoteProxy {
      * @return true, if data was added to cache
      */
     boolean acceptData(long sequenceNumber) {
-        // Data must come in order. If not, drop it. Manage out-of-order data
-        // with
-        // HeartBeat & AckNack messages
+        // TODO:
+        // Data for reliable readers must come in order. If not, drop it. 
+        // Manage out-of-order data with HeartBeat & AckNack & Gap messages
 
-        // TODO: SPDP writer keeps its Data seq-num always at 1. We need >=
-        // comparison here for that purpose.
-        // So that participant lease expiration gets handled.
         if (sequenceNumber >= seqNumMax) {
             if (sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
-                log.warn(
-                        "Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}",
+                log.warn("Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}",
                         sequenceNumber, seqNumMax);
             }
 

@@ -2,7 +2,6 @@ package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 
-import net.sf.jrtps.message.data.DataEncapsulation;
 import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
@@ -152,23 +151,6 @@ public class Data extends SubMessage {
         return inlineQosParams;
     }
 
-    public boolean isDisposed() {
-        if (inlineQosFlag()) {
-            StatusInfo sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
-            return sInfo.isDisposed();
-        }
-
-        return false;
-    }
-
-    public boolean isUnregistered() {
-        if (inlineQosFlag()) {
-            StatusInfo sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
-            return sInfo.isUnregistered();
-        }
-
-        return false;
-    }
 
     /**
      * Indicates to the Reader that the dataPayload submessage element contains
@@ -247,6 +229,10 @@ public class Data extends SubMessage {
         }
     }
 
+    /**
+     * Gets the DataEncapsulation.
+     * @return DataEncapsulation
+     */
     public DataEncapsulation getDataEncapsulation() {
         return dataEncapsulation;
     }
@@ -282,5 +268,4 @@ public class Data extends SubMessage {
 
         return sb.toString();
     }
-
 }

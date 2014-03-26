@@ -1,4 +1,4 @@
-package net.sf.jrtps.message.data;
+package net.sf.jrtps.message;
 
 import java.nio.ByteOrder;
 
@@ -6,9 +6,10 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * This abstract class is a base class for different encapsulation schemes.
+ * DataEncapsulation is used by <i>Data</i> submessage.
  * 
  * @author mcr70
- * 
+ * @see Data
  */
 public abstract class DataEncapsulation {
     public static final byte[] CDR_BE_HEADER = new byte[] { 0, 0, 0, 0 };
@@ -16,6 +17,14 @@ public abstract class DataEncapsulation {
     public static final byte[] PL_CDR_BE_HEADER = new byte[] { 0, 2, 0, 0 };
     public static final byte[] PL_CDR_LE_HEADER = new byte[] { 0, 3, 0, 0 };
 
+    /**
+     * <i>This method is not implemented at the moment.</i> Currently, it is only possible to
+     * use predefined DataEncapsulations: CDREncapsulation and ParameterListEncapsulation 
+     * 
+     * @param dEnc
+     * @see CDREncapsulation
+     * @see ParameterListEncapsulation
+     */
     public static void registerDataEncapsulation(DataEncapsulation dEnc) {
         // TODO: implement me
     }

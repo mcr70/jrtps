@@ -1,8 +1,8 @@
 package net.sf.jrtps.builtin;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.DataEncapsulation;
-import net.sf.jrtps.message.data.ParameterListEncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
+import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.DefaultMulticastLocator;
 import net.sf.jrtps.message.parameter.DefaultUnicastLocator;

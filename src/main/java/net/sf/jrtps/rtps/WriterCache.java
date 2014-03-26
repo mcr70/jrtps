@@ -1,8 +1,7 @@
-package net.sf.jrtps;
+package net.sf.jrtps.rtps;
 
-import java.util.SortedSet;
+import java.util.LinkedList;
 
-import net.sf.jrtps.rtps.CacheChange;
 
 /**
  * WriterCache represents writers history cache from the RTPSWriter point of
@@ -12,7 +11,7 @@ import net.sf.jrtps.rtps.CacheChange;
  * @author mcr70
  * 
  */
-public interface WriterCache {
+public interface WriterCache<T> {
     /**
      * Gets the smallest sequence number available in history cache.
      * 
@@ -29,10 +28,10 @@ public interface WriterCache {
 
     /**
      * Gets all the CacheChanges since given sequence number.
+     * Returned CacheChanges are ordered by sequence numbers.
      * 
-     * @param seqNum
-     *            Highest sequence number reader has
-     * @return SortedSet
+     * @param seqNum sequence number to compare
+     * @return changes since given seqNum. Returned List is newly allocated.
      */
-    public SortedSet<CacheChange> getChangesSince(long seqNum);
+    public LinkedList<Sample<T>> getChangesSince(long seqNum);
 }

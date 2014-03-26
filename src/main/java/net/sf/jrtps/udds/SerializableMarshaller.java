@@ -11,8 +11,8 @@ import java.util.Comparator;
 import java.util.LinkedList;
 
 import net.sf.jrtps.Marshaller;
-import net.sf.jrtps.message.data.CDREncapsulation;
-import net.sf.jrtps.message.data.DataEncapsulation;
+import net.sf.jrtps.message.CDREncapsulation;
+import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.slf4j.Logger;
@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This Marshaller marshalls objects by writing them to
  * <i>ObjectOutputStream</i> and reading from <i>ObjectInputStream</i>.
- * JavaSerializableMarshaller supports net.sf.jrtps.udds.Key annotation to form
+ * SerializableMarshaller supports net.sf.jrtps.udds.Key annotation to form
  * a Key for the marshalled Object.
  * 
  * @see java.io.ObjectOutputStream
@@ -29,10 +29,9 @@ import org.slf4j.LoggerFactory;
  * @see net.sf.jrtps.udds.Key
  * 
  * @author mcr70
- * 
  */
-public class JavaSerializableMarshaller implements Marshaller<Serializable> {
-    private static final Logger log = LoggerFactory.getLogger(JavaSerializableMarshaller.class);
+class SerializableMarshaller implements Marshaller<Serializable> {
+    private static final Logger log = LoggerFactory.getLogger(SerializableMarshaller.class);
 
     private final int bufferSize;
     private final Field[] keyFields;
@@ -44,7 +43,7 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
      * 
      * @param type
      */
-    public JavaSerializableMarshaller(Class<?> type) {
+    public SerializableMarshaller(Class<?> type) {
         this(type, 1024);
     }
 
@@ -57,7 +56,7 @@ public class JavaSerializableMarshaller implements Marshaller<Serializable> {
      *            the size of the buffer that is used during marshall and
      *            unmarshall
      */
-    public JavaSerializableMarshaller(Class<?> type, int bufferSize) {
+    public SerializableMarshaller(Class<?> type, int bufferSize) {
         this.bufferSize = bufferSize;
         this.keyFields = getKeyFields(type);
         this.hasKey = keyFields.length > 0;

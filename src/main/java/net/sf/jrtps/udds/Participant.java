@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -87,6 +88,8 @@ public class Participant {
 
     private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
 
+    private Guid guid;
+
     /**
      * Create a Participant with domainId 0 and participantId 0.
      * 
@@ -134,7 +137,14 @@ public class Participant {
         locators.add(mcLoc);
         locators.add(ucLoc);
 
-        rtps_participant = new RTPSParticipant(domainId, participantId, threadPoolExecutor, locators,
+        Random r = new Random(System.currentTimeMillis());
+        int vmid = r.nextInt();
+        byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
+                (byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
+
+        this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+        
+        rtps_participant = new RTPSParticipant(guid, domainId, threadPoolExecutor, locators,
                 discoveredParticipants, config);
         rtps_participant.start();
 
@@ -271,18 +281,19 @@ public class Participant {
     public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
         logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 
-        Marshaller<?> m = getMarshaller(type);
-        RTPSReader<T> rtps_reader = null;
+        Marshaller<T> m = getMarshaller(type);
+        EntityId eId = null;
+        
         if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_TOPIC_READER, topicName, m, qos);
+            eId = EntityId.SEDP_BUILTIN_TOPIC_READER;
         } else if (SubscriptionData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER, topicName, m, qos);
+            eId = EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER;
         } else if (PublicationData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER, topicName, m, qos);
+            eId = EntityId.SEDP_BUILTIN_PUBLICATIONS_READER;
         } else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER, topicName, m, qos);
+            eId = EntityId.SPDP_BUILTIN_PARTICIPANT_READER;
         } else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_reader = rtps_participant.createReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER, topicName, m, qos);
+            eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER;
         } else {
             int myIdx = userEntityIdx++;
             byte[] myKey = new byte[3];
@@ -296,11 +307,13 @@ public class Participant {
                 kind = 0x04; // User defined reader, no key
             }
 
-            rtps_reader = rtps_participant.createReader(new EntityId.UserDefinedEntityId(myKey, kind), topicName, m,
-                    qos);
+            eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
 
-        DataReader<T> reader = new DataReader<T>(this, type, rtps_reader);
+        HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
+        RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, hc, qos);
+
+        DataReader<T> reader = new DataReader<T>(this, type, rtps_reader, hc);
         readers.add(reader);
 
         if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
@@ -310,6 +323,7 @@ public class Participant {
             SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
             sw.write(rd);
         }
+        
         return reader;
     }
 
@@ -352,23 +366,18 @@ public class Participant {
     public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
         logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
 
-        Marshaller<?> m = getMarshaller(type);
-        HistoryCache<T> wCache = new HistoryCache(m, qos);
-        RTPSWriter<T> rtps_writer = null;
+        Marshaller<T> m = getMarshaller(type);
+        EntityId eId = null;
         if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER, topicName, wCache, qos);
+            eId = EntityId.SEDP_BUILTIN_TOPIC_WRITER;
         } else if (SubscriptionData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER, topicName, wCache,
-                    qos);
+            eId = EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER;
         } else if (PublicationData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_writer = rtps_participant.createWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER, topicName, wCache,
-                    qos);
+            eId = EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER;
         } else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_writer = rtps_participant.createWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER, topicName, wCache,
-                    qos);
+            eId = EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER;
         } else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-            rtps_writer = rtps_participant.createWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER, topicName, wCache,
-                    qos);
+            eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER;
         } else {
             int myIdx = userEntityIdx++;
             byte[] myKey = new byte[3];
@@ -381,11 +390,14 @@ public class Participant {
                 kind = 0x03; // User defined writer, no key
             }
 
-            rtps_writer = rtps_participant.createWriter(new EntityId.UserDefinedEntityId(myKey, kind), topicName,
-                    wCache, qos);
+            eId = new EntityId.UserDefinedEntityId(myKey, kind);            
         }
 
-        DataWriter<T> writer = new DataWriter<T>(this, type, rtps_writer, wCache);
+        
+        HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
+        RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
+
+        DataWriter<T> writer = new DataWriter<>(this, type, rtps_writer, hc);
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
@@ -406,12 +418,12 @@ public class Participant {
      * Marshaller is preferred over default Marshaller. Default Marshaller is
      * JavaSerializationMarshaller, which uses java serialization.
      * 
-     * @see JavaSerializableMarshaller
+     * @see SerializableMarshaller
      * 
      * @param type
      * @param m
      */
-    public void setMarshaller(Class<?> type, Marshaller<?> m) {
+    public <T> void setMarshaller(Class<T> type, Marshaller<T> m) {
         marshallers.put(type, m);
     }
 
@@ -444,21 +456,21 @@ public class Participant {
      * @param type
      * @return Marshaller
      */
-    private Marshaller<?> getMarshaller(Class<?> type) {
+    private <T> Marshaller<T> getMarshaller(Class<T> type) {
         Marshaller<?> m = marshallers.get(type);
         if (m == null) {
             if (Externalizable.class.isAssignableFrom(type)) {
-                m = new JavaExternalizableMarshaller((Class<? extends Externalizable>) type);
+                m = new ExternalizableMarshaller((Class<? extends Externalizable>) type);
             } else if (Serializable.class.isAssignableFrom(type)) {
-                m = new JavaSerializableMarshaller(type);
+                m = new SerializableMarshaller(type);
             } else {
-                logger.error("No marshaller registered for {} and it is not Serializable", type);
+                logger.error("No marshaller registered for {} and it is not Serializable or Externalizable", type);
 
                 throw new IllegalArgumentException("No marshaller found for " + type);
             }
         }
 
-        return m;
+        return (Marshaller<T>) m;
     }
 
     /**

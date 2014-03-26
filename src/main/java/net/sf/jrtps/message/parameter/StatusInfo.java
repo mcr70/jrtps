@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.rtps.CacheChange;
+import net.sf.jrtps.rtps.ChangeKind;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 import org.slf4j.Logger;
@@ -21,11 +21,11 @@ public class StatusInfo extends Parameter implements InlineParameter {
 
     private byte[] flags;
 
-    public StatusInfo(CacheChange.Kind... changeKinds) {
+    public StatusInfo(ChangeKind... changeKinds) {
         super(ParameterEnum.PID_STATUS_INFO);
         this.flags = new byte[4];
 
-        for (CacheChange.Kind kind : changeKinds) {
+        for (ChangeKind kind : changeKinds) {
             switch (kind) {
             case DISPOSE:
                 this.flags[3] |= 0x1;
@@ -76,16 +76,36 @@ public class StatusInfo extends Parameter implements InlineParameter {
         return (flags[3] & 0x2) == 0x2;
     }
 
-    public List<CacheChange.Kind> getChangeKinds() {
-        List<CacheChange.Kind> ckList = new LinkedList<>();
+    
+    
+    public List<ChangeKind> getChangeKinds() {
+        List<ChangeKind> ckList = new LinkedList<>();
         if (isDisposed()) {
-            ckList.add(CacheChange.Kind.DISPOSE);
+            ckList.add(ChangeKind.DISPOSE);
         }
         if (isUnregistered()) {
-            ckList.add(CacheChange.Kind.UNREGISTER);
+            ckList.add(ChangeKind.UNREGISTER);
         }
 
         return ckList;
     }
 
+    /**
+     * Gets the Kind of change represented by this StatusInfo. 
+     * Note, that only one kind is returned, even if there are multiple flags set on
+     * StatusInfo. Most significant change is DISPOSE, then UNREGISTER, and finally WRITE.
+     * 
+     * @return change kind
+     */
+    public ChangeKind getKind() {
+        if (isDisposed()) {
+            return ChangeKind.DISPOSE;
+        }
+        else if (isUnregistered()) {
+            return ChangeKind.UNREGISTER;
+        }
+        else {
+            return ChangeKind.WRITE;
+        }
+    }
 }

@@ -15,7 +15,7 @@ udds examples
 +---
 
 
-* Creating a DataWriter
+* Using a DataWriter
  
  To create a <DataWriter>, you need to specify at least the type of the Data that will be written by
  the created DataWriter. Using a <DataWriter>, that will write messages of type <HelloMessage>,
@@ -30,7 +30,7 @@ udds examples
  serialization to marshall HelloMessage to wire. More on Marshallers later.
  
  
-* Creating a DataReader
+* Using a DataReader
 
  Creating a <DataReader> is done similarily. To get data from DataReader, one can add a <SampleListener>
  to it.
@@ -45,3 +45,7 @@ udds examples
  });
  
 +--- 
+
+ With DDS(and udds), changes to data are communicated as samples. A <Sample> holds the timestamp
+ when the corresponding change occured, and lifecycle information of the change. I.e. if the sample
+ represents an update to data, or a disposal of data. 
