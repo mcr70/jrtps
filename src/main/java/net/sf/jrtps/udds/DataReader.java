@@ -97,7 +97,7 @@ public class DataReader<T> extends Entity<T> {
      * 
      * @return a Set of instances
      */
-    public Set<Sample<T>> getInstances() {
+    Set<Sample<T>> getInstances() {
         return hCache.getInstances();
     }
     /**

@@ -16,8 +16,6 @@ public class HelloReader {
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();
         
-        System.out.println("Instances: " + dr.getInstances());
-        
         p.close();
     }
 }
