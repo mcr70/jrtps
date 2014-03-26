@@ -106,7 +106,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
     
     private void addChange(Sample<T> cc) {
-        log.debug("addChange({})", cc);
+        log.trace("addChange({})", cc);
         KeyHash key = cc.getKey();
         ChangeKind kind = cc.getKind();
         
@@ -117,7 +117,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
             Instance<T> inst = instances.get(key);
 
             if (inst == null) {
-                log.debug("[{}] Creating new instance {}", entityId, key);
+                log.trace("[{}] Creating new instance {}", entityId, key);
 
                 if (resource_limits.getMaxInstances() != -1 && 
                         instances.size() >= resource_limits.getMaxInstances()) {
@@ -217,7 +217,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
-        log.debug("changesBegin({})", id);
+        log.trace("changesBegin({})", id);
         List<Sample<T>> pendingSamples = new LinkedList<>();
         incomingChanges.put(id, pendingSamples);
     }
@@ -232,7 +232,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
     @Override
     public void changesEnd(int id) {
-        log.debug("changesEnd({})", id);        
+        log.trace("changesEnd({})", id);        
 
         List<Sample<T>> pendingSamples = incomingChanges.remove(id); 
 
