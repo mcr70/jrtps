@@ -271,4 +271,33 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         
         return instSet;
     }
+    
+    /**
+     * Gets a instance history of given Sample. History is presented as a List of Samples 
+     * that is ordered so that list item 0 is the most recent sample of that instance.<p>
+     * 
+     * If the Sample represents an instance, which is not known to this DataReader, null
+     * is returned.
+     * 
+     * @param sample
+     * @return instance history, or null if there was no matching instance.
+     */
+    List<Sample<T>> getInstanceHistory(Sample<T> sample) {
+        Instance<T> instance = instances.get(sample.getKey());
+        if (instance != null) {
+            return instance.getHistory();
+        }
+        
+        return null;
+    }
+
+    List<Sample<T>> getSamplesSince(long l) {
+        LinkedList<Sample<T>> samples = new LinkedList<>();
+        for (Sample<T> s : changes) {
+            if (s.getSequenceNumber() > l) { // Alternatively if (s.getTimestamp() > l)
+                samples.addAll(changes.tailSet(s));
+            }
+        }
+        return samples;
+    }
 }
