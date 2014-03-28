@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 
@@ -97,32 +98,20 @@ public class DataReader<T> extends Entity<T> {
      * 
      * @return a Set of instances
      */
-    public Set<Sample<T>> getInstances() {
+    public Set<Instance<T>> getInstances() {
         return hCache.getInstances();
     }
 
     /**
-     * Gets the latest Sample of given instance.
-     * @param s 
-     * @return Latest Sample
+     * Gets an Instance with given key. Key of the Instance may be obtained from Sample.
+     * @param key KeyHash of the Instance
+     * @return Instance with given key, or null if there is no such Instance available
+     * @see Sample#getKey()
      */
-    public Sample<T> getInstance(Sample<T> s) {
-        return getInstanceHistory(s).get(0);
+    public Instance<T> getInstance(KeyHash key) {
+        return hCache.getInstance(key);
     }
-
-    /**
-     * Gets a instance history of given Sample. History is presented as a List of Samples 
-     * that is ordered so that list item 0 is the most recent sample of that instance.<p>
-     * 
-     * If the Sample represents an instance, which is not known to this DataReader, null
-     * is returned.
-     * 
-     * @param sample
-     * @return instance history, or null if there was no matching instance.
-     */
-    public List<Sample<T>> getInstanceHistory(Sample<T> s) {
-        return hCache.getInstanceHistory(s);
-    }
+    
     
     /**
      * Gets all the samples this DataReader knows about. Samples are returned in the order
@@ -131,17 +120,7 @@ public class DataReader<T> extends Entity<T> {
      * @return all the Samples
      */
     public List<Sample<T>> getSamples() {
-        return getSamplesSince(0);
-    }
-    
-    /**
-     * Gets all the samples since given timestamp.
-     * 
-     * @param timestamp
-     * @return Samples since given timestamp
-     */
-    public List<Sample<T>> getSamplesSince(long timestamp) {
-        return hCache.getSamplesSince(timestamp);
+        return hCache.getSamplesSince(0);
     }
     
     /**
@@ -150,10 +129,8 @@ public class DataReader<T> extends Entity<T> {
      * @return all the samples that have been received after given Sample
      */
     public List<Sample<T>> getSamplesSince(Sample<T> s) {
-        return getSamplesSince(s.getSequenceNumber());
+        return hCache.getSamplesSince(s.getSequenceNumber());
     }
-    
-    
 
     List<Sample<T>> takeSamples() {
         return null; // NOT TO BE IMPLEMENTED
