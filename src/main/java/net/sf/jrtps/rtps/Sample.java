@@ -140,7 +140,8 @@ public class Sample<T> {
     }
 
     /**
-     * Gets the key of this Sample.
+     * Gets the key of this Sample. Key of the Sample is used to distinguish between
+     * instances, when transmitting Samples over the wire.
      * 
      * @return KeyHash, or null if this Sample does not have a key.
      */

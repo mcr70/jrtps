@@ -261,34 +261,13 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
 
     // --- experimental code follows. These are paired with the ones in DataReader  ----------------
-    Set<Sample<T>> getInstances() {
-        Set<Sample<T>> instSet = new HashSet<>();
-        
+    Set<Instance<T>> getInstances() {
         Collection<Instance<T>> values = instances.values();
-        for (Instance<T> inst : values) {
-            instSet.add(inst.getLatest());
-        }
-        
-        return instSet;
+        return new HashSet<>(values);
     }
     
-    /**
-     * Gets a instance history of given Sample. History is presented as a List of Samples 
-     * that is ordered so that list item 0 is the most recent sample of that instance.<p>
-     * 
-     * If the Sample represents an instance, which is not known to this DataReader, null
-     * is returned.
-     * 
-     * @param sample
-     * @return instance history, or null if there was no matching instance.
-     */
-    List<Sample<T>> getInstanceHistory(Sample<T> sample) {
-        Instance<T> instance = instances.get(sample.getKey());
-        if (instance != null) {
-            return instance.getHistory();
-        }
-        
-        return null;
+    Instance<T> getInstance(KeyHash key) {
+        return instances.get(key);
     }
 
     List<Sample<T>> getSamplesSince(long l) {
