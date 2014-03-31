@@ -136,5 +136,15 @@ public class DataReader<T> extends Entity<T> {
         return null; // NOT TO BE IMPLEMENTED
         // trying to avoid read/take semantics
     }
+    
+    /**
+     * Clears Samples from the history cache. Once cleared, they cannot be retrieved from
+     * the cache anymore.
+     * @param samples a List of Samples to clear.
+     */
+    public void clear(List<Sample<T>> samples) {
+        throw new RuntimeException("clear(...) not implemented");
+    }
+    
     // ----  End of experimental code
 }
