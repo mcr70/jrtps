@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
-import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 
@@ -103,13 +102,23 @@ public class DataReader<T> extends Entity<T> {
     }
 
     /**
-     * Gets an Instance with given key. Key of the Instance may be obtained from Sample.
-     * @param key KeyHash of the Instance
-     * @return Instance with given key, or null if there is no such Instance available
-     * @see Sample#getKey()
+     * Gets an Instance of given Sample. Due the asynchronous nature of DDS applications, 
+     * instance might be disposed after the Sample has been passed to application. In that case,
+     * this method will return null.
+     * <pre>
+     *           App                          DataReader                  RTPSReader
+     *            |------- getSamples() --------->|                           |
+     *            |<------ samples ---------------|                           |
+     *            |                               |<-------- dispose ---------|
+     *            |------- getInstance() -------->|                           |
+     *            |<------ null ------------------|                           |
+     *            |                               |                           |
+     * </pre>
+     * @param sample 
+     * @return Instance of given Sample, or null if there is no such Instance available.
      */
-    public Instance<T> getInstance(KeyHash key) {
-        return hCache.getInstance(key);
+    public Instance<T> getInstance(Sample<T> sample) {
+        return hCache.getInstance(sample.getKey());
     }
     
     
