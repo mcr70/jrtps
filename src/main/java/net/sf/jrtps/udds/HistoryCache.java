@@ -185,9 +185,10 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public long getSeqNumMin() {
         long seqNumMin = 0;
-        Sample<T> aSample = samples.first();
-        if (aSample != null) {
-            seqNumMin = aSample.getSequenceNumber();
+        synchronized (samples) {
+            if (samples.size() > 0) {
+                seqNumMin = samples.first().getSequenceNumber();
+            }
         }
         
         return seqNumMin;
@@ -201,9 +202,11 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public long getSeqNumMax() {
         long seqNumMax = 0;
-        Sample<T> aSample = samples.last();
-        if (aSample != null) {
-            seqNumMax = aSample.getSequenceNumber();
+        
+        synchronized (samples) {
+            if (samples.size() > 0) {
+                seqNumMax = samples.last().getSequenceNumber();
+            }
         }
 
         return seqNumMax;

@@ -59,6 +59,7 @@ class RTPSMessageReceiver implements Runnable {
             try {
                 // NOTE: We can have only one MessageReceiver. pending samples
                 // concept relies on it.
+                // NOTE2: pending samples concept has changed. Check this.
                 byte[] bytes = queue.take();
                 Message msg = new Message(new RTPSByteBuffer(bytes));
                 logger.debug("Parsed RTPS message {}", msg);
@@ -66,6 +67,8 @@ class RTPSMessageReceiver implements Runnable {
                 handleMessage(msg);
             } catch (InterruptedException e) {
                 running = false;
+            } catch(Exception e) {
+                logger.warn("Got unexpected exception during Message handling", e);
             }
         }
 
