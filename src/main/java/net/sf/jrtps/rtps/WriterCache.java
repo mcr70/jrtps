@@ -33,5 +33,5 @@ public interface WriterCache<T> {
      * @param seqNum sequence number to compare
      * @return changes since given seqNum. Returned List is newly allocated.
      */
-    public LinkedList<Sample<T>> getChangesSince(long seqNum);
+    public LinkedList<Sample<T>> getSamplesSince(long seqNum);
 }

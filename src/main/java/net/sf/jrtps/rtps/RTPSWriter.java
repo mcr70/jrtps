@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Samples are written through an implementation of WriterCache, which will be
  * given when creating RTPSWriter with RTPSParticipant. When RTPSWriter needs to
- * write samples to RTPSReader, it will query WriterCache for the CacheChanges.
+ * write samples to RTPSReader, it will query WriterCache for the Samples.
  * 
  * @see WriterCache
  * @see RTPSParticipant#createWriter(EntityId, String, WriterCache,
@@ -167,7 +167,7 @@ public class RTPSWriter<T> extends Endpoint {
     }
 
     /**
-     * Close this writer. Closing a writer clears its cache of changes.
+     * Close this writer.
      */
     public void close() {
         if (hbAnnounceTask != null) {
@@ -289,9 +289,9 @@ public class RTPSWriter<T> extends Endpoint {
      */
     private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
         Message m = new Message(getGuid().getPrefix());
-        LinkedList<Sample<T>> changes = writer_cache.getChangesSince(readersHighestSeqNum);
+        LinkedList<Sample<T>> samples = writer_cache.getSamplesSince(readersHighestSeqNum);
 
-        if (changes.size() == 0) {
+        if (samples.size() == 0) {
             log.debug("[{}] Remote reader already has all the data", getEntityId(),
                     proxy, readersHighestSeqNum);
             return;
@@ -300,20 +300,20 @@ public class RTPSWriter<T> extends Endpoint {
         long prevTimeStamp = 0;
         EntityId proxyEntityId = proxy.getEntityId();
 
-        for (Sample<T> cc : changes) {
+        for (Sample<T> aSample : samples) {
             try {
-                long timeStamp = cc.getTimestamp();
+                long timeStamp = aSample.getTimestamp();
                 if (timeStamp > prevTimeStamp) {
                     InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
                     m.addSubMessage(infoTS);
                 }
                 prevTimeStamp = timeStamp;
 
-                log.trace("Marshalling {}", cc.getData());
-                Data data = createData(proxyEntityId, cc);
+                log.trace("Marshalling {}", aSample.getData());
+                Data data = createData(proxyEntityId, aSample);
                 m.addSubMessage(data);
             } catch (IOException ioe) {
-                log.warn("[{}] Failed to add cache change to message", getEntityId(), ioe);
+                log.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
             }
         }
 
@@ -324,8 +324,8 @@ public class RTPSWriter<T> extends Endpoint {
             m.addSubMessage(hb);
         }
 
-        long firstSeqNum = changes.getFirst().getSequenceNumber();
-        long lastSeqNum = changes.getLast().getSequenceNumber();
+        long firstSeqNum = samples.getFirst().getSequenceNumber();
+        long lastSeqNum = samples.getLast().getSequenceNumber();
         
         log.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
 
@@ -390,10 +390,8 @@ public class RTPSWriter<T> extends Endpoint {
      * Checks, if a given change number has been acknowledged by every known
      * matched reader.
      * 
-     * @param sequenceNumber
-     *            sequenceNumber of a change to check
-     * @return true, if every matched reader has acknowledged given change
-     *         number
+     * @param sequenceNumber sequenceNumber of a change to check
+     * @return true, if every matched reader has acknowledged given change number
      */
     public boolean isAcknowledgedByAll(long sequenceNumber) {
         for (ReaderProxy proxy : readerProxies.values()) {
