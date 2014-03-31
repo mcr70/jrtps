@@ -54,6 +54,17 @@ public class Instance <T> {
     }
 
     /**
+     * Removes a Sample from history if this Instance.
+     * @param sample Sample to remove
+     */
+    void removeSample(Sample<T> sample) {
+        synchronized (history) {
+            history.remove(sample);
+        }
+    }
+    
+    
+    /**
      * Gets the history of this instance. First element in the List returned represents
      * the latest Sample. Note, that returned List represents history at the time of
      * calling this method.
