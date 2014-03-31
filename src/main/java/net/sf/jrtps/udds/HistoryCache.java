@@ -185,12 +185,11 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public long getSeqNumMin() {
         long seqNumMin = 0;
-        synchronized (samples) {
-            if (samples.size() > 0) {
-                seqNumMin = samples.first().getSequenceNumber();
-            }
+        Sample<T> aSample = samples.first();
+        if (aSample != null) {
+            seqNumMin = aSample.getSequenceNumber();
         }
-
+        
         return seqNumMin;
     }
 
@@ -202,10 +201,9 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public long getSeqNumMax() {
         long seqNumMax = 0;
-        synchronized (samples) {
-            if (samples.size() > 0) {
-                seqNumMax = samples.last().getSequenceNumber();
-            }
+        Sample<T> aSample = samples.last();
+        if (aSample != null) {
+            seqNumMax = aSample.getSequenceNumber();
         }
 
         return seqNumMax;
@@ -235,7 +233,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
         List<Sample<T>> pendingSamples = incomingSamples.remove(id); 
 
-        // Add each pending CacheChange to HistoryCache
+        // Add each pending Sample to HistoryCache
         for (Sample<T> cc : pendingSamples) {
             long latestSampleTime = 0;
             if (samples.size() > 0) {
@@ -267,5 +265,16 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     
     Instance<T> getInstance(KeyHash key) {
         return instances.get(key);
+    }
+    
+    void clear(List<Sample<T>> samples) {
+        for (Sample<T> s : samples) {
+            Instance<T> inst = instances.get(s.getKey());
+            inst.removeSample(s);
+            
+            synchronized (samples) {
+                samples.remove(s);    
+            }
+        }
     }
 }

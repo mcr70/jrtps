@@ -143,7 +143,7 @@ public class DataReader<T> extends Entity<T> {
      * @param samples a List of Samples to clear.
      */
     public void clear(List<Sample<T>> samples) {
-        throw new RuntimeException("clear(...) not implemented");
+        hCache.clear(samples);
     }
     
     // ----  End of experimental code
