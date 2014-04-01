@@ -1,5 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
+import java.util.Arrays;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
@@ -43,5 +45,18 @@ public class KeyHash extends Parameter implements InlineParameter {
     public void writeTo(RTPSByteBuffer bb) {
         writeBytes(bb); // TODO: default writing. just writes byte[] in super
                         // class
+    }
+    
+    
+    public boolean equals(Object other) {
+        if (other instanceof KeyHash) {
+            return Arrays.equals(getKeyHash(), ((KeyHash)other).getKeyHash());
+        }
+        
+        return false;
+    }
+    
+    public int hashCode() {
+        return Arrays.hashCode(getKeyHash());
     }
 }
