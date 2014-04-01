@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Guid;
@@ -19,6 +20,7 @@ import net.sf.jrtps.types.Guid;
  *            Object that is used with uDDS.
  */
 public class DataWriter<T> extends Entity<T> {
+    private final List<ReaderListener> rListeners = new LinkedList<>();
     private final RTPSWriter<T> rtps_writer;
     private final HistoryCache<T> hCache;
 
@@ -108,7 +110,7 @@ public class DataWriter<T> extends Entity<T> {
     }
 
     /**
-     * Gets a Set of instances this DataWriter knows.   
+     * Gets a Set of instances <i>this</i> DataWriter knows.   
      * 
      * @return a Set of instances
      */
@@ -134,5 +136,46 @@ public class DataWriter<T> extends Entity<T> {
      */
     void notifyReaders() {
         rtps_writer.notifyReaders();
+    }
+
+    /**
+     * Adds a ReaderListener to this DataWriter.
+     * @param rl ReaderListener to add
+     */
+    public void addReaderListener(ReaderListener rl) {
+        synchronized (rListeners) {
+            rListeners.add(rl);
+        }
+    }
+    
+    /**
+     * Removes a ReaderListener from this DataWriter.
+     * @param rl ReaderListener to remove
+     */
+    public void removeReaderListener(ReaderListener rl) {
+        synchronized (rListeners) {
+            rListeners.remove(rl);
+        }
+    }
+
+    void addMatchedReader(SubscriptionData sd) {
+        rtps_writer.addMatchedReader(sd);
+        synchronized (rListeners) {
+            for (ReaderListener rl : rListeners) {
+                rl.readerMatched(sd);
+            }
+        }
+    }
+
+    void removeMatchedReader(SubscriptionData sd) {
+        rtps_writer.removeMatchedReader(sd);
+    }
+
+    void inconsistentQoS(SubscriptionData sd) {
+        synchronized (rListeners) {
+            for (ReaderListener rl : rListeners) {
+                rl.inconsistentQoS(sd);
+            }
+        }
     }
 }
