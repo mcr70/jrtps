@@ -11,13 +11,15 @@ public class HelloWriter {
         Participant p = new Participant(0, 2); // domain 0, participant 2
 
         DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
-
+        
         for (int i = 0; i < 10; i++) {
-            HelloMessage m = new HelloMessage(i, "Hello");
+            HelloMessage m = new HelloMessage(i , "Hello");
             dw.write(m);
             Thread.sleep(1000);
         }
 
+        System.out.println("Created " + dw.getInstances().size() + " instances. Closing Participant.");
+        
         p.close();
     }
 }
