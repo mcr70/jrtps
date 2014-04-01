@@ -8,7 +8,9 @@ import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.Sample;
 
 /**
- * Instance
+ * Instance represents Samples with same distinct ID. Instance has a history, which can be obtained 
+ * from this class. The size of the history is configurable. Default size is 1, which means that only 
+ * a latest Sample is preserved in history. 
  * 
  * @author mcr70
  * @param <T>
@@ -23,11 +25,6 @@ public class Instance <T> {
         this.key = key;
         this.maxSize = historySize;
         this.maxSamplesPerInstance = maxSamplesPerInstance;
-    }
-
-    @Override
-    public int hashCode() {
-        return key.hashCode();
     }
 
     /**
@@ -54,7 +51,7 @@ public class Instance <T> {
     }
 
     /**
-     * Removes a Sample from history if this Instance.
+     * Removes a Sample from history of this Instance.
      * @param sample Sample to remove
      */
     void removeSample(Sample<T> sample) {
@@ -83,5 +80,9 @@ public class Instance <T> {
     
     Sample<T> getLatest() {
         return history.getFirst();
+    }
+
+    public String toString() {
+        return key.toString();
     }
 }

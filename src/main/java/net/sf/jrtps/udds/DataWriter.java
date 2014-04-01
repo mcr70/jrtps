@@ -2,14 +2,14 @@ package net.sf.jrtps.udds;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Guid;
 
 /**
- * This class represents a strongly typed DataWriter in spirit of DDS
- * specification.
+ * This class represents a strongly typed DataWriter in spirit of DDS specification.
  * 
  * @author mcr70
  * 
@@ -44,9 +44,10 @@ public class DataWriter<T> extends Entity<T> {
     }
     
     /**
-     * Writes a sample to subscribed data readers.
+     * Writes a sample to subscribed data readers. By writing a Sample, an Instance is first
+     * created if one did not exists before for a given Sample.
      * 
-     * @param sample
+     * @param sample a Sample to write
      */
     public void write(T sample) {
         LinkedList<T> ll = new LinkedList<>();
@@ -55,7 +56,7 @@ public class DataWriter<T> extends Entity<T> {
     }
 
     /**
-     * Writes a List of samples to subscribed data readers.
+     * Writes a List of samples to subscribed data readers. 
      * 
      * @param samples a List of samples
      */
@@ -68,9 +69,24 @@ public class DataWriter<T> extends Entity<T> {
     }
 
     /**
-     * Dispose a given instance.
+     * Dispose a given instance. Disposing an instance removes it from the Set of know instances
+     * of this DataWriter. In addition, a Sample with ChangeKind.DISPOSE is added to List of changes
+     * that will be transmitted to readers.
      * 
-     * @param instance
+     * After disposing an Instance, it can be recreated by writing a Sample with same ID. In this case,
+     * an Instance will be reborn, but its history consist only of the new Sample just written.
+     * Following diagram illustrates this behavior:  
+     * 
+     * <pre>
+     *     App             Instance history    changes to readers
+     *  1. write(S1)       S1                  S1
+     *  2. write(S2)       S1,S2               S1,S2
+     *  3. dispose(S3)     --                  S1,S2,S3
+     *  4. write(S4)       S4                  S1,S2,S3,S4
+     * </pre>
+     * 
+     * 
+     * @param instance an Instance to dispose
      */
     public void dispose(T instance) {
         LinkedList<T> ll = new LinkedList<>();
@@ -81,7 +97,7 @@ public class DataWriter<T> extends Entity<T> {
     /**
      * Dispose a List of instances.
      * 
-     * @param instances
+     * @param instances a List of Instances to dispose
      */
     public void dispose(List<T> instances) {
         try {
@@ -91,6 +107,15 @@ public class DataWriter<T> extends Entity<T> {
         }
     }
 
+    /**
+     * Gets a Set of instances this DataWriter knows.   
+     * 
+     * @return a Set of instances
+     */
+    public Set<Instance<T>> getInstances() {
+        return hCache.getInstances();
+    }
+    
     RTPSWriter<T> getRTPSWriter() {
         return rtps_writer;
     }

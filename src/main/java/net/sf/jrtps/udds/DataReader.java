@@ -8,8 +8,10 @@ import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 
 /**
- * This class represents a strongly typed DataReader in spirit of DDS
- * specification.
+ * This class represents a strongly typed DataReader in spirit of DDS specification.
+ * DataReader maintains a history cache where it keeps Samples received from writers on the network.
+ * There are two ways to get these Samples from DataReader. One is by using any of the getXXX methods,
+ * and the other is by registering a SampleListener.
  * 
  * @author mcr70
  * 
@@ -92,8 +94,7 @@ public class DataReader<T> extends Entity<T> {
 
     
     /**
-     * Gets a Set of instances this DataReader knows. Each Sample returned
-     * is the latest sample of that instance.
+     * Gets a Set of instances this DataReader knows. 
      * 
      * @return a Set of instances
      */
@@ -102,19 +103,19 @@ public class DataReader<T> extends Entity<T> {
     }
 
     /**
-     * Gets an Instance of given Sample. Due the asynchronous nature of DDS applications, 
+     * Gets an Instance of given Sample. Due to asynchronous nature of DDS applications, 
      * instance might be disposed after the Sample has been passed to application. In that case,
      * this method will return null.
      * <pre>
-     *           App                          DataReader                  RTPSReader
-     *            |------- getSamples() --------->|                           |
-     *            |<------ samples ---------------|                           |
-     *            |                               |<-------- dispose ---------|
-     *            |------- getInstance() -------->|                           |
-     *            |<------ null ------------------|                           |
-     *            |                               |                           |
+     *   App                      DataReader                  RTPSReader
+     *    |------- getSamples() ----->|                           |
+     *    |<------ samples -----------|                           |
+     *    |                           |<-------- dispose ---------|
+     *    |------- getInstance() ---->|                           |
+     *    |<------ null --------------|                           |
+     *    |                           |                           |
      * </pre>
-     * @param sample 
+     * @param sample a Sample, whose instance is retrieved 
      * @return Instance of given Sample, or null if there is no such Instance available.
      */
     public Instance<T> getInstance(Sample<T> sample) {
@@ -133,8 +134,9 @@ public class DataReader<T> extends Entity<T> {
     }
     
     /**
-     * Gets all the Samples that have been received after given Sample.
-     * @param s
+     * Gets all the Samples that have been received after given Sample. 
+     * 
+     * @param s a Sample to compare.
      * @return all the samples that have been received after given Sample
      */
     public List<Sample<T>> getSamplesSince(Sample<T> s) {
@@ -148,11 +150,15 @@ public class DataReader<T> extends Entity<T> {
     
     /**
      * Clears Samples from the history cache. Once cleared, they cannot be retrieved from
-     * the cache anymore.
+     * the cache anymore. Note, that clearing samples from readers history cache is not the same thing as 
+     * writer disposing. Reader clearing samples is merely a local operation while writer disposal
+     * is a global operation affecting all the entities in the network. Clearing can be thought of as 
+     * a manual resource control on reader side.
+     * 
      * @param samples a List of Samples to clear.
      */
     public void clear(List<Sample<T>> samples) {
-        hCache.clear(samples);
+        hCache.clear(samples); 
     }
     
     // ----  End of experimental code
