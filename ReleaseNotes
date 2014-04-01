@@ -1,6 +1,9 @@
 0.7.0
     - DataWriter.assertLiveliness() to support Liveliness kind MANUAL_BY_TOPIC.
-    
+    - Expose Instances with DataReader & DataWriter. Also, for DataReader various getXXX methods
+      to get Samples from history cache (in addition to using SampleListener).
+    - FIX: KeyHash equals & hashCode, which is used as a key in Map that stores Instances
+        
 0.6.4
     - Some refactoring, general bug fixing and documentation.
     - CacheChange is removed. Sample is used instead. 
