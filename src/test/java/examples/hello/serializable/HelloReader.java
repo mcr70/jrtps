@@ -16,6 +16,8 @@ public class HelloReader {
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();
         
+        System.out.println("Received " + dr.getInstances().size() + " instances from writers.");
+        
         p.close();
     }
 }
