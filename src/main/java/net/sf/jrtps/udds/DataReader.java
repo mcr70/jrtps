@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 
@@ -21,8 +22,10 @@ import net.sf.jrtps.rtps.Sample;
  *            Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity<T> {
+    private final List<WriterListener> wListeners = new LinkedList<>();
     private final RTPSReader<T> rtps_reader;
     private final HistoryCache<T> hCache;
+
 
     /**
      * Package access. This class is only instantiated by Participant class.
@@ -162,4 +165,47 @@ public class DataReader<T> extends Entity<T> {
     }
     
     // ----  End of experimental code
+    
+    
+    /**
+     * Adds a WriterListener to this DataReader.
+     * @param rl WriterListener to add
+     */
+    public void addWriterListener(WriterListener rl) {
+        synchronized (wListeners) {
+            wListeners.add(rl);
+        }
+    }
+    
+    /**
+     * Removes a WriterListener from this DataReader.
+     * @param rl WriterListener to remove
+     */
+    public void removeWriterListener(WriterListener rl) {
+        synchronized (wListeners) {
+            wListeners.remove(rl);
+        }
+    }
+
+    void addMatchedWriter(PublicationData pd) {
+        rtps_reader.addMatchedWriter(pd);
+        synchronized (wListeners) {
+            for (WriterListener wl : wListeners) {
+                wl.writerMatched(pd);
+            }
+        }
+    }
+
+    void removeMatchedWriter(PublicationData pd) {
+        rtps_reader.removeMatchedWriter(pd);
+    }
+
+    void inconsistentQoS(PublicationData pd) {
+        synchronized (wListeners) {
+            for (WriterListener wl : wListeners) {
+                wl.inconsistentQoS(pd);
+            }
+        }
+    }
+    
 }

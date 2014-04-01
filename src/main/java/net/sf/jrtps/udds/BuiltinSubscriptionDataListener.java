@@ -50,16 +50,15 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
                             .getKey().getEntityId());
 
                     if (offered.isCompatibleWith(requested)) {
-                        w.getRTPSWriter().addMatchedReader(sd);
-                        fireReaderMatched(w, sd);
+                        w.addMatchedReader(sd);
                     } else {
                         log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", sd, w
                                 .getRTPSWriter().getQualityOfService());
-                        fireInconsistentQoS(w, sd);
+                        w.inconsistentQoS(sd);
                     }
                 } else if (w.getRTPSWriter().isMatchedWith(sd) && sdSample.isDisposed()) {
                     // Associated and sample is dispose -> remove association
-                    w.getRTPSWriter().removeMatchedReader(sd);
+                    w.removeMatchedReader(sd);
                 }
             }
         }

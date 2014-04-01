@@ -44,12 +44,11 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
                             .getGuid().getEntityId());
 
                     if (offered.isCompatibleWith(requested)) {
-                        r.getRTPSReader().addMatchedWriter(pd);
-                        fireWriterMatched(r, pd);
+                        r.addMatchedWriter(pd);
                     } else {
                         log.warn("Discovered writer had incompatible QoS with reader. {}, {}", pd, r.getRTPSReader()
                                 .getQualityOfService());
-                        fireInconsistentQoS(r, pd);
+                        r.inconsistentQoS(pd);
                     }
                 } else if (r.getRTPSReader().isMatchedWith(pd) && pdSample.isDisposed()) {
                     // Associated and sample is dispose -> remove association
