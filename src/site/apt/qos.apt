@@ -1,9 +1,10 @@
 Quality of Service
 
  Quality Of Service is a way to configure system, and to make a contract between readers and writers 
- of the expected behavior. During discovery, participants interchange Quality Of Service information
+ of the expected behavior. During discovery, participants interchange Quality of Service information
  of each entity they manage. For any given topic, its readers and writers can start communication
- if their Quality of Service is compatible.
+ if their Quality of Service is compatible. Compatibility of Quality of Service  is presented with 
+ request-offer(RxO) semantics, where writers 'offer' Quality of Service and readers 'request' for it. 
 
 * Reliability
 
@@ -20,7 +21,7 @@ Quality of Service
  be established as BEST_EFFORT, since BEST_EFFORT entities does not use <HeartBeat> and <AckNack>
  sub messages.
  
- Reliability QoS between reader and writer is compatible, if 
+ Reliability QoS between reader and writer is compatible if 
  
 +------
  offered.kind >= requested.kind
@@ -41,7 +42,7 @@ Quality of Service
  Setting Durability of udds <DataWriter>s to a kind greater than TRANSIENT_LOCAL has no effect
  other than making a difference during QoS compatibility checking.
  
- Durability QoS between reader and writer is compatible, if 
+ Durability QoS between reader and writer is compatible if 
  
 +------
  offered.kind >= requested.kind
@@ -61,7 +62,7 @@ Quality of Service
  calling <Participant.assertLiveliness()>. MANUAL_BY_TOPIC kind is used when each writer needs
  to individually call <DataWriter.assertLiveliness()>
  
- Liveliness QoS between reader and writer is compatible, if 
+ Liveliness QoS between reader and writer is compatible if 
  
 +------
  offered.kind >= requested.kind
@@ -70,4 +71,34 @@ Quality of Service
  
  where AUTOMATIC \< MANUAL_BY_PARTICIPANT \< MANUAL_BY_TOPIC
  
+
+Quality of Service - uDDS
+
+ Not all the Quality of Service defined in DDS specification is mandatory from the RTPS point of view.
+ RTPS is about transmission. But DDS specifies a bunch of more QoS settings. 
+ While jRTPS tries to be 100% compatible with RTPS specification, uDDS makes no such promise to 
+ DDS specification. This section is about those settings, and how they are supported by uDDS. 
  
+* History
+
+ This Quality of Service controls how the history cache is maintained by an Entity. 
+
++------ 
+ kind = KEEP_LAST | KEEP_ALL
+ depth = <int>
++------
+
+ DDS specification states that if KEEP_ALL kind is used, writer should block if
+ Reliability is set to RELIABLE and one of Resource Limits is reached.
+
+ 
+* Resource Limits
+
+ Resource limits is used to provide means to control resource usage of an Entity. DDS specification
+ defines following attributes to control resource usage:
+ 
++------
+ max_instances
+ max_samples_per_instance
+ max_samples
++------
