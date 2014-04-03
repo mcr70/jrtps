@@ -415,10 +415,7 @@ public class Participant {
 
     /**
      * Sets a type specific Marshaller. When creating entities, a type specific
-     * Marshaller is preferred over default Marshaller. Default Marshaller is
-     * JavaSerializationMarshaller, which uses java serialization.
-     * 
-     * @see SerializableMarshaller
+     * Marshaller is preferred over other matching Marshallers. 
      * 
      * @param type
      * @param m
