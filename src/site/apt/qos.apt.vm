@@ -91,6 +91,17 @@ Quality of Service - uDDS
  DDS specification states that if KEEP_ALL kind is used, writer should block if
  Reliability is set to RELIABLE and one of Resource Limits is reached.
 
+ Current implementation (${project.version}) will never block writer. I.e. DataWriters History QoS behaves like
+ KEEP_LAST, with default depth of 1. In the DataReader, History QoS behaves similarly.
+ 
+ Note, that history cache will remove oldest samples of the Instance, if history depth is reached.
+ This means, that DataReader might miss some samples, if the reader does not read the samples
+ quick enough. By using SampleListener, one can be sure, that DataReader gets all the samples
+ delivered even if they are removed by history cache. For DataWriter, this means that if DataWriter
+ writes Samples quicker than it can deliver them to Readers, not all the readers might end up having
+ all the samples.
+ 
+ NOTE: This behavior might change in the future
  
 * Resource Limits
 
@@ -102,3 +113,8 @@ Quality of Service - uDDS
  max_samples_per_instance
  max_samples
 +------
+
+ udds supports all of the settings above. When any of the limits is reached, an OutOfResources Exception
+ is thrown. On reader side, resource limits are checked when Samples arrive from the network. Limits are
+ thus checked by the network receiver thread. Application is therefore not aware of the resource limit
+ problem. 

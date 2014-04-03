@@ -54,3 +54,21 @@ udds examples
  With DDS(and udds), changes to data are communicated as samples. A <Sample> holds the timestamp
  when the corresponding change occured, and lifecycle information of the change. I.e. if the sample
  represents an update to data, or a disposal of data. 
+ 
+
+* About Marshallers
+
+ udds uses <Marshaller>s to read/write Data from/to network. When creating a DataReader or DataWriter,
+ the type of the entity is checked (HelloMessage in the examples above), and a matching Marshaller is 
+ assigned to entity being created.
+ 
+ Two builtin Marshallers are provided by udds; ExternalizableMarshaller and SerializationMarshaller.
+ Using these Marshallers is a matter of implementing either <java.io.Externalizable> or <java.io.Serializable>
+ by the type of the entity (HelloMessage above).
+ 
+ One can also provide custom Marshaller to be assigned during creation of entities. Custom Marshallers are
+ registered with a call to Participants 
+ {{{./apidocs/net/sf/jrtps/udds/Participant.html##setMarshaller(java.lang.Class, net.sf.jrtps.Marshaller)}setMarshaller(java.lang.Class, net.sf.jrtps.Marshaller)}} 
+
+ 
+   
