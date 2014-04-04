@@ -77,7 +77,7 @@ Quality of Service - uDDS
  Not all the Quality of Service defined in DDS specification is mandatory from the RTPS point of view.
  RTPS is about transmission. But DDS specifies a bunch of more QoS settings. 
  While jRTPS tries to be 100% compatible with RTPS specification, uDDS makes no such promise to 
- DDS specification. This section is about those settings, and how they are supported by uDDS. 
+ DDS specification. This section is about those settings, and how they are supported by uDDS-${project.version}. 
  
 * History
 
@@ -89,19 +89,18 @@ Quality of Service - uDDS
 +------
 
  DDS specification states that if KEEP_ALL kind is used, writer should block if
- Reliability is set to RELIABLE and one of Resource Limits is reached.
+ Reliability is set to RELIABLE and Samples would be lost by a write operation. KEEP_LATEST kind is used when 
+ service will try to maintain and deliver only the <depth> number of samples. In this case, writer is allowed
+ to drop oldest samples, even if it haven't been sent to readers.
 
- Current implementation (${project.version}) will never block writer. I.e. DataWriters History QoS behaves like
- KEEP_LAST, with default depth of 1. In the DataReader, History QoS behaves similarly.
+ udds supports only KEEP_LAST kind, i.e. writers will never block. In the DataReader, History QoS behaves similarly.
  
- Note, that history cache will remove oldest samples of the Instance, if history depth is reached.
- This means, that DataReader might miss some samples, if the reader does not read the samples
- quick enough. By using SampleListener, one can be sure, that DataReader gets all the samples
+ Note, that this means that DataReader might miss some samples, if the reader does not read the samples
+ quick enough. By using SampleListener, one can be sure that DataReader gets all the samples
  delivered even if they are removed by history cache. For DataWriter, this means that if DataWriter
  writes Samples quicker than it can deliver them to Readers, not all the readers might end up having
  all the samples.
- 
- NOTE: This behavior might change in the future
+
  
 * Resource Limits
 
@@ -114,7 +113,7 @@ Quality of Service - uDDS
  max_samples
 +------
 
- udds supports all of the settings above. When any of the limits is reached, an OutOfResources Exception
- is thrown. On reader side, resource limits are checked when Samples arrive from the network. Limits are
- thus checked by the network receiver thread. Application is therefore not aware of the resource limit
- problem. 
+ udds supports <max_instances> and <max_samples> settings above. When any of the limits is reached, 
+ an OutOfResources Exception is thrown. On reader side, resource limits are checked when Samples arrive 
+ from the network. Limits are thus checked by the network receiver thread, and application is therefore not 
+ aware of the resource limit problem. 

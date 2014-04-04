@@ -8,14 +8,14 @@
 		<menu name="Overview">
             <item name="Overview" href="index.html" />
 			<item name="Getting started" href="usage.html" />
-            <item name="Examples" href="examples.html" />
-            <item name="Configuration" href="configuration.html" />
             <item name="Quality of Service" href="qos.html" />
 		</menu>
 
 		<!-- <menu ref="reports"/> -->
 
-		<menu name="Javadoc">
+		<menu name="Development">
+            <item name="Examples" href="examples.html" />
+            <item name="Configuration" href="configuration.html" />
 			<item name="javadoc" href="apidocs/index.html" />
 		</menu>
 	</body>
