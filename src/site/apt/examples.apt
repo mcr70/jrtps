@@ -14,11 +14,15 @@ udds examples
  Participant p = new Participant(0, 2); // Create participant; domainId 0, participantId 2
 +---
 
+ With DDS(and udds), changes to data are communicated as samples. A <Sample> holds the timestamp
+ when the corresponding change occured, and lifecycle information of the change. I.e. if the sample
+ represents an update to data, or a disposal of data. 
+ 
 
 * Using a DataWriter
  
- To create a <DataWriter>, you need to specify at least the type of the Data that will be written by
- the created DataWriter. Using a DataWriter, that will write messages of type <HelloMessage>,
+ To create a <DataWriter>, you need to specify at least the type of the data that will be written by
+ the created DataWriter. Using a DataWriter, that will writes <Sample>s of type <HelloMessage>,
  can be as simple as this:
 
 +---
@@ -33,7 +37,7 @@ udds examples
 * Using a DataReader
 
  Creating a <DataReader> is done similarly. Using any of the getXXX() methods in DataReader, one gets
- current snapshot of the available data in readers history cache.
+ current snapshot of the available Samples in readers history cache.
  
 +---
  DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
@@ -51,10 +55,6 @@ udds examples
  });
 +--- 
 
- With DDS(and udds), changes to data are communicated as samples. A <Sample> holds the timestamp
- when the corresponding change occured, and lifecycle information of the change. I.e. if the sample
- represents an update to data, or a disposal of data. 
- 
 
 * About Marshallers
 
@@ -64,10 +64,8 @@ udds examples
  
  Two builtin Marshallers are provided by udds; ExternalizableMarshaller and SerializationMarshaller.
  Using these Marshallers is a matter of implementing either <java.io.Externalizable> or <java.io.Serializable>
- by the type of the entity (HelloMessage above).
- 
- One can also provide custom Marshaller to be assigned during creation of entities. Custom Marshallers are
- registered with a call to Participants 
+ by the type (HelloMessage above). One can also provide custom Marshaller to be assigned during creation of entities. 
+ Custom Marshallers are registered with a call to Participants 
  {{{./apidocs/net/sf/jrtps/udds/Participant.html##setMarshaller(java.lang.Class, net.sf.jrtps.Marshaller)}setMarshaller(java.lang.Class, net.sf.jrtps.Marshaller)}} 
 
  

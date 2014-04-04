@@ -3,7 +3,6 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.Sample;
 
@@ -19,12 +18,10 @@ public class Instance <T> {
     private final KeyHash key;
     private final LinkedList<Sample<T>> history = new LinkedList<>();
     private final int maxSize;
-    private final int maxSamplesPerInstance;
 
-    Instance(KeyHash key, int historySize, int maxSamplesPerInstance) {
+    Instance(KeyHash key, int historySize) {
         this.key = key;
         this.maxSize = historySize;
-        this.maxSamplesPerInstance = maxSamplesPerInstance;
     }
 
     /**
@@ -34,11 +31,6 @@ public class Instance <T> {
      *       addition caused a drop of the oldest Sample, which will be returned.  
      */
     Sample<T> addSample(Sample<T> aSample) {
-        if (maxSamplesPerInstance != -1 && 
-                history.size() >= maxSamplesPerInstance) {
-            throw new OutOfResources("max_samples_per_instance=" + maxSamplesPerInstance);
-        }
-
         synchronized (history) {
             history.addFirst(aSample);
 
