@@ -89,7 +89,7 @@ Quality of Service - uDDS
 +------
 
  DDS specification states that if KEEP_ALL kind is used, writer should block if
- Reliability is set to RELIABLE and Samples would be lost by a write operation. KEEP_LATEST kind is used when 
+ Reliability is set to RELIABLE and Samples would be lost by a write operation. KEEP_LAST kind is used when 
  service will try to maintain and deliver only the <depth> number of samples. In this case, writer is allowed
  to drop oldest samples, even if it haven't been sent to readers.
 
