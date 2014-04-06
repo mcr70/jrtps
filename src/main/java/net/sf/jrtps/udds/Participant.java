@@ -414,22 +414,18 @@ public class Participant {
 
 
     /**
-     * Sets a type specific Marshaller. When creating entities, a type specific
-     * Marshaller is preferred over default Marshaller. Default Marshaller is
-     * JavaSerializationMarshaller, which uses java serialization.
+     * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is preferred 
+     * over other matching Marshallers. 
      * 
-     * @see SerializableMarshaller
-     * 
-     * @param type
-     * @param m
+     * @param type a Class, that will be associated with given Marshaller 
+     * @param m Marshaller associated with given type
      */
     public <T> void setMarshaller(Class<T> type, Marshaller<T> m) {
         marshallers.put(type, m);
     }
 
     /**
-     * Asserts liveliness of writers, whose QosLiveliness kind is
-     * MANUAL_BY_PARTICIPANT.
+     * Asserts liveliness of writers, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
      * 
      * @see net.sf.jrtps.message.parameter.QosLiveliness
      */

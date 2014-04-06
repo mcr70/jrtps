@@ -1,3 +1,6 @@
+0.7.1
+    - Documentation update
+
 0.7.0
     - DataWriter.assertLiveliness() to support Liveliness kind MANUAL_BY_TOPIC.
     - Expose Instances with DataReader & DataWriter. Also, for DataReader 
