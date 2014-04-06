@@ -97,9 +97,9 @@ Quality of Service - uDDS
  
  Note, that this means that DataReader might miss some samples, if the reader does not read the samples
  quick enough. By using SampleListener, one can be sure that DataReader gets all the samples
- delivered even if they are removed by history cache. For DataWriter, this means that if DataWriter
- writes Samples quicker than it can deliver them to Readers, not all the readers might end up having
- all the samples.
+ delivered to application, even if they are removed by history cache. For DataWriter, this means that if 
+ DataWriter writes Samples quicker than it can deliver them to Readers, not all the readers might 
+ end up having all the samples.
 
  
 * Resource Limits
