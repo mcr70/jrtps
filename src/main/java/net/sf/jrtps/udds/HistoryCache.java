@@ -124,7 +124,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
                     throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
                 }
 
-                inst = new Instance<T>(key, history.getDepth(), resource_limits.getMaxSamplesPerInstance());
+                inst = new Instance<T>(key, history.getDepth());
                 instances.put(key, inst);
             }   
 

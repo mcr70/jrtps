@@ -49,7 +49,7 @@ jrtps.prefer-multicast = true
   This parameter allows reader to discard reception <<<Heartbeat>>> messages that arrive 'too soon'.
 
   * <<{rtps.spdp.resend-data-period}>>
-  Period, that SPDP writer uses to announce its presence on the network.
+  Period, that SPDP writer(Participant) uses to announce its presence on the network.
 
 
 * jRTPS specific configuration

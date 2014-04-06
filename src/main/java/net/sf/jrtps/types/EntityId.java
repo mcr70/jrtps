@@ -55,6 +55,9 @@ public abstract class EntityId {
      * @see RTPSParticipant
      */
     public static final EntityId PARTICIPANT = new Participant();
+    /* public */ static final EntityId INTER_PARTICIPANT_WRITER = new InterParticipantStatelessWriter();
+    /* public */ static final EntityId INTER_PARTICIPANT_READER = new InterParticipantStatelessReader();
+    
     /**
      * Builtin writer for ParticipantMessage
      */
@@ -165,6 +168,13 @@ public abstract class EntityId {
         case (2 << 16) | 0xc7:
             entityId = new BuiltinParticipantMessageReader();
             break; // liveliness protocol
+        case (2 << 16) | (1 << 8) | 0xc2:
+            entityId = new InterParticipantStatelessWriter(); // for DDS security
+            break;  
+        case (2 << 16) | (1 << 8) | 0xc7:
+            entityId = new InterParticipantStatelessReader(); // for DDS security
+            break;  
+            
         default:
             if ((kind & 0x40) == 0x40) { // two most signicant bits equals '01'
                                          // -> vendor specific entities
@@ -276,6 +286,38 @@ public abstract class EntityId {
         }
     }
 
+
+    /**
+     * Used with DDS security. The InterParticipantStatelessWriter is an RTPS Best-Effort StatelessWriter
+     * @author mcr70
+     */
+    static class InterParticipantStatelessWriter extends EntityId {
+        private InterParticipantStatelessWriter() {
+            super(new byte[] { 0, 2, 1 }, (byte) 0xc2);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return 0; // TODO: check this
+        }
+    }
+
+    /**
+     * Used with DDS security. The InterParticipantStatelessReader is an RTPS Best-Effort StatelessReader
+     * @author mcr70
+     */
+    static class InterParticipantStatelessReader extends EntityId {
+        private InterParticipantStatelessReader() {
+            super(new byte[] { 0, 2, 1 }, (byte) 0xc7);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return 0; // TODO: check this
+        }
+    }
+
+    
     /**
      * EntityId representing SEDP builtin topic reader.
      * 
