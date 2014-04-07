@@ -246,7 +246,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
             if (cc.getTimestamp() < latestSampleTime) {
                 log.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
                         cc.getTimestamp(), latestSampleTime);
-                return;
+                continue;
             }
             else {
                 addSample(cc);
