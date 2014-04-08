@@ -2,8 +2,13 @@ package net.sf.jrtps;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
+import net.sf.jrtps.transport.PortNumberParameters;
 import net.sf.jrtps.types.Duration;
 
 import org.slf4j.Logger;
@@ -152,6 +157,15 @@ public class Configuration {
         return i;
     }
 
+    private String[] getStringArrayProperty(String key, String[] deflt) {
+        String property = props.getProperty(key);
+        if (property == null) {
+            return deflt;
+        }
+        
+        return property.split(",");
+    }
+    
     /**
      * Gets a named boolean property from configuration.
      * 
@@ -206,5 +220,66 @@ public class Configuration {
      */
     public boolean getPublishBuiltinEntities() {
         return getBooleanProperty("jrtps.publish-builtin-data", false);
+    }
+
+    /**
+     * Gets PortNumberParamers from the configuation file. If a port number parameter
+     * is missing, its default value is set into returned PortNumberParameters
+     * @return PortNumberParameters
+     */
+    public PortNumberParameters getPortNumberParameters() {
+        int pb = getIntProperty("rtps.traffic.PB", -1);
+        int dg = getIntProperty("rtps.traffic.DG", -1);
+        int pg = getIntProperty("rtps.traffic.PG", -1);
+        int d0 = getIntProperty("rtps.traffic.d0", -1);
+        int d1 = getIntProperty("rtps.traffic.d1", -1);
+        int d2 = getIntProperty("rtps.traffic.d2", -1);
+        int d3 = getIntProperty("rtps.traffic.d3", -1);
+        
+        return new PortNumberParameters(pb, dg, pg, d0, d1, d2, d3);
+    }
+    
+    /**
+     * Gets the listener URIs
+     * @return Listener URIs
+     */
+    public List<URI> getListenerURIs() {
+        String[] uriStrings = getStringArrayProperty("jrtps.listener-uris", 
+                new String[] {"udp:localhost", "udp:239.255.0.1"});
+        
+        List<URI> uriList = new LinkedList<>();
+        for (String s : uriStrings) {
+            try {
+                uriList.add(new URI(s));
+            } catch (URISyntaxException e) {
+                log.error("Invalid URI", e);
+            }
+        }
+        
+        return uriList;
+    }
+
+
+    /**
+     * Gets the listener URIs for discovery
+     * @return Listener URIs
+     */
+    public List<URI> getDiscoveryListenerURIs() {
+        String[] uriStrings = getStringArrayProperty("jrtps.discovery.listener-uris", null);
+
+        if (uriStrings == null) { // If discovery URIs is omitted, use the same URIs as with user data
+            return getListenerURIs();
+        }
+        
+        List<URI> uriList = new LinkedList<>();
+        for (String s : uriStrings) {
+            try {
+                uriList.add(new URI(s.trim()));
+            } catch (URISyntaxException e) {
+                log.error("Invalid URI", e);
+            }
+        }
+        
+        return uriList;
     }
 }
