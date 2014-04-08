@@ -18,6 +18,7 @@ import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.QosDestinationOrder.Kind;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.rtps.ChangeKind;
@@ -62,6 +63,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
     private final Marshaller<T> marshaller;
     private final EntityId entityId;
+    private final Kind destinationOrderKind;
 
     HistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
         this.entityId = eId;
@@ -69,7 +71,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
         resource_limits = qos.getResourceLimits();
         history = qos.getHistory();
-        qos.getReliability();
+        destinationOrderKind = qos.getDestinationOrder().getKind();
     }
 
     public void dispose(List<T> samples) {
@@ -226,7 +228,15 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
         List<Sample<T>> pendingSamples = incomingSamples.get(id); 
         
-        Sample<T> cc = new Sample<T>(writerGuid, marshaller, ++seqNum, timestamp.timeMillis(), data);
+        long ts = 0;
+        if (destinationOrderKind == Kind.BY_RECEPTION_TIMESTAMP || timestamp == null) {
+            ts = System.currentTimeMillis();
+        }
+        else {
+            ts = timestamp.timeMillis(); 
+        }
+        
+        Sample<T> cc = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, data);
         pendingSamples.add(cc);
     }
 
