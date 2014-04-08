@@ -36,6 +36,9 @@ public class Locator {
     private int port;
     private byte[] address;
 
+    private String uri;
+
+    
     public Locator(InetAddress addr, int port) {
         this.port = port;
         
@@ -108,7 +111,7 @@ public class Locator {
      * @param domainId
      * 
      */
-    public static Locator defaultMetatrafficUnicastLocator(int domainId, int participantId) {
+    public static Locator defaultDiscoveryUnicastLocator(int domainId, int participantId) {
         InetAddress addr = null;
         try {
             addr = InetAddress.getLocalHost();

@@ -127,7 +127,7 @@ public class Participant {
         createUnknownParticipantData(domainId);
 
         meta_mcLoc = Locator.defaultDiscoveryMulticastLocator(domainId);
-        meta_ucLoc = Locator.defaultMetatrafficUnicastLocator(domainId, participantId);
+        meta_ucLoc = Locator.defaultDiscoveryUnicastLocator(domainId, participantId);
         mcLoc = Locator.defaultUserMulticastLocator(domainId);
         ucLoc = Locator.defaultUserUnicastLocator(domainId, participantId);
 

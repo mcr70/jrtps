@@ -44,7 +44,7 @@ public class MessageTests {
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 
 		List<Locator> unicastLocators = new LinkedList<>();
-		unicastLocators.add(Locator.defaultMetatrafficUnicastLocator(0, 0));
+		unicastLocators.add(Locator.defaultDiscoveryUnicastLocator(0, 0));
 		List<Locator> multicastLocators = new LinkedList<>();
 		multicastLocators.add(Locator.defaultDiscoveryMulticastLocator(0));
 		
