@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class UDPWriter {
+public class UDPWriter implements Writer {
     private static final Logger log = LoggerFactory.getLogger(UDPWriter.class);
     private final Locator locator;
     private DatagramChannel channel;
