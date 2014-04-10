@@ -8,7 +8,7 @@ import net.sf.jrtps.message.Message;
  * Writer.
  * @author mcr70
  */
-interface Writer {
+public interface Writer {
     /**
      * Sends a Message to destination.
      * @param msg Message to send

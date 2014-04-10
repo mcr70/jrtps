@@ -30,7 +30,7 @@ public class UDPReceiver implements Runnable, Receiver {
 
     private int bufferSize;
 
-    public UDPReceiver(DatagramSocket ds, BlockingQueue<byte[]> queue, int bufferSize) {
+    UDPReceiver(DatagramSocket ds, BlockingQueue<byte[]> queue, int bufferSize) {
         this.socket = ds;
         this.queue = queue;
         this.bufferSize = bufferSize;
