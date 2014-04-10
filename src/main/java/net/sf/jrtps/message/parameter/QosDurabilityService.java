@@ -20,7 +20,7 @@ public class QosDurabilityService extends Parameter implements DataWriterPolicy<
 
     @Override
     public boolean isCompatible(QosDurabilityService other) {
-        return true; // Always true // TODO: check this
+        return true; // Always true
     }
 
     public static QosDurabilityService defaultDurabilityService() {
