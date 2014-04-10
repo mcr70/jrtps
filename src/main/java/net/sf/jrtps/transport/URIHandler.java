@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,9 @@ import org.slf4j.LoggerFactory;
 public abstract class URIHandler {
     private static final Logger log = LoggerFactory.getLogger(URIHandler.class);
     
-    private static HashMap<String, URIHandler> handlers = new HashMap<>();
+    private static HashMap<String, URIHandler> handlersForScheme = new HashMap<>();
+    private static HashMap<Integer, URIHandler> handlersForKind = new HashMap<>();
+    
     private Configuration config;
    
 
@@ -39,36 +42,59 @@ public abstract class URIHandler {
      * @return URIHandler, or null if there was not URIHandler registered with given scheme
      */
     public static URIHandler getInstance(String scheme) {
-        return handlers.get(scheme);
+        return handlersForScheme.get(scheme);
     }
     
     /**
-     * Registers an URIHandler with given scheme.
+     * Get a handler for given Locator kind. Remote entities advertise Locators, that can be used to
+     * connect to them. 
+     * 
+     * @param kind Locator.kind
+     * @return URIHandler, or null if there was not URIHandler registered with given Locator.kind
+     * @see Locator#getKind()
+     */
+    public static URIHandler getInstance(int kind) {
+        return handlersForKind.get(kind);
+    }
+
+    /**
+     * Registers an URIHandler with given scheme and kind
      * 
      * @param scheme Scheme for the URIHandler
      * @param handler URIHandler
+     * @param kinds Kinds of the Locators, that will be matched to given handler
      */
-    public static void registerURIHandler(String scheme, URIHandler handler) {
-        log.debug("Registering URI handler for scheme '{}': {}", scheme, handler);
-        handlers.put(scheme, handler);
+    public static void registerURIHandler(String scheme, URIHandler handler, int ... kinds) {
+        log.debug("Registering URI handler for scheme '{}', kind {}: {}", scheme, kinds, handler);
+        handlersForScheme.put(scheme, handler);
+        
+        for (int kind : kinds) {
+            handlersForKind.put(kind, handler);
+        }
     }
     
     /**
-     * Creates a new Receiver.
-     * @param locator
-     * @param queue
-     * @param bufferSize
-     * @return Receiver
-     * @throws IOException
+     * Creates a new Receiver. If the URI has a port defined, it will be used. If not, domainId, participantId and
+     * discovery parameters are used to create port number according to specification.
+     * 
+     * @param uri Uri of the receiver to create.
+     * @param domainId domainId
+     * @param participantId participantId
+     * @param discovery set to true, if the receiver created will be for discovery
+     * @param queue a BlockingQueue, that should be populated with byte[] received by the Receiver.
+     * @param bufferSize Size of the buffer that should be used during reception.
+     * @return Receiver, or null if Receiver could not be created
+     * @throws IOException 
      */
     public abstract Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue, int bufferSize) throws IOException;
 
     /**
-     * Creates a new Writer.
-     * @param locator
-     * @param bufferSize
+     * Creates a new Writer. Remote entities advertise how they can be reached by the means of Locator.
+     * 
+     * @param locator Locator used
+     * @param bufferSize Size of the buffer, that should be used byt the Writer
      * @return Writer
      * @throws IOException
      */
-    public abstract Writer createWriter(URI uri, int domainId, int participantId, int bufferSize) throws IOException;
+    public abstract Writer createWriter(Locator locator, int bufferSize) throws IOException;
 }

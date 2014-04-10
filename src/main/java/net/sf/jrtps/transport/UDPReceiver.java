@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ import org.slf4j.LoggerFactory;
 public class UDPReceiver implements Runnable, Receiver {
     private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
 
-    private final Semaphore initLock = new Semaphore(1);
     private final BlockingQueue<byte[]> queue;
     private final DatagramSocket socket;
     
