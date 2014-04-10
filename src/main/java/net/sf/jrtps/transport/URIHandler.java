@@ -49,12 +49,12 @@ public abstract class URIHandler {
      * Get a handler for given Locator kind. Remote entities advertise Locators, that can be used to
      * connect to them. 
      * 
-     * @param kind Locator.kind
+     * @param locator
      * @return URIHandler, or null if there was not URIHandler registered with given Locator.kind
      * @see Locator#getKind()
      */
-    public static URIHandler getInstance(int kind) {
-        return handlersForKind.get(kind);
+    public static URIHandler getInstance(Locator locator) {
+        return handlersForKind.get(locator.getKind());
     }
 
     /**

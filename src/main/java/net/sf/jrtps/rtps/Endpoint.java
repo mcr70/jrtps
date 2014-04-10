@@ -120,7 +120,7 @@ public class Endpoint {
 
         if (locator != null) {
             try {
-                URIHandler handler = URIHandler.getInstance(locator.getKind());
+                URIHandler handler = URIHandler.getInstance(locator);
                 Writer w = handler.createWriter(locator, configuration.getBufferSize());
                 //UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); 
                 // TODO: No need to create and close all the time
