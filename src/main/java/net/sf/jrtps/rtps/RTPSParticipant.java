@@ -1,6 +1,11 @@
 package net.sf.jrtps.rtps;
 
+import java.io.IOException;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.MulticastSocket;
 import java.net.SocketException;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
+import net.sf.jrtps.transport.PortNumberParameters;
 import net.sf.jrtps.transport.UDPReceiver;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -60,6 +66,9 @@ public class RTPSParticipant {
 
     private int domainId;
 
+    private int participantId = 0; // Determined during socket creation. 0 is the first possible participantId
+    private boolean participantIdSet = false;
+
     /**
      * Creates a new participant with given domainId and participantId. Domain
      * ID and particiapnt ID is used to construct unicast locators to this
@@ -94,21 +103,80 @@ public class RTPSParticipant {
         // encrypted?, signed?
         // UDP is required by the specification.
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
-
+        int bufferSize = config.getBufferSize();
+        
         // NOTE: We can have only one MessageReceiver. pending samples concept
         // relies on it.
         handler = new RTPSMessageReceiver(this, queue);
         threadPoolExecutor.execute(handler);
 
-        int bufferSize = config.getBufferSize();
-        for (Locator loc : locators) {
-            UDPReceiver receiver = new UDPReceiver(loc, queue, bufferSize);
-            receivers.add(receiver);
-            threadPoolExecutor.execute(receiver);
-        }
+        log.debug("Starting receivers for discovery");
+        List<URI> discoveryURIs = config.getDiscoveryListenerURIs();
+        startReceiversForURIs(queue, bufferSize, discoveryURIs, true);
 
+        log.debug("Starting receivers for user data");
+        List<URI> listenerURIs = config.getListenerURIs();
+        startReceiversForURIs(queue, bufferSize, listenerURIs, false);
+        
         log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
                 writerEndpoints.size());
+    }
+
+    private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, boolean discovery) {
+        for (URI uri : listenerURIs) {
+            if ("udp".equals(uri.getScheme())) {
+                try {
+                    DatagramSocket ds = getDatagramSocket(uri, config.getPortNumberParameters(), discovery);
+                    UDPReceiver receiver = new UDPReceiver(ds, queue, bufferSize);
+                    receivers.add(receiver);
+                    threadPoolExecutor.execute(receiver);
+                    log.debug("Created UDPReceiver for URI {}", uri);
+                } catch (IOException ioe) {
+                    log.warn("Failed to start receiver for uri {}", uri, ioe);
+                }
+            }
+            else {
+                log.warn("Unknown scheme for uri {}", uri);
+            }
+        }
+    }
+
+    private DatagramSocket getDatagramSocket(URI uri, PortNumberParameters pnp, boolean discovery) throws IOException {
+        InetAddress ia = InetAddress.getByName(uri.getHost());
+        DatagramSocket ds = null;
+        int port = uri.getPort();
+        
+        if (ia.isMulticastAddress()) {
+            if (port == -1) {
+                port = discovery ? pnp.getDiscoveryMulticastPort(domainId) : pnp.getUserdataMulticastPort(domainId);
+            }
+            
+            ds = new MulticastSocket(port);
+        }
+        else {
+            int pId = participantId;
+            boolean portFound = port != -1;
+
+            do {
+                if (!portFound) {
+                    port = discovery ? pnp.getDiscoveryUnicastPort(domainId, pId) : pnp.getUserdataUnicastPort(domainId, pId);
+                }
+                log.debug("Trying port {}", port);
+                try {
+                    ds = new DatagramSocket(port);
+                }
+                catch(SocketException se) {
+                    pId++;
+                }
+            }
+            while(ds == null && !portFound);
+            
+            participantId = pId;
+            participantIdSet = true;
+            log.debug("participantId set to {}", participantId);
+        }
+        
+        return ds;
     }
 
     /**
