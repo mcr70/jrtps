@@ -5,7 +5,7 @@ package net.sf.jrtps.transport;
  * 
  * @author mcr70
  */
-interface Receiver extends Runnable {
+public interface Receiver extends Runnable {
     /**
      * Close this Receiver
      */
