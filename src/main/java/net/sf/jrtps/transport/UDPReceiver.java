@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  * 
  */
-public class UDPReceiver implements Runnable {
+public class UDPReceiver implements Runnable, Receiver {
     private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
 
     private final Semaphore initLock = new Semaphore(1);
