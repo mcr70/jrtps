@@ -9,6 +9,7 @@ import java.net.URI;
 import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,14 +36,18 @@ public class UDPHandler extends URIHandler {
     }
 
     @Override
-    public Writer createWriter(URI uri, int domainId, int participantId, int bufferSize) throws IOException {
-        return null; //return new UDPWriter(locator, bufferSize);
+    public Writer createWriter(Locator locator, int bufferSize) throws IOException {
+        return new UDPWriter(locator, bufferSize);
     }
 
     private DatagramSocket getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
         InetAddress ia = InetAddress.getByName(uri.getHost());
         DatagramSocket ds = null;
         int port = uri.getPort();
+        
+        if (port == -1) {
+            log.debug("Port number is not specified in URI {}, using {}", uri, pnp);
+        }
         
         if (ia.isMulticastAddress()) {
             if (port == -1) {

@@ -65,9 +65,9 @@ public class RTPSParticipant {
     
     /**
      * Creates a new participant with given domainId and participantId. Domain
-     * ID and particiapnt ID is used to construct unicast locators to this
+     * ID and participant ID is used to construct unicast locators to this
      * RTPSParticipant. In general, participants in the same domain get to know
-     * each other through SPDP. Each participant has a uniques unicast locator
+     * each other through SPDP. Each participant has a unique unicast locator
      * to access its endpoints.
      * 
      * @param guid Guid, that is assigned to this participant. Every entity created by this
@@ -84,7 +84,8 @@ public class RTPSParticipant {
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
 
-        URIHandler.registerURIHandler("udp", new UDPHandler(config));
+        UDPHandler handler = new UDPHandler(config); 
+        URIHandler.registerURIHandler("udp", handler, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
     }
 
     /**
@@ -93,9 +94,6 @@ public class RTPSParticipant {
      * @throws SocketException
      */
     public void start() throws SocketException {
-        // TODO: We should have endpoints for TCP, InMemory, What else?
-        // encrypted?, signed?
-        // UDP is required by the specification.
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
         int bufferSize = config.getBufferSize();
         
@@ -119,13 +117,10 @@ public class RTPSParticipant {
     /**
      * Creates a new RTPSReader.
      * 
-     * @param eId
-     *            EntityId of the reader
-     * @param topicName
-     *            Name of the topic
+     * @param eId EntityId of the reader
+     * @param topicName Name of the topic
      * @param marshaller
-     * @param qos
-     *            QualityOfService
+     * @param qos QualityOfService
      * 
      * @return RTPSReader
      */
@@ -141,10 +136,8 @@ public class RTPSParticipant {
     /**
      * Creates a new RTPSWriter.
      * 
-     * @param eId
-     *            EntityId of the reader
-     * @param topicName
-     *            Name of the topic
+     * @param eId EntityId of the reader
+     * @param topicName Name of the topic
      * @param wCache
      *            WriterCache
      * @param qos

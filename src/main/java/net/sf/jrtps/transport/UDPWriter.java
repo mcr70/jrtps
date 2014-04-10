@@ -31,7 +31,7 @@ public class UDPWriter implements Writer {
      * @param bufferSize Size of the buffer that will be used to write messages. 
      * @throws IOException
      */
-    public UDPWriter(Locator locator, int bufferSize) throws IOException {
+    UDPWriter(Locator locator, int bufferSize) throws IOException {
         this.locator = locator;
         this.bufferSize = bufferSize;
         channel = DatagramChannel.open();

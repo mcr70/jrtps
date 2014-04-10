@@ -104,4 +104,8 @@ public class PortNumberParameters {
     public int getUserdataUnicastPort(int domainId, int participantId) {
         return pb + dg * domainId + d3 + pg * participantId;
     }
+    
+    public String toString() {
+        return "PB=" + pb + ",DG=" + dg + ",PG=" + pg + ",d0=" + d0 + ",d1=" + d1 + ",d2=" + d2 + ",d3=" + d3;
+    }
 }

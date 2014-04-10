@@ -7,6 +7,7 @@ Configuration
 +---
 
 # ---  RTPS related configuration parameters
+rtps.traffic.port-config = PB=7400, DG=250, PG=2, d0=0, d1=10, d2=1, d3=11
 rtps.writer.push-mode = true
 rtps.writer.heartbeat-period = 5000
 rtps.writer.nack-response-delay = 200
@@ -21,10 +22,15 @@ jrtps.message-queue.size = 10
 jrtps.buffer-size = 16384
 jrtps.publish-builtin-data = false
 jrtps.prefer-multicast = true
-
+jrtps.listener-uris=udp://239.255.0.1,udp://localhost
+jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
 +---
  
 * RTPS specific configuration
+
+  * <<{rtps.traffic.port-config}>>
+  A comma separated list of <name>=<value> settings. A <name> must be one of <PB, DG, PG, d0, d1, d2 or d3>. 
+  They are used with port number expression specified in RTPS specification ch. 9.6.1.1 and ch 9.6.1.2.
 
   * <<{rtps.writer.push-mode}>>
   This configuration parameter affects how writer communicates changes to readers.
@@ -74,4 +80,14 @@ jrtps.prefer-multicast = true
   * <<{jrtps.prefer-multicast}>>
   A remote entity may advertise both unicast address and multicast address. This flag tells which one to
   prefer. Note, that if remote entity advertises only one or the other, this flag has no effect. 
+  
+  * <<{jrtps.listener-uris}>>
+  A comma separated list of URIs, that will be used to start listeners for user traffic.
+  If port number is omitted, it will be calculated using the port number expression defined  
+  in RTPS spec (I.e. use rtps.traffic.port-config). Currently, udp is the only scheme that is supported
+  by jRTPS. However, there is a preliminary work done for adding custom scheme handlers.
+  
+  * <<{jrtps.discovery.listener-uris}>>
+  A comma separated list of URIs, that will be used to start listeners for discovery.
+  If this config is omitted, discovery will use the same listeners as with user data.
   

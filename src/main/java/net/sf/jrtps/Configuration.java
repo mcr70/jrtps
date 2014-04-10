@@ -159,6 +159,7 @@ public class Configuration {
 
     private String[] getStringArrayProperty(String key, String[] deflt) {
         String property = props.getProperty(key);
+        
         if (property == null) {
             return deflt;
         }
@@ -228,15 +229,60 @@ public class Configuration {
      * @return PortNumberParameters
      */
     public PortNumberParameters getPortNumberParameters() {
-        int pb = getIntProperty("rtps.traffic.PB", -1);
-        int dg = getIntProperty("rtps.traffic.DG", -1);
-        int pg = getIntProperty("rtps.traffic.PG", -1);
-        int d0 = getIntProperty("rtps.traffic.d0", -1);
-        int d1 = getIntProperty("rtps.traffic.d1", -1);
-        int d2 = getIntProperty("rtps.traffic.d2", -1);
-        int d3 = getIntProperty("rtps.traffic.d3", -1);
+        String[] params = getStringArrayProperty("rtps.traffic.port-config", 
+                new String[] {"PB=7400", "DG=250", "PG=2", "d0=0", "d1=10", "d2=1", "d3=11"});
+        
+        int pb = 7400; int dg = 250; int pg = 2;
+        int d0 = 0; int d1 = 10; int d2 = 1; int d3 = 11;
+
+        for (String s : params) {
+            String[] kv = s.split("=");
+            if (kv.length == 2) {
+                String k = kv[0].trim();
+                String v = kv[1].trim();
+                
+                if ("PB".equalsIgnoreCase(k)) {
+                    pb = convert(v, 7400);
+                }
+                else if ("DG".equalsIgnoreCase(k)) {
+                    dg = convert(v, 250);
+                } 
+                else if ("PG".equalsIgnoreCase(k)) {
+                    pg = convert(v, 2);
+                } 
+                else if ("d0".equalsIgnoreCase(k)) {
+                    d0 = convert(v, 0);
+                } 
+                else if ("d1".equalsIgnoreCase(k)) {
+                    d1 = convert(v, 10);
+                } 
+                else if ("d2".equalsIgnoreCase(k)) {
+                    d2 = convert(v, 1);
+                } 
+                else if ("d3".equalsIgnoreCase(k)) {
+                    d3 = convert(v, 11);
+                }
+                else {
+                    log.warn("Variable '{}' in rtps.traffic.port-config is not one of PB, DG, PG, d0, d1, d2 or d3", k);
+                }
+            }
+            else {
+                log.warn("Variable '{}' in rtps.traffic.port-config is not in format <var>=<int>, ignoring it.", s);
+            }
+        }
         
         return new PortNumberParameters(pb, dg, pg, d0, d1, d2, d3);
+    }
+    
+    private int convert(String v, int dflt) {
+        try {
+            return Integer.parseInt(v);
+        }
+        catch(Exception e) {
+            log.warn("Failed to convert {} to int, using default value of {}", v, dflt);
+        }
+        
+        return dflt;
     }
     
     /**
@@ -244,19 +290,7 @@ public class Configuration {
      * @return Listener URIs
      */
     public List<URI> getListenerURIs() {
-        String[] uriStrings = getStringArrayProperty("jrtps.listener-uris", 
-                new String[] {"udp:localhost", "udp:239.255.0.1"});
-        
-        List<URI> uriList = new LinkedList<>();
-        for (String s : uriStrings) {
-            try {
-                uriList.add(new URI(s));
-            } catch (URISyntaxException e) {
-                log.error("Invalid URI", e);
-            }
-        }
-        
-        return uriList;
+        return __getListenerURIs("jrtps.listener-uris");
     }
 
 
@@ -265,12 +299,12 @@ public class Configuration {
      * @return Listener URIs
      */
     public List<URI> getDiscoveryListenerURIs() {
-        String[] uriStrings = getStringArrayProperty("jrtps.discovery.listener-uris", null);
+        return __getListenerURIs("jrtps.discovery.listener-uris");
+    }
+    
+    public List<URI> __getListenerURIs(String prop) {
+        String[] uriStrings = getStringArrayProperty(prop, new String[] {"udp:localhost", "udp:239.255.0.1"});
 
-        if (uriStrings == null) { // If discovery URIs is omitted, use the same URIs as with user data
-            return getListenerURIs();
-        }
-        
         List<URI> uriList = new LinkedList<>();
         for (String s : uriStrings) {
             try {
