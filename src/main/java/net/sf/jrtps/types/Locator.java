@@ -118,6 +118,14 @@ public class Locator {
         return new InetSocketAddress(getInetAddress(), port);
     }
 
+    /**
+     * Checks, if this Locator represents a multicast locator.
+     * @return true, if multicast locator.
+     */
+    public boolean isMulticastLocator() {
+        return getInetAddress().isMulticastAddress();
+    }
+    
     /** 
      * Gets the kind of this Locator. Each Locator has a kind associated with it to distinguish different types 
      * of communication mechanisms from each other. For example, kind can be used to distinguish UDP from TCP. 
@@ -202,6 +210,6 @@ public class Locator {
     }
 
     public String toString() {
-        return getInetAddress() + ":" + getPort() + "(" + kind + ")";
+        return getInetAddress() + ":" + getPort();
     }
 }

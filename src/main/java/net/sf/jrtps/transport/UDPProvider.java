@@ -15,15 +15,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This Handler creaters receivers and writers for UDP protocol.
+ * This Provider creates receivers and writers for UDP protocol.
  * UDP is the only protocol that is required by the RTPS specification.
  *  
  * @author mcr70
  */
-public class UDPHandler extends TransportProvider {
-    private static final Logger log = LoggerFactory.getLogger(UDPHandler.class);
+public class UDPProvider extends TransportProvider {
+    private static final Logger log = LoggerFactory.getLogger(UDPProvider.class);
     
-    public UDPHandler(Configuration config) {
+    public UDPProvider(Configuration config) {
         super(config);
     }
     
@@ -32,7 +32,7 @@ public class UDPHandler extends TransportProvider {
         DatagramSocket datagramSocket = getDatagramSocket(uri, domainId, participantId, 
                 getConfiguration().getPortNumberParameters(), discovery);
         
-        return new UDPReceiver(datagramSocket, queue, bufferSize);
+        return new UDPReceiver(uri, datagramSocket, queue, bufferSize);
     }
 
     @Override
@@ -45,8 +45,10 @@ public class UDPHandler extends TransportProvider {
         DatagramSocket ds = null;
         int port = uri.getPort();
         
+        boolean participantIdFixed = participantId != -1;
+        
         if (port == -1) {
-            log.debug("Port number is not specified in URI {}, using {}", uri, pnp);
+            log.trace("Port number is not specified in URI {}, using {}", uri, pnp);
         }
         
         if (ia.isMulticastAddress()) {
@@ -58,25 +60,24 @@ public class UDPHandler extends TransportProvider {
             ((MulticastSocket) ds).joinGroup(ia);
         }
         else {
-            int pId = participantId;
+            int pId = participantIdFixed ? participantId : 0;
             boolean portFound = port != -1;
     
             do {
                 if (!portFound) {
                     port = discovery ? pnp.getDiscoveryUnicastPort(domainId, pId) : pnp.getUserdataUnicastPort(domainId, pId);
                 }
-                log.debug("Trying port {}", port);
+
                 try {
                     ds = new DatagramSocket(port);
+                    log.trace("Port set to {}", port);
+                    break;
                 }
                 catch(SocketException se) {
                     pId++;
                 }
             }
-            while(ds == null && !portFound);
-            
-            participantId = pId;
-            log.debug("participantId set to {}", participantId);
+            while(ds == null && !participantIdFixed && pId < pnp.getDomainIdGain() + pnp.getD3());
         }
         
         return ds;

@@ -4,7 +4,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
+
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,19 +28,23 @@ public class UDPReceiver implements Runnable, Receiver {
 
     private final BlockingQueue<byte[]> queue;
     private final DatagramSocket socket;
+    private final URI uri;
+    private final int bufferSize;
+    private final Locator locator;
     
     private boolean running = true;
 
-    private int bufferSize;
-
-    UDPReceiver(DatagramSocket ds, BlockingQueue<byte[]> queue, int bufferSize) {
+    
+    UDPReceiver(URI uri, DatagramSocket ds, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {
+        this.uri = uri;
         this.socket = ds;
         this.queue = queue;
         this.bufferSize = bufferSize;
+        this.locator = new Locator(InetAddress.getByName(uri.getHost()), ds.getLocalPort());
     }
 
     public void run() {
-        log.debug("Starting to listen on port {}", socket.getLocalPort());
+        log.debug("Listening on {}:{}", uri.getHost(), socket.getLocalPort());
         byte[] buf = new byte[bufferSize];
 
         while (running) {
@@ -57,6 +66,12 @@ public class UDPReceiver implements Runnable, Receiver {
         } // while(...)
     }
 
+    @Override
+    public Locator getLocator() {
+        return locator;
+    }
+
+    @Override
     public void close() {
         log.debug("Closing {}", socket.getLocalPort());
         
