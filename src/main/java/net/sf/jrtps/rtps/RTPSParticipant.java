@@ -18,8 +18,8 @@ import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.transport.Receiver;
-import net.sf.jrtps.transport.UDPHandler;
 import net.sf.jrtps.transport.TransportProvider;
+import net.sf.jrtps.transport.UDPProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -61,7 +61,12 @@ public class RTPSParticipant {
     private RTPSMessageReceiver handler;
 
     private int domainId;
-    private int participantId = 0; // Determined during socket creation. 0 is the first possible participantId
+    private int participantId;
+
+    private Locator discovery_mc_Locator;
+    private Locator discovery_uc_Locator;
+    private Locator userdata_mc_Locator;
+    private Locator userdata_uc_Locator;
     
     /**
      * Creates a new participant with given domainId and participantId. Domain
@@ -73,10 +78,12 @@ public class RTPSParticipant {
      * @param guid Guid, that is assigned to this participant. Every entity created by this
      *        RTPSParticipant will share the GuidPrefix of this Guid. 
      * @param domainId Domain ID of the participant
-     * @param locators a Set of Locators
+     * @param participantId Participant ID of this participant. If set to -1, and port number is not given
+     *                      during starting of receivers, participantId will be determined based on the first
+     *                      suitable network socket.
      * @param config Configuration used
      */
-    public RTPSParticipant(Guid guid, int domainId, ScheduledThreadPoolExecutor tpe, Set<Locator> locators,
+    public RTPSParticipant(Guid guid, int domainId, int participantId, ScheduledThreadPoolExecutor tpe, 
             Map<GuidPrefix, ParticipantData> discoveredParticipants, Configuration config) {
         this.guid = guid;
         this.domainId = domainId; // TODO: We should get rid of domainId here
@@ -84,7 +91,7 @@ public class RTPSParticipant {
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
 
-        UDPHandler handler = new UDPHandler(config); 
+        UDPProvider handler = new UDPProvider(config); 
         TransportProvider.registerTransportProvider("udp", handler, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
     }
 
@@ -336,11 +343,10 @@ public class RTPSParticipant {
             
             if (handler != null) {
                 try {
-                    Receiver receiver = handler.createReceiver(uri, domainId, 0, discovery, queue, bufferSize);
+                    Receiver receiver = handler.createReceiver(uri, domainId, -1, discovery, queue, bufferSize);
+                    setLocator(receiver.getLocator(), discovery);
                     receivers.add(receiver);
                     threadPoolExecutor.execute(receiver);
-
-                    log.debug("Started Receiver for URI {}", uri);
                 } catch (IOException ioe) {
                     log.warn("Failed to start receiver for URI {}", uri, ioe);
                 }
@@ -349,5 +355,42 @@ public class RTPSParticipant {
                 log.warn("Unknown scheme for URI {}", uri);
             }
         }
+    }
+
+    /** 
+     * Assigns Receivers Locator to proper field
+     * @param loc
+     * @param discovery
+     */
+    private void setLocator(Locator loc, boolean discovery) {
+        if (loc.isMulticastLocator()) {
+            if (discovery) {
+                discovery_mc_Locator = loc;
+            }
+            else {
+                userdata_mc_Locator = loc;
+            }
+        }
+        else {
+            if (discovery) {
+                discovery_uc_Locator = loc;
+            }
+            else {
+                userdata_uc_Locator = loc;
+            }                        
+        }        
+    }
+
+    public Locator getDiscoveryMulticastLocator() {
+        return discovery_mc_Locator;
+    }
+    public Locator getDiscoveryUnicastLocator() {
+        return discovery_uc_Locator;
+    }
+    public Locator getUserdataMulticastLocator() {
+        return userdata_mc_Locator;
+    }
+    public Locator getUserdataUnicastLocator() {
+        return userdata_uc_Locator;
     }
 }

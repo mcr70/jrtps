@@ -36,7 +36,7 @@ public class PortNumberParameters {
      * Gets the port base number
      * @return Port Base, defaults to 7400
      */
-    public int getPb() {
+    public int getPortBase() {
         return pb;
     }
     
@@ -44,7 +44,7 @@ public class PortNumberParameters {
      * Gets the DomainId Gain.
      * @return DomainId Gain, defaults to 250
      */
-    public int getDg() {
+    public int getDomainIdGain() {
         return dg;
     }
 
@@ -52,7 +52,7 @@ public class PortNumberParameters {
      * Gets the ParticipantId Gain.
      * @return ParticipantId Gain, defaults to 2
      */
-    public int getPg() {
+    public int getParticipantIdGain() {
         return pg;
     }
     
