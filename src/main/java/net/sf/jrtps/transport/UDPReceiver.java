@@ -27,20 +27,25 @@ public class UDPReceiver implements Receiver {
     private final URI uri;
     private final int bufferSize;
     private final Locator locator;
-    
-    private boolean running = true;
+    private final int participantId;
+    private final boolean discovery;
 
+    private boolean running = true;
     
-    UDPReceiver(URI uri, DatagramSocket ds, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {
+    UDPReceiver(URI uri, ReceiverConfig rConfig, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {
         this.uri = uri;
-        this.socket = ds;
+        this.socket = rConfig.ds;
+        this.participantId = rConfig.participantId;
         this.queue = queue;
         this.bufferSize = bufferSize;
-        this.locator = new Locator(InetAddress.getByName(uri.getHost()), ds.getLocalPort());
+        this.locator = new Locator(InetAddress.getByName(uri.getHost()), socket.getLocalPort());
+        this.discovery = rConfig.discovery;
     }
 
     public void run() {
-        log.debug("Listening on {}:{}", uri.getHost(), socket.getLocalPort());
+        log.debug("Listening on udp://{}:{} for {}", uri.getHost(), socket.getLocalPort(),
+                discovery ? "discovery traffic" : "user traffic");
+        
         byte[] buf = new byte[bufferSize];
 
         while (running) {
@@ -67,6 +72,8 @@ public class UDPReceiver implements Receiver {
         return locator;
     }
 
+    
+    
     @Override
     public void close() {
         log.debug("Closing {}", socket.getLocalPort());
@@ -87,5 +94,10 @@ public class UDPReceiver implements Receiver {
         } catch (Exception e) {
             log.error("Failed to write message to {}", string, e);
         }
+    }
+
+    @Override
+    public int getParticipantId() {
+        return participantId;
     }
 }

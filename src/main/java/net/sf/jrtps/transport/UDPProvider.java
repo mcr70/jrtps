@@ -30,10 +30,10 @@ public class UDPProvider extends TransportProvider {
     
     @Override
     public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue, int bufferSize) throws IOException {
-        DatagramSocket datagramSocket = getDatagramSocket(uri, domainId, participantId, 
+        ReceiverConfig rConfig = getDatagramSocket(uri, domainId, participantId, 
                 getConfiguration().getPortNumberParameters(), discovery);
         
-        return new UDPReceiver(uri, datagramSocket, queue, bufferSize);
+        return new UDPReceiver(uri, rConfig, queue, bufferSize);
     }
 
     @Override
@@ -41,7 +41,9 @@ public class UDPProvider extends TransportProvider {
         return new UDPTransmitter(locator, bufferSize);
     }
 
-    private DatagramSocket getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
+    private ReceiverConfig getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
+        log.trace("Creating DatagramSocket for URI {}, domain {}, pId {}", uri, domainId, participantId);
+        
         InetAddress ia = InetAddress.getByName(uri.getHost());
         DatagramSocket ds = null;
         int port = uri.getPort();
@@ -65,6 +67,7 @@ public class UDPProvider extends TransportProvider {
             boolean portFound = port != -1;
     
             do {
+                log.trace("Trying pId {}", pId);
                 if (!portFound) {
                     port = discovery ? pnp.getDiscoveryUnicastPort(domainId, pId) : pnp.getUserdataUnicastPort(domainId, pId);
                 }
@@ -79,8 +82,9 @@ public class UDPProvider extends TransportProvider {
                 }
             }
             while(ds == null && !participantIdFixed && pId < pnp.getDomainIdGain() + pnp.getD3());
+            participantId = pId;
         }
         
-        return ds;
+        return new ReceiverConfig(participantId, ds, discovery);
     }
 }
