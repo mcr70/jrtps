@@ -13,7 +13,7 @@ import net.sf.jrtps.message.parameter.MulticastLocator;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.UnicastLocator;
 import net.sf.jrtps.transport.TransportProvider;
-import net.sf.jrtps.transport.Writer;
+import net.sf.jrtps.transport.Transmitter;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -121,7 +121,7 @@ public class Endpoint {
         if (locator != null) {
             try {
                 TransportProvider handler = TransportProvider.getInstance(locator);
-                Writer w = handler.createWriter(locator, configuration.getBufferSize());
+                Transmitter w = handler.createTransmitter(locator, configuration.getBufferSize());
                 //UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); 
                 // TODO: No need to create and close all the time
 

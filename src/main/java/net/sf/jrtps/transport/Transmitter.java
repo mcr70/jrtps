@@ -5,10 +5,13 @@ import java.io.IOException;
 import net.sf.jrtps.message.Message;
 
 /**
- * Writer.
+ * Transmitter is used to deliver messages to destination.  
+ * 
  * @author mcr70
+ * @see Receiver
+ * @see TransportProvider
  */
-public interface Writer {
+public interface Transmitter {
     /**
      * Sends a Message to destination.
      * @param msg Message to send

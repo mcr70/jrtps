@@ -2,6 +2,14 @@
     - FIX: QosDestinationOrder is better handled during reception.
       There still remains some incompatibility as timestamp is not compared
       at instance level, but at sample level. 
+    - Config: rtps.traffic.port-config: Allows configuration of PD, DG, PG etc.
+    - Config: jrtps.listener-uris & jrtps.discovery.listener-uris: Allows 
+      configuration of network listener receivers
+    - Participant ID used can be omitted. In that case, if port numbers are 
+      not explicitly given, port number will be assigned by trying different
+      participant ids until a port can be opened for receprion.
+    - TransportProvider is used to plug different transports to jRTPS. 
+      Currently, UDP is the only one available.   
     
 0.7.1
     - Documentation update

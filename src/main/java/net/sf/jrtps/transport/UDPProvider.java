@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 /**
  * This Provider creates receivers and writers for UDP protocol.
  * UDP is the only protocol that is required by the RTPS specification.
+ * Both unicast and multicast is supported.
  *  
  * @author mcr70
  */
@@ -36,8 +37,8 @@ public class UDPProvider extends TransportProvider {
     }
 
     @Override
-    public Writer createWriter(Locator locator, int bufferSize) throws IOException {
-        return new UDPWriter(locator, bufferSize);
+    public Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException {
+        return new UDPTransmitter(locator, bufferSize);
     }
 
     private DatagramSocket getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {

@@ -15,15 +15,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class receives network data. It is configured according to Locator given
- * on constructor.
- * <p>
- * see 8.3.4 The RTPS Message Receiver
+ * This class receives UDP packets from the network. 
  * 
  * @author mcr70
- * 
  */
-public class UDPReceiver implements Runnable, Receiver {
+public class UDPReceiver implements Receiver {
     private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
 
     private final BlockingQueue<byte[]> queue;

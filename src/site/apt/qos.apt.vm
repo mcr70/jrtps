@@ -101,6 +101,8 @@ Quality of Service - uDDS
  DataWriter writes Samples quicker than it can deliver them to Readers, not all the readers might 
  end up having all the samples.
 
+ Note also, that History QoS does not follow RxO semantics. I.e. Reader does not know how the writers history cache 
+ is configured. Nor can reader enforce writer to use either of the kinds.
  
 * Resource Limits
 
@@ -112,6 +114,9 @@ Quality of Service - uDDS
  max_samples_per_instance = <int>
  max_samples = <int>
 +------
+
+ <max_samples_per_instance> must be consistent with History QoS <depth>, so that 
+ <depth> \<= <max_samples_per_instance> 
 
  udds supports <max_instances> and <max_samples> settings above. When any of the limits is reached, 
  an OutOfResources Exception is thrown. On reader side, resource limits are checked when Samples arrive 

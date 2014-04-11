@@ -29,8 +29,8 @@ jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
 * RTPS specific configuration
 
   * <<{rtps.traffic.port-config}>>
-  A comma separated list of <name>=<value> settings. A <name> must be one of <PB, DG, PG, d0, d1, d2 or d3>. 
-  They are used with port number expression specified in RTPS specification ch. 9.6.1.1 and ch 9.6.1.2.
+  A comma separated list of <name>=<value> pairs. A <name> must be one of <PB, DG, PG, d0, d1, d2 or d3>. 
+  They are used with port number expression specified in RTPS specification ch. 9.6.1.1 and ch. 9.6.1.2.
 
   * <<{rtps.writer.push-mode}>>
   This configuration parameter affects how writer communicates changes to readers.

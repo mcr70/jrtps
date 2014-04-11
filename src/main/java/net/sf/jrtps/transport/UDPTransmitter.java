@@ -15,12 +15,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * UDPWriter.
+ * UDPTransmitter send Messages to remote entities using UDP protocol.
  * 
  * @author mcr70
  */
-public class UDPWriter implements Writer {
-    private static final Logger log = LoggerFactory.getLogger(UDPWriter.class);
+public class UDPTransmitter implements Transmitter {
+    private static final Logger log = LoggerFactory.getLogger(UDPTransmitter.class);
     private final Locator locator;
     private DatagramChannel channel;
     private int bufferSize;
@@ -31,7 +31,7 @@ public class UDPWriter implements Writer {
      * @param bufferSize Size of the buffer that will be used to write messages. 
      * @throws IOException
      */
-    UDPWriter(Locator locator, int bufferSize) throws IOException {
+    UDPTransmitter(Locator locator, int bufferSize) throws IOException {
         this.locator = locator;
         this.bufferSize = bufferSize;
         channel = DatagramChannel.open();
