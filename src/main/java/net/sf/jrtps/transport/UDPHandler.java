@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
  *  
  * @author mcr70
  */
-public class UDPHandler extends URIHandler {
+public class UDPHandler extends TransportProvider {
     private static final Logger log = LoggerFactory.getLogger(UDPHandler.class);
     
     public UDPHandler(Configuration config) {

@@ -16,16 +16,16 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public abstract class URIHandler {
-    private static final Logger log = LoggerFactory.getLogger(URIHandler.class);
+public abstract class TransportProvider {
+    private static final Logger log = LoggerFactory.getLogger(TransportProvider.class);
     
-    private static HashMap<String, URIHandler> handlersForScheme = new HashMap<>();
-    private static HashMap<Integer, URIHandler> handlersForKind = new HashMap<>();
+    private static HashMap<String, TransportProvider> providersForScheme = new HashMap<>();
+    private static HashMap<Integer, TransportProvider> providersForKind = new HashMap<>();
     
     private Configuration config;
    
 
-    protected URIHandler(Configuration config) {
+    protected TransportProvider(Configuration config) {
         this.config = config;
     }
     
@@ -34,42 +34,42 @@ public abstract class URIHandler {
     }
     
     /**
-     * get a handler for given scheme. Scheme is the same, as is used by
-     * java.net.URI class. An URIHandler need to be first registered with
-     * registerURIHandler.
+     * get a provider for given scheme. Scheme is the same, as is used by
+     * java.net.URI class. A TransportProvider need to be first registered with
+     * registerProvider.
      * 
      * @param scheme scheme
-     * @return URIHandler, or null if there was not URIHandler registered with given scheme
+     * @return TransportProvider, or null if there was not TransportProvider registered with given scheme
      */
-    public static URIHandler getInstance(String scheme) {
-        return handlersForScheme.get(scheme);
+    public static TransportProvider getInstance(String scheme) {
+        return providersForScheme.get(scheme);
     }
     
     /**
-     * Get a handler for given Locator kind. Remote entities advertise Locators, that can be used to
+     * Get a provider for given Locator kind. Remote entities advertise Locators, that can be used to
      * connect to them. 
      * 
      * @param locator
-     * @return URIHandler, or null if there was not URIHandler registered with given Locator.kind
+     * @return TransportProvider, or null if there was not TransportProvider registered with given Locator.kind
      * @see Locator#getKind()
      */
-    public static URIHandler getInstance(Locator locator) {
-        return handlersForKind.get(locator.getKind());
+    public static TransportProvider getInstance(Locator locator) {
+        return providersForKind.get(locator.getKind());
     }
 
     /**
-     * Registers an URIHandler with given scheme and kind
+     * Registers a TranportProvider with given scheme and kind
      * 
-     * @param scheme Scheme for the URIHandler
-     * @param handler URIHandler
-     * @param kinds Kinds of the Locators, that will be matched to given handler
+     * @param scheme Scheme for the provider
+     * @param provider TranportProvider to register
+     * @param kinds Kinds of the Locators, that will be matched to given provider
      */
-    public static void registerURIHandler(String scheme, URIHandler handler, int ... kinds) {
-        log.debug("Registering URI handler for scheme '{}', kind {}: {}", scheme, kinds, handler);
-        handlersForScheme.put(scheme, handler);
+    public static void registerTransportProvider(String scheme, TransportProvider provider, int ... kinds) {
+        log.debug("Registering provider for scheme '{}', kind {}: {}", scheme, kinds, provider);
+        providersForScheme.put(scheme, provider);
         
         for (int kind : kinds) {
-            handlersForKind.put(kind, handler);
+            providersForKind.put(kind, provider);
         }
     }
     

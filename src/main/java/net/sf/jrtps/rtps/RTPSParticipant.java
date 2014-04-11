@@ -19,7 +19,7 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.transport.Receiver;
 import net.sf.jrtps.transport.UDPHandler;
-import net.sf.jrtps.transport.URIHandler;
+import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -85,7 +85,7 @@ public class RTPSParticipant {
         this.config = config;
 
         UDPHandler handler = new UDPHandler(config); 
-        URIHandler.registerURIHandler("udp", handler, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
+        TransportProvider.registerTransportProvider("udp", handler, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
     }
 
     /**
@@ -332,7 +332,7 @@ public class RTPSParticipant {
 
     private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, boolean discovery) {
         for (URI uri : listenerURIs) {
-            URIHandler handler = URIHandler.getInstance(uri.getScheme());
+            TransportProvider handler = TransportProvider.getInstance(uri.getScheme());
             
             if (handler != null) {
                 try {
