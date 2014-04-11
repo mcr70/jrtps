@@ -86,7 +86,8 @@ public class RTPSParticipant {
     public RTPSParticipant(Guid guid, int domainId, int participantId, ScheduledThreadPoolExecutor tpe, 
             Map<GuidPrefix, ParticipantData> discoveredParticipants, Configuration config) {
         this.guid = guid;
-        this.domainId = domainId; // TODO: We should get rid of domainId here
+        this.domainId = domainId; 
+        this.participantId = participantId;
         this.threadPoolExecutor = tpe;
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
@@ -339,11 +340,15 @@ public class RTPSParticipant {
 
     private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, boolean discovery) {
         for (URI uri : listenerURIs) {
-            TransportProvider handler = TransportProvider.getInstance(uri.getScheme());
+            TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
             
-            if (handler != null) {
+            if (provider != null) {
                 try {
-                    Receiver receiver = handler.createReceiver(uri, domainId, -1, discovery, queue, bufferSize);
+                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, queue, bufferSize);
+                    if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
+                        this.participantId = receiver.getParticipantId();
+                    }
+                    
                     setLocator(receiver.getLocator(), discovery);
                     receivers.add(receiver);
                     threadPoolExecutor.execute(receiver);
