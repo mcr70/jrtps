@@ -9,3 +9,6 @@ o OSGi
 o Security
     - bouncy castle
 
+o Misc
+    - JMS; implement JMS on top of RTPS
+    - Transceiver; Joins DataReader + DataWriter
