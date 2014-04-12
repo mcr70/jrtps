@@ -1,6 +1,8 @@
 package net.sf.jrtps.rtps;
 
+import java.io.IOException;
 import java.net.SocketException;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +17,9 @@ import java.util.concurrent.TimeUnit;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.transport.UDPReceiver;
+import net.sf.jrtps.transport.Receiver;
+import net.sf.jrtps.transport.TransportProvider;
+import net.sf.jrtps.transport.UDPProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -48,40 +52,48 @@ public class RTPSParticipant {
      * A Set that stores network receivers for each locator we know. (For
      * listening purposes)
      */
-    private Set<UDPReceiver> receivers = new HashSet<UDPReceiver>();
+    private Set<Receiver> receivers = new HashSet<>();
 
     private final List<RTPSReader<?>> readerEndpoints = new LinkedList<>();
     private final List<RTPSWriter<?>> writerEndpoints = new LinkedList<>();
 
     private final Guid guid;
-    private final Set<Locator> locators;
-
     private RTPSMessageReceiver handler;
 
     private int domainId;
+    private int participantId;
 
+    private Locator discovery_mc_Locator;
+    private Locator discovery_uc_Locator;
+    private Locator userdata_mc_Locator;
+    private Locator userdata_uc_Locator;
+    
     /**
      * Creates a new participant with given domainId and participantId. Domain
-     * ID and particiapnt ID is used to construct unicast locators to this
+     * ID and participant ID is used to construct unicast locators to this
      * RTPSParticipant. In general, participants in the same domain get to know
-     * each other through SPDP. Each participant has a uniques unicast locator
+     * each other through SPDP. Each participant has a unique unicast locator
      * to access its endpoints.
      * 
      * @param guid Guid, that is assigned to this participant. Every entity created by this
      *        RTPSParticipant will share the GuidPrefix of this Guid. 
      * @param domainId Domain ID of the participant
-     * @param locators a Set of Locators
+     * @param participantId Participant ID of this participant. If set to -1, and port number is not given
+     *                      during starting of receivers, participantId will be determined based on the first
+     *                      suitable network socket.
      * @param config Configuration used
      */
-    public RTPSParticipant(Guid guid, int domainId, ScheduledThreadPoolExecutor tpe, Set<Locator> locators,
+    public RTPSParticipant(Guid guid, int domainId, int participantId, ScheduledThreadPoolExecutor tpe, 
             Map<GuidPrefix, ParticipantData> discoveredParticipants, Configuration config) {
         this.guid = guid;
-        this.domainId = domainId; // TODO: We should get rid of domainId here
-
+        this.domainId = domainId; 
+        this.participantId = participantId;
         this.threadPoolExecutor = tpe;
-        this.locators = locators;
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
+
+        UDPProvider handler = new UDPProvider(config); 
+        TransportProvider.registerTransportProvider("udp", handler, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
     }
 
     /**
@@ -90,23 +102,22 @@ public class RTPSParticipant {
      * @throws SocketException
      */
     public void start() throws SocketException {
-        // TODO: We should have endpoints for TCP, InMemory, What else?
-        // encrypted?, signed?
-        // UDP is required by the specification.
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
-
+        int bufferSize = config.getBufferSize();
+        
         // NOTE: We can have only one MessageReceiver. pending samples concept
         // relies on it.
         handler = new RTPSMessageReceiver(this, queue);
         threadPoolExecutor.execute(handler);
 
-        int bufferSize = config.getBufferSize();
-        for (Locator loc : locators) {
-            UDPReceiver receiver = new UDPReceiver(loc, queue, bufferSize);
-            receivers.add(receiver);
-            threadPoolExecutor.execute(receiver);
-        }
+        log.debug("Starting receivers for discovery");
+        List<URI> discoveryURIs = config.getDiscoveryListenerURIs();
+        startReceiversForURIs(queue, bufferSize, discoveryURIs, true);
 
+        log.debug("Starting receivers for user data");
+        List<URI> listenerURIs = config.getListenerURIs();
+        startReceiversForURIs(queue, bufferSize, listenerURIs, false);
+        
         log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
                 writerEndpoints.size());
     }
@@ -114,13 +125,10 @@ public class RTPSParticipant {
     /**
      * Creates a new RTPSReader.
      * 
-     * @param eId
-     *            EntityId of the reader
-     * @param topicName
-     *            Name of the topic
+     * @param eId EntityId of the reader
+     * @param topicName Name of the topic
      * @param marshaller
-     * @param qos
-     *            QualityOfService
+     * @param qos QualityOfService
      * 
      * @return RTPSReader
      */
@@ -136,10 +144,8 @@ public class RTPSParticipant {
     /**
      * Creates a new RTPSWriter.
      * 
-     * @param eId
-     *            EntityId of the reader
-     * @param topicName
-     *            Name of the topic
+     * @param eId EntityId of the reader
+     * @param topicName Name of the topic
      * @param wCache
      *            WriterCache
      * @param qos
@@ -169,7 +175,7 @@ public class RTPSParticipant {
         }
 
         // close network receivers
-        for (UDPReceiver r : receivers) {
+        for (Receiver r : receivers) {
             r.close();
         }
     }
@@ -183,6 +189,16 @@ public class RTPSParticipant {
         return guid;
     }
 
+    /**
+     * Ignores messages originating from given Participant 
+     * @param prefix GuidPrefix of the participant to ignore
+     */
+    public void ignoreParticipant(GuidPrefix prefix) {
+        handler.ignoreParticipant(prefix);
+    }
+
+    
+    
     /**
      * Gets the domainId of this participant;
      * 
@@ -223,22 +239,6 @@ public class RTPSParticipant {
     }
 
     /**
-     * Finds a Reader with given entity id.
-     * 
-     * @param readerId
-     * @return RTPSReader
-     */
-    private RTPSReader<?> getReader(EntityId readerId) {
-        for (RTPSReader<?> reader : readerEndpoints) {
-            if (reader.getGuid().getEntityId().equals(readerId)) {
-                return reader;
-            }
-        }
-
-        return null;
-    }
-
-    /**
      * Gets a Reader with given readerId. If readerId is null or
      * EntityId_t.UNKNOWN_ENTITY, a search is made to match with corresponding
      * writerId. I.e. If writer is SEDP_BUILTIN_PUBLICATIONS_WRITER, a search is
@@ -252,28 +252,73 @@ public class RTPSParticipant {
         if (readerId != null && !EntityId.UNKNOWN_ENTITY.equals(readerId)) {
             return getReader(readerId);
         }
-
+    
         if (writerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER)) {
             return getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
         }
-
+    
         if (writerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER)) {
             return getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
         }
-
+    
         if (writerId.equals(EntityId.SEDP_BUILTIN_TOPIC_WRITER)) {
             return getReader(EntityId.SEDP_BUILTIN_TOPIC_READER);
         }
-
+    
         if (writerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER)) {
             return getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
         }
-
+    
         if (writerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER)) {
             return getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
         }
-
+    
         log.warn("Failed to find RTPSReader for reader entity {} or matching writer entity {}", readerId, writerId);
+        return null;
+    }
+
+    RTPSWriter<?> getWriter(EntityId writerId, EntityId readerId) {
+        if (writerId != null && !EntityId.UNKNOWN_ENTITY.equals(writerId)) {
+            return getWriter(writerId);
+        }
+    
+        if (readerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER)) {
+            return getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+        }
+    
+        if (readerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER)) {
+            return getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+        }
+    
+        if (readerId.equals(EntityId.SEDP_BUILTIN_TOPIC_READER)) {
+            return getWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER);
+        }
+    
+        if (readerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_READER)) {
+            return getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
+        }
+    
+        if (readerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER)) {
+            return getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
+        }
+    
+        log.warn("Failed to find Writer for writer {} or matching reader {}", writerId, readerId);
+        return null;
+    }
+
+    /**
+     * Finds a Reader with given entity id.
+     * 
+     * @param readerId
+     * @return RTPSReader
+     */
+    private RTPSReader<?> getReader(EntityId readerId) {
+        for (RTPSReader<?> reader : readerEndpoints) {
+            if (reader.getGuid().getEntityId().equals(readerId)) {
+                return reader;
+            }
+        }
+
         return null;
     }
 
@@ -293,40 +338,64 @@ public class RTPSParticipant {
         return null;
     }
 
-    RTPSWriter<?> getWriter(EntityId writerId, EntityId readerId) {
-        if (writerId != null && !EntityId.UNKNOWN_ENTITY.equals(writerId)) {
-            return getWriter(writerId);
+    private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, boolean discovery) {
+        for (URI uri : listenerURIs) {
+            TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
+            
+            if (provider != null) {
+                try {
+                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, queue, bufferSize);
+                    if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
+                        this.participantId = receiver.getParticipantId();
+                    }
+                    
+                    setLocator(receiver.getLocator(), discovery);
+                    receivers.add(receiver);
+                    threadPoolExecutor.execute(receiver);
+                } catch (IOException ioe) {
+                    log.warn("Failed to start receiver for URI {}", uri, ioe);
+                }
+            }
+            else {
+                log.warn("Unknown scheme for URI {}", uri);
+            }
         }
-
-        if (readerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER)) {
-            return getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
-        }
-
-        if (readerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER)) {
-            return getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
-        }
-
-        if (readerId.equals(EntityId.SEDP_BUILTIN_TOPIC_READER)) {
-            return getWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER);
-        }
-
-        if (readerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_READER)) {
-            return getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
-        }
-
-        if (readerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER)) {
-            return getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
-        }
-
-        log.warn("Failed to find Writer for writer {} or matching reader {}", writerId, readerId);
-        return null;
     }
 
-    /**
-     * Ignores messages originating from given Participant 
-     * @param prefix GuidPrefix of the participant to ignore
+    /** 
+     * Assigns Receivers Locator to proper field
+     * @param loc
+     * @param discovery
      */
-    public void ignoreParticipant(GuidPrefix prefix) {
-        handler.ignoreParticipant(prefix);
+    private void setLocator(Locator loc, boolean discovery) {
+        if (loc.isMulticastLocator()) {
+            if (discovery) {
+                discovery_mc_Locator = loc;
+            }
+            else {
+                userdata_mc_Locator = loc;
+            }
+        }
+        else {
+            if (discovery) {
+                discovery_uc_Locator = loc;
+            }
+            else {
+                userdata_uc_Locator = loc;
+            }                        
+        }        
+    }
+
+    public Locator getDiscoveryMulticastLocator() {
+        return discovery_mc_Locator;
+    }
+    public Locator getDiscoveryUnicastLocator() {
+        return discovery_uc_Locator;
+    }
+    public Locator getUserdataMulticastLocator() {
+        return userdata_mc_Locator;
+    }
+    public Locator getUserdataUnicastLocator() {
+        return userdata_uc_Locator;
     }
 }

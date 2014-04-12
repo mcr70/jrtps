@@ -8,7 +8,7 @@ import net.sf.jrtps.udds.Participant;
 public class HelloWriter {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, SocketException,
             InterruptedException {
-        Participant p = new Participant(0, 2); // domain 0, participant 2
+        Participant p = new Participant(0); // domain 0, participant 2
 
         DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class);
         

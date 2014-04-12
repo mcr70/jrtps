@@ -5,7 +5,6 @@ import java.io.Serializable;
 import java.net.SocketException;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -81,22 +80,32 @@ public class Participant {
     private final WriterLivelinessManager livelinessManager;
     private final ParticipantLeaseManager leaseManager;
 
-    private Locator meta_mcLoc;
-    private Locator meta_ucLoc;
-    private Locator mcLoc;
-    private Locator ucLoc;
+    private final Locator meta_mcLoc;
+    private final Locator meta_ucLoc;
+    private final Locator mcLoc;
+    private final Locator ucLoc;
 
     private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
 
     private Guid guid;
 
     /**
-     * Create a Participant with domainId 0 and participantId 0.
+     * Create a Participant with domainId 0 and participantId -1.
      * 
      * @throws SocketException
      */
     public Participant() throws SocketException {
-        this(0, 0);
+        this(0, -1);
+    }
+
+    /**
+     * Create a Participant with given domainId and participantId -1.
+     * @param domainId domainId
+     * 
+     * @throws SocketException
+     */
+    public Participant(int domainId) throws SocketException {
+        this(domainId, -1);
     }
 
     /**
@@ -104,12 +113,12 @@ public class Participant {
      * with same domainId are able to communicate with each other. participantId
      * is used to distinguish participants within this domain(and JVM). More
      * specifically, domainId and participantId are used to select networking
-     * ports used by participant.
+     * ports used by participant. If participantId is set to -1, participantId
+     * will be determined during starting of network receivers. First participantId
+     * (based on available port number) available will be used. 
      * 
-     * @param domainId
-     *            domainId of this participant.
-     * @param participantId
-     *            participantId of this participant.
+     * @param domainId domainId of this participant.
+     * @param participantId participantId of this participant.
      * @throws SocketException
      */
     public Participant(int domainId, int participantId) throws SocketException {
@@ -126,17 +135,6 @@ public class Participant {
 
         createUnknownParticipantData(domainId);
 
-        meta_mcLoc = Locator.defaultDiscoveryMulticastLocator(domainId);
-        meta_ucLoc = Locator.defaultMetatrafficUnicastLocator(domainId, participantId);
-        mcLoc = Locator.defaultUserMulticastLocator(domainId);
-        ucLoc = Locator.defaultUserUnicastLocator(domainId, participantId);
-
-        HashSet<Locator> locators = new HashSet<>();
-        locators.add(meta_mcLoc);
-        locators.add(meta_ucLoc);
-        locators.add(mcLoc);
-        locators.add(ucLoc);
-
         Random r = new Random(System.currentTimeMillis());
         int vmid = r.nextInt();
         byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
@@ -144,9 +142,14 @@ public class Participant {
 
         this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
         
-        rtps_participant = new RTPSParticipant(guid, domainId, threadPoolExecutor, locators,
+        rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
                 discoveredParticipants, config);
         rtps_participant.start();
+
+        meta_mcLoc = rtps_participant.getDiscoveryMulticastLocator();
+        meta_ucLoc = rtps_participant.getDiscoveryUnicastLocator(); 
+        mcLoc = rtps_participant.getUserdataMulticastLocator();
+        ucLoc = rtps_participant.getUserdataUnicastLocator();
 
         this.livelinessManager = new WriterLivelinessManager(this);
         createBuiltinEntities();
@@ -452,6 +455,7 @@ public class Participant {
      * @param type
      * @return Marshaller
      */
+    @SuppressWarnings("unchecked")
     private <T> Marshaller<T> getMarshaller(Class<T> type) {
         Marshaller<?> m = marshallers.get(type);
         if (m == null) {

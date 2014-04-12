@@ -12,7 +12,8 @@ import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.MulticastLocator;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.UnicastLocator;
-import net.sf.jrtps.transport.UDPWriter;
+import net.sf.jrtps.transport.TransportProvider;
+import net.sf.jrtps.transport.Transmitter;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -102,24 +103,26 @@ public class Endpoint {
     }
 
     /**
-     * Sends a message. If an overflow occurs during marshalling of Message,
+     * Sends a message. If an overflow occurs during marshaling of Message,
      * only submessages before the overflow will get sent.
      * 
      * @param m
      *            Message to send
      * @param proxy
      *            proxy of the remote entity
-     * @return true, if an overflow occured during send.
+     * @return true, if an overflow occurred during send.
      */
     protected boolean sendMessage(Message m, RemoteProxy proxy) {
         boolean overFlowed = false;
-        //proxy.preferMulticast(true);
+        
         Locator locator = proxy.getLocator();
         log.debug("Sending message to {}", locator);
 
         if (locator != null) {
             try {
-                UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); 
+                TransportProvider handler = TransportProvider.getInstance(locator);
+                Transmitter w = handler.createTransmitter(locator, configuration.getBufferSize());
+                //UDPWriter w = new UDPWriter(locator, configuration.getBufferSize()); 
                 // TODO: No need to create and close all the time
 
                 overFlowed = w.sendMessage(m);

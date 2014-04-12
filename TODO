@@ -1,12 +1,21 @@
+o General
+    - We store only one locator for discovery/userdata access. 
+      d_mc, d_uc, u_mc, u_uc.
+      Instead, we should store a List of locators for each. (tcp, ssl, ...).
+      Configuration allows to specify multiple locators, but last one is 
+      actually propagated to remote participant.
+    
 o Quality of Service
-	- Use reasonable defaults, configuration, adaptation.
-	- Role of jrtps vs. udds vs. java5-psm
+    - Use reasonable defaults, configuration, adaptation.
 
 o OSGi
-	- Build jrtps/udds as an OSGi bundle.
-	- OSGi service: DataListener{topic-name, type-name[, qos]}. 
-	- What other services is needed?
-	- test with felix, equinox, 
+    - OSGi service: DataListener{topic-name, type-name[, qos]}. 
+    - What other services is needed?
+    - test with felix, equinox, 
 	
-o Encryption/signing
+o Security
+    - bouncy castle
 
+o Misc
+    - JMS; implement JMS on top of RTPS
+    - Transceiver; Joins DataReader + DataWriter

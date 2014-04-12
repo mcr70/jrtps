@@ -32,11 +32,19 @@ public class Instance <T> {
      */
     Sample<T> addSample(Sample<T> aSample) {
         synchronized (history) {
-            history.addFirst(aSample);
+            if (history.size() == 0) {
+                history.addFirst(aSample);
+            }
+            else {
+                Sample<T> first = history.getFirst();
+                if (first.getTimestamp() < aSample.getTimestamp()) {
+                    history.addFirst(aSample);
+                }
+            }
 
             if (history.size() > maxSize) {
                 return history.removeLast(); // Discard oldest sample
-            }            
+            }
         }
 
         return null;
@@ -51,8 +59,8 @@ public class Instance <T> {
             history.remove(sample);
         }
     }
-    
-    
+
+
     /**
      * Gets the history of this instance. First element in the List returned represents
      * the latest Sample. Note, that returned List represents history at the time of
@@ -65,11 +73,11 @@ public class Instance <T> {
         synchronized (history) {
             ll.addAll(history); // TODO: should we create new List here or not
         }
-       
+
         return ll; 
     }
-    
-    
+
+
     Sample<T> getLatest() {
         return history.getFirst();
     }

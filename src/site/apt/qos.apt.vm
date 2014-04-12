@@ -101,6 +101,8 @@ Quality of Service - uDDS
  DataWriter writes Samples quicker than it can deliver them to Readers, not all the readers might 
  end up having all the samples.
 
+ Note also, that History QoS does not follow RxO semantics. I.e. Reader does not know how the writers history cache 
+ is configured. Nor can reader enforce writer to use either of the kinds.
  
 * Resource Limits
 
@@ -108,12 +110,38 @@ Quality of Service - uDDS
  defines following attributes to control resource usage:
  
 +------
- max_instances
- max_samples_per_instance
- max_samples
+ max_instances = <int>
+ max_samples_per_instance = <int>
+ max_samples = <int>
 +------
+
+ <max_samples_per_instance> must be consistent with History QoS <depth>, so that 
+ <depth> \<= <max_samples_per_instance> 
 
  udds supports <max_instances> and <max_samples> settings above. When any of the limits is reached, 
  an OutOfResources Exception is thrown. On reader side, resource limits are checked when Samples arrive 
  from the network. Limits are thus checked by the network receiver thread, and application is therefore not 
  aware of the resource limit problem. 
+
+* Destination Order
+
+ This QoS policy controls how readers determine the order of Samples from multiple writers. If the kind 
+ is BY_RECEPTION_TIMESTAMP, the latest received value for the instance should be kept. BY_SOURCE_TIMESTAMP
+ indicates that the timestamp set by the writers should be considered instead. Using BY_SOURCE_TIMESTAMP
+ ensures that every subscriber in the system will end up having the same latest value for the instance.
+ 
+ Destination order QoS between reader and writer is compatible if 
+ 
++------
+ offered.kind >= requested.kind
++------
+ 
+ where BY_RECEPTION_TIMESTAMP \< BY_SOURCE_TIMESTAMP 
+ 
+ During reception, jRTPS sets timestamp of the Sample to system time if kind is BY_RECEPTION_TIME
+ or writer does not provide timestamp even though it should. Also, jRTPS does not compare timestamp at 
+ instance level. Instead, it compares Sample time to previous Sample time received. Regardless of its instance. 
+ This ensures that one cannot get 'older' samples during reception. Unfortunately, this is not compatible 
+ with the DDS specification.
+ 
+ <NOTE: This behavior might change in the future to be more in sync with DDS specification>

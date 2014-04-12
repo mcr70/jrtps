@@ -4,10 +4,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.MulticastSocket;
-import java.net.SocketException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Semaphore;
 
 import net.sf.jrtps.types.Locator;
 
@@ -15,54 +15,37 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This class receives network data. It is configured according to Locator given
- * on constructor.
- * <p>
- * see 8.3.4 The RTPS Message Receiver
+ * This class receives UDP packets from the network. 
  * 
  * @author mcr70
- * 
  */
-public class UDPReceiver implements Runnable {
+public class UDPReceiver implements Receiver {
     private static final Logger log = LoggerFactory.getLogger(UDPReceiver.class);
 
-    private final Semaphore initLock = new Semaphore(1);
     private final BlockingQueue<byte[]> queue;
+    private final DatagramSocket socket;
+    private final URI uri;
+    private final int bufferSize;
     private final Locator locator;
+    private final int participantId;
+    private final boolean discovery;
 
     private boolean running = true;
-    DatagramSocket socket = null;
-
-    private int bufferSize;
-
-    public UDPReceiver(Locator locator, BlockingQueue<byte[]> queue, int bufferSize) throws SocketException {
-        this.locator = locator;
+    
+    UDPReceiver(URI uri, ReceiverConfig rConfig, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {
+        this.uri = uri;
+        this.socket = rConfig.ds;
+        this.participantId = rConfig.participantId;
         this.queue = queue;
         this.bufferSize = bufferSize;
+        this.locator = new Locator(InetAddress.getByName(uri.getHost()), socket.getLocalPort());
+        this.discovery = rConfig.discovery;
     }
 
     public void run() {
-        try {
-            initLock.acquire();
-        } catch (InterruptedException e1) {
-            log.debug("Failed to acquire lock duringin initialization. exiting.");
-            return;
-        }
-
-        try {
-            if (locator.getInetAddress().isMulticastAddress()) {
-                socket = new MulticastSocket(locator.getPort());
-                ((MulticastSocket) socket).joinGroup(locator.getInetAddress());
-            } else {
-                socket = new DatagramSocket(locator.getPort());
-            }
-        } catch (IOException ioe) {
-            log.warn("Got IOException during creation of socket", ioe);
-        }
-
-        log.debug("Listening on {}", locator);
-        initLock.release();
-
+        log.debug("Listening on udp://{}:{} for {}", uri.getHost(), socket.getLocalPort(),
+                discovery ? "discovery traffic" : "user traffic");
+        
         byte[] buf = new byte[bufferSize];
 
         while (running) {
@@ -72,33 +55,35 @@ public class UDPReceiver implements Runnable {
 
                 byte[] bytes = new byte[p.getLength()];
                 System.arraycopy(p.getData(), 0, bytes, 0, bytes.length);
-                log.debug("Received {} bytes from {}", bytes.length, locator);
+                log.debug("Received {} bytes from port {}", bytes.length, socket.getLocalPort());
 
                 queue.put(bytes);
             } catch (IOException se) {
                 // Ignore. If we are still running, try to receive again
             } catch (InterruptedException ie) {
+                Thread.currentThread().interrupt();
                 running = false;
             }
         } // while(...)
     }
 
-    public void close() {
-        log.debug("Closing {}, {}", locator, socket);
-        try {
-            initLock.acquire();
-            if (socket != null) {
-                socket.close();
-            }
-            running = false;
-        } catch (InterruptedException e) {
-            log.debug("close() was interrupted");
-        }
-    }
-
+    @Override
     public Locator getLocator() {
         return locator;
     }
+
+    
+    
+    @Override
+    public void close() {
+        log.debug("Closing {}", socket.getLocalPort());
+        
+        if (socket != null) {
+            socket.close();
+        }
+        running = false;
+    }
+
 
     @SuppressWarnings("unused")
     private void writeMessage(String string, byte[] msgBytes) {
@@ -109,5 +94,10 @@ public class UDPReceiver implements Runnable {
         } catch (Exception e) {
             log.error("Failed to write message to {}", string, e);
         }
+    }
+
+    @Override
+    public int getParticipantId() {
+        return participantId;
     }
 }
