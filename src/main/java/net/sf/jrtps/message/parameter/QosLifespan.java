@@ -39,7 +39,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
 
     @Override
     public boolean isCompatible(QosLifespan other) {
-        return true; // Always true. TODO: check this
+        return true; // Always true.
     }
 
     /**

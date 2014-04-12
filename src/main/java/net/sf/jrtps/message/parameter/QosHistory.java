@@ -72,7 +72,7 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
 
     @Override
     public boolean isCompatible(QosHistory other) {
-        return true; // Always true. TODO: check this
+        return true; // Always true. 
     }
 
     /**

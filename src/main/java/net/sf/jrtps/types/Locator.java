@@ -13,10 +13,17 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class Locator {
-    public static final int LENGTH = 24;
-
+    /**
+     * This kind is used for communication with UDPv4
+     */
     public static final int LOCATOR_KIND_UDPv4 = 1;
+    /**
+     * This kind is used for communication with UDPv6
+     */
     public static final int LOCATOR_KIND_UDPv6 = 2;
+    /**
+     * An invalid Locator kind 
+     */
     public static final int LOCATOR_KIND_INVALID = -1;
 
     protected static final int PB = 7400; // NOTE: These should be moved to
@@ -73,65 +80,6 @@ public class Locator {
         assert address != null && address.length == 16;
     }
 
-    /**
-     * see 9.6.1.2 User traffic
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultUserMulticastLocator(int domainId) {
-        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
-
-        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d2, addr);
-    }
-
-    /**
-     * see 9.6.1.2 User traffic
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultUserUnicastLocator(int domainId, int participantId) {
-        InetAddress addr = null;
-        try {
-            addr = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            addr = InetAddress.getLoopbackAddress();
-        }
-
-        return new Locator(addr, PB + DG * domainId + d3 + PG * participantId);
-    }
-
-    /**
-     * see 9.6.1.2 User traffic
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultMetatrafficUnicastLocator(int domainId, int participantId) {
-        InetAddress addr = null;
-        try {
-            addr = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            addr = InetAddress.getLoopbackAddress();
-        }
-
-        return new Locator(addr, PB + DG * domainId + d1 + PG * participantId);
-    }
-
-    /**
-     * see 9.6.1.4 Default Settings for the Simple Participant Discovery
-     * Protocol
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultDiscoveryMulticastLocator(int domainId) {
-        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
-
-        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d0, addr);
-    }
-
     public InetAddress getInetAddress() {
         InetAddress inetAddress = null;
 
@@ -170,6 +118,25 @@ public class Locator {
         return new InetSocketAddress(getInetAddress(), port);
     }
 
+    /**
+     * Checks, if this Locator represents a multicast locator.
+     * @return true, if multicast locator.
+     */
+    public boolean isMulticastLocator() {
+        return getInetAddress().isMulticastAddress();
+    }
+    
+    /** 
+     * Gets the kind of this Locator. Each Locator has a kind associated with it to distinguish different types 
+     * of communication mechanisms from each other. For example, kind can be used to distinguish UDP from TCP. 
+     * RTPS specification defines only two mandatory kinds: for UDPv4 and UDPv6
+     *  
+     * @return kind 
+     */
+    public int getKind() {
+        return kind;
+    }
+    
     public int getPort() {
         // TODO: check this. port is ulong (32 bits), but in practice, 16 last
         // bits (0-65535) is our port number
@@ -177,13 +144,72 @@ public class Locator {
         return port & 0xffff;
     }
 
-    public String toString() {
-        return getInetAddress() + ":" + getPort();
-    }
-
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_long(kind);
         buffer.write_long(port);
         buffer.write(address);
+    }
+
+    /**
+     * see 9.6.1.2 User traffic
+     * 
+     * @param domainId
+     * 
+     */
+    public static Locator defaultUserMulticastLocator(int domainId) {
+        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
+    
+        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d2, addr);
+    }
+
+    /**
+     * see 9.6.1.2 User traffic
+     * 
+     * @param domainId
+     * 
+     */
+    public static Locator defaultUserUnicastLocator(int domainId, int participantId) {
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            addr = InetAddress.getLoopbackAddress();
+        }
+    
+        return new Locator(addr, PB + DG * domainId + d3 + PG * participantId);
+    }
+
+    /**
+     * see 9.6.1.2 User traffic
+     * 
+     * @param domainId
+     * 
+     */
+    public static Locator defaultDiscoveryUnicastLocator(int domainId, int participantId) {
+        InetAddress addr = null;
+        try {
+            addr = InetAddress.getLocalHost();
+        } catch (UnknownHostException e) {
+            addr = InetAddress.getLoopbackAddress();
+        }
+    
+        return new Locator(addr, PB + DG * domainId + d1 + PG * participantId);
+    }
+
+    /**
+     * see 9.6.1.4 Default Settings for the Simple Participant Discovery
+     * Protocol
+     * 
+     * @param domainId
+     * 
+     */
+    public static Locator defaultDiscoveryMulticastLocator(int domainId) {
+        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
+    
+        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d0, addr);
+    }
+
+    public String toString() {
+        return getInetAddress() + ":" + getPort();
     }
 }
