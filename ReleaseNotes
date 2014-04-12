@@ -1,4 +1,4 @@
-0.7.2
+0.8.0
     - FIX: QosDestinationOrder is better handled during reception.
       There still remains some incompatibility as timestamp is not compared
       at instance level, but at sample level. 

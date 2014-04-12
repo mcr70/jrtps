@@ -1,16 +1,17 @@
 o General
-    - We store only one locator for discovery/userdata access. d_mc, d_uc, u_mc, u_uc.
+    - We store only one locator for discovery/userdata access. 
+      d_mc, d_uc, u_mc, u_uc.
       Instead, we should store a List of locators for each. (tcp, ssl, ...).
-      Configuration allows to specify multiple locators, but last one is actually propagated
-      to remote participant.
+      Configuration allows to specify multiple locators, but last one is 
+      actually propagated to remote participant.
     
 o Quality of Service
-	- Use reasonable defaults, configuration, adaptation.
+    - Use reasonable defaults, configuration, adaptation.
 
 o OSGi
-	- OSGi service: DataListener{topic-name, type-name[, qos]}. 
-	- What other services is needed?
-	- test with felix, equinox, 
+    - OSGi service: DataListener{topic-name, type-name[, qos]}. 
+    - What other services is needed?
+    - test with felix, equinox, 
 	
 o Security
     - bouncy castle
