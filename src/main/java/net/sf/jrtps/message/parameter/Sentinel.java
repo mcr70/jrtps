@@ -9,8 +9,7 @@ public class Sentinel extends Parameter implements InlineParameter {
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        readBytes(bb, length); // TODO: default reading. just reads to byte[] in
-                               // super class.
+        readBytes(bb, length);
     }
 
     @Override

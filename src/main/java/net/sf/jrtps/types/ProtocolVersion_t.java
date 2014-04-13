@@ -10,7 +10,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class ProtocolVersion_t {
-    public static final int LENGTH = 2;
     public static final ProtocolVersion_t PROTOCOLVERSION_1_0 = new ProtocolVersion_t(1, 0);
     public static final ProtocolVersion_t PROTOCOLVERSION_1_1 = new ProtocolVersion_t(1, 1);
     public static final ProtocolVersion_t PROTOCOLVERSION_2_0 = new ProtocolVersion_t(2, 0);

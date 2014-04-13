@@ -212,7 +212,7 @@ public class Data extends SubMessage {
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_short(extraFlags);
 
-        short octets_to_inline_qos = EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH;
+        short octets_to_inline_qos = 4 + 4 + 8;// EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH;
         buffer.write_short(octets_to_inline_qos);
 
         readerId.writeTo(buffer);

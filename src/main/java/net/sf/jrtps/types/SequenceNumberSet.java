@@ -61,21 +61,25 @@ public class SequenceNumberSet {
         return bitmaps;
     }
 
+    /**
+     * Gets the sequence numbers set in this SequenceNumberSet.
+     * @return a List of sequence numbers
+     */
     public List<Long> getSequenceNumbers() {
         List<Long> seqNums = new LinkedList<Long>();
 
         long seqNum = bitmapBase.getAsLong();
-
+        int bitCount = 0;
+        
         for (int i = 0; i < bitmaps.length; i++) {
             int bitmap = bitmaps[i];
 
-            for (int j = 0; j < 32; j++) {
-                if ((bitmap & 0x8000000) == 0x8000000) { // id the MSB matches,
-                                                         // add a new seqnum
+            for (int j = 0; j < 32 && bitCount < numBits; j++) {
+                if ((bitmap & 0x8000000) == 0x8000000) { // id the MSB matches, add a new seqnum
                     seqNums.add(seqNum);
                 }
 
-                seqNum++;
+                seqNum++; bitCount++;
                 bitmap = bitmap << 1;
             }
         }
@@ -83,6 +87,10 @@ public class SequenceNumberSet {
         return seqNums;
     }
 
+    /**
+     * Gets the sequence numbers missing in this SequenceNumberSet.
+     * @return a List of missing sequence numbers
+     */
     public List<Long> getMissingSequenceNumbers() {
         List<Long> seqNums = new LinkedList<Long>();
 

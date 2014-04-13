@@ -8,9 +8,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  */
 public class SequenceNumber {
-    public static final int LENGTH = 8;
-
-    private int high = 0; // TODO: store as long instead
+    private int high = 0;
     private int low = 0;
 
     public SequenceNumber(RTPSByteBuffer bb) {
@@ -18,9 +16,9 @@ public class SequenceNumber {
         this.low = bb.read_long();
     }
 
-    public SequenceNumber(int _high, int _low) {
-        high = _high;
-        low = _low;
+    public SequenceNumber(int high, int low) {
+        this.high = high;
+        this.low = low;
     }
 
     public SequenceNumber(long seqNum) {

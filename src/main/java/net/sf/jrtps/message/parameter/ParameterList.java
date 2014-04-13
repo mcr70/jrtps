@@ -28,9 +28,7 @@ public class ParameterList {
             log.trace("Read Parameter {}, length {} from position {}", param, length, pos1);
 
             if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
-                break; // TODO: Add some control token to CDRInputStream that
-                       // counts bytes read and
-                // fails if expected_read_count+1 is reached
+                break;
             }
         }
     }

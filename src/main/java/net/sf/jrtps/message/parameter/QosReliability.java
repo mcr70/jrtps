@@ -75,9 +75,7 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
      * @return default QosReliability
      */
     public static QosReliability defaultReliability() {
-        return new QosReliability(Kind.BEST_EFFORT, new Duration(0, 0)); // TODO:
-                                                                         // check
-                                                                         // default
+        return new QosReliability(Kind.BEST_EFFORT, new Duration(0, 0));
     }
 
     public String toString() {

@@ -302,8 +302,8 @@ public class Configuration {
         return __getListenerURIs("jrtps.discovery.listener-uris");
     }
     
-    public List<URI> __getListenerURIs(String prop) {
-        String[] uriStrings = getStringArrayProperty(prop, new String[] {"udp:localhost", "udp:239.255.0.1"});
+    private List<URI> __getListenerURIs(String prop) {
+        String[] uriStrings = getStringArrayProperty(prop, new String[] {"udp://239.255.0.1", "udp://localhost"});
 
         List<URI> uriList = new LinkedList<>();
         for (String s : uriStrings) {

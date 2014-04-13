@@ -10,17 +10,12 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * actual value depends on the PSM. The implementation is free to choose the
  * prefix, as long as every Participant in the Domain has a unique GUID.
  * <p>
- * This implementation has chosen to use prefix: domainId, participantId, 0, 0,
- * 0xcafebabe
- * <p>
  * see 8.2.4.2 The GUIDs of RTPS Participants<br>
  * see 9.3.1.1 Mapping of the GuidPrefix_t
  * 
  * @author mcr70
  */
 public class GuidPrefix {
-    public static final int LENGTH = 12;
-
     public static final GuidPrefix GUIDPREFIX_UNKNOWN = new GuidPrefix(
             new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
 
@@ -35,12 +30,10 @@ public class GuidPrefix {
     }
 
     /**
-     * Create GuidPrefix with given byte array. The length of the array must be
-     * 12.
+     * Create GuidPrefix with given byte array. The length of the array must be 12.
      * 
-     * @param bytes
-     * @throws IllegalArgumentException
-     *             if length of the array is not 12
+     * @param bytes bytes of the GuidPrefix
+     * @throws IllegalArgumentException if length of the array is not 12
      */
     public GuidPrefix(byte[] bytes) {
         this.bytes = bytes;

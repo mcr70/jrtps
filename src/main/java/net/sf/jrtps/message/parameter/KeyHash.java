@@ -15,9 +15,6 @@ public class KeyHash extends Parameter implements InlineParameter {
         super(ParameterEnum.PID_KEY_HASH);
     }
 
-    // TODO: we could have constructor that takes a GUID. This could be used
-    // with built-in data creation
-
     public KeyHash(byte[] bytes) {
         super(ParameterEnum.PID_KEY_HASH, bytes);
 
@@ -37,12 +34,12 @@ public class KeyHash extends Parameter implements InlineParameter {
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        readBytes(bb, length); // TODO: default reading. just reads to byte[] in super class.
+        readBytes(bb, length);
     }
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        writeBytes(bb); // TODO: default writing. just writes byte[] in super class
+        writeBytes(bb);
     }
     
     public boolean equals(Object other) {

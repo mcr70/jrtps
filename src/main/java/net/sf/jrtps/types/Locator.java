@@ -8,9 +8,9 @@ import java.net.UnknownHostException;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
+ * Locator is used to tell remote participants how a participant can be reached.
  * 
  * @author mcr70
- * 
  */
 public class Locator {
     /**
@@ -26,17 +26,17 @@ public class Locator {
      */
     public static final int LOCATOR_KIND_INVALID = -1;
 
-    protected static final int PB = 7400; // NOTE: These should be moved to
+    private static final int PB = 7400; // NOTE: These should be moved to
                                           // somewhere else. default ports.
-    protected static final int DG = 250;
-    protected static final int PG = 2;
-    protected static final int d0 = 0; // used with metatraffic (discovery),
+    private static final int DG = 250;
+    private static final int PG = 2;
+    private static final int d0 = 0; // used with metatraffic (discovery),
                                        // multicast @see 9.6.1.1
-    protected static final int d1 = 10; // used with metatraffic (discovery),
+    private static final int d1 = 10; // used with metatraffic (discovery),
                                         // unicast @see 9.6.1.1
-    protected static final int d2 = 1; // Used with user traffic, multicast @see
+    private static final int d2 = 1; // Used with user traffic, multicast @see
                                        // 9.6.1.2
-    protected static final int d3 = 11; // Used with user traffic, unicast @see
+    private static final int d3 = 11; // Used with user traffic, unicast @see
                                         // 9.6.1.2
 
     private int kind;
@@ -148,52 +148,6 @@ public class Locator {
         buffer.write_long(kind);
         buffer.write_long(port);
         buffer.write(address);
-    }
-
-    /**
-     * see 9.6.1.2 User traffic
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultUserMulticastLocator(int domainId) {
-        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
-    
-        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d2, addr);
-    }
-
-    /**
-     * see 9.6.1.2 User traffic
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultUserUnicastLocator(int domainId, int participantId) {
-        InetAddress addr = null;
-        try {
-            addr = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            addr = InetAddress.getLoopbackAddress();
-        }
-    
-        return new Locator(addr, PB + DG * domainId + d3 + PG * participantId);
-    }
-
-    /**
-     * see 9.6.1.2 User traffic
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultDiscoveryUnicastLocator(int domainId, int participantId) {
-        InetAddress addr = null;
-        try {
-            addr = InetAddress.getLocalHost();
-        } catch (UnknownHostException e) {
-            addr = InetAddress.getLoopbackAddress();
-        }
-    
-        return new Locator(addr, PB + DG * domainId + d1 + PG * participantId);
     }
 
     /**

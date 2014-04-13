@@ -2,6 +2,7 @@ package net.sf.jrtps.message;
 
 import static org.junit.Assert.assertArrayEquals;
 
+import java.net.InetAddress;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -43,10 +44,13 @@ public class MessageTests {
 		// Create a Message with InfoDestination
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 
+		Locator loc1 = new Locator(InetAddress.getLoopbackAddress(), 7111);
+        Locator loc2 = new Locator(InetAddress.getLoopbackAddress(), 7222);
+		
 		List<Locator> unicastLocators = new LinkedList<>();
-		unicastLocators.add(Locator.defaultDiscoveryUnicastLocator(0, 0));
+		unicastLocators.add(loc1);
 		List<Locator> multicastLocators = new LinkedList<>();
-		multicastLocators.add(Locator.defaultDiscoveryMulticastLocator(0));
+		multicastLocators.add(loc2);
 		
 		m1.addSubMessage(new InfoReply(unicastLocators, multicastLocators));
 		

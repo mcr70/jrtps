@@ -10,8 +10,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class VendorId_t {
-    public static final int LENGTH = 2;
-
     public static final VendorId_t VENDORID_INVALID = new VendorId_t(new byte[] { 0, 0 });
     public static final VendorId_t VENDORID_JRTPS = new VendorId_t(new byte[] { (byte) 0xca, (byte) 0xfe });
     public static final VendorId_t PRISMTECH = new VendorId_t(new byte[] { (byte) 0x1, (byte) 0x2 });

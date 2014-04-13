@@ -63,7 +63,7 @@ public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwner
      * @return default QosOwnership
      */
     public static QosOwnership defaultOwnership() {
-        return new QosOwnership(Kind.SHARED); // TODO: check default
+        return new QosOwnership(Kind.SHARED);
     }
 
     public String toString() {
