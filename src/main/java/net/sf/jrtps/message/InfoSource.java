@@ -18,8 +18,8 @@ public class InfoSource extends SubMessage {
 
     private ProtocolVersion_t protocolVersion;
     private VendorId_t vendorId;
-    private GuidPrefix guidPrefix;
-
+    private GuidPrefix guidPrefix;    
+    
     public InfoSource(GuidPrefix guidPrefix) {
         super(new SubMessageHeader(KIND));
 
@@ -67,7 +67,7 @@ public class InfoSource extends SubMessage {
 
     @Override
     public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write_long(0); // TODO: check this
+        buffer.write_long(0);
         protocolVersion.writeTo(buffer);
         vendorId.writeTo(buffer);
         guidPrefix.writeTo(buffer);

@@ -111,7 +111,7 @@ public class ParticipantData extends DiscoveredData {
      * 
      * Default value is 100 seconds.
      */
-    private Duration leaseDuration = new Duration(15, 0); // TODO: 100 sec
+    private Duration leaseDuration = new Duration(100, 0);
 
     /**
      * Used to implement MANUAL_BY_PARTICIPANT liveliness QoS. When liveliness

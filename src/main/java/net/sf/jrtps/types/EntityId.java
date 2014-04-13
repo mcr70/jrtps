@@ -71,8 +71,6 @@ public abstract class EntityId {
      */
     public static final EntityId UNKNOWN_ENTITY = new UnknownEntity();
 
-    public static final int LENGTH = 4;
-
     private byte[] entityKey;
     private byte entityKind;
 
@@ -265,7 +263,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return 0; // TODO: check this
+            return 0; 
         }
     }
 

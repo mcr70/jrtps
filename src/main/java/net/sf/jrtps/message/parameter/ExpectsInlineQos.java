@@ -8,18 +8,16 @@ public class ExpectsInlineQos extends Parameter {
     }
 
     public boolean expectsInlineQos() {
-        return getBytes()[0] == 1; // TODO: Check boolean encoding
+        return getBytes()[0] == 1;
     }
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        readBytes(bb, length); // TODO: default reading. just reads to byte[] in
-                               // super class.
+        readBytes(bb, length);
     }
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        writeBytes(bb); // TODO: default writing. just writes byte[] in super
-                        // class
+        writeBytes(bb);
     }
 }

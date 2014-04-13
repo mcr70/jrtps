@@ -24,8 +24,7 @@ public class VendorSpecificParameter extends Parameter {
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        writeBytes(bb); // TODO: default writing. just writes byte[] in super
-                        // class
+        writeBytes(bb);
     }
 
     public String toString() {

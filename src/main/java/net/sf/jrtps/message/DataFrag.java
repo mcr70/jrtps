@@ -104,18 +104,14 @@ public class DataFrag extends SubMessage {
         int unknownOctets = octetsToInlineQos - bytesRead;
 
         for (int i = 0; i < unknownOctets; i++) {
-            // System.out.println("SKIP");
-            bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3
-                             // octetsToInlineQos
+            bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3 octetsToInlineQos
         }
 
         if (inlineQosFlag()) {
             readParameterList(bb);
         }
 
-        // TODO: alignment
-        int end_count = bb.position(); // end of bytes read so far from the
-                                       // beginning
+        int end_count = bb.position(); // end of bytes read so far from the beginning
 
         this.serializedPayload = new byte[header.submessageLength - (end_count - start_count)];
         bb.read(serializedPayload);
@@ -133,9 +129,7 @@ public class DataFrag extends SubMessage {
             Parameter param = ParameterFactory.readParameter(bb);
             parameterList.add(param);
             if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
-                break; // TODO: Add some control token to CDRInputStream that
-                       // counts bytes read and
-                       // fails if expected_read_count+1 is reached
+                break; 
             }
         }
     }
@@ -144,7 +138,7 @@ public class DataFrag extends SubMessage {
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_short(extraFlags);
 
-        short octets_to_inline_qos = EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH + 4 + 2 + 2 + 4;
+        short octets_to_inline_qos = 4 + 4 + 8 + 4 + 2 + 2 + 4;
         buffer.write_short(octets_to_inline_qos);
 
         readerId.writeTo(buffer);

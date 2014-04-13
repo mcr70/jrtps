@@ -5,6 +5,11 @@ import java.net.UnknownHostException;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * Optimized locator for UDP/IPv4.
+ * 
+ * @author mcr70
+ */
 public class LocatorUDPv4_t {
     public static final LocatorUDPv4_t LOCATORUDPv4_INVALID = new LocatorUDPv4_t(0, 0);
     /**

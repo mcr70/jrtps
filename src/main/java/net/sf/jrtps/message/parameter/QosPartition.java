@@ -30,8 +30,6 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        // writeBytes(bb); // TODO: default writing. just writes byte[] in super
-        // class
         bb.write_long(partitions.length);
         for (int i = 0; i < partitions.length; i++) {
             bb.write_string(partitions[i]);
@@ -49,7 +47,7 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
      * @return QosPartition
      */
     public static QosPartition defaultPartition() {
-        return new QosPartition(new String[0]); // TODO: check default
+        return new QosPartition(new String[0]);
     }
 
     public String toString() {

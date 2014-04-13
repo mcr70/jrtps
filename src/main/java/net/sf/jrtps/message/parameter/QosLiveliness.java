@@ -92,8 +92,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        this.kind = bb.read_long(); // TODO: we should throw an exception, if
-                                    // kind is illegal
+        this.kind = bb.read_long();
         this.lease_duration = new Duration(bb);
     }
 

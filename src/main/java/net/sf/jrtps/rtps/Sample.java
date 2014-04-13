@@ -59,7 +59,6 @@ public class Sample<T> {
         this.obj = obj;
     }
 
-    // TODO: this should be made package private
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, Data data) {
         this(writerGuid, m, seqNum, timestamp, data.getStatusInfo());
         this.data = data;
@@ -191,9 +190,10 @@ public class Sample<T> {
                 throw new RuntimeException(noSuchAlgorithm);
             }
 
-            // TODO: multithreading
-            bytes = md5.digest(key);
-            md5.reset();
+            synchronized (md5) {
+                bytes = md5.digest(key);
+                md5.reset();                
+            }
         }
 
         return new KeyHash(bytes);
