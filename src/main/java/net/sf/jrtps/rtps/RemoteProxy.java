@@ -104,7 +104,7 @@ public class RemoteProxy {
     }
 
     /**
-     * Gets the EntityId of this Endpoint. This is method behaves the same as calling
+     * Gets the EntityId of remote entity. This is method behaves the same as calling
      * getGuid().getEntityId().
      * 
      * @return EntityId

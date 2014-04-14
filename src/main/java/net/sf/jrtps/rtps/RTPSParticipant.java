@@ -127,7 +127,7 @@ public class RTPSParticipant {
      * 
      * @param eId EntityId of the reader
      * @param topicName Name of the topic
-     * @param marshaller
+     * @param rCache ReaderCache
      * @param qos QualityOfService
      * 
      * @return RTPSReader

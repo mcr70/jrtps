@@ -3,6 +3,12 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.ProtocolVersion_t;
 
+/**
+ * ProtocolVersion parameter.
+ * 
+ * @author mcr70
+ *
+ */
 public class ProtocolVersion extends Parameter {
     private ProtocolVersion_t version;
 
@@ -15,6 +21,10 @@ public class ProtocolVersion extends Parameter {
         super(ParameterEnum.PID_PROTOCOL_VERSION);
     }
 
+    /**
+     * Gets the ProtocolVersion_t.
+     * @return ProtocolVersion_t
+     */
     public ProtocolVersion_t getProtocolVersion() {
         return version;
     }

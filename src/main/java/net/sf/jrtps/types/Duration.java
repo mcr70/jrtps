@@ -11,14 +11,13 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class Duration implements Comparable<Duration> {
     // INFINITE: dds v1.2, IDL DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC,
     public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, Integer.MAX_VALUE);
-    public int sec;
-    public int nano;
+    private int sec;
+    private int nano;
 
     /**
      * Constructor for Duration_t
      * 
-     * @param millis
-     *            Duration expressed in milliseconds.
+     * @param millis Duration expressed in milliseconds.
      */
     public Duration(int millis) {
         this.sec = (int) (millis / 1000);
@@ -28,10 +27,8 @@ public class Duration implements Comparable<Duration> {
     /**
      * Constructor for Duration_t
      * 
-     * @param sec
-     *            seconds
-     * @param nano
-     *            nanoseconds
+     * @param sec seconds
+     * @param nano nanoseconds
      */
     public Duration(int sec, int nano) {
         this.sec = sec;
@@ -48,6 +45,10 @@ public class Duration implements Comparable<Duration> {
         nano = bb.read_long();
     }
 
+    /**
+     * Writes this Duration to given RTPSByteBuffer.
+     * @param buffer
+     */
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_long(sec);
         buffer.write_long(nano);
@@ -66,10 +67,6 @@ public class Duration implements Comparable<Duration> {
         return (long) sec * 1000 + n;
     }
 
-    public String toString() {
-        return "[" + sec + ":" + nano + "]";
-    }
-
     @Override
     public int compareTo(Duration o) {
         return (int) (asMillis() - o.asMillis());
@@ -85,5 +82,9 @@ public class Duration implements Comparable<Duration> {
         }
 
         return false;
+    }
+    
+    public String toString() {
+        return "[" + sec + ":" + nano + "]";
     }
 }
