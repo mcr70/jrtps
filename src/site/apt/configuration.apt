@@ -2,7 +2,7 @@ Configuration
 
  During startup, each Participant loads a configuration file named jrtps.properties
  from the classpath. If this file is not found, default values are used. Following 
- configuration file describes the defaults used.
+ configuration describes the defaults used.
  
 +---
 
