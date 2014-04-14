@@ -236,11 +236,12 @@ public class RTPSReader<T> extends Endpoint {
      * it will call stopMessageProcessing of each RTPSReader that has received
      * some Data messages.
      * 
+     * @param id Id of the set of changes
      * @param sourcePrefix GuidPrefix of the remote participant sending Data message
      * @param data Data SubMessage
      * @param timeStamp timestamp of the data
      * @throws IOException
-     * @see #stopMessageProcessing()
+     * @see #stopMessageProcessing(int)
      */
     void createSample(int id, GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
         Guid writerGuid = new Guid(sourcePrefix, data.getWriterId());
@@ -267,7 +268,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * 
      * @param msgId Id of the message
      * @see #startMessageProcessing(int)
-	 * @see #createSample(GuidPrefix, Data, Time)
+	 * @see #createSample(int, GuidPrefix, Data, Time)
 	 */
 	void stopMessageProcessing(int msgId) {
 		rCache.changesEnd(msgId);

@@ -100,7 +100,7 @@ public abstract class TransportProvider {
      * @return Receiver, or null if Receiver could not be created
      * @throws IOException 
      * 
-     * @see getPortNumberParameters()
+     * @see #getPortNumberParameters()
      */
     public abstract Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue, int bufferSize) throws IOException;
 

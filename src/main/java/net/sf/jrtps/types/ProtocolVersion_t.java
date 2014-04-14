@@ -31,6 +31,22 @@ public class ProtocolVersion_t {
         this(new byte[] { (byte) major, (byte) minor });
     }
 
+    /**
+     * Gets the major version number
+     * @return major
+     */
+    public byte getMajor() {
+        return bytes[0];
+    }
+    
+    /**
+     * Gets the minor version number
+     * @return minor
+     */
+    public byte getMinor() {
+        return bytes[1];
+    }
+    
     public String toString() {
         StringBuffer sb = new StringBuffer("version ");
         sb.append(bytes[0]);
@@ -40,6 +56,10 @@ public class ProtocolVersion_t {
         return sb.toString();
     }
 
+    /**
+     * Writers this ProtocolVersion_t to given RTPSByteBuffer.
+     * @param buffer
+     */
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write(bytes);
     }
