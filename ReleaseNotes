@@ -1,5 +1,5 @@
 0.8.1
-    - Minor fixes
+    - Minor fixes, Configuration can be given to participant
     
 0.8.0
     - FIX: QosDestinationOrder is better handled during reception.

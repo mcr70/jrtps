@@ -2,7 +2,6 @@ package net.sf.jrtps.udds;
 
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.net.SocketException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -53,7 +52,7 @@ public class Participant {
 
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
-    private final Configuration config = new Configuration();
+    private final Configuration config;
     private final HashMap<Class<?>, Marshaller<?>> marshallers = new HashMap<>();
     private final RTPSParticipant rtps_participant;
 
@@ -91,21 +90,27 @@ public class Participant {
 
     /**
      * Create a Participant with domainId 0 and participantId -1.
-     * 
-     * @throws SocketException
      */
-    public Participant() throws SocketException {
-        this(0, -1);
+    public Participant() {
+        this(0, -1, null);
     }
 
     /**
      * Create a Participant with given domainId and participantId -1.
+     *
      * @param domainId domainId
-     * 
-     * @throws SocketException
      */
-    public Participant(int domainId) throws SocketException {
-        this(domainId, -1);
+    public Participant(int domainId) {
+        this(domainId, -1, null);
+    }
+
+    /**
+     * Create a Participant with given domainId and participantId -1.
+     * 
+     * @param domainId domainId
+     */
+    public Participant(int domainId, int participantId) {
+        this(domainId, participantId, null);
     }
 
     /**
@@ -119,11 +124,13 @@ public class Participant {
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
-     * @throws SocketException
+     * @param config Configuration used. If config is null, default Configuration is used.
      */
-    public Participant(int domainId, int participantId) throws SocketException {
+    public Participant(int domainId, int participantId, Configuration config) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
-
+        
+        this.config = config != null ? config : new Configuration();
+        
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
         threadPoolExecutor = 
