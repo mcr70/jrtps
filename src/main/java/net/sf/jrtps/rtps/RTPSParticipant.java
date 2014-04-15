@@ -1,7 +1,6 @@
 package net.sf.jrtps.rtps;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -98,10 +97,8 @@ public class RTPSParticipant {
 
     /**
      * Starts this Participant. All the configured endpoints are initialized.
-     * 
-     * @throws SocketException
      */
-    public void start() throws SocketException {
+    public void start() {
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
         int bufferSize = config.getBufferSize();
         
