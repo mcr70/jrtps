@@ -17,5 +17,5 @@ o Security
     - bouncy castle
 
 o Misc
-    - JMS; implement JMS on top of RTPS
+    - JMS; implement JMS/RTPS
     - Transceiver; Joins DataReader + DataWriter
