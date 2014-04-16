@@ -38,8 +38,7 @@ import org.slf4j.LoggerFactory;
  * write samples to RTPSReader, it will query WriterCache for the Samples.
  * 
  * @see WriterCache
- * @see RTPSParticipant#createWriter(EntityId, String, WriterCache,
- *      QualityOfService)
+ * @see RTPSParticipant#createWriter(EntityId, String, WriterCache, QualityOfService)
  * 
  * @author mcr70
  */
