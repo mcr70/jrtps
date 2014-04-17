@@ -14,7 +14,7 @@ public class Subscriber {
         DataReader<Message> dr = p.createDataReader("Movie Discussion List", Message.class,
                 "IDL:Messenger/MessageTypeSupport:1.0", new MessengerQoS());
         MessageListener hl = new MessageListener();
-        dr.addListener(hl);
+        dr.addSampleListener(hl);
 
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();
