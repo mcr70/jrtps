@@ -2,6 +2,7 @@ package net.sf.jrtps.builtin;
 
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 import net.sf.jrtps.QualityOfService;
@@ -48,69 +49,16 @@ public class ParticipantData extends DiscoveredData {
     private GuidPrefix guidPrefix;
     private boolean expectsInlineQos = false;
 
-    /**
-     * List of unicast locators (transport, address, port combinations) that can
-     * be used to send messages to the built-in Endpoints contained in the
-     * Participant.
-     */
-    private Locator metatrafficUnicastLocator;
-
-    /**
-     * List of multicast locators (transport, address, port combinations) that
-     * can be used to send messages to the built-in Endpoints contained in the
-     * Participant.
-     */
+    private Locator metatrafficUnicastLocator; // TODO: remove these
     private Locator metatrafficMulticastLocator;
-
-    /**
-     * Default list of unicast locators (transport, address, port combinations)
-     * that can be used to send messages to the userdefined Endpoints contained
-     * in the Participant.
-     * 
-     * ???? These are the unicast locators that will be used in case the
-     * Endpoint does not specify its own set of Locators, so at least one
-     * Locator must be present. ????
-     * 
-     * (to SPDPbuiltinParticipantWriter? or SPPDPbuiltinParticipantReader? or
-     * Participant?)
-     */
     private Locator unicastLocator;
-
-    /**
-     * Default list of multicast locators (transport, address, port
-     * combinations) that can be used to send messages to the userdefined
-     * Endpoints contained in the Participant. These are the multicast locators
-     * that will be used in case the Endpoint does not specify its own set of
-     * Locators.
-     */
     private Locator multicastLocator;
 
-    /**
-     * All Participants must support the SEDP. This attribute identifies the
-     * kinds of built-in SEDP Endpoints that are available in the Participant.
-     * This allows a Participant to indicate that it only contains a subset of
-     * the possible built-in Endpoints. See also Section 8.5.4.3.
-     * <p>
-     * 
-     * Possible values for BuiltinEndpointSet_t are: PUBLICATIONS_READER,
-     * PUBLICATIONS_WRITER, SUBSCRIPTIONS_READER, SUBSCRIPTIONS_WRITER,
-     * TOPIC_READER, TOPIC_WRITER
-     * <p>
-     * 
-     * Vendor specific extensions may be used to denote support for additional
-     * EDPs.
-     */
+    private List<Locator> discoveryLocators;
+    private List<Locator> userdataLocators;
+
     private int availableBuiltinEndpoints;
 
-    /**
-     * How long a Participant should be considered alive every time an
-     * announcement is received from the Participant. If a Participant fails to
-     * send another announcement within this time period, the Participant can be
-     * considered gone. In that case, any resources associated to the
-     * Participant and its Endpoints can be freed.
-     * 
-     * Default value is 100 seconds.
-     */
     private Duration leaseDuration = new Duration(100, 0);
 
     /**
@@ -118,12 +66,28 @@ public class ParticipantData extends DiscoveredData {
      * is asserted, the manualLivelinessCount is incremented and a new
      * SPDPdiscoveredParticipantData is sent.
      */
-    private int manualLivelinessCount = 0;
+    private int manualLivelinessCount = 0; // TODO: check this
 
     /**
      * Time, that will mark remote participants lease as expired.
      */
     private long leaseExpirationTime;
+
+    public ParticipantData(GuidPrefix prefix, int endpoints, List<Locator> discoveryLocators,
+            List<Locator> userdataLocators) {
+        super();
+        qos = QualityOfService.getSPDPQualityOfService();
+
+        this.guidPrefix = prefix;
+        this.availableBuiltinEndpoints = endpoints;
+        this.discoveryLocators = discoveryLocators;
+        this.userdataLocators = userdataLocators;
+
+        super.topicName = BUILTIN_TOPIC_NAME;
+        super.typeName = ParticipantData.class.getName();
+
+        renewLease();
+    }
 
     public ParticipantData(GuidPrefix prefix, int endpoints, Locator u_ucLocator, Locator u_mcLocator,
             Locator m_ucLocator, Locator m_mcLocator) {
@@ -328,6 +292,22 @@ public class ParticipantData extends DiscoveredData {
      */
     public long getLeaseExpirationTime() {
         return leaseExpirationTime;
+    }
+
+    /**
+     * Gets the list of Locators that can be used for discovery(metadata).
+     * @return List of Locators for discovery
+     */
+    public List<Locator> getDiscoveryLocators() {
+        return discoveryLocators;
+    }
+    
+    /**
+     * Gets the list of Locators that can be used for user data
+     * @return List of Locators for user data
+     */
+    public List<Locator> getUserdataLocators() {
+        return userdataLocators;
     }
 
     public String toString() {

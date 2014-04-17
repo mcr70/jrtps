@@ -79,7 +79,10 @@ public class Participant {
     private final WriterLivelinessManager livelinessManager;
     private final ParticipantLeaseManager leaseManager;
 
-    private final Locator meta_mcLoc;
+    private final List<Locator> discoveryLocators;
+    private final List<Locator> userdataLocators;
+
+    private final Locator meta_mcLoc; // TODO: remove these
     private final Locator meta_ucLoc;
     private final Locator mcLoc;
     private final Locator ucLoc;
@@ -87,6 +90,7 @@ public class Participant {
     private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
 
     private Guid guid;
+
 
     /**
      * Create a Participant with domainId 0 and participantId -1.
@@ -153,6 +157,9 @@ public class Participant {
                 discoveredParticipants, config);
         rtps_participant.start();
 
+        discoveryLocators = rtps_participant.getDiscoveryLocators();
+        userdataLocators = rtps_participant.getUserdataLocators();
+        
         meta_mcLoc = rtps_participant.getDiscoveryMulticastLocator();
         meta_ucLoc = rtps_participant.getDiscoveryUnicastLocator(); 
         mcLoc = rtps_participant.getUserdataMulticastLocator();
@@ -491,6 +498,7 @@ public class Participant {
 
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
+        
         ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
                 meta_ucLoc, meta_mcLoc);
 

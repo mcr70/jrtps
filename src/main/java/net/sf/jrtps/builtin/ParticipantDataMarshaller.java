@@ -1,5 +1,7 @@
 package net.sf.jrtps.builtin;
 
+import java.util.List;
+
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.ParameterListEncapsulation;
@@ -54,7 +56,32 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
 
         payloadParams.add(new ParticipantBuiltinEndpoints(pd.getBuiltinEndpoints()));
         payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
+
         
+        List<Locator> discoveryLocators = pd.getDiscoveryLocators();
+        if (discoveryLocators != null) {
+            for (Locator loc : discoveryLocators) {
+                if (loc.isMulticastLocator()) {
+                    payloadParams.add(new MetatrafficMulticastLocator(loc));
+                }
+                else {
+                    payloadParams.add(new MetatrafficUnicastLocator(loc));                                        
+                }
+            }
+        }
+        
+        List<Locator> userdataLocators = pd.getUserdataLocators();
+        if (userdataLocators != null) {
+            for (Locator loc : userdataLocators) {
+                if (loc.isMulticastLocator()) {
+                    payloadParams.add(new DefaultMulticastLocator(loc));
+                }
+                else {
+                    payloadParams.add(new DefaultUnicastLocator(loc));
+                }
+            }
+        }
+
         Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
         if (metaUnicastLocator != null) {
             payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
