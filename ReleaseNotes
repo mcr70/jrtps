@@ -1,5 +1,6 @@
 0.8.1
-    - Minor fixes, Configuration can be given to participant
+    - Minor fixes, Configuration can be given to participant. Renamed
+      DataListener: add/removeListener to add/removeSampleListener
     
 0.8.0
     - FIX: QosDestinationOrder is better handled during reception.
