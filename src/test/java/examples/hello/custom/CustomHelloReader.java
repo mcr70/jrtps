@@ -13,7 +13,7 @@ public class CustomHelloReader {
         DataReader<CustomHelloMessage> dr = p.createDataReader(CustomHelloMessage.class);
         CustomHelloListener hl = new CustomHelloListener(); // implements SampleListener
 
-        dr.addListener(hl);
+        dr.addSampleListener(hl);
 
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();
