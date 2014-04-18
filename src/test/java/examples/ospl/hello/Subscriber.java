@@ -13,7 +13,7 @@ public class Subscriber {
 
         DataReader<Msg> dr = p.createDataReader("HelloWorldData_Msg", Msg.class, "HelloWorldData::Msg", new MsgQoS());
         MsgListener hl = new MsgListener();
-        dr.addListener(hl);
+        dr.addSampleListener(hl);
 
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();

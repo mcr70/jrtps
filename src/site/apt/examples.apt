@@ -48,7 +48,7 @@ udds examples
  arrive at DataReader.
  
 +---
- dr.addListener(new SampleListener<HelloMessage>() {
+ dr.addSampleListener(new SampleListener<HelloMessage>() {
    public void onSamples(List<Sample<HelloMessage>> samples) {
        System.out.println("Got samples: " + samples);
    }

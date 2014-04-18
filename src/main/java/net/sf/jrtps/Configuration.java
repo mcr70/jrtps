@@ -29,11 +29,20 @@ public class Configuration {
 
     private final Properties props;
 
+    /**
+     * Creates a Configuration from resource named <i>/jrtps.properties</i>
+     */
     public Configuration() {
         this("/jrtps.properties");
     }
 
-    Configuration(String resourceName) {
+    /**
+     * Creates a new Configuration with given resourceName. If given resourceName
+     * is not found, a default Configuration is constructed.
+     * 
+     * @param resourceName name of the resource given to {@link Class#getResourceAsStream(String)} 
+     */
+    public Configuration(String resourceName) {
         this.props = new Properties();
 
         InputStream is = getClass().getResourceAsStream(resourceName);

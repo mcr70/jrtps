@@ -1,5 +1,8 @@
 0.8.1
-    - Minor fixes
+    - Minor fixes, Configuration can be given to participant. Renamed
+      DataListener: add/removeListener to add/removeSampleListener.
+    - One can configure any number of listener uris. Each successful
+      listener uri will be transported to remote entity.
     
 0.8.0
     - FIX: QosDestinationOrder is better handled during reception.

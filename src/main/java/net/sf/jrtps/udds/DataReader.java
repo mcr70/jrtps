@@ -43,59 +43,24 @@ public class DataReader<T> extends Entity<T> {
      * Adds a SampleListener to this DataReader
      * @param listener Listener to add
      */
-    public void addListener(SampleListener<T> listener) {
+    public void addSampleListener(SampleListener<T> listener) {
         hCache.addListener(listener);
     }
 
-    /**
-     * Removes a given SampleListener from this DataReader.
-     * @param listener A listener to remove
-     */
-    public void removeListener(SampleListener<T> listener) {
-        hCache.removeListener(listener);
-    }
+    // ----  End of experimental code
+    
     
     /**
-     * Package access
+     * Adds a WriterListener to this DataReader.
+     * @param rl WriterListener to add
      */
-    RTPSReader<T> getRTPSReader() {
-        return rtps_reader;
-    }
-
-    // ----  Experimental code follows  ------------------------
-    /**
-     * Adds a reader side Filter. When samples are received, they are evaluated with
-     * all the Filters this DataReader has. If a Sample is accepted by all of the Filters,
-     * it is added to history cache of this reader, and clients are notified of new samples.
-     *  
-     * @param filter
-     */
-    void addFilter(SampleFilter<T> filter) {
-        // QosOwnership could be implemented with Filters.
-        // QosResourceLimits could be implemented with Filters.
-    }
-    
-    /**
-     * Gets samples that match Filter. History cache is scanned through and for each
-     * Sample, a Filter is applied. Only the accepted Samples are returned.
-     * 
-     * @param filter
-     * @return A List of Samples that matched given Filter
-     */
-    List<Sample<T>> getSamples(SampleFilter<T> filter) {
-        List<Sample<T>> filteredSampled = new LinkedList<>();
-        
-        List<Sample<T>> samples = getSamples();
-        for (Sample<T> sample : samples) {
-            if (filter.acceptSample(sample)) {
-                filteredSampled.add(sample);
-            }
+    public void addWriterListener(WriterListener rl) {
+        synchronized (wListeners) {
+            wListeners.add(rl);
         }
-        
-        return filteredSampled;
     }
 
-    
+
     /**
      * Gets a Set of instances this DataReader knows. 
      * 
@@ -146,11 +111,6 @@ public class DataReader<T> extends Entity<T> {
         return hCache.getSamplesSince(s.getSequenceNumber());
     }
 
-    List<Sample<T>> takeSamples() {
-        return null; // NOT TO BE IMPLEMENTED
-        // trying to avoid read/take semantics
-    }
-    
     /**
      * Clears Samples from the history cache. Once cleared, they cannot be retrieved from
      * the cache anymore. Note, that clearing samples from readers history cache is not the same thing as 
@@ -168,15 +128,14 @@ public class DataReader<T> extends Entity<T> {
     
     
     /**
-     * Adds a WriterListener to this DataReader.
-     * @param rl WriterListener to add
+     * Removes a given SampleListener from this DataReader.
+     * @param listener A listener to remove
      */
-    public void addWriterListener(WriterListener rl) {
-        synchronized (wListeners) {
-            wListeners.add(rl);
-        }
+    public void removeSampleListener(SampleListener<T> listener) {
+        hCache.removeListener(listener);
     }
-    
+
+
     /**
      * Removes a WriterListener from this DataReader.
      * @param rl WriterListener to remove
@@ -186,6 +145,55 @@ public class DataReader<T> extends Entity<T> {
             wListeners.remove(rl);
         }
     }
+
+    /**
+     * Package access
+     */
+    RTPSReader<T> getRTPSReader() {
+        return rtps_reader;
+    }
+
+
+    // ----  Experimental code follows  ------------------------
+    /**
+     * Adds a reader side Filter. When samples are received, they are evaluated with
+     * all the Filters this DataReader has. If a Sample is accepted by all of the Filters,
+     * it is added to history cache of this reader, and clients are notified of new samples.
+     *  
+     * @param filter
+     */
+    void addFilter(SampleFilter<T> filter) {
+        // QosOwnership could be implemented with Filters.
+        // QosResourceLimits could be implemented with Filters.
+    }
+
+
+    /**
+     * Gets samples that match Filter. History cache is scanned through and for each
+     * Sample, a Filter is applied. Only the accepted Samples are returned.
+     * 
+     * @param filter
+     * @return A List of Samples that matched given Filter
+     */
+    List<Sample<T>> getSamples(SampleFilter<T> filter) {
+        List<Sample<T>> filteredSampled = new LinkedList<>();
+        
+        List<Sample<T>> samples = getSamples();
+        for (Sample<T> sample : samples) {
+            if (filter.acceptSample(sample)) {
+                filteredSampled.add(sample);
+            }
+        }
+        
+        return filteredSampled;
+    }
+
+
+    List<Sample<T>> takeSamples() {
+        return null; // NOT TO BE IMPLEMENTED
+        // trying to avoid read/take semantics
+    }
+
 
     void addMatchedWriter(PublicationData pd) {
         rtps_reader.addMatchedWriter(pd);

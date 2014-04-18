@@ -2,7 +2,6 @@ package net.sf.jrtps.udds;
 
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.net.SocketException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -53,7 +52,7 @@ public class Participant {
 
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
-    private final Configuration config = new Configuration();
+    private final Configuration config;
     private final HashMap<Class<?>, Marshaller<?>> marshallers = new HashMap<>();
     private final RTPSParticipant rtps_participant;
 
@@ -80,7 +79,10 @@ public class Participant {
     private final WriterLivelinessManager livelinessManager;
     private final ParticipantLeaseManager leaseManager;
 
-    private final Locator meta_mcLoc;
+    private final List<Locator> discoveryLocators;
+    private final List<Locator> userdataLocators;
+
+    private final Locator meta_mcLoc; // TODO: remove these
     private final Locator meta_ucLoc;
     private final Locator mcLoc;
     private final Locator ucLoc;
@@ -89,23 +91,30 @@ public class Participant {
 
     private Guid guid;
 
+
     /**
      * Create a Participant with domainId 0 and participantId -1.
-     * 
-     * @throws SocketException
      */
-    public Participant() throws SocketException {
-        this(0, -1);
+    public Participant() {
+        this(0, -1, null);
     }
 
     /**
      * Create a Participant with given domainId and participantId -1.
+     *
      * @param domainId domainId
-     * 
-     * @throws SocketException
      */
-    public Participant(int domainId) throws SocketException {
-        this(domainId, -1);
+    public Participant(int domainId) {
+        this(domainId, -1, null);
+    }
+
+    /**
+     * Create a Participant with given domainId and participantId -1.
+     * 
+     * @param domainId domainId
+     */
+    public Participant(int domainId, int participantId) {
+        this(domainId, participantId, null);
     }
 
     /**
@@ -119,11 +128,13 @@ public class Participant {
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
-     * @throws SocketException
+     * @param config Configuration used. If config is null, default Configuration is used.
      */
-    public Participant(int domainId, int participantId) throws SocketException {
+    public Participant(int domainId, int participantId, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
-
+        
+        this.config = cfg != null ? cfg : new Configuration();
+        
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
         threadPoolExecutor = 
@@ -146,6 +157,9 @@ public class Participant {
                 discoveredParticipants, config);
         rtps_participant.start();
 
+        discoveryLocators = rtps_participant.getDiscoveryLocators();
+        userdataLocators = rtps_participant.getUserdataLocators();
+        
         meta_mcLoc = rtps_participant.getDiscoveryMulticastLocator();
         meta_ucLoc = rtps_participant.getDiscoveryUnicastLocator(); 
         mcLoc = rtps_participant.getUserdataMulticastLocator();
@@ -197,30 +211,30 @@ public class Participant {
         DataReader<ParticipantData> pdReader = createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
                 ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
                 spdpQoS);
-        pdReader.addListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
+        pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
         // ---- Create a Readers for SEDP ---------
         DataReader<PublicationData> wdReader = createDataReader(PublicationData.BUILTIN_TOPIC_NAME,
                 PublicationData.class, PublicationData.BUILTIN_TYPE_NAME, // PublicationData.class.getName(),
                 sedpQoS);
-        wdReader.addListener(new BuiltinPublicationDataListener(this, discoveredWriters));
+        wdReader.addSampleListener(new BuiltinPublicationDataListener(this, discoveredWriters));
 
         DataReader<SubscriptionData> rdReader = createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME,
                 SubscriptionData.class, SubscriptionData.BUILTIN_TYPE_NAME, // SubscriptionData.class.getName(),
                 sedpQoS);
-        rdReader.addListener(new BuiltinSubscriptionDataListener(this, discoveredReaders));
+        rdReader.addSampleListener(new BuiltinSubscriptionDataListener(this, discoveredReaders));
 
         // NOTE: It is not mandatory to publish TopicData, create reader anyway.
         // Maybe someone publishes TopicData.
         DataReader<TopicData> tReader = createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class,
                 TopicData.BUILTIN_TYPE_NAME, // TopicData.class.getName(),
                 sedpQoS);
-        tReader.addListener(new BuiltinTopicDataListener(this));
+        tReader.addSampleListener(new BuiltinTopicDataListener(this));
 
         // Create entities for ParticipantMessage ---------------
         DataReader<ParticipantMessage> pmReader = createDataReader(ParticipantMessage.BUILTIN_TOPIC_NAME,
                 ParticipantMessage.class, ParticipantMessage.class.getName(), pmQoS);
-        pmReader.addListener(new BuiltinParticipantMessageListener(this, readers));
+        pmReader.addSampleListener(new BuiltinParticipantMessageListener(this, readers));
 
         // Just create writer for ParticipantMessage, so that it will be listed
         // in builtin entities
@@ -484,8 +498,12 @@ public class Participant {
 
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
-        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
-                meta_ucLoc, meta_mcLoc);
+        
+//        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
+//                meta_ucLoc, meta_mcLoc);
+
+        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
+                discoveryLocators, userdataLocators);
 
         return pd;
     }

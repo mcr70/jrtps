@@ -12,7 +12,7 @@ public class ExternalizableHelloReader {
         DataReader<ExternalizableHelloMessage> dr = p.createDataReader(ExternalizableHelloMessage.class);
         ExternalizableHelloListener hl = new ExternalizableHelloListener(); // implements SampleListener
 
-        dr.addListener(hl);
+        dr.addSampleListener(hl);
 
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();

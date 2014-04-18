@@ -1,7 +1,6 @@
 package net.sf.jrtps.rtps;
 
 import java.io.IOException;
-import java.net.SocketException;
 import java.net.URI;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -57,13 +56,18 @@ public class RTPSParticipant {
     private final List<RTPSReader<?>> readerEndpoints = new LinkedList<>();
     private final List<RTPSWriter<?>> writerEndpoints = new LinkedList<>();
 
+    private final LinkedList<Locator> discoveryLocators = new LinkedList<>();
+    private final LinkedList<Locator> userdataLocators = new LinkedList<>();
+
+    
     private final Guid guid;
     private RTPSMessageReceiver handler;
 
     private int domainId;
     private int participantId;
 
-    private Locator discovery_mc_Locator;
+    
+    private Locator discovery_mc_Locator; // TODO: remove these
     private Locator discovery_uc_Locator;
     private Locator userdata_mc_Locator;
     private Locator userdata_uc_Locator;
@@ -98,10 +102,8 @@ public class RTPSParticipant {
 
     /**
      * Starts this Participant. All the configured endpoints are initialized.
-     * 
-     * @throws SocketException
      */
-    public void start() throws SocketException {
+    public void start() {
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
         int bufferSize = config.getBufferSize();
         
@@ -338,13 +340,16 @@ public class RTPSParticipant {
         return null;
     }
 
-    private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, boolean discovery) {
+    private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, 
+            boolean discovery) {
         for (URI uri : listenerURIs) {
             TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
             
             if (provider != null) {
                 try {
-                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, queue, bufferSize);
+                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, 
+                            queue, bufferSize);
+                    
                     if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
                         this.participantId = receiver.getParticipantId();
                     }
@@ -368,6 +373,15 @@ public class RTPSParticipant {
      * @param discovery
      */
     private void setLocator(Locator loc, boolean discovery) {
+        if (discovery) {
+            discoveryLocators.add(loc);
+        }
+        else {
+            userdataLocators.add(loc);
+        }
+        
+        // TODO: remove rest of this method
+        
         if (loc.isMulticastLocator()) {
             if (discovery) {
                 discovery_mc_Locator = loc;
@@ -397,5 +411,13 @@ public class RTPSParticipant {
     }
     public Locator getUserdataUnicastLocator() {
         return userdata_uc_Locator;
+    }
+
+
+    public List<Locator> getDiscoveryLocators() {
+        return discoveryLocators;
+    }
+    public List<Locator> getUserdataLocators() {
+        return userdataLocators;
     }
 }
