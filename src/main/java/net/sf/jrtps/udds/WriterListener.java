@@ -12,14 +12,14 @@ import net.sf.jrtps.builtin.PublicationData;
 public interface WriterListener {
     /**
      * This method is called when a remote writer has been successfully matched. 
-     * @param sd PublicationData of the remote writer
+     * @param pd PublicationData of the remote writer
      */
-    void writerMatched(PublicationData sd);
+    void writerMatched(PublicationData pd);
 
     /**
      * This method is called when a remote writer cannot be matched with DataReader due to 
      * inconsistent QualityOfService. 
-     * @param sd PublicationData of the remote writer
+     * @param pd PublicationData of the remote writer
      */
-    void inconsistentQoS(PublicationData sd);
+    void inconsistentQoS(PublicationData pd);
 }

@@ -82,7 +82,7 @@ jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
   prefer. Note, that if remote entity advertises only one or the other, this flag has no effect. 
   
   * <<{jrtps.listener-uris}>>
-  A comma separated list of URIs, that will be used to start listeners for user traffic.
+  A comma separated list of URIs that will be used to start listeners for user traffic.
   If port number is omitted, it will be calculated using the port number expression defined  
   in RTPS spec (I.e. use rtps.traffic.port-config). Currently, udp is the only scheme that is supported
   by jRTPS. However, there is a preliminary work done for adding custom scheme handlers.
