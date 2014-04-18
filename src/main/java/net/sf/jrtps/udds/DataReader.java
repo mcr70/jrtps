@@ -52,11 +52,11 @@ public class DataReader<T> extends Entity<T> {
     
     /**
      * Adds a WriterListener to this DataReader.
-     * @param rl WriterListener to add
+     * @param wl WriterListener to add
      */
-    public void addWriterListener(WriterListener rl) {
+    public void addWriterListener(WriterListener wl) {
         synchronized (wListeners) {
-            wListeners.add(rl);
+            wListeners.add(wl);
         }
     }
 
