@@ -499,8 +499,11 @@ public class Participant {
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
         
-        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
-                meta_ucLoc, meta_mcLoc);
+//        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
+//                meta_ucLoc, meta_mcLoc);
+
+        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
+                discoveryLocators, userdataLocators);
 
         return pd;
     }
