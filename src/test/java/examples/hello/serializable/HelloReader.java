@@ -11,7 +11,7 @@ public class HelloReader {
 
         DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class);
         HelloListener hl = new HelloListener(); // implements DataListener
-        dr.addListener(hl);
+        dr.addSampleListener(hl);
        
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();

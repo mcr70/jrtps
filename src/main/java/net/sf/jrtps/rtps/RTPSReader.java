@@ -28,16 +28,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * RTPSReader implements RTPS Reader endpoint functionality. RTPSReader does not
- * store any data received. It only keeps track of data entries sent by writers
- * and propagates received data to RTPSListeners registered.
- * <p>
- * 
- * RTPSReader will not communicate with unknown writers. It is the
+ * RTPSReader implements RTPS Reader endpoint functionality. 
+ * It will not communicate with unknown writers. It is the
  * responsibility of DDS layer to provide matched readers when necessary.
  * Likewise, DDS layer should remove matched writer, when it detects that it is
- * not available anymore.
+ * not available anymore.<p>
  * 
+ * When Samples arrive at RTPSReader, they are passed on to DDS layer through
+ * <i>ReaderCache</i>. ReaderCache is implemented by DDS layer and is responsible for
+ * storing samples.
+ * 
+ * @see ReaderCache
+ * @see RTPSParticipant#createReader(EntityId, String, ReaderCache, QualityOfService)
+ *
  * @author mcr70
  */
 public class RTPSReader<T> extends Endpoint {
@@ -249,7 +252,7 @@ public class RTPSReader<T> extends Endpoint {
         WriterProxy wp = getWriterProxy(writerGuid);
         if (wp != null) {
             if (wp.acceptData(data.getWriterSequenceNumber())) {
-                log.debug("[{}] Got Data: {}", getEntityId(), data.getWriterSequenceNumber());
+                log.debug("[{}] Got Data: #{}", getEntityId(), data.getWriterSequenceNumber());
                 rCache.addChange(id, writerGuid, data, timeStamp);
             } else {
                 log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
