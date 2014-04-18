@@ -130,10 +130,10 @@ public class Participant {
      * @param participantId participantId of this participant.
      * @param config Configuration used. If config is null, default Configuration is used.
      */
-    public Participant(int domainId, int participantId, Configuration config) {
+    public Participant(int domainId, int participantId, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
         
-        this.config = config != null ? config : new Configuration();
+        this.config = cfg != null ? cfg : new Configuration();
         
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);

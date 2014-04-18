@@ -35,7 +35,7 @@ jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
   * <<{rtps.writer.push-mode}>>
   This configuration parameter affects how writer communicates changes to readers.
   If push-mode is false, writer will announce new data to readers by sending a <<<Heartbeat>>>
-  message. If set to true, writer will send the changes to all matched writers directly.
+  message. If set to true, writer will send the changes to all matched readers directly.
 
   * <<{rtps.writer.heartbeat-period}>>
   This configuration parameter tells how often writer will advertise the changes it has by
@@ -71,7 +71,7 @@ jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
   * <<{jrtps.buffer-size}>>
   Size of the buffer used. This is the maximum size of the UDP packet. During sending, if an overflow
   occurs only submessages that were successfully written to buffer will get actually sent. This overflow
-  is detected, and if it occured during sending of <<<Data>>>, a <<<Heartbeat>>> message will be sent
+  is detected and if it occured during sending of <<<Data>>>, a <<<Heartbeat>>> message will be sent
   
   * <<{jrtps.publish-builtin-data}>>
   Determines whether or not to publish data for builtin entities. This defaults to false, since 
@@ -89,5 +89,5 @@ jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
   
   * <<{jrtps.discovery.listener-uris}>>
   A comma separated list of URIs, that will be used to start listeners for discovery.
-  If this config is omitted, discovery will use the same listeners as with user data.
+
   
