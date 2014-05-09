@@ -178,6 +178,137 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */{
         write_octet((byte) 0); // terminating NUL character
     }
 
+    // --- Reads and writes for java primitives --------------
+    /**
+     * Reads a java primitive int.
+     * @return an int
+     */
+    public int readInt() {
+        return buffer.getInt();
+    }
+    
+    /**
+     * Writes a java primitive int.
+     * @param i
+     */
+    public void writeInt(int i) {
+        buffer.putInt(i);
+    }
+    
+    /**
+     * Reads a java primitive short.
+     * @return a short
+     */
+    public short readShort() {
+        return buffer.getShort();
+    }
+    
+    /**
+     * Writes a java primitive short.
+     * @param s
+     */
+    public void writeShort(short s) {
+        buffer.putShort(s);
+    }
+    
+    /**
+     * Reads a java primitive long.
+     * @return a long
+     */
+    public long readLong() {
+        return buffer.getLong();
+    }
+    
+    /**
+     * Writes a java primitive long.
+     * @param l
+     */
+    public void writeLong(long l) {
+        buffer.putLong(l);
+    }
+
+    /**
+     * Reads a java primitive float.
+     * @return a float
+     */
+    public float readFloat() {
+        return buffer.getFloat();
+    }
+    
+    /**
+     * Writes a java primitive float.
+     * @param f
+     */
+    public void writeFloat(float f) {
+        buffer.putFloat(f);
+    }
+    
+    /**
+     * Reads a java primitive double.
+     * @return a double
+     */
+    public double readDouble() {
+        return buffer.getDouble();
+    }
+    
+    /**
+     * Writes a java primitive double.
+     * @param d
+     */
+    public void writeDouble(double d) {
+        buffer.putDouble(d);
+    }
+    
+    /**
+     * Reads a java primitive char.
+     * @return a char
+     */
+    public char readChar() {
+        return buffer.getChar();
+    }
+    
+    /**
+     * Writes a java primitive char.
+     * @param c
+     */
+    public void writeChar(char c) {
+        buffer.putChar(c);
+    }
+    
+    /**
+     * Reads a java primitive byte.
+     * @return a byte
+     */
+    public byte readByte() {
+        return buffer.get();
+    }
+    
+    /**
+     * Writes a java primitive byte.
+     * @param f
+     */
+    public void writeByte(byte b) {
+        buffer.put(b);
+    }
+    
+    /**
+     * Reads a java primitive boolean.
+     * @return a boolean
+     */
+    public boolean readBoolean() {
+        return read_boolean();
+    }
+    
+    /**
+     * Writes a java primitive boolean.
+     * @param b
+     */
+    public void writeBoolean(boolean b) {
+        write_boolean(b);
+    }
+    
+    
+    
     /**
      * Reads in bytes(octets) from underlying buffer.
      * 
@@ -196,17 +327,10 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */{
         buffer.put(bytes);
     }
 
-    /**
-     * Writes an array of ints(longs)
-     * 
-     * @param ints
-     */
-    public void write(int[] ints) {
-        for (int i = 0; i < ints.length; i++) {
-            write_long(ints[i]);
-        }
-    }
 
+
+    
+    
     /**
      * Aligns this buffer to given byteBoundary.
      * 
