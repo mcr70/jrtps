@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -328,7 +329,25 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */{
     }
 
 
-
+    public void writeString(String s) {
+        buffer.putInt(s.length());
+        try {
+            buffer.put(s.getBytes("ISO-8859-1"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    
+    public String readString() {
+        int length = buffer.getInt();
+        byte[] bytes = new byte[length];
+        buffer.get(bytes);
+        try {
+            return new String(bytes, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
     
     
     /**
