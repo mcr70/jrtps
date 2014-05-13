@@ -14,9 +14,7 @@ import java.nio.ByteOrder;
  * @author mcr70
  * 
  */
-public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */{
-    // TODO: consider extending from org.omg.CORBA.portable.InputStream
-    // This would allow to use idl compiler for dds.idl & rtps.idl
+public class RTPSByteBuffer {
     private ByteBuffer buffer;
 
     /**
@@ -328,22 +326,51 @@ public class RTPSByteBuffer /* extends org.omg.CORBA.portable.InputStream */{
         buffer.put(bytes);
     }
 
-
+    /**
+     * Writes a String into this buffer. This method calls writeString(s, "ISO-8859-1") 
+     * @param s String to write
+     */
     public void writeString(String s) {
+        writeString(s, "ISO-8859-1");
+    }
+    
+    /**
+     * Writes a String into this buffer with given charsetName. charsetName is used when getting the bytes of the
+     * String. 
+     * @param s String to write
+     * @param charsetName Name of the charset
+     * @throw RuntimeException that wraps UnsupportedEncodingException
+     */
+    public void writeString(String s, String charsetName) {
         buffer.putInt(s.length());
+        
         try {
-            buffer.put(s.getBytes("ISO-8859-1"));
+            buffer.put(s.getBytes(charsetName));
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }
     
+    /**
+     * Reads a String from the buffer. This method calls readString("ISO-8859-1")
+     * @return a String
+     */
     public String readString() {
+        return readString("ISO-8859-1");
+    }
+    
+    /**
+     * Reads a String from the buffer. 
+     * @param charsetName Name of of charset
+     * @return a String
+     * @throw RuntimeException that wraps UnsupportedEncodingException
+     */
+    public String readString(String charsetName) {
         int length = buffer.getInt();
         byte[] bytes = new byte[length];
         buffer.get(bytes);
         try {
-            return new String(bytes, "ISO-8859-1");
+            return new String(bytes, charsetName);
         } catch (UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
