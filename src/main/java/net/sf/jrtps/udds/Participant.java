@@ -82,11 +82,6 @@ public class Participant {
     private final List<Locator> discoveryLocators;
     private final List<Locator> userdataLocators;
 
-    private final Locator meta_mcLoc; // TODO: remove these
-    private final Locator meta_ucLoc;
-    private final Locator mcLoc;
-    private final Locator ucLoc;
-
     private List<EntityListener> entityListeners = new CopyOnWriteArrayList<>();
 
     private Guid guid;
@@ -160,11 +155,6 @@ public class Participant {
         discoveryLocators = rtps_participant.getDiscoveryLocators();
         userdataLocators = rtps_participant.getUserdataLocators();
         
-        meta_mcLoc = rtps_participant.getDiscoveryMulticastLocator();
-        meta_ucLoc = rtps_participant.getDiscoveryUnicastLocator(); 
-        mcLoc = rtps_participant.getUserdataMulticastLocator();
-        ucLoc = rtps_participant.getUserdataUnicastLocator();
-
         this.livelinessManager = new WriterLivelinessManager(this);
         createBuiltinEntities();
 
