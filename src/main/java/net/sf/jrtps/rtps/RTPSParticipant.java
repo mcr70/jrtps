@@ -67,11 +67,6 @@ public class RTPSParticipant {
     private int participantId;
 
     
-    private Locator discovery_mc_Locator; // TODO: remove these
-    private Locator discovery_uc_Locator;
-    private Locator userdata_mc_Locator;
-    private Locator userdata_uc_Locator;
-    
     /**
      * Creates a new participant with given domainId and participantId. Domain
      * ID and participant ID is used to construct unicast locators to this
@@ -189,6 +184,22 @@ public class RTPSParticipant {
      */
     public Guid getGuid() {
         return guid;
+    }
+
+    /**
+     * Gets the Locators that can be used for discovery
+     * @return a List of Locators
+     */
+    public List<Locator> getDiscoveryLocators() {
+        return discoveryLocators;
+    }
+
+    /**
+     * Gets the Locators that can be used for user data
+     * @return a List of Locators
+     */
+    public List<Locator> getUserdataLocators() {
+        return userdataLocators;
     }
 
     /**
@@ -378,46 +389,6 @@ public class RTPSParticipant {
         }
         else {
             userdataLocators.add(loc);
-        }
-        
-        // TODO: remove rest of this method
-        
-        if (loc.isMulticastLocator()) {
-            if (discovery) {
-                discovery_mc_Locator = loc;
-            }
-            else {
-                userdata_mc_Locator = loc;
-            }
-        }
-        else {
-            if (discovery) {
-                discovery_uc_Locator = loc;
-            }
-            else {
-                userdata_uc_Locator = loc;
-            }                        
-        }        
-    }
-
-    public Locator getDiscoveryMulticastLocator() {
-        return discovery_mc_Locator;
-    }
-    public Locator getDiscoveryUnicastLocator() {
-        return discovery_uc_Locator;
-    }
-    public Locator getUserdataMulticastLocator() {
-        return userdata_mc_Locator;
-    }
-    public Locator getUserdataUnicastLocator() {
-        return userdata_uc_Locator;
-    }
-
-
-    public List<Locator> getDiscoveryLocators() {
-        return discoveryLocators;
-    }
-    public List<Locator> getUserdataLocators() {
-        return userdataLocators;
+        }    
     }
 }
