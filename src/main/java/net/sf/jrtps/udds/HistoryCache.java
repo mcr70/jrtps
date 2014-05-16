@@ -46,7 +46,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
 
     private final List<SampleListener<T>> listeners = new LinkedList<>();
-    
+
     private volatile long seqNum; // sequence number of a Sample
 
     // Main collection to hold instances. ResourceLimits is checked against this map
@@ -82,53 +82,46 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         addSample(ChangeKind.UNREGISTER, samples);
     }
 
+    public Instance register(T sample) {
+        Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
+        return getOrCreateInstance(dummySample.getKey());
+    }
+
     public void write(List<T> samples) {
         addSample(ChangeKind.WRITE, samples);
     }
-    
+
     void addListener(SampleListener<T> aListener) {
         listeners.add(aListener);
     }
-    
+
     void removeListener(SampleListener<T> aListener) {
         listeners.remove(aListener);
     }
 
-    
+
     private void addSample(ChangeKind kind, List<T> samples) {
         log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
-        
+
         long ts = System.currentTimeMillis();
-        
+
         for (T sample : samples) {
             Sample<T> aSample = new Sample<T>(null, marshaller, ++seqNum, ts, kind, sample);
             addSample(aSample);
         }
     }
 
-    
+
     private void addSample(Sample<T> cc) {
         log.trace("addSample({})", cc);
         KeyHash key = cc.getKey();
         ChangeKind kind = cc.getKind();
-        
+
         if (kind == ChangeKind.DISPOSE) {
             instances.remove(key);
         }
         else {
-            Instance<T> inst = instances.get(key);
-
-            if (inst == null) {
-                log.trace("[{}] Creating new instance {}", entityId, key);
-
-                if (resource_limits.getMaxInstances() != -1 && 
-                        instances.size() >= resource_limits.getMaxInstances()) {
-                    throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
-                }
-
-                inst = new Instance<T>(key, history.getDepth());
-                instances.put(key, inst);
-            }   
+            Instance<T> inst = inst = getOrCreateInstance(key);
 
             log.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
@@ -149,7 +142,25 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
             samples.add(cc);
         }
     }
-    
+
+
+    private Instance<T> getOrCreateInstance(KeyHash key) {
+        Instance inst = instances.get(key);
+        if (inst == null) {
+
+            log.trace("[{}] Creating new instance {}", entityId, key);
+
+            if (resource_limits.getMaxInstances() != -1 && 
+                    instances.size() >= resource_limits.getMaxInstances()) {
+                throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
+            }
+
+            inst = new Instance<T>(key, history.getDepth());
+            instances.put(key, inst);
+        }   
+
+        return inst;
+    }
 
     // ----  WriterCache implementation follows  -------------------------
     /**
@@ -192,7 +203,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
                 seqNumMin = samples.first().getSequenceNumber();
             }
         }
-        
+
         return seqNumMin;
     }
 
@@ -204,7 +215,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public long getSeqNumMax() {
         long seqNumMax = 0;
-        
+
         synchronized (samples) {
             if (samples.size() > 0) {
                 seqNumMax = samples.last().getSequenceNumber();
@@ -227,7 +238,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     @Override
     public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
         List<Sample<T>> pendingSamples = incomingSamples.get(id); 
-        
+
         long ts = 0;
         if (destinationOrderKind == Kind.BY_RECEPTION_TIMESTAMP || timestamp == null) {
             ts = System.currentTimeMillis();
@@ -235,7 +246,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         else {
             ts = timestamp.timeMillis(); 
         }
-        
+
         Sample<T> cc = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, data);
         pendingSamples.add(cc);
     }
@@ -262,7 +273,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
                 addSample(cc);
             }
         }
-        
+
         // Notify listeners 
         for (SampleListener<T> aListener : listeners) {
             aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
@@ -275,16 +286,16 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         Collection<Instance<T>> values = instances.values();
         return new HashSet<>(values);
     }
-    
+
     Instance<T> getInstance(KeyHash key) {
         return instances.get(key);
     }
-    
+
     void clear(List<Sample<T>> samples) {
         for (Sample<T> s : samples) {
             Instance<T> inst = instances.get(s.getKey());
             inst.removeSample(s);
-            
+
             synchronized (samples) {
                 samples.remove(s);    
             }
