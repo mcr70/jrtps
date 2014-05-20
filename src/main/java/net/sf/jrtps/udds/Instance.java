@@ -77,7 +77,15 @@ public class Instance <T> {
         return ll; 
     }
 
-
+    /** 
+     * Gets the key of this instance.
+     * @return a KeyHash that represents the key of this instance
+     */
+    public KeyHash getKey() {
+        return key;
+    }
+    
+    
     Sample<T> getLatest() {
         return history.getFirst();
     }

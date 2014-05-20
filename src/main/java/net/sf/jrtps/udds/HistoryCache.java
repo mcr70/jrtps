@@ -74,22 +74,24 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         destinationOrderKind = qos.getDestinationOrder().getKind();
     }
 
-    public void dispose(List<T> samples) {
-        addSample(ChangeKind.DISPOSE, samples);
+    public void dispose(T sample, long timestamp) {
+        addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.DISPOSE, sample));
     }
 
-    public void unregister(List<T> samples) {
-        addSample(ChangeKind.UNREGISTER, samples);
+    public void unregister(T sample, long timestamp) {
+        addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.UNREGISTER, sample));
     }
 
-    public Instance<T> register(T sample) {
+    public void write(T sample, long timestamp) {
+        addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.WRITE, sample));
+    }
+
+    
+    public Instance<T> register(T sample, long timestamp) {
         Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
         return getOrCreateInstance(dummySample.getKey());
     }
 
-    public void write(List<T> samples) {
-        addSample(ChangeKind.WRITE, samples);
-    }
 
     void addListener(SampleListener<T> aListener) {
         listeners.add(aListener);
@@ -98,19 +100,6 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     void removeListener(SampleListener<T> aListener) {
         listeners.remove(aListener);
     }
-
-
-    private void addSample(ChangeKind kind, List<T> samples) {
-        log.trace("[{}] add {} samples of kind {}", entityId, samples.size(), kind);
-
-        long ts = System.currentTimeMillis();
-
-        for (T sample : samples) {
-            Sample<T> aSample = new Sample<T>(null, marshaller, ++seqNum, ts, kind, sample);
-            addSample(aSample);
-        }
-    }
-
 
     private void addSample(Sample<T> cc) {
         log.trace("addSample({})", cc);
@@ -144,7 +133,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
 
-    private Instance<T> getOrCreateInstance(KeyHash key) {
+    protected Instance<T> getOrCreateInstance(KeyHash key) {
         Instance<T> inst = instances.get(key);
         if (inst == null) {
 
