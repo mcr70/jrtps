@@ -64,7 +64,10 @@ public class DataWriter<T> extends Entity<T> {
      */
     public void write(List<T> samples) {
         try {
-            hCache.write(samples);
+            long ts = System.currentTimeMillis();
+            for (T sample : samples) {
+                hCache.write(sample, ts);
+            }
         } finally {
             notifyReaders();
         }
@@ -103,7 +106,10 @@ public class DataWriter<T> extends Entity<T> {
      */
     public void dispose(List<T> instances) {
         try {
-            hCache.dispose(instances);
+            long ts = System.currentTimeMillis();
+            for (T sample : instances) {
+                hCache.dispose(sample, ts);
+            }
         } finally {
             notifyReaders();
         }
