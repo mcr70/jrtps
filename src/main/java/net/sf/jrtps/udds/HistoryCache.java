@@ -82,7 +82,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         addSample(ChangeKind.UNREGISTER, samples);
     }
 
-    public Instance register(T sample) {
+    public Instance<T> register(T sample) {
         Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
         return getOrCreateInstance(dummySample.getKey());
     }
@@ -121,7 +121,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
             instances.remove(key);
         }
         else {
-            Instance<T> inst = inst = getOrCreateInstance(key);
+            Instance<T> inst = getOrCreateInstance(key);
 
             log.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
@@ -145,7 +145,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
 
     private Instance<T> getOrCreateInstance(KeyHash key) {
-        Instance inst = instances.get(key);
+        Instance<T> inst = instances.get(key);
         if (inst == null) {
 
             log.trace("[{}] Creating new instance {}", entityId, key);
