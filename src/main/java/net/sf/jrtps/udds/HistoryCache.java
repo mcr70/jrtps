@@ -74,19 +74,39 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
         destinationOrderKind = qos.getDestinationOrder().getKind();
     }
 
+    /**
+     * Dispose a sample.
+     * @param sample
+     * @param timestamp
+     */
     public void dispose(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.DISPOSE, sample));
     }
 
+    /**
+     * Unregisters an instance.
+     * @param sample
+     * @param timestamp
+     */
     public void unregister(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.UNREGISTER, sample));
     }
 
+    /**
+     * Writes a sample.
+     * @param sample
+     * @param timestamp
+     */
     public void write(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.WRITE, sample));
     }
 
-    
+    /**
+     * Registers an instance
+     * @param sample
+     * @param timestamp
+     * @return an Instance
+     */
     public Instance<T> register(T sample, long timestamp) {
         Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
         return getOrCreateInstance(dummySample.getKey());
