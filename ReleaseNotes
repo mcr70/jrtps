@@ -1,7 +1,6 @@
 0.8.3
     - Added EntityFactory. EntityFactory provides means for the application
       to provide custom implementations of entities used by udds.
-    - RTPSByteBuffer supports all of the java primitive types directly.
       
 0.8.2
     - Added direct support for java primitive types to RTPSByteBuffer
