@@ -4,8 +4,11 @@ import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
 
 /**
- * EntityFactory is used to create instances of uDDS entities.
+ * EntityFactory is used to create instances of uDDS entities. 
+ * By giving an instance of EntityFactory to Participants constructor, one
+ * can provide customized entities to application.
  * 
+ * @see Participant#Participant(int, int, EntityFactory, net.sf.jrtps.Configuration)
  * @author mcr70
  */
 public interface EntityFactory {

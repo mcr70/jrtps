@@ -122,6 +122,10 @@ public class Participant {
      * ports used by participant. If participantId is set to -1, participantId
      * will be determined during starting of network receivers. First participantId
      * (based on available port number) available will be used. 
+     * <p>
+     * Participant delegates creation of DataWriters and DataReaders to EntityFactory.
+     * By providing a custom EntityFactory, application can provide customized 
+     * DataReaders and DataWriters
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
