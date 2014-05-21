@@ -11,7 +11,7 @@ import net.sf.jrtps.rtps.Sample;
 /**
  * This class represents a strongly typed DataReader in spirit of DDS specification.
  * DataReader maintains a history cache where it keeps Samples received from writers on the network.
- * There are two ways to get these Samples from DataReader. One is by using any of the getXXX methods,
+ * There are two ways to get these Samples from DataReader. One is by using any of the get methods,
  * and the other is by registering a SampleListener.
  * 
  * @author mcr70
@@ -23,21 +23,33 @@ import net.sf.jrtps.rtps.Sample;
  */
 public class DataReader<T> extends Entity<T> {
     private final List<WriterListener> wListeners = new LinkedList<>();
-    private final RTPSReader<T> rtps_reader;
-    private final HistoryCache<T> hCache;
+    private UDDSHistoryCache<T> hCache;
+
+    /**
+     * RTPSReader associated with this DataReader
+     */
+    protected final RTPSReader<T> rtps_reader;
 
 
     /**
-     * Package access. This class is only instantiated by Participant class.
+     * Constructor for DataReader.
      * 
-     * @param topicName
+     * @param p Participant that created this DataReader
+     * @param type Type of this DataReader
+     * @param reader associated RTPSReader
      */
-    DataReader(Participant p, Class<T> type, RTPSReader<T> reader, HistoryCache<T> hCache) {
+    protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
         super(p, type, reader.getTopicName());
         this.rtps_reader = reader;
-        this.hCache = hCache;
     }
 
+    /**
+     * Package access.
+     * @param hCache
+     */
+    void setHistoryCache(UDDSHistoryCache<T> hCache) {
+        this.hCache = hCache;
+    }
 
     /**
      * Adds a SampleListener to this DataReader

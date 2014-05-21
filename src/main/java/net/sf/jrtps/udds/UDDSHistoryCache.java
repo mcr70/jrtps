@@ -38,8 +38,8 @@ import org.slf4j.LoggerFactory;
  * <p>
  * Samples on the reader side are made available through HistoryCache.
  */
-class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
-    private static final Logger log = LoggerFactory.getLogger(HistoryCache.class);
+class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCache<T> {
+    private static final Logger log = LoggerFactory.getLogger(UDDSHistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
@@ -65,7 +65,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     private final EntityId entityId;
     private final Kind destinationOrderKind;
 
-    HistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
+    UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
         this.entityId = eId;
         this.marshaller = marshaller;
 
@@ -79,6 +79,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
      * @param sample
      * @param timestamp
      */
+    @Override
     public void dispose(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.DISPOSE, sample));
     }
@@ -88,6 +89,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
      * @param sample
      * @param timestamp
      */
+    @Override
     public void unregister(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.UNREGISTER, sample));
     }
@@ -97,6 +99,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
      * @param sample
      * @param timestamp
      */
+    @Override
     public void write(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.WRITE, sample));
     }
@@ -107,6 +110,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
      * @param timestamp
      * @return an Instance
      */
+    @Override
     public Instance<T> register(T sample, long timestamp) {
         Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
         return getOrCreateInstance(dummySample.getKey());
@@ -153,7 +157,7 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
     }
 
 
-    protected Instance<T> getOrCreateInstance(KeyHash key) {
+    private Instance<T> getOrCreateInstance(KeyHash key) {
         Instance<T> inst = instances.get(key);
         if (inst == null) {
 
@@ -291,7 +295,8 @@ class HistoryCache<T> implements WriterCache<T>, ReaderCache<T> {
 
 
     // --- experimental code follows. These are paired with the ones in DataReader  ----------------
-    Set<Instance<T>> getInstances() {
+    @Override
+    public Set<Instance<T>> getInstances() {
         Collection<Instance<T>> values = instances.values();
         return new HashSet<>(values);
     }
