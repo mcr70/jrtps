@@ -284,7 +284,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive byte.
-     * @param f
+     * @param b
      */
     public void writeByte(byte b) {
         buffer.put(b);
@@ -339,7 +339,7 @@ public class RTPSByteBuffer {
      * String. 
      * @param s String to write
      * @param charsetName Name of the charset
-     * @throw RuntimeException that wraps UnsupportedEncodingException
+     * @throws RuntimeException that wraps UnsupportedEncodingException
      */
     public void writeString(String s, String charsetName) {
         buffer.putInt(s.length());
@@ -363,7 +363,7 @@ public class RTPSByteBuffer {
      * Reads a String from the buffer. 
      * @param charsetName Name of of charset
      * @return a String
-     * @throw RuntimeException that wraps UnsupportedEncodingException
+     * @throws RuntimeException that wraps UnsupportedEncodingException
      */
     public String readString(String charsetName) {
         int length = buffer.getInt();

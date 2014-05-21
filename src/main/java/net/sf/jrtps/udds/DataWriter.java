@@ -21,20 +21,29 @@ import net.sf.jrtps.types.Guid;
  */
 public class DataWriter<T> extends Entity<T> {
     private final List<ReaderListener> rListeners = new LinkedList<>();
-    private final RTPSWriter<T> rtps_writer;
-    private final HistoryCache<T> hCache;
+    /**
+     * RTPSWriter associated with this DataWriter
+     */
+    protected final RTPSWriter<T> rtps_writer;
+    /**
+     * HistoryCache associated with this DataWriter
+     */
+    protected final HistoryCache<T> hCache;
 
     /**
-     * Creates this DataWriter with given topic name.
+     * Constructor for DataWriter.
      * 
-     * @param topicName
+     * @param p Participant that created this DataWriter
+     * @param type Type of this DataWriter
+     * @param writer associated RTPSWriter
+     * @param hCache HistoryCache for DataWriter
      */
-    DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+    protected DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
         super(p, type, writer.getTopicName());
         this.rtps_writer = writer;
         this.hCache = hCache;
     }
-
+    
     /**
      * Asserts liveliness of this DataWriter. Liveliness of writers must be asserted by a 
      * call to this method, if QosLiveliness.Kind is set to MANUAL_BY_TOPIC.

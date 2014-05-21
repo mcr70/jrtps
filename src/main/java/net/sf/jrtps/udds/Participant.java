@@ -53,6 +53,7 @@ public class Participant {
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
     private final Configuration config;
+    private final EntityFactory entityFactory;
     private final HashMap<Class<?>, Marshaller<?>> marshallers = new HashMap<>();
     private final RTPSParticipant rtps_participant;
 
@@ -87,11 +88,12 @@ public class Participant {
     private Guid guid;
 
 
+
     /**
      * Create a Participant with domainId 0 and participantId -1.
      */
     public Participant() {
-        this(0, -1, null);
+        this(0, -1, null, null);
     }
 
     /**
@@ -100,7 +102,7 @@ public class Participant {
      * @param domainId domainId
      */
     public Participant(int domainId) {
-        this(domainId, -1, null);
+        this(domainId, -1, null, null);
     }
 
     /**
@@ -109,7 +111,7 @@ public class Participant {
      * @param domainId domainId
      */
     public Participant(int domainId, int participantId) {
-        this(domainId, participantId, null);
+        this(domainId, participantId, null, null);
     }
 
     /**
@@ -123,11 +125,13 @@ public class Participant {
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
-     * @param config Configuration used. If config is null, default Configuration is used.
+     * @param ef EntityFactory to be used. If ef is null, a default EntityFactory will be used.
+     * @param cfg Configuration used. If config is null, default Configuration is used.
      */
-    public Participant(int domainId, int participantId, Configuration cfg) {
+    public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
         
+        this.entityFactory = ef != null ? ef : new UDDSEntityFactory();;
         this.config = cfg != null ? cfg : new Configuration();
         
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
@@ -317,10 +321,11 @@ public class Participant {
             eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
 
-        HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
+        UDDSHistoryCache<T> hc = new UDDSHistoryCache<>(eId, m, qos);
         RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, hc, qos);
 
-        DataReader<T> reader = new DataReader<T>(this, type, rtps_reader, hc);
+        DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);//new DataReader<T>(this, type, rtps_reader);
+        reader.setHistoryCache(hc);
         readers.add(reader);
 
         if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
@@ -401,10 +406,10 @@ public class Participant {
         }
 
         
-        HistoryCache<T> hc = new HistoryCache<>(eId, m, qos);
+        UDDSHistoryCache<T> hc = new UDDSHistoryCache<>(eId, m, qos);
         RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
 
-        DataWriter<T> writer = new DataWriter<>(this, type, rtps_writer, hc);
+        DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, hc);//new DataWriter<>(this, type, rtps_writer, hc);
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
