@@ -22,14 +22,14 @@ Extending jRTPS & uDDS
  {{{./apidocs/net/sf/jrtps/udds/EntityFactory.html##createDataWriter(net.sf.jrtps.udds.Participant, java.lang.Class, net.sf.jrtps.rtps.RTPSWriter, net.sf.jrtps.udds.HistoryCache)}creating a DataWriter}}.
 
 +---
-public class CustomEntityFactory implements EntityFactory {
+public class CustomEntityFactory extends EntityFactory {
     @Override
     public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
             HistoryCache<T> hCache) {
         return new CustomDataWriter<>(p, type, rtpsWriter, hCache);
     }
+}
 
-  ...
 
 public class CustomDataWriter<T> extends DataWriter<T> {
     CustomDataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
@@ -46,9 +46,11 @@ public class CustomDataWriter<T> extends DataWriter<T> {
 }
 +---
 
- The code above would allow one to use CustomDataWriter by casting DataWriter.
+ The code above would allow one to use CustomDataWriter by type casting DataWriter created by Participant.
  
 +---
-CustomDataWriter<HelloMessage> cdw = (CustomDataWriter<HelloMessage>) p.createDataWriter(HelloMessage.class);
-cdw.write(new HelloMessage(1, "hello"), System.currentTimeMillis());
+    Participant p = new Participant(0, 2, new CustomEntityFactory(), null);
+
+    CustomDataWriter<HelloMessage> cdw = (CustomDataWriter<HelloMessage>) p.createDataWriter(HelloMessage.class);
+    cdw.write(new HelloMessage(1, "hello"), System.currentTimeMillis());
 +---
