@@ -16,6 +16,7 @@
 		<menu name="Development">
             <item name="Examples" href="examples.html" />
             <item name="Configuration" href="configuration.html" />
+            <item name="Extending jRTPS" href="extending.html" />
 			<item name="javadoc" href="apidocs/index.html" />
 		</menu>
 	</body>

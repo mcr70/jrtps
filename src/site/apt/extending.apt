@@ -1,0 +1,54 @@
+Extending jRTPS & uDDS
+
+ uDDS tries to be as simple as possible. And yet function as 100% wire compatible DDS participant.
+ By providing a simplistic API, means that not all of the features available on DDS specification just
+ cannot be implemented. And there might be situations, where communication cannot be established 
+ because of these restrictions.
+ 
+ For this reason, there are extensions points that can be used to provide missing features, while
+ keeping uDDS API as clean as possible. Note, that extensions are a constant work-in-progress type 
+ of thing. They will be added and modified as needed to uDDS and jRTPS.
+ 
+
+* EntityFactory
+
+ <EntityFactory> is used to create <DataWriter> and <DataReader> entities. One can provide a custom
+ EntityFactory to udds Participant, which is used to extend functionality of DataWriter and DataReader 
+ entities.
+ For example, DDS specification (Java 5 PSM) has defined <write> methods for DataWriter, that take a timestamp
+ as one of arguments. uDDS DataWriter has no such method available. Fortunately, there is such a method:  
+ {{{./apidocs/net/sf/jrtps/udds/HistoryCache.html##write(T, long)}HistoryCache.write(T, long)}}.
+ And luckily, HistoryCache is provided to EntityFactory when
+ {{{./apidocs/net/sf/jrtps/udds/EntityFactory.html##createDataWriter(net.sf.jrtps.udds.Participant, java.lang.Class, net.sf.jrtps.rtps.RTPSWriter, net.sf.jrtps.udds.HistoryCache)}creating a DataWriter}}.
+
++---
+public class CustomEntityFactory implements EntityFactory {
+    @Override
+    public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
+            HistoryCache<T> hCache) {
+        return new CustomDataWriter<>(p, type, rtpsWriter, hCache);
+    }
+
+  ...
+
+public class CustomDataWriter<T> extends DataWriter<T> {
+    CustomDataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+        super(p, type, writer, hCache);
+    }
+
+    public void write(T sample, long timestamp) {
+        try {
+            hCache.write(sample, timestamp); // Write a sample with given timestamp
+        } finally {
+            super.notifyReaders(); // notify remote readers of new data in HistoryCache
+        }
+    }
+}
++---
+
+ The code above would allow one to use CustomDataWriter by casting DataWriter.
+ 
++---
+CustomDataWriter<HelloMessage> cdw = (CustomDataWriter<HelloMessage>) p.createDataWriter(HelloMessage.class);
+cdw.write(new HelloMessage(1, "hello"), System.currentTimeMillis());
++---
