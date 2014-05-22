@@ -37,7 +37,7 @@ public class TopicData extends DiscoveredData {
                 break;
             default:
                 if (param instanceof QosPolicy) {
-                    addQosPolicy((QosPolicy) param);
+                    addQosPolicy((QosPolicy<?>) param);
                 } else {
                     log.warn("Parameter {} not handled", param.getParameterId());
                 }
