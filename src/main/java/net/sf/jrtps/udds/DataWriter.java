@@ -149,7 +149,7 @@ public class DataWriter<T> extends Entity<T> {
     /**
      * Notifies readers of the changes available.
      */
-    void notifyReaders() {
+    protected void notifyReaders() {
         rtps_writer.notifyReaders();
     }
 

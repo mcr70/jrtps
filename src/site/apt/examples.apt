@@ -36,7 +36,7 @@ udds examples
  
 * Using a DataReader
 
- Creating a <DataReader> is done similarly. Using any of the getXXX() methods in DataReader, one gets
+ Creating a <DataReader> is done similarly. Using any of the <get> methods in DataReader, one gets
  current snapshot of the available Samples in readers history cache.
  
 +---
@@ -62,7 +62,7 @@ udds examples
  the type of the entity is checked (HelloMessage in the examples above), and a matching Marshaller is 
  assigned to entity being created.
  
- Two builtin Marshallers are provided by udds; ExternalizableMarshaller and SerializationMarshaller.
+ Two builtin Marshallers are provided by udds; ExternalizableMarshaller and SerializableMarshaller.
  Using these Marshallers is a matter of implementing either <java.io.Externalizable> or <java.io.Serializable>
  by the type (HelloMessage above). One can also provide custom Marshaller to be assigned during creation of entities. 
  Custom Marshallers are registered with a call to Participants 
