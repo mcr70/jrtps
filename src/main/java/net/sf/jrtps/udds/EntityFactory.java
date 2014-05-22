@@ -5,13 +5,22 @@ import net.sf.jrtps.rtps.RTPSWriter;
 
 /**
  * EntityFactory is used to create instances of uDDS entities. 
- * By giving an instance of EntityFactory to Participants constructor, one
+ * By giving an instance of EntityFactory to Participant, one
  * can provide customized entities to application.
  * 
  * @see Participant#Participant(int, int, EntityFactory, net.sf.jrtps.Configuration)
+ * @see Participant#setEntityFactory(EntityFactory)
+ * 
  * @author mcr70
  */
-public interface EntityFactory {
+public class EntityFactory {
+
+    /**
+     * Empty constructor. 
+     */
+    protected EntityFactory() {
+    }
+    
     /**
      * Create a new DataWriter.
      * @param p Participant that is parent of created DataWriter
@@ -20,8 +29,10 @@ public interface EntityFactory {
      * @param hCache HistoryCache of DataWriter
      * @return DataWriter
      */
-    <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
-            HistoryCache<T> hCache);
+    protected <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter, 
+            HistoryCache<T> hCache) {
+        return new DataWriter<>(p, type, rtpsWriter, hCache);
+    }
     
     /**
      * Create a new DataReader.
@@ -30,5 +41,7 @@ public interface EntityFactory {
      * @param rtpsReader RTPSReader to be associated with created DataReader
      * @return DataReader
      */
-    <T> DataReader<T> createDataReader(Participant p, Class<T> type, RTPSReader<T> rtpsReader);
+    protected <T> DataReader<T> createDataReader(Participant p, Class<T> type, RTPSReader<T> rtpsReader) {
+        return new DataReader<>(p, type, rtpsReader);
+    }
 }

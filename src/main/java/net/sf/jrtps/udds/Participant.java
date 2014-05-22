@@ -53,10 +53,10 @@ public class Participant {
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
     private final Configuration config;
-    private final EntityFactory entityFactory;
     private final HashMap<Class<?>, Marshaller<?>> marshallers = new HashMap<>();
     private final RTPSParticipant rtps_participant;
 
+    private EntityFactory entityFactory;
     private List<DataReader<?>> readers = new LinkedList<>();
     private List<DataWriter<?>> writers = new LinkedList<>();
 
@@ -125,7 +125,7 @@ public class Participant {
      * <p>
      * Participant delegates creation of DataWriters and DataReaders to EntityFactory.
      * By providing a custom EntityFactory, application can provide customized 
-     * DataReaders and DataWriters
+     * DataReaders and DataWriters, including entities for builtin topics.
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
@@ -135,7 +135,7 @@ public class Participant {
     public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
         
-        this.entityFactory = ef != null ? ef : new UDDSEntityFactory();;
+        this.entityFactory = ef != null ? ef : new EntityFactory();;
         this.config = cfg != null ? cfg : new Configuration();
         
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
@@ -440,6 +440,20 @@ public class Participant {
         marshallers.put(type, m);
     }
 
+    /**
+     * Sets the EntityFactory of this Participant to given one. All the entities created after setting
+     * of EntityFactory will be created by that EntityFactory. Previously created entities remain as 
+     * before.
+     * <p>
+     * This method provides means to create entities by different EntityFactories. For example, one might want
+     * to create builtin entities with default EntityFactory, and application entities with customized EntityFactory.
+     * 
+     * @param ef EntityFactory to set
+     */
+    public void setEntityFactory(EntityFactory ef) {
+        entityFactory = ef;
+    }
+    
     /**
      * Asserts liveliness of writers, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
      * 
