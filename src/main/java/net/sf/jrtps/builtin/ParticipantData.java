@@ -170,7 +170,7 @@ public class ParticipantData extends DiscoveredData {
                 break;
             default:
                 if (param instanceof QosPolicy) {
-                    addQosPolicy((QosPolicy) param);
+                    addQosPolicy((QosPolicy<?>) param);
                 }
             }
         }

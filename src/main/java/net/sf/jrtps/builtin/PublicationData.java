@@ -57,7 +57,7 @@ public class PublicationData extends DiscoveredData {
 
             default:
                 if (param instanceof QosPolicy) {
-                    addQosPolicy((QosPolicy) param);
+                    addQosPolicy((QosPolicy<?>) param);
                 }
             }
         }
