@@ -7,7 +7,6 @@ import java.util.Set;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.rtps.RTPSWriter;
-import net.sf.jrtps.types.Guid;
 
 /**
  * This class represents a strongly typed DataWriter in spirit of DDS specification.
@@ -39,7 +38,7 @@ public class DataWriter<T> extends Entity<T> {
      * @param hCache HistoryCache for DataWriter
      */
     protected DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
-        super(p, type, writer.getTopicName());
+        super(p, type, writer.getTopicName(), writer.getGuid());
         this.rtps_writer = writer;
         this.hCache = hCache;
     }
@@ -137,14 +136,6 @@ public class DataWriter<T> extends Entity<T> {
         return rtps_writer;
     }
 
-    /**
-     * Gets the Guid of thie DataWriter
-     * 
-     * @return Guid
-     */
-    Guid getGuid() {
-        return rtps_writer.getGuid();
-    }
 
     /**
      * Notifies readers of the changes available.

@@ -258,6 +258,14 @@ public class Participant {
     }
 
     /**
+     * Gets the Guid of this Participant.
+     * @return guid
+     */
+    public Guid getGuid() {
+        return guid;
+    }
+    
+    /**
      * Create a new DataReader for given type T. DataReader is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
      * Typename of the DataReader is set to fully qualified class name.
