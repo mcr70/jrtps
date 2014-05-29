@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -52,7 +53,7 @@
                 <site>
                     <id>jrtps.site.local</id>
                     <name>jRTPS</name>
-                    <url>file:///tmp//jrtps/site</url> 
+                    <url>file:///tmp//jrtps/site</url>
                 </site>
             </distributionManagement>
         </profile>
@@ -66,7 +67,7 @@
                 <site>
                     <id>jrtps.site.sf</id>
                     <name>jRTPS</name>
-                    <url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url> 
+                    <url>scp://shell.sourceforge.net/home/project-web/jrtps/htdocs</url>
                 </site>
             </distributionManagement>
         </profile>
@@ -93,6 +94,7 @@
                         <phase>verify</phase>
                         <goals>
                             <goal>jar-no-fork</goal>
+                            <goal>test-jar-no-fork</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -162,6 +164,19 @@
                 <version>2.9.1</version>
                 <configuration>
                 </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>2.7</version>
+                <reportSets>
+                    <reportSet>
+                        <reports>
+                            <report>license</report>
+                        </reports>
+                    </reportSet>
+                </reportSets>
             </plugin>
         </plugins>
     </reporting>
