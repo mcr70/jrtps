@@ -1,3 +1,6 @@
+0.8.5
+    - Added getGuid() method to udds Participant & Entity
+     
 0.8.4
     - Changed EntityFactory to be a class instead of interface.
     

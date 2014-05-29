@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds;
 
+import net.sf.jrtps.types.Guid;
+
 /**
  * Entity is a base class for DataReader and DataWriter.
  * 
@@ -11,17 +13,22 @@ public class Entity<T> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
+    private Guid guid;
 
     /**
      * Constructor
      * 
+     * @param p
+     * @param type
      * @param topicName
      *            name of the topic this entity is bound to.
+     * @param guid 
      */
-    protected Entity(Participant p, Class<T> type, String topicName) {
+    protected Entity(Participant p, Class<T> type, String topicName, Guid guid) {
         this.participant = p;
         this.type = type;
         this.topicName = topicName;
+        this.guid = guid;
     }
 
     /**
@@ -49,5 +56,13 @@ public class Entity<T> {
      */
     public Class<T> getType() {
         return type;
+    }
+    
+    /**
+     * Gets the Guid of this Entity
+     * @return guid
+     */
+    public Guid getGuid() {
+        return guid;
     }
 }

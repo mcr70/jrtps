@@ -39,7 +39,7 @@ public class DataReader<T> extends Entity<T> {
      * @param reader associated RTPSReader
      */
     protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
-        super(p, type, reader.getTopicName());
+        super(p, type, reader.getTopicName(), reader.getGuid());
         this.rtps_reader = reader;
     }
 
