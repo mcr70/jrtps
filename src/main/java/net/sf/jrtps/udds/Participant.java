@@ -658,6 +658,22 @@ public class Participant {
     }
 
     /**
+     * Gets the DataReaders created by this Participant.
+     * @return a List of DataReaders
+     */
+    public List<DataReader<?>> getReaders() {
+        return readers;
+    }
+    
+    /**
+     * Gets the DataWriters created by this Participant.
+     * @return a List of DataWriters
+     */
+    public List<DataWriter<?>> getWriters() {
+        return writers;
+    }
+    
+    /**
      * Waits for a given amount of milliseconds.
      * 
      * @param millis
