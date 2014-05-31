@@ -1,3 +1,7 @@
+0.8.6
+    - Added getReaders() and getWriters() to Participant. This allows 
+      access to existing entities.
+    
 0.8.5
     - Added getGuid() method to udds Participant & Entity
      
