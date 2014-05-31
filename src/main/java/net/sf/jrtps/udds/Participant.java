@@ -658,7 +658,7 @@ public class Participant {
     }
 
     /**
-     * Gets the DataReaders created by this Participant.
+     * Gets DataReaders created by this Participant.
      * @return a List of DataReaders
      */
     public List<DataReader<?>> getReaders() {
@@ -666,7 +666,7 @@ public class Participant {
     }
     
     /**
-     * Gets the DataWriters created by this Participant.
+     * Gets DataWriters created by this Participant.
      * @return a List of DataWriters
      */
     public List<DataWriter<?>> getWriters() {
