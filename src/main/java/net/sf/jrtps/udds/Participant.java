@@ -348,6 +348,8 @@ public class Participant {
             sw.write(rd);
         }
         
+        logger.debug("Created DataReader for {}", topicName);
+        
         return reader;
     }
 
@@ -429,9 +431,14 @@ public class Participant {
             @SuppressWarnings("unchecked")
             DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
                     PublicationData.BUILTIN_TOPIC_NAME).get(0);
+            logger.debug("Writing Publication");
             PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
             pw.write(wd);
+
+            logger.debug("Created DataWriter for {}, participant guid is {}, Publications guid is {}", 
+                    topicName, getGuid(), wd.getKey());
         }
+
 
         return writer;
     }
