@@ -64,7 +64,7 @@ public class PublicationDataMarshaller implements Marshaller<PublicationData> {
     public DataEncapsulation marshall(PublicationData wd) {
         ParameterList payloadParams = new ParameterList();
 
-        payloadParams.add(new KeyHash(wd.getKey().getBytes()));
+        payloadParams.add(new KeyHash(wd.getKey().getBytes(), true));
         payloadParams.add(new TopicName(wd.getTopicName()));
         payloadParams.add(new TypeName(wd.getTypeName()));
 

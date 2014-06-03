@@ -1,10 +1,9 @@
 package net.sf.jrtps.rtps;
 
 import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 import net.sf.jrtps.Marshaller;
+import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.parameter.KeyHash;
@@ -35,16 +34,6 @@ public class Sample<T> {
     private KeyHash keyHash;
 
     private DataEncapsulation marshalledData;
-
-    private static MessageDigest md5 = null;
-    private static NoSuchAlgorithmException noSuchAlgorithm = null;
-    static {
-        try {
-            md5 = MessageDigest.getInstance("MD5");
-        } catch (NoSuchAlgorithmException e) {
-            noSuchAlgorithm = e; // Actual usage might not even need it.
-        }
-    }    
 
     private Sample(Guid writerGuid, Marshaller<T> marshaller, long seqNum, long timestamp, StatusInfo sInfo) {
         this.writerGuid = writerGuid;
@@ -146,7 +135,15 @@ public class Sample<T> {
      */
     public KeyHash getKey() {
         if (keyHash == null && marshaller.hasKey()) {
-            keyHash = extractKey();
+            T aData = getData();
+            if (aData instanceof DiscoveredData) {
+                DiscoveredData dd = (DiscoveredData) aData;
+                byte[] builtinTopicKey = dd.getKey().getBytes();
+                keyHash = new KeyHash(builtinTopicKey, true);
+            }
+            else {
+                keyHash = new KeyHash(marshaller.extractKey(aData), false);
+            }
         }
 
         return keyHash;
@@ -173,32 +170,6 @@ public class Sample<T> {
     boolean hasKey() {
         return this.marshaller.hasKey();
     }
-
-
-    private KeyHash extractKey() {
-        byte[] key = this.marshaller.extractKey(getData());
-        if (key == null) {
-            key = new byte[0];
-        }
-
-        byte[] bytes = null;
-        if (key.length < 16) {
-            bytes = new byte[16];
-            System.arraycopy(key, 0, bytes, 0, key.length);
-        } else {
-            if (md5 == null) {
-                throw new RuntimeException(noSuchAlgorithm);
-            }
-
-            synchronized (md5) {
-                bytes = md5.digest(key);
-                md5.reset();                
-            }
-        }
-
-        return new KeyHash(bytes);
-    }
-
 
     public String toString() {
         return "Sample[" + seqNum + "]";
