@@ -198,22 +198,33 @@ public class QualityOfService {
         return inlinePolicies;
     }
 
-    
+    /**
+     * Gets all the incompatible qos policies of the other QualityOfService
+     * @param other
+     * @return a Set of QosPolicies. If all the policies a re compatible, return an empty Set.
+     */
     @SuppressWarnings("unchecked")
-    public boolean isCompatibleWith(QualityOfService other) {
-        boolean compatible = true;
-
+    public Set<QosPolicy<?>> getIncompatibleQos(QualityOfService other) {
+        Set<QosPolicy<?>> set = new HashSet<>();
+        
         for (QosPolicy qp : policies.values()) {
             QosPolicy qpOther = other.policies.get(qp.getClass());
             if (!qp.isCompatible(qpOther)) {
-                compatible = false;
+                set.add(qpOther);
                 log.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
-                // Don't break from the loop. Report every incompatible QoS
-                // policy.
             }
         }
 
-        return compatible;
+        return set;        
+    }
+    
+    /**
+     * Checks wheter or not this QualityOfService is compatible with the other.
+     * @param other
+     * @return true, if compatible
+     */
+    public boolean isCompatibleWith(QualityOfService other) {
+        return getIncompatibleQos(other).size() == 0;
     }
 
     /**

@@ -56,7 +56,7 @@ public class TopicDataMarshaller implements Marshaller<TopicData> {
 
         payloadParams.add(new TopicName(td.getTopicName()));
         payloadParams.add(new TypeName(td.getTypeName()));
-        payloadParams.add(new KeyHash(td.getKey().getBytes()));
+        payloadParams.add(new KeyHash(td.getKey().getBytes(), true));
 
         addQoS(td, payloadParams);
         payloadParams.add(new Sentinel());
