@@ -67,7 +67,7 @@ public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> 
 
         payloadParams.add(new TopicName(rd.getTopicName()));
         payloadParams.add(new TypeName(rd.getTypeName()));
-        payloadParams.add(new KeyHash(rd.getKey().getBytes()));
+        payloadParams.add(new KeyHash(rd.getKey().getBytes(), true));
 
         addQoS(rd, payloadParams);
         payloadParams.add(new Sentinel());
