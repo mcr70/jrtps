@@ -224,7 +224,7 @@ public class QualityOfService {
      * @return true, if compatible
      */
     public boolean isCompatibleWith(QualityOfService other) {
-        return getIncompatibleQos(other).size() > 0;
+        return getIncompatibleQos(other).size() == 0;
     }
 
     /**
