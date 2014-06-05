@@ -305,8 +305,8 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         return instances.get(key);
     }
 
-    void clear(List<Sample<T>> samples) {
-        for (Sample<T> s : samples) {
+    void clear(List<Sample<T>> samplesToClear) {
+        for (Sample<T> s : samplesToClear) {
             Instance<T> inst = instances.get(s.getKey());
             inst.removeSample(s);
 
