@@ -1,3 +1,6 @@
+0.8.8
+    - FIX: DataReader.clear() had a bug, samples were not removed.
+
 0.8.7 
     - FIX: Keys for builtin topics are not subject to MD5 digest.
      
