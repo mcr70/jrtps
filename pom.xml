@@ -10,7 +10,7 @@
 
     <groupId>net.sf.jrtps</groupId>
     <artifactId>jrtps</artifactId>
-    <version>0.8.8-SNAPSHOT</version>
+    <version>0.8.8</version>
     <packaging>jar</packaging>
 
     <name>jRTPS</name>
