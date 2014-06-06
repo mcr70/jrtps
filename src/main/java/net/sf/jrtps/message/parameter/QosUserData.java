@@ -8,16 +8,25 @@ public class QosUserData extends Parameter implements DataReaderPolicy<QosUserDa
 	public QosUserData(byte[] userData) {
 		super(ParameterEnum.PID_USER_DATA);
         if (userData == null) {
-        	throw new NullPointerException("userData cannot be null");
+            this.userData = new byte[0];
         }
-		
-		this.userData = userData;
+        else {
+            this.userData = userData;
+        }
 	}
 	
 	QosUserData() {
         super(ParameterEnum.PID_USER_DATA);
     }
 
+	/**
+	 * Gets the user data
+	 * @return user data
+	 */
+	public byte[] getUserData() {
+	    return userData;
+	}
+	
     @Override
     public void read(RTPSByteBuffer bb, int length) {
     	int len = bb.read_long();
