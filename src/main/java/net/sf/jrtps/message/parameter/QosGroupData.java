@@ -8,17 +8,26 @@ public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroup
 	public QosGroupData(byte[] groupData) {
         super(ParameterEnum.PID_GROUP_DATA);
         if (groupData == null) {
-        	throw new NullPointerException("groupData cannot be null");
+            this.groupData = new byte[0];
         }
-        
-		this.groupData = groupData;
+        else {
+            this.groupData = groupData;
+        }
     }
 	
 	QosGroupData() {
         super(ParameterEnum.PID_GROUP_DATA);
     }
 
-    @Override
+	/**
+	 * Get the group data
+	 * @return group data
+	 */
+	public byte[] getGroupData() {
+	    return groupData;
+	}
+	
+	@Override
     public void read(RTPSByteBuffer bb, int length) {
     	int len = bb.read_long();
     	this.groupData = new byte[len];
