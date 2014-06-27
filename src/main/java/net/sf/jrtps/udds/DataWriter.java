@@ -60,9 +60,12 @@ public class DataWriter<T> extends Entity<T> {
      * @param sample a Sample to write
      */
     public void write(T sample) {
-        LinkedList<T> ll = new LinkedList<>();
-        ll.add(sample);
-        write(ll);
+        try {
+            long ts = System.currentTimeMillis();
+            hCache.write(sample, ts, false);
+        } finally {
+            notifyReaders();
+        }
     }
 
     /**
@@ -74,7 +77,7 @@ public class DataWriter<T> extends Entity<T> {
         try {
             long ts = System.currentTimeMillis();
             for (T sample : samples) {
-                hCache.write(sample, ts);
+                hCache.write(sample, ts, true);
             }
         } finally {
             notifyReaders();
@@ -99,12 +102,15 @@ public class DataWriter<T> extends Entity<T> {
      * </pre>
      * 
      * 
-     * @param instance an Instance to dispose
+     * @param instance a Sample of type T representing an Instance to dispose
      */
     public void dispose(T instance) {
-        LinkedList<T> ll = new LinkedList<>();
-        ll.add(instance);
-        dispose(ll);
+        try {
+            long ts = System.currentTimeMillis();
+            hCache.dispose(instance, ts, false);
+        } finally {
+            notifyReaders();
+        }
     }
 
     /**
@@ -116,7 +122,7 @@ public class DataWriter<T> extends Entity<T> {
         try {
             long ts = System.currentTimeMillis();
             for (T sample : instances) {
-                hCache.dispose(sample, ts);
+                hCache.dispose(sample, ts, true);
             }
         } finally {
             notifyReaders();

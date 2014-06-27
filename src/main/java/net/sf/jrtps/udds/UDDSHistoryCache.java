@@ -78,9 +78,10 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      * Dispose a sample.
      * @param sample
      * @param timestamp
+     * @param coherent
      */
     @Override
-    public void dispose(T sample, long timestamp) {
+    public void dispose(T sample, long timestamp, boolean coherent) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.DISPOSE, sample));
     }
 
@@ -88,9 +89,10 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      * Unregisters an instance.
      * @param sample
      * @param timestamp
+     * @param coherent
      */
     @Override
-    public void unregister(T sample, long timestamp) {
+    public void unregister(T sample, long timestamp, boolean coherent) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.UNREGISTER, sample));
     }
 
@@ -98,9 +100,10 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      * Writes a sample.
      * @param sample
      * @param timestamp
+     * @param coherent
      */
     @Override
-    public void write(T sample, long timestamp) {
+    public void write(T sample, long timestamp, boolean coherent) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.WRITE, sample));
     }
 
