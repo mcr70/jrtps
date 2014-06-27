@@ -16,7 +16,7 @@ rtps.reader.heartbeat-response-delay = 500
 rtps.reader.heartbeat-suppression-duration = 0
 rtps.spdp.resend-data-period = 30000
 
-# ---  jRTPS tuning parameters  ------------------
+# ---  jRTPS configuration parameters  ------------------
 jrtps.thread-pool.core-size = 10
 jrtps.message-queue.size = 10
 jrtps.buffer-size = 16384
@@ -24,6 +24,9 @@ jrtps.publish-builtin-data = false
 jrtps.prefer-multicast = true
 jrtps.listener-uris=udp://239.255.0.1,udp://localhost
 jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
+
+# ---  uDDS configuration parameters  ------------------
+udds.collections.coherent=true
 +---
  
 * RTPS specific configuration
@@ -90,4 +93,10 @@ jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
   * <<{jrtps.discovery.listener-uris}>>
   A comma separated list of URIs, that will be used to start listeners for discovery.
 
+* jRTPS specific configuration
   
+  * <<{udds.collections.coherent}>>
+  This parameter tells whether or not uDDS datawriters write collections coherently or not.
+  By writing Collections coherently. means that all the samples delivered to subscribed readers
+  will see all the changes in one single 'transaction'. I.e. samples does not get fragmented
+  during transmission.
