@@ -10,22 +10,25 @@ import java.util.Set;
 public interface HistoryCache<T> {
     /**
      * Dispose an instance represented by given sample
-     * @param sample 
-     * @param timestamp
+     * @param sample  Sample to dispose
+     * @param timestamp timestamp of the disposal
+     * @param coherent whether or not this dispose is part of a coherent set of changes 
      */
-    void dispose(T sample, long timestamp);
+    void dispose(T sample, long timestamp, boolean coherent);
     /**
      * Unregister an instance represented by given sample.
-     * @param sample
-     * @param timestamp
+     * @param sample Sample representing instance to unregister
+     * @param timestamp timestamp of unregister
+     * @param coherent whether or not this unregister is part of a coherent set of changes 
      */
-    void unregister(T sample, long timestamp);
+    void unregister(T sample, long timestamp, boolean coherent);
     /**
      * Writes a Sample.
-     * @param sample
-     * @param timestamp
+     * @param sample Sample to write
+     * @param timestamp timestamp of the write
+     * @param coherent whether or not this write is part of a coherent set of changes 
      */
-    void write(T sample, long timestamp);
+    void write(T sample, long timestamp, boolean coherent);
     
     /**
      * Registers an instance represented by given sample.
