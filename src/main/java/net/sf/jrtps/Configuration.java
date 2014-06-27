@@ -166,16 +166,6 @@ public class Configuration {
         return i;
     }
 
-    private String[] getStringArrayProperty(String key, String[] deflt) {
-        String property = props.getProperty(key);
-        
-        if (property == null) {
-            return deflt;
-        }
-        
-        return property.split(",");
-    }
-    
     /**
      * Gets a named boolean property from configuration.
      * 
@@ -283,17 +273,6 @@ public class Configuration {
         return new PortNumberParameters(pb, dg, pg, d0, d1, d2, d3);
     }
     
-    private int convert(String v, int dflt) {
-        try {
-            return Integer.parseInt(v);
-        }
-        catch(Exception e) {
-            log.warn("Failed to convert {} to int, using default value of {}", v, dflt);
-        }
-        
-        return dflt;
-    }
-    
     /**
      * Gets the listener URIs
      * @return Listener URIs
@@ -311,6 +290,37 @@ public class Configuration {
         return __getListenerURIs("jrtps.discovery.listener-uris");
     }
     
+    /**
+     * Gets whether or not udds DataWriter writes collections coherently or not.
+     * 
+     * @return true, if writer writes collections coherently 
+     */
+    public boolean getWriteCollectionsCoherently() {
+        return getBooleanProperty("udds.collections.coherent", true);
+    }
+    
+    
+    private String[] getStringArrayProperty(String key, String[] deflt) {
+        String property = props.getProperty(key);
+        
+        if (property == null) {
+            return deflt;
+        }
+        
+        return property.split(",");
+    }
+
+    private int convert(String v, int dflt) {
+        try {
+            return Integer.parseInt(v);
+        }
+        catch(Exception e) {
+            log.warn("Failed to convert {} to int, using default value of {}", v, dflt);
+        }
+        
+        return dflt;
+    }
+
     private List<URI> __getListenerURIs(String prop) {
         String[] uriStrings = getStringArrayProperty(prop, new String[] {"udp://239.255.0.1", "udp://localhost"});
 
