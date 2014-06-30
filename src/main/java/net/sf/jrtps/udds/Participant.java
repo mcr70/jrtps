@@ -524,6 +524,10 @@ public class Participant {
         return rtps_participant;
     }
 
+    Configuration getConfiguration() {
+        return config;
+    }
+    
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
         

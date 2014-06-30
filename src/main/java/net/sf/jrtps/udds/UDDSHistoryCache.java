@@ -17,6 +17,7 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.Data;
+import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosDestinationOrder.Kind;
 import net.sf.jrtps.message.parameter.QosHistory;
@@ -27,6 +28,7 @@ import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterCache;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.SequenceNumber;
 import net.sf.jrtps.types.Time;
 
 import org.slf4j.Logger;
@@ -39,7 +41,7 @@ import org.slf4j.LoggerFactory;
  * Samples on the reader side are made available through HistoryCache.
  */
 class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCache<T> {
-    private static final Logger log = LoggerFactory.getLogger(UDDSHistoryCache.class);
+    private static final Logger logger = LoggerFactory.getLogger(UDDSHistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
@@ -48,7 +50,8 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     private final List<SampleListener<T>> listeners = new LinkedList<>();
 
     private volatile long seqNum; // sequence number of a Sample
-
+    private volatile CoherentSet coherentSet; // Current CoherentSet
+    
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
 
@@ -65,6 +68,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     private final EntityId entityId;
     private final Kind destinationOrderKind;
 
+
     UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
         this.entityId = eId;
         this.marshaller = marshaller;
@@ -78,10 +82,9 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      * Dispose a sample.
      * @param sample
      * @param timestamp
-     * @param coherent
      */
     @Override
-    public void dispose(T sample, long timestamp, boolean coherent) {
+    public void dispose(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.DISPOSE, sample));
     }
 
@@ -89,10 +92,9 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      * Unregisters an instance.
      * @param sample
      * @param timestamp
-     * @param coherent
      */
     @Override
-    public void unregister(T sample, long timestamp, boolean coherent) {
+    public void unregister(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.UNREGISTER, sample));
     }
 
@@ -100,10 +102,9 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      * Writes a sample.
      * @param sample
      * @param timestamp
-     * @param coherent
      */
     @Override
-    public void write(T sample, long timestamp, boolean coherent) {
+    public void write(T sample, long timestamp) {
         addSample(new Sample<T>(null, marshaller, ++seqNum, timestamp, ChangeKind.WRITE, sample));
     }
 
@@ -129,17 +130,19 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     }
 
     private void addSample(Sample<T> cc) {
-        log.trace("addSample({})", cc);
+        logger.trace("addSample({})", cc);
         KeyHash key = cc.getKey();
         ChangeKind kind = cc.getKind();
 
+        cc.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
+        
         if (kind == ChangeKind.DISPOSE) {
             instances.remove(key);
         }
         else {
             Instance<T> inst = getOrCreateInstance(key);
 
-            log.trace("[{}] Creating sample {}", entityId, seqNum + 1);
+            logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
             Sample<T> removedSample = inst.addSample(cc);
             if (removedSample != null) {
@@ -164,7 +167,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         Instance<T> inst = instances.get(key);
         if (inst == null) {
 
-            log.trace("[{}] Creating new instance {}", entityId, key);
+            logger.trace("[{}] Creating new instance {}", entityId, key);
 
             if (resource_limits.getMaxInstances() != -1 && 
                     instances.size() > resource_limits.getMaxInstances()) {
@@ -189,20 +192,20 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
      */
     @Override
     public LinkedList<Sample<T>> getSamplesSince(long sequenceNumber) {
-        log.trace("[{}] getChangesSince({})", entityId, sequenceNumber);
+        logger.trace("[{}] getChangesSince({})", entityId, sequenceNumber);
 
         synchronized (samples) {
             for (Sample<T> cc : samples) {
                 if (cc.getSequenceNumber() > sequenceNumber) {
                     SortedSet<Sample<T>> tailSet = samples.tailSet(cc);
-                    log.trace("[{}] returning {}", entityId, tailSet);
+                    logger.trace("[{}] returning {}", entityId, tailSet);
 
                     return new LinkedList<Sample<T>>(tailSet);
                 }
             }
         }
 
-        log.trace("[{}] No chances to return for seq num {}", entityId, sequenceNumber);
+        logger.trace("[{}] No chances to return for seq num {}", entityId, sequenceNumber);
         return new LinkedList<>();
     }
 
@@ -246,7 +249,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
-        log.trace("changesBegin({})", id);
+        logger.trace("changesBegin({})", id);
         List<Sample<T>> pendingSamples = new LinkedList<>();
         incomingSamples.put(id, pendingSamples);
     }
@@ -269,7 +272,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
     @Override
     public void changesEnd(int id) {
-        log.trace("changesEnd({})", id);        
+        logger.trace("changesEnd({})", id);        
 
         List<Sample<T>> pendingSamples = incomingSamples.remove(id); 
 
@@ -281,7 +284,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
             }
 
             if (cc.getTimestamp() < latestSampleTime) {
-                log.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
+                logger.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
                         cc.getTimestamp(), latestSampleTime);
                 continue;
             }
@@ -317,5 +320,19 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
                 samples.remove(s);    
             }
         }
+    }
+
+    @Override
+    public void coherentChangesBegin() {
+        coherentSet = new CoherentSet(new SequenceNumber(seqNum + 1));
+        logger.debug("coherentChangesBegin({})", seqNum + 1);
+    }
+
+    @Override
+    public void coherentChangesEnd() {
+        if (coherentSet != null) {
+            logger.debug("coherentChangesEnd({})", coherentSet.getStartSeqNum().getAsLong());
+        }
+        coherentSet = null;
     }
 }

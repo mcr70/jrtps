@@ -6,6 +6,7 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
+import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.Guid;
@@ -34,6 +35,8 @@ public class Sample<T> {
     private KeyHash keyHash;
 
     private DataEncapsulation marshalledData;
+
+    private CoherentSet coherentSet;
 
     private Sample(Guid writerGuid, Marshaller<T> marshaller, long seqNum, long timestamp, StatusInfo sInfo) {
         this.writerGuid = writerGuid;
@@ -167,10 +170,30 @@ public class Sample<T> {
         return marshalledData;
     }
 
+    /**
+     * Checks wheter or not this Sample is associated with a Key.
+     * @return true or false
+     */
     boolean hasKey() {
         return this.marshaller.hasKey();
     }
 
+    /**
+     * Return CoherentSet attribute of this Sample, if it exists.
+     * @return CoherentSet, or null if one has not been set
+     */
+    public CoherentSet getCoherentSet() {
+        return coherentSet;
+    }
+
+    /**
+     * Sets a CoherentSet attribute for this Sample.
+     * @param cs
+     */
+    public void setCoherentSet(CoherentSet cs) {
+        coherentSet = cs;
+    }
+    
     public String toString() {
         return "Sample[" + seqNum + "]";
     }
