@@ -11,6 +11,15 @@ public class CoherentSet extends Parameter implements InlineParameter {
     }
 
     /**
+     * Creates a new CoherentSet with given SequenceNumber
+     * @param seqNum
+     */
+    public CoherentSet(SequenceNumber seqNum) {
+        super(ParameterEnum.PID_COHERENT_SET);
+        this.seqNum = seqNum;
+    }
+    
+    /**
      * Gets the sequence number of the first sample in coherent set.
      * @return sequence number
      */
