@@ -28,6 +28,7 @@ public class DataWriter<T> extends Entity<T> {
      * HistoryCache associated with this DataWriter
      */
     protected final HistoryCache<T> hCache;
+    private final boolean writeCollectionsCoherently;
 
     /**
      * Constructor for DataWriter.
@@ -41,6 +42,7 @@ public class DataWriter<T> extends Entity<T> {
         super(p, type, writer.getTopicName(), writer.getGuid());
         this.rtps_writer = writer;
         this.hCache = hCache;
+        this.writeCollectionsCoherently = p.getConfiguration().getWriteCollectionsCoherently();
     }
     
     /**
@@ -62,7 +64,7 @@ public class DataWriter<T> extends Entity<T> {
     public void write(T sample) {
         try {
             long ts = System.currentTimeMillis();
-            hCache.write(sample, ts, false);
+            hCache.write(sample, ts);
         } finally {
             notifyReaders();
         }
@@ -76,10 +78,16 @@ public class DataWriter<T> extends Entity<T> {
     public void write(List<T> samples) {
         try {
             long ts = System.currentTimeMillis();
+            
+            if (writeCollectionsCoherently) {
+                hCache.coherentChangesBegin();
+            }
+            
             for (T sample : samples) {
-                hCache.write(sample, ts, true);
+                hCache.write(sample, ts);
             }
         } finally {
+            hCache.coherentChangesEnd();
             notifyReaders();
         }
     }
@@ -107,7 +115,7 @@ public class DataWriter<T> extends Entity<T> {
     public void dispose(T instance) {
         try {
             long ts = System.currentTimeMillis();
-            hCache.dispose(instance, ts, false);
+            hCache.dispose(instance, ts);
         } finally {
             notifyReaders();
         }
@@ -121,10 +129,15 @@ public class DataWriter<T> extends Entity<T> {
     public void dispose(List<T> instances) {
         try {
             long ts = System.currentTimeMillis();
+            if (writeCollectionsCoherently) {
+                hCache.coherentChangesBegin();
+            }
+            
             for (T sample : instances) {
-                hCache.dispose(sample, ts, true);
+                hCache.dispose(sample, ts);
             }
         } finally {
+            hCache.coherentChangesEnd();
             notifyReaders();
         }
     }

@@ -17,6 +17,7 @@ import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
+import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosReliability;
@@ -43,7 +44,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class RTPSWriter<T> extends Endpoint {
-    private static final Logger log = LoggerFactory.getLogger(RTPSWriter.class);
+    private static final Logger logger = LoggerFactory.getLogger(RTPSWriter.class);
 
     private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
@@ -71,12 +72,12 @@ public class RTPSWriter<T> extends Endpoint {
             Runnable r = new Runnable() {
                 @Override
                 public void run() {
-                    log.debug("[{}] Starting periodical notification", getEntityId());
+                    logger.debug("[{}] Starting periodical notification", getEntityId());
                     try {
                         // periodical notification is handled always as pushMode == false
                         notifyReaders(false);
                     } catch (Exception e) {
-                        log.error("Got exception while doing periodical notification", e);
+                        logger.error("Got exception while doing periodical notification", e);
                     }
                 }
             };
@@ -109,7 +110,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     private void notifyReaders(boolean pushMode) {
         if (readerProxies.size() > 0) {
-            log.debug("[{}] Notifying {} matched readers of changes in history cache", getEntityId(),
+            logger.debug("[{}] Notifying {} matched readers of changes in history cache", getEntityId(),
                     readerProxies.size());
 
             for (ReaderProxy proxy : readerProxies.values()) {
@@ -136,7 +137,7 @@ public class RTPSWriter<T> extends Endpoint {
         ReaderProxy proxy = readerProxies.get(guid);
 
         if (proxy == null) {
-            log.warn("Will not notify, no proxy for {}", guid);
+            logger.warn("Will not notify, no proxy for {}", guid);
             return;
         }
 
@@ -193,7 +194,7 @@ public class RTPSWriter<T> extends Endpoint {
 
         if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
             // VOLATILE readers are marked having received all the samples so far
-            log.trace("[{}] Setting highest seqNum to {} for VOLATILE reader", getEntityId(),
+            logger.trace("[{}] Setting highest seqNum to {} for VOLATILE reader", getEntityId(),
                     writer_cache.getSeqNumMax());
 
             proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
@@ -201,7 +202,7 @@ public class RTPSWriter<T> extends Endpoint {
             notifyReader(proxy.getGuid());
         }
 
-        log.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
+        logger.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
         return proxy;
     }
 
@@ -225,7 +226,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     public void removeMatchedReader(SubscriptionData readerData) {
         readerProxies.remove(readerData.getKey());
-        log.debug("[{}] Removed matchedReader {}, {}", getEntityId(), readerData.getKey());
+        logger.debug("[{}] Removed matchedReader {}, {}", getEntityId(), readerData.getKey());
     }
 
     /**
@@ -261,20 +262,20 @@ public class RTPSWriter<T> extends Endpoint {
      * @param ackNack
      */
     void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
-        log.debug("[{}] Got AckNack: #{} {}, F:{} from {}", getEntityId(), ackNack.getCount(),
+        logger.debug("[{}] Got AckNack: #{} {}, F:{} from {}", getEntityId(), ackNack.getCount(),
                 ackNack.getReaderSNState(), ackNack.finalFlag(), senderPrefix);
 
         ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
         if (proxy != null) {
             if (proxy.ackNackReceived(ackNack)) {
-                log.trace("[{}] Wait for nack response delay: {} ms", getEntityId(), nackResponseDelay);
+                logger.trace("[{}] Wait for nack response delay: {} ms", getEntityId(), nackResponseDelay);
                 getParticipant().waitFor(nackResponseDelay);
 
                 sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
             }
         } 
         else {
-            log.warn("[{}] Discarding AckNack from unknown reader {}", getEntityId(), ackNack.getReaderId());
+            logger.warn("[{}] Discarding AckNack from unknown reader {}", getEntityId(), ackNack.getReaderId());
         }
     }
 
@@ -291,7 +292,7 @@ public class RTPSWriter<T> extends Endpoint {
         LinkedList<Sample<T>> samples = writer_cache.getSamplesSince(readersHighestSeqNum);
 
         if (samples.size() == 0) {
-            log.debug("[{}] Remote reader already has all the data", getEntityId(),
+            logger.debug("[{}] Remote reader already has all the data", getEntityId(),
                     proxy, readersHighestSeqNum);
             return;
         }
@@ -308,11 +309,11 @@ public class RTPSWriter<T> extends Endpoint {
                 }
                 prevTimeStamp = timeStamp;
 
-                log.trace("Marshalling {}", aSample.getData());
+                logger.trace("Marshalling {}", aSample.getData());
                 Data data = createData(proxyEntityId, aSample);
                 m.addSubMessage(data);
             } catch (IOException ioe) {
-                log.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
+                logger.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
             }
         }
 
@@ -326,11 +327,11 @@ public class RTPSWriter<T> extends Endpoint {
         long firstSeqNum = samples.getFirst().getSequenceNumber();
         long lastSeqNum = samples.getLast().getSequenceNumber();
         
-        log.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
+        logger.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
 
         boolean overFlowed = sendMessage(m, proxy);
         if (overFlowed) {
-            log.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
+            logger.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
             sendHeartbeat(proxy);
         }
     }
@@ -345,7 +346,7 @@ public class RTPSWriter<T> extends Endpoint {
         hb.livelinessFlag(livelinessFlag);
         m.addSubMessage(hb);
 
-        log.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getEntityId(), hb.getCount(),
+        logger.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getEntityId(), hb.getCount(),
                 hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), hb.finalFlag(), hb.livelinessFlag(),
                 proxy.getGuid());
 
@@ -367,20 +368,26 @@ public class RTPSWriter<T> extends Endpoint {
         return hb;
     }
 
-    private Data createData(EntityId readerId, Sample<T> cc) throws IOException {
-        DataEncapsulation dEnc = cc.getDataEncapsulation();
+    private Data createData(EntityId readerId, Sample<T> sample) throws IOException {
+        DataEncapsulation dEnc = sample.getDataEncapsulation();
         ParameterList inlineQos = new ParameterList();
 
-        if (cc.hasKey()) { // Add KeyHash if present
-            inlineQos.add(cc.getKey());
+        CoherentSet cs = sample.getCoherentSet();
+        
+        if (cs != null) { // Add CoherentSet if present
+            inlineQos.add(cs);
+        }
+        
+        if (sample.hasKey()) { // Add KeyHash if present
+            inlineQos.add(sample.getKey());
         }
 
-        if (!cc.getKind().equals(ChangeKind.WRITE)) { 
+        if (!sample.getKind().equals(ChangeKind.WRITE)) { 
             // Add status info for operations other than WRITE
-            inlineQos.add(new StatusInfo(cc.getKind()));
+            inlineQos.add(new StatusInfo(sample.getKind()));
         }
 
-        Data data = new Data(readerId, getEntityId(), cc.getSequenceNumber(), inlineQos, dEnc);
+        Data data = new Data(readerId, getEntityId(), sample.getSequenceNumber(), inlineQos, dEnc);
 
         return data;
     }
