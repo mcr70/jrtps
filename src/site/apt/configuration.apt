@@ -6,7 +6,7 @@ Configuration
  
 +---
 
-# ---  RTPS related configuration parameters
+# ---  RTPS configuration parameters
 rtps.traffic.port-config = PB=7400, DG=250, PG=2, d0=0, d1=10, d2=1, d3=11
 rtps.writer.push-mode = true
 rtps.writer.heartbeat-period = 5000
@@ -26,7 +26,7 @@ jrtps.listener-uris=udp://239.255.0.1,udp://localhost
 jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
 
 # ---  uDDS configuration parameters  ------------------
-udds.collections.coherent=true
+udds.collections.coherent=false
 +---
  
 * RTPS specific configuration
@@ -93,10 +93,10 @@ udds.collections.coherent=true
   * <<{jrtps.discovery.listener-uris}>>
   A comma separated list of URIs, that will be used to start listeners for discovery.
 
-* jRTPS specific configuration
+* uDDS specific configuration
   
   * <<{udds.collections.coherent}>>
-  This parameter tells whether or not uDDS datawriters write collections coherently or not.
-  By writing Collections coherently. means that all the samples delivered to subscribed readers
-  will see all the changes in one single 'transaction'. I.e. samples does not get fragmented
+  This parameter tells whether or not uDDS data writers write collections coherently or not.
+  By writing Collections coherently, means that all the samples delivered to subscribed readers
+  will see changes in one single 'transaction'. I.e. samples does not get fragmented
   during transmission.

@@ -296,7 +296,7 @@ public class Configuration {
      * @return true, if writer writes collections coherently 
      */
     public boolean getWriteCollectionsCoherently() {
-        return getBooleanProperty("udds.collections.coherent", true);
+        return getBooleanProperty("udds.collections.coherent", false);
     }
     
     
