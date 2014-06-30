@@ -167,7 +167,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
             log.trace("[{}] Creating new instance {}", entityId, key);
 
             if (resource_limits.getMaxInstances() != -1 && 
-                    instances.size() >= resource_limits.getMaxInstances()) {
+                    instances.size() > resource_limits.getMaxInstances()) {
                 throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
             }
 
