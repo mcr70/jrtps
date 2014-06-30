@@ -8,6 +8,8 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  */
 public class SequenceNumber {
+    public static final SequenceNumber SEQUENCENUMBER_UNKNOWN = new SequenceNumber(-1, 0); // see table 9.4
+    
     private int high = 0;
     private int low = 0;
 
