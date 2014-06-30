@@ -152,6 +152,10 @@ public class Sample<T> {
         return keyHash;
     }
 
+    /**
+     * Get the ChangeKind of this Sample.
+     * @return ChangeKind
+     */
     public ChangeKind getKind() {
         return sInfo.getKind();
     }
@@ -171,7 +175,7 @@ public class Sample<T> {
     }
 
     /**
-     * Checks wheter or not this Sample is associated with a Key.
+     * Checks whether or not this Sample is associated with a Key.
      * @return true or false
      */
     boolean hasKey() {
