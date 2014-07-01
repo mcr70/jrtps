@@ -1,7 +1,7 @@
 0.9.0
     - DirectedWrite. RTPSReader checks if incoming data contains 
       DirectedWrite inline qos, and if so, accepts Data only if
-      There is a matching Guid.
+      there is a matching Guid.
     - CoherentSet support. Coherent sets are handled by udds history
       cache.
     - PropertyList
