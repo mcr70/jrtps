@@ -13,6 +13,11 @@ public class PropertyList extends Parameter implements InlineQoS {
         super(ParameterEnum.PID_PROPERTY_LIST);
     }
 
+    public PropertyList(Property[] properties) {
+        super(ParameterEnum.PID_PROPERTY_LIST);
+        this.properties = properties;
+    }
+    
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         this.properties = new Property[bb.read_long()];

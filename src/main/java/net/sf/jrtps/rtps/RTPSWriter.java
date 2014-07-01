@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
 
@@ -18,8 +19,11 @@ import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.CoherentSet;
+import net.sf.jrtps.message.parameter.DataWriterPolicy;
+import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.EntityId;
@@ -185,7 +189,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     public ReaderProxy addMatchedReader(SubscriptionData readerData) {
         LocatorPair locators = getLocators(readerData);
-        ReaderProxy proxy = new ReaderProxy(readerData, locators, false, getConfiguration().getNackSuppressionDuration());
+        ReaderProxy proxy = new ReaderProxy(readerData, locators, getConfiguration().getNackSuppressionDuration());
         proxy.preferMulticast(getConfiguration().preferMulticast());
         
         readerProxies.put(readerData.getKey(), proxy);
@@ -310,7 +314,7 @@ public class RTPSWriter<T> extends Endpoint {
                 prevTimeStamp = timeStamp;
 
                 logger.trace("Marshalling {}", aSample.getData());
-                Data data = createData(proxyEntityId, aSample);
+                Data data = createData(proxyEntityId, proxy.expectsInlineQoS(), aSample);
                 m.addSubMessage(data);
             } catch (IOException ioe) {
                 logger.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
@@ -368,10 +372,19 @@ public class RTPSWriter<T> extends Endpoint {
         return hb;
     }
 
-    private Data createData(EntityId readerId, Sample<T> sample) throws IOException {
+    private Data createData(EntityId readerId, boolean expectsInlineQos, Sample<T> sample) throws IOException {
         DataEncapsulation dEnc = sample.getDataEncapsulation();
         ParameterList inlineQos = new ParameterList();
 
+        if (expectsInlineQos) { // If reader expects inline qos, add them 
+            Set<QosPolicy<?>> inlinePolicies = getQualityOfService().getInlinePolicies();
+            for (QosPolicy<?> policy : inlinePolicies) {
+                if (policy instanceof DataWriterPolicy) {
+                    inlineQos.add((Parameter) policy); // TODO: safe cast, but ugly
+                }
+            }
+        }
+        
         CoherentSet cs = sample.getCoherentSet();
         
         if (cs != null) { // Add CoherentSet if present

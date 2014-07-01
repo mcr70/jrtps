@@ -24,13 +24,10 @@ public class ReaderProxy extends RemoteProxy {
 
 	private final int anSuppressionDuration;
 
-    ReaderProxy(SubscriptionData readerData, LocatorPair locators) {
-        this(readerData, locators, false, 0);
-    }
 
-    ReaderProxy(SubscriptionData rd, LocatorPair lPair, boolean expectsInlineQoS, int anSuppressionDuration) {
+    ReaderProxy(SubscriptionData rd, LocatorPair lPair, int anSuppressionDuration) {
         super(rd, lPair.ucLocator, lPair.mcLocator);
-        this.expectsInlineQoS = expectsInlineQoS;
+        this.expectsInlineQoS = rd.expectsInlineQos(); 
 		this.anSuppressionDuration = anSuppressionDuration;
     }
 
