@@ -38,7 +38,7 @@ public class CustomDataWriter<T> extends DataWriter<T> {
 
     public void write(T sample, long timestamp) {
         try {
-            hCache.write(sample, timestamp, false); // Write a sample with given timestamp
+            hCache.write(sample, timestamp); // Write a sample with given timestamp
         } finally {
             super.notifyReaders(); // notify remote readers of new data in HistoryCache
         }
