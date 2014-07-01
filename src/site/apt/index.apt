@@ -6,3 +6,8 @@ Overview
  
  <Note: Consider any documentation on this site prior version 1.0 to be subject to changes> 
  
+ jRTPS also provides a simplistic DDS alike programming interface, 
+ {{{./apidocs/net/sf/jrtps/udds/package-summary.html}udds}}, 
+ that can be used to read/write data from/to DDS domain. There is also an ongoing effort, 
+ {{{http://jdds.sourceforge.net}jDDS}}, that utilizes jRTPS as its transport.
+ 

@@ -6,7 +6,7 @@ import java.util.Set;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
-import net.sf.jrtps.message.parameter.InlineParameter;
+import net.sf.jrtps.message.parameter.InlineQoS;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.Guid;
@@ -179,7 +179,7 @@ public class DiscoveredData {
      * 
      * @return QosPolicies that can be inlined to Data
      * @see net.sf.jrtps.message.Data#getInlineQos()
-     * @see InlineParameter
+     * @see InlineQoS
      */
     public Set<QosPolicy<?>> getInlineableQosPolicies() {
         return qos.getInlinePolicies();

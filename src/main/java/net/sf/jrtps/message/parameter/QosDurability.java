@@ -13,7 +13,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class QosDurability extends Parameter implements DataReaderPolicy<QosDurability>,
-        DataWriterPolicy<QosDurability>, TopicPolicy<QosDurability>, InlineParameter {
+        DataWriterPolicy<QosDurability>, TopicPolicy<QosDurability>, InlineQoS {
     private int kind;
 
     public enum Kind {

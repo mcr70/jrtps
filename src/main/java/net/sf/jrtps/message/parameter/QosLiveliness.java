@@ -14,7 +14,7 @@ import net.sf.jrtps.types.Duration;
  * 
  */
 public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLiveliness>,
-        DataWriterPolicy<QosLiveliness>, TopicPolicy<QosLiveliness>, InlineParameter {
+        DataWriterPolicy<QosLiveliness>, TopicPolicy<QosLiveliness>, InlineQoS {
     private int kind;
     private Duration lease_duration;
 

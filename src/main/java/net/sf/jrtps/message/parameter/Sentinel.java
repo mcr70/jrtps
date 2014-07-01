@@ -2,7 +2,7 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class Sentinel extends Parameter implements InlineParameter {
+public class Sentinel extends Parameter implements InlineQoS {
     public Sentinel() {
         super(ParameterEnum.PID_SENTINEL);
     }

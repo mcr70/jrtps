@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration;
 
 public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosLatencyBudget>,
-        DataWriterPolicy<QosLatencyBudget>, TopicPolicy<QosLatencyBudget>, InlineParameter {
+        DataWriterPolicy<QosLatencyBudget>, TopicPolicy<QosLatencyBudget>, InlineQoS {
     private Duration duration;
 
     QosLatencyBudget() {

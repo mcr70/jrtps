@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwnership>, TopicPolicy<QosOwnership>,
-        DataWriterPolicy<QosOwnership>, InlineParameter {
+        DataWriterPolicy<QosOwnership>, InlineQoS {
     private int kind;
 
     public enum Kind {

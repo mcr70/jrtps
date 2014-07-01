@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration;
 
 public class QosReliability extends Parameter implements DataReaderPolicy<QosReliability>,
-        DataWriterPolicy<QosReliability>, TopicPolicy<QosReliability>, InlineParameter {
+        DataWriterPolicy<QosReliability>, TopicPolicy<QosReliability>, InlineQoS {
     // see Table 9.4 - PSM mapping of the value types that appear on the wire
     // TODO: OSPL 5.5 uses KIND=2, maybe there is an offset error like 1 for
     // BEST_EFFORT and 2 for RELIABLE
