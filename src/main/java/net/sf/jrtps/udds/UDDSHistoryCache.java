@@ -130,12 +130,12 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         listeners.remove(aListener);
     }
 
-    private void addSample(Sample<T> cc) {
-        logger.trace("addSample({})", cc);
-        KeyHash key = cc.getKey();
-        ChangeKind kind = cc.getKind();
+    private void addSample(Sample<T> sample) {
+        logger.trace("addSample({})", sample);
+        KeyHash key = sample.getKey();
+        ChangeKind kind = sample.getKind();
 
-        cc.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
+        sample.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
 
         if (kind == ChangeKind.DISPOSE) {
             instances.remove(key);
@@ -145,7 +145,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
             logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
-            Sample<T> removedSample = inst.addSample(cc);
+            Sample<T> removedSample = inst.addSample(sample);
             if (removedSample != null) {
                 synchronized (samples) {
                     samples.remove(removedSample);
@@ -159,7 +159,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         }
 
         synchronized (samples) {
-            samples.add(cc);
+            samples.add(sample);
         }
     }
 
@@ -271,9 +271,9 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
         Sample<T> sample = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, data);
         CoherentSet cs = sample.getCoherentSet();
-        
+
         // Check, if we need to add existing CoherentSet into pendingSamples
-        if (coherentSet.size() > 0) { // If no samples in cs, no need to add 
+        if (coherentSet.size() > 0) { // If no samples in cs, no need to add to pending samples 
             if (cs == null || 
                     cs.getStartSeqNum().getAsLong() == SequenceNumber.SEQUENCENUMBER_UNKNOWN.getAsLong() ||
                     cs.getStartSeqNum().getAsLong() != coherentSet.get(0).getCoherentSet().getStartSeqNum().getAsLong()) {
@@ -283,8 +283,18 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
                 coherentSet.clear();
             }
         }
-        
-        pendingSamples.add(sample);
+
+        if (data.dataFlag()) { // Add only Samples with contain Data
+            if (cs != null) { // If we have a CS attribute, add it to coherentSet
+                coherentSet.add(sample);
+            }
+            else {
+                pendingSamples.add(sample);
+            }
+        }
+        else {
+            logger.debug("Skipping sample #{} from being delivered to reader, since it does not contain Data", data.getWriterSequenceNumber());
+        }
     }
 
     private List<Sample<T>> getCoherentSet(Guid writerGuid) {
@@ -361,5 +371,6 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
             logger.debug("coherentChangesEnd({})", coherentSet.getStartSeqNum().getAsLong());
         }
         coherentSet = null;
+        addSample(new Sample<T>(++seqNum)); // Add a Sample denoting end of CoherentSet
     }
 }

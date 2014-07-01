@@ -48,6 +48,15 @@ public class Sample<T> {
         this.timestamp = timestamp;        
     }
 
+    /**
+     * This constructor is used to create a Sample, that has no content. It is used to pass
+     * only inline QoS parameters to remote reader. For example, indicating an end of coherent set.
+     * @param seqNum
+     */
+    public Sample(long seqNum) {
+        this(null, null, seqNum, System.currentTimeMillis(), (StatusInfo)null);
+    }
+
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, ChangeKind kind, T obj) {
         this(writerGuid, m, seqNum, timestamp, new StatusInfo(kind));        
         this.obj = obj;
@@ -64,6 +73,7 @@ public class Sample<T> {
             }
         }
     }
+
 
     /**
      * Gets the data associated with this Sample.
@@ -146,7 +156,7 @@ public class Sample<T> {
      * @return KeyHash, or null if this Sample does not have a key.
      */
     public KeyHash getKey() {
-        if (keyHash == null && marshaller.hasKey()) {
+        if (keyHash == null && marshaller != null && marshaller.hasKey()) {
             T aData = getData();
             if (aData instanceof DiscoveredData) {
                 DiscoveredData dd = (DiscoveredData) aData;
@@ -163,10 +173,14 @@ public class Sample<T> {
 
     /**
      * Get the ChangeKind of this Sample.
-     * @return ChangeKind
+     * @return ChangeKind May be null, if this Sample does not represent a change to an instance.
      */
     public ChangeKind getKind() {
-        return sInfo.getKind();
+        if (sInfo != null) {
+            return sInfo.getKind();
+        }
+        
+        return null;
     }
 
 
@@ -176,8 +190,8 @@ public class Sample<T> {
      * @throws IOException
      */
     DataEncapsulation getDataEncapsulation() throws IOException {
-        if (marshalledData == null) {
-            marshalledData = this.marshaller.marshall(getData());
+        if (marshalledData == null && marshaller != null) {
+            marshalledData = marshaller.marshall(getData());
         }
 
         return marshalledData;
@@ -188,7 +202,11 @@ public class Sample<T> {
      * @return true or false
      */
     boolean hasKey() {
-        return this.marshaller.hasKey();
+        if (marshaller != null) {
+            return marshaller.hasKey();
+        }
+        
+        return false;
     }
 
     /**
