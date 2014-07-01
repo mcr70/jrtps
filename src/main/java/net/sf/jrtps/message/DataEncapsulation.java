@@ -30,13 +30,12 @@ public abstract class DataEncapsulation {
     }
 
     /**
-     * Checks whether this encapsulation holds data or key as serialized
-     * payload.
+     * Checks whether this encapsulation holds data
      * 
      * @return true, if this encapsulation holds data
      */
-    public abstract boolean containsData(); // as opposed to key
-
+    public abstract boolean containsData();
+    
     /**
      * Gets the payload as a byte array. Payload must contain an encapsulation
      * identifier as first 2 bytes.

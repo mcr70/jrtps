@@ -6,7 +6,10 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
+import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.ParameterEnum;
+import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.Guid;
 
@@ -35,12 +38,23 @@ public class Sample<T> {
 
     private DataEncapsulation marshalledData;
 
+    private CoherentSet coherentSet;
+
     private Sample(Guid writerGuid, Marshaller<T> marshaller, long seqNum, long timestamp, StatusInfo sInfo) {
         this.writerGuid = writerGuid;
         this.marshaller = marshaller;
         this.seqNum = seqNum;
         this.sInfo = sInfo;
         this.timestamp = timestamp;        
+    }
+
+    /**
+     * This constructor is used to create a Sample, that has no content. It is used to pass
+     * only inline QoS parameters to remote reader. For example, indicating an end of coherent set.
+     * @param seqNum
+     */
+    public Sample(long seqNum) {
+        this(null, null, seqNum, System.currentTimeMillis(), (StatusInfo)null);
     }
 
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, ChangeKind kind, T obj) {
@@ -51,7 +65,15 @@ public class Sample<T> {
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, Data data) {
         this(writerGuid, m, seqNum, timestamp, data.getStatusInfo());
         this.data = data;
+        
+        if (data.inlineQosFlag()) {
+            ParameterList inlineQos = data.getInlineQos();
+            if (inlineQos != null) {
+                coherentSet = (CoherentSet) inlineQos.getParameter(ParameterEnum.PID_COHERENT_SET);
+            }
+        }
     }
+
 
     /**
      * Gets the data associated with this Sample.
@@ -134,7 +156,7 @@ public class Sample<T> {
      * @return KeyHash, or null if this Sample does not have a key.
      */
     public KeyHash getKey() {
-        if (keyHash == null && marshaller.hasKey()) {
+        if (keyHash == null && marshaller != null && marshaller.hasKey()) {
             T aData = getData();
             if (aData instanceof DiscoveredData) {
                 DiscoveredData dd = (DiscoveredData) aData;
@@ -149,8 +171,16 @@ public class Sample<T> {
         return keyHash;
     }
 
+    /**
+     * Get the ChangeKind of this Sample.
+     * @return ChangeKind May be null, if this Sample does not represent a change to an instance.
+     */
     public ChangeKind getKind() {
-        return sInfo.getKind();
+        if (sInfo != null) {
+            return sInfo.getKind();
+        }
+        
+        return null;
     }
 
 
@@ -160,17 +190,41 @@ public class Sample<T> {
      * @throws IOException
      */
     DataEncapsulation getDataEncapsulation() throws IOException {
-        if (marshalledData == null) {
-            marshalledData = this.marshaller.marshall(getData());
+        if (marshalledData == null && marshaller != null) {
+            marshalledData = marshaller.marshall(getData());
         }
 
         return marshalledData;
     }
 
+    /**
+     * Checks whether or not this Sample is associated with a Key.
+     * @return true or false
+     */
     boolean hasKey() {
-        return this.marshaller.hasKey();
+        if (marshaller != null) {
+            return marshaller.hasKey();
+        }
+        
+        return false;
     }
 
+    /**
+     * Return CoherentSet attribute of this Sample, if it exists.
+     * @return CoherentSet, or null if one has not been set
+     */
+    public CoherentSet getCoherentSet() {
+        return coherentSet;
+    }
+
+    /**
+     * Sets a CoherentSet attribute for this Sample.
+     * @param cs
+     */
+    public void setCoherentSet(CoherentSet cs) {
+        coherentSet = cs;
+    }
+    
     public String toString() {
         return "Sample[" + seqNum + "]";
     }

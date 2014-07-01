@@ -12,7 +12,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  * 
  */
-public class KeyHash extends Parameter implements InlineParameter {
+public class KeyHash extends Parameter implements InlineQoS {
 
     private static MessageDigest md5 = null;
     private static NoSuchAlgorithmException noSuchAlgorithm = null;

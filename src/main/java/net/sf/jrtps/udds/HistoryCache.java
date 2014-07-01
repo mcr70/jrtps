@@ -9,21 +9,31 @@ import java.util.Set;
  */
 public interface HistoryCache<T> {
     /**
+     * Calling this method starts a new coherent set.
+     */
+    void coherentChangesBegin();
+    
+    /**
+     * Calling this method ends current coherent set.
+     */
+    void coherentChangesEnd();
+    
+    /**
      * Dispose an instance represented by given sample
-     * @param sample 
-     * @param timestamp
+     * @param sample  Sample to dispose
+     * @param timestamp timestamp of the disposal
      */
     void dispose(T sample, long timestamp);
     /**
      * Unregister an instance represented by given sample.
-     * @param sample
-     * @param timestamp
+     * @param sample Sample representing instance to unregister
+     * @param timestamp timestamp of unregister
      */
     void unregister(T sample, long timestamp);
     /**
      * Writes a Sample.
-     * @param sample
-     * @param timestamp
+     * @param sample Sample to write
+     * @param timestamp timestamp of the write
      */
     void write(T sample, long timestamp);
     

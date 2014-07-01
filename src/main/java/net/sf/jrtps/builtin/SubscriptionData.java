@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.message.parameter.ExpectsInlineQos;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
@@ -59,6 +60,9 @@ public class SubscriptionData extends DiscoveredData {
                 super.key = new Guid(param.getBytes()); // TODO: We should store
                                                         // either GUID, or
                                                         // KeyHash only
+                break;
+            case PID_EXPECTS_INLINE_QOS:
+                expectsInlineQos = ((ExpectsInlineQos) param).expectsInlineQos();
                 break;
             case PID_SENTINEL:
                 break;

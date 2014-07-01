@@ -9,6 +9,8 @@
             <item name="Overview" href="index.html" />
 			<item name="Getting started" href="usage.html" />
             <item name="Quality of Service" href="qos.html" />
+       <!--      <item name="Compatibility" href="compatibility.html" /> -->
+            <item name="ReleaseNotes" href="ReleaseNotes.html" />
 		</menu>
 
 		<!-- <menu ref="reports"/> -->

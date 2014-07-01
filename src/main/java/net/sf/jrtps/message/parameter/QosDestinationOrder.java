@@ -12,7 +12,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class QosDestinationOrder extends Parameter implements DataReaderPolicy<QosDestinationOrder>,
-        DataWriterPolicy<QosDestinationOrder>, TopicPolicy<QosDestinationOrder>, InlineParameter {
+        DataWriterPolicy<QosDestinationOrder>, TopicPolicy<QosDestinationOrder>, InlineQoS {
     private int kind;
 
     public enum Kind {

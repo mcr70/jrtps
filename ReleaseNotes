@@ -1,3 +1,14 @@
+0.9.0
+    - DirectedWrite. RTPSReader checks if incoming data contains 
+      DirectedWrite inline qos, and if so, accepts Data only if
+      there is a matching Guid.
+    - CoherentSet support. Coherent sets are handled by udds history
+      cache.
+    - PropertyList
+    - ExpectsInlineQoS. RTPSWriter sends inline QoS to readers with
+      each sample, if subscription data during discovery contains
+      PID_EXPECTS_INLINE_QOS parameter
+    
 0.8.8
     - FIX: DataReader.clear() had a bug, samples were not removed.
 

@@ -42,10 +42,9 @@ public class Data extends SubMessage {
      * @param seqNum
      * @param inlineQosParams
      *            Inline QoS parameters. May be null.
-     * @param dEnc
+     * @param dEnc If null, neither dataFlag or keyFlag is set
      */
     public Data(EntityId readerId, EntityId writerId, long seqNum, ParameterList inlineQosParams, DataEncapsulation dEnc) {
-
         super(new SubMessageHeader(0x15));
 
         this.readerId = readerId;
@@ -57,12 +56,14 @@ public class Data extends SubMessage {
             this.inlineQosParams = inlineQosParams;
         }
 
-        if (dEnc.containsData()) {
-            header.flags |= 0x4; // dataFlag
-        } else {
-            header.flags |= 0x8; // keyFlag
+        if (dEnc != null) {
+            if (dEnc.containsData()) {
+                header.flags |= 0x4; // dataFlag
+            } else {
+                header.flags |= 0x8; // keyFlag
+            }
         }
-
+        
         this.dataEncapsulation = dEnc;
     }
 
@@ -82,7 +83,7 @@ public class Data extends SubMessage {
         }
 
         int start_count = bb.position(); // start of bytes read so far from the
-                                         // beginning
+        // beginning
 
         this.extraFlags = (short) bb.read_short();
         int octetsToInlineQos = bb.read_short() & 0xffff;
@@ -101,7 +102,7 @@ public class Data extends SubMessage {
             // newPos = bb.getBuffer.position() + unknownOctets or something
             // like that
             bb.read_octet(); // Skip unknown octets, @see 9.4.5.3.3
-                             // octetsToInlineQos
+            // octetsToInlineQos
         }
 
         if (inlineQosFlag()) {
@@ -111,15 +112,15 @@ public class Data extends SubMessage {
 
         if (dataFlag() || keyFlag()) {
             bb.align(4); // Each submessage is aligned on 32-bit boundary, @see
-                         // 9.4.1 Overall Structure
+            // 9.4.1 Overall Structure
             int end_count = bb.position(); // end of bytes read so far from the
-                                           // beginning
+            // beginning
 
             byte[] serializedPayload = null;
             if (header.submessageLength != 0) {
                 serializedPayload = new byte[header.submessageLength - (end_count - start_count)];
             } else { // SubMessage is the last one. Rest of the bytes are read.
-                     // @see 8.3.3.2.3
+                // @see 8.3.3.2.3
                 ByteBuffer buffer = bb.getBuffer();
                 serializedPayload = new byte[buffer.capacity() - buffer.position()];
             }
