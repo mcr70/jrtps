@@ -50,8 +50,9 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     private final List<SampleListener<T>> listeners = new LinkedList<>();
 
     private volatile long seqNum; // sequence number of a Sample
-    private volatile CoherentSet coherentSet; // Current CoherentSet
-    
+    private volatile CoherentSet coherentSet; // Current CoherentSet, used by writer
+    private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
+
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
 
@@ -135,7 +136,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         ChangeKind kind = cc.getKind();
 
         cc.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
-        
+
         if (kind == ChangeKind.DISPOSE) {
             instances.remove(key);
         }
@@ -256,7 +257,6 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
     @Override
     public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
-        List<Sample<T>> pendingSamples = incomingSamples.get(id); 
 
         long ts = 0;
         if (destinationOrderKind == Kind.BY_RECEPTION_TIMESTAMP || timestamp == null) {
@@ -266,8 +266,35 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
             ts = timestamp.timeMillis(); 
         }
 
-        Sample<T> cc = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, data);
-        pendingSamples.add(cc);
+        List<Sample<T>> coherentSet = getCoherentSet(writerGuid); // Get current CoherentSet for writer
+        List<Sample<T>> pendingSamples = incomingSamples.get(id); 
+
+        Sample<T> sample = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, data);
+        CoherentSet cs = sample.getCoherentSet();
+        
+        // Check, if we need to add existing CoherentSet into pendingSamples
+        if (coherentSet.size() > 0) { // If no samples in cs, no need to add 
+            if (cs == null || 
+                    cs.getStartSeqNum().getAsLong() == SequenceNumber.SEQUENCENUMBER_UNKNOWN.getAsLong() ||
+                    cs.getStartSeqNum().getAsLong() != coherentSet.get(0).getCoherentSet().getStartSeqNum().getAsLong()) {
+                // End of CoherentSet is detected, if CS attribute is missing, or it is SEQNUM_UNKNOWN,
+                // or its startSeqNum is different
+                pendingSamples.addAll(coherentSet);
+                coherentSet.clear();
+            }
+        }
+        
+        pendingSamples.add(sample);
+    }
+
+    private List<Sample<T>> getCoherentSet(Guid writerGuid) {
+        List<Sample<T>> list = coherentSets.get(writerGuid);
+        if (list == null) {
+            list = new LinkedList<>();
+            coherentSets.put(writerGuid, list);
+        }
+
+        return list;
     }
 
     @Override
