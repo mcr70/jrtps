@@ -2,7 +2,7 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class PropertyList extends Parameter {
+public class PropertyList extends Parameter implements InlineQoS {
     PropertyList() {
         super(ParameterEnum.PID_PROPERTY_LIST);
     }
