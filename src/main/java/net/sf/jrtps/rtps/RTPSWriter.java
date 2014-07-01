@@ -382,7 +382,7 @@ public class RTPSWriter<T> extends Endpoint {
             inlineQos.add(sample.getKey());
         }
 
-        if (!sample.getKind().equals(ChangeKind.WRITE)) { 
+        if (!ChangeKind.WRITE.equals(sample.getKind()) && sample.getKind() != null) { 
             // Add status info for operations other than WRITE
             inlineQos.add(new StatusInfo(sample.getKind()));
         }
