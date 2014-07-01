@@ -2,7 +2,7 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class TopicName extends Parameter implements InlineParameter {
+public class TopicName extends Parameter implements InlineQoS {
     private String name;
 
     public TopicName(String name) {

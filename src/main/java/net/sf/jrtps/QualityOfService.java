@@ -6,7 +6,7 @@ import java.util.Set;
 
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
-import net.sf.jrtps.message.parameter.InlineParameter;
+import net.sf.jrtps.message.parameter.InlineQoS;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDestinationOrder;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -190,7 +190,7 @@ public class QualityOfService {
         Set<QosPolicy<?>> inlinePolicies = new HashSet<>();
 
         for (QosPolicy qp : policies.values()) {
-            if (qp instanceof InlineParameter) {
+            if (qp instanceof InlineQoS) {
                 inlinePolicies.add(qp);
             }
         }

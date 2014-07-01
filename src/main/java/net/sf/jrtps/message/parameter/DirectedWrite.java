@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 
-public class DirectedWrite extends Parameter implements InlineParameter {
+public class DirectedWrite extends Parameter implements InlineQoS {
     private Guid[] guids;
 
     DirectedWrite() {

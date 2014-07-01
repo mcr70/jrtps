@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  * 
  */
-public class StatusInfo extends Parameter implements InlineParameter {
+public class StatusInfo extends Parameter implements InlineQoS {
     private static final Logger log = LoggerFactory.getLogger(StatusInfo.class);
 
     private byte[] flags;
