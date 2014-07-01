@@ -254,9 +254,8 @@ public class RTPSReader<T> extends Endpoint {
         WriterProxy wp = getWriterProxy(writerGuid);
         if (wp != null) {
             if (wp.acceptData(data.getWriterSequenceNumber())) {
-
-                boolean ok = checkDirectedWrite(data);
-                if (ok) {
+                if (checkDirectedWrite(data)) { 
+                    // Add Data to cache only if permitted by DirectedWrite, or if DirectedWrite does not exist
                     log.debug("[{}] Got Data: #{}", getEntityId(), data.getWriterSequenceNumber());
                     rCache.addChange(id, writerGuid, data, timeStamp);
                 }
@@ -278,16 +277,18 @@ public class RTPSReader<T> extends Endpoint {
      * @return true, if data can be added to this Reader
      */
     private boolean checkDirectedWrite(Data data) {
-        DirectedWrite dw = (DirectedWrite) data.getInlineQos().getParameter(ParameterEnum.PID_DIRECTED_WRITE);
-        
-        if (dw != null) {
-            for (Guid guid : dw.getGuids()) {
-                if (guid.equals(getGuid())) {
-                    return true;
+        if (data.inlineQosFlag()) {
+            DirectedWrite dw = (DirectedWrite) data.getInlineQos().getParameter(ParameterEnum.PID_DIRECTED_WRITE);
+
+            if (dw != null) {
+                for (Guid guid : dw.getGuids()) {
+                    if (guid.equals(getGuid())) {
+                        return true;
+                    }
                 }
+
+                return false;
             }
-            
-            return false;
         }
         
         return true;
