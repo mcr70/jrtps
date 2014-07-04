@@ -205,7 +205,12 @@ public class ParameterFactory {
         case 0x0071:
             param = new StatusInfo();
             break;
-
+        case 0x0073:
+            param = new QosDataRepresentation(); // From x-types
+            break;
+        case 0x0074:
+            param = new QosTypeConsistencyEnforcement();
+            
             // Table 9.17: deprecated ids
         case 0x0003:
             param = new Persistence();
