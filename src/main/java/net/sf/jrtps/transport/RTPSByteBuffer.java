@@ -89,7 +89,7 @@ public class RTPSByteBuffer {
     }
 
     /**
-     * Qrites a short to underlying buffer
+     * Writes a short to underlying buffer
      * 
      * @param a_short
      */
