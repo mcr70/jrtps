@@ -18,7 +18,7 @@ public class Watchdog {
      * Create Watchdog with given ScheduledExecutorService.
      * @param ses
      */
-    Watchdog(ScheduledExecutorService ses) {
+    public Watchdog(ScheduledExecutorService ses) {
         this.ses = ses;
     }
     
@@ -30,7 +30,7 @@ public class Watchdog {
      *        not call Task.reset() before trigger time has elapsed.
      * @return Task
      */
-    Task addTask(long triggerTime, final Listener listener) {
+    public Task addTask(long triggerTime, final Listener listener) {
         Runnable r = new Runnable() {
             @Override
             public void run() {
