@@ -11,7 +11,7 @@ import java.util.concurrent.TimeUnit;
  * 
  * @author mcr70
  */
-class Watchdog {
+public class Watchdog {
     private ScheduledExecutorService ses;
 
     /**
@@ -56,7 +56,7 @@ class Watchdog {
         private long triggerTime;
         private Runnable runnable;
 
-        public Task(ScheduledFuture<?> scheduledFuture, long triggerTime, Runnable r) {
+        private Task(ScheduledFuture<?> scheduledFuture, long triggerTime, Runnable r) {
             this.scheduledFuture = scheduledFuture;
             this.triggerTime = triggerTime;
             this.runnable = r;
@@ -66,7 +66,7 @@ class Watchdog {
          * Cancel this Task. Canceling of a task removes it from 
          * executor.
          */
-        void cancel() {
+        public void cancel() {
             scheduledFuture.cancel(false); // do not interrupt
         }
         
@@ -75,7 +75,7 @@ class Watchdog {
          * at period less than watchdog trigger time used when Task was created.
          * I.e. Once reset is called, trigger time is reset to initial value.
          */
-        void reset() {
+        public void reset() {
             scheduledFuture.cancel(false); // do not interrupt
             this.scheduledFuture = ses.schedule(runnable, triggerTime, TimeUnit.MILLISECONDS);
         }
