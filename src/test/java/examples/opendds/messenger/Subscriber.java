@@ -11,8 +11,7 @@ public class Subscriber {
 
         p.setMarshaller(Message.class, new MessageMarshaller());
 
-        DataReader<Message> dr = p.createDataReader("Movie Discussion List", Message.class,
-                "IDL:Messenger/MessageTypeSupport:1.0", new MessengerQoS());
+        DataReader<Message> dr = p.createDataReader(Message.class, new MessengerQoS());
         MessageListener hl = new MessageListener();
         dr.addSampleListener(hl);
 
