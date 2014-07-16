@@ -13,7 +13,7 @@ public class Subscriber2 {
 
         p.setMarshaller(Msg.class, new MsgMarshaller());
 
-        DataReader<Msg> dr = p.createDataReader("HelloWorldData_Msg", Msg.class, "HelloWorldData::Msg", new MsgQoS());
+        DataReader<Msg> dr = p.createDataReader(Msg.class, new MsgQoS());
 
         System.out.println("\n*** Press enter to read samples and close participant ***\n");
         System.in.read();

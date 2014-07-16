@@ -9,7 +9,7 @@ public class Publisher {
 
         p.setMarshaller(Msg.class, new MsgMarshaller());
 
-        DataWriter<Msg> dw = p.createDataWriter("HelloWorldData_Msg", Msg.class, "HelloWorldData::Msg", new MsgQoS());
+        DataWriter<Msg> dw = p.createDataWriter(Msg.class, new MsgQoS());
 
         for (int i = 0; i < 10; i++) {
             Msg m = new Msg(i, "message" + i);
