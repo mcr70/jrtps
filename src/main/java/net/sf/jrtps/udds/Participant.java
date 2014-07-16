@@ -268,8 +268,9 @@ public class Participant {
     /**
      * Create a new DataReader for given type T. DataReader is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
-     * Typename of the DataReader is set to fully qualified class name.
-     * QualityOfService with default values will be used.
+     * If Class <i>type</i> has a TypeName annotation set, it will be used to set
+     * the value of TypeName to be announced to remote entities. Otherwise
+     * TypeName is set to fully qualified class name.
      * 
      * @param type
      * @return a DataReader<T>
@@ -280,15 +281,18 @@ public class Participant {
 
     /**
      * Create a new DataReader for given type T. DataReader is bound to a topic
-     * named c.getSimpleName(), which corresponds to class name of the argument.
-     * Typename of the DataReader is set to fully qualified class name.
+     * named type.getSimpleName(), which corresponds to class name of the argument.
+     * If Class <i>type</i> has a TypeName annotation set, it will be used to set
+     * the value of TypeName to be announced to remote entities. Otherwise
+     * TypeName is set to fully qualified class name.
      * 
      * @param type 
      * @param qos QualityOfService used
      * @return a DataReader<T>
+     * @see TypeName
      */
     public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
-        return createDataReader(type.getSimpleName(), type, type.getName(), qos);
+        return createDataReader(type.getSimpleName(), type, getTypeName(type), qos);
     }
 
     /**
@@ -301,7 +305,7 @@ public class Participant {
      * @param qos QualityOfService
      * @return a DataReader<T>
      */
-    public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {
+    public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {        
         logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
 
         Marshaller<T> m = getMarshaller(type);
@@ -356,27 +360,32 @@ public class Participant {
     /**
      * Creates a new DataWriter of given type. DataWriter is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
-     * Typename of the DataWriter is set to fully qualified class name. A
-     * default QualityOfService is used.
+     * If Class <i>type</i> has a TypeName annotation set, it will be used to set
+     * the value of TypeName to be announced to remote entities. Otherwise
+     * TypeName is set to fully qualified class name.
      * 
-     * @param c A class, that is used with created DataWriter.
+     * 
+     * @param type A class, that is used with created DataWriter.
      * @return a DataWriter<T>
      */
-    public <T> DataWriter<T> createDataWriter(Class<T> c) {
-        return createDataWriter(c, new QualityOfService());
+    public <T> DataWriter<T> createDataWriter(Class<T> type) {
+        return createDataWriter(type, new QualityOfService());
     }
 
     /**
      * Creates a new DataWriter of given type. DataWriter is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
-     * Typename of the DataWriter is set to fully qualified class name.
+     * If Class <i>type</i> has a TypeName annotation set, it will be used to set
+     * the value of TypeName to be announced to remote entities. Otherwise
+     * TypeName is set to fully qualified class name.
      * 
-     * @param c A class, that is used with created DataWriter.
+     * 
+     * @param type A class, that is used with created DataWriter.
      * @param qos QualityOfService
      * @return a DataWriter<T>
      */
-    public <T> DataWriter<T> createDataWriter(Class<T> c, QualityOfService qos) {
-        return createDataWriter(c.getSimpleName(), c, c.getName(), qos);
+    public <T> DataWriter<T> createDataWriter(Class<T> type, QualityOfService qos) {
+        return createDataWriter(type.getSimpleName(), type, getTypeName(type), qos);
     }
 
     /**
@@ -385,7 +394,7 @@ public class Participant {
      * 
      * @param topicName name of the topic
      * @param type type of the DataWriter
-     * @param typeName name of the type. typeName gets sent to remote readers.
+     * @param typeName name of the type. typeName gets sent to remote readers. 
      * @param qos QualityOfService
      * @return a DataWriter<T>
      */
@@ -443,6 +452,21 @@ public class Participant {
         return writer;
     }
 
+    private String getTypeName(Class<?> c) {
+        TypeName tna = c.getAnnotation(TypeName.class);
+        String typeName;
+        if (tna != null) {
+            typeName = tna.typeName();
+        }
+        else {
+            typeName = c.getName();
+        }
+
+        logger.debug("Setting type name to {}", typeName);
+        
+        return typeName;
+    }
+    
 
     /**
      * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is preferred 
