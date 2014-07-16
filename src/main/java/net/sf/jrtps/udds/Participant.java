@@ -289,10 +289,10 @@ public class Participant {
      * @param type 
      * @param qos QualityOfService used
      * @return a DataReader<T>
-     * @see TypeName
+     * @see Type
      */
     public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
-        return createDataReader(type.getSimpleName(), type, getTypeName(type), qos);
+        return createDataReader(getTopicName(type), type, getTypeName(type), qos);
     }
 
     /**
@@ -375,7 +375,7 @@ public class Participant {
     /**
      * Creates a new DataWriter of given type. DataWriter is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
-     * If Class <i>type</i> has a TypeName annotation set, it will be used to set
+     * If Class <i>type</i> has a Topic annotation set, it will be used to set
      * the value of TypeName to be announced to remote entities. Otherwise
      * TypeName is set to fully qualified class name.
      * 
@@ -385,7 +385,7 @@ public class Participant {
      * @return a DataWriter<T>
      */
     public <T> DataWriter<T> createDataWriter(Class<T> type, QualityOfService qos) {
-        return createDataWriter(type.getSimpleName(), type, getTypeName(type), qos);
+        return createDataWriter(getTopicName(type), type, getTypeName(type), qos);
     }
 
     /**
@@ -453,20 +453,33 @@ public class Participant {
     }
 
     private String getTypeName(Class<?> c) {
-        TypeName tna = c.getAnnotation(TypeName.class);
+        Type ta = c.getAnnotation(Type.class);
         String typeName;
-        if (tna != null) {
-            typeName = tna.typeName();
+        
+        if (ta != null) {
+            typeName = ta.typeName();
         }
         else {
             typeName = c.getName();
         }
 
-        logger.debug("Setting type name to {}", typeName);
-        
         return typeName;
     }
     
+    private String getTopicName(Class<?> c) {
+        Type ta = c.getAnnotation(Type.class);
+        String topicName = null;
+        
+        if (ta != null) {
+            topicName = ta.topicName();
+        }
+        
+        if (topicName == null || topicName.length() == 0) {
+            topicName = c.getSimpleName();
+        }
+
+        return topicName;
+    }
 
     /**
      * Sets a type specific Marshaller. When creating entities, a type specific Marshaller is preferred 

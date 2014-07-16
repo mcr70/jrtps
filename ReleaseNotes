@@ -1,5 +1,5 @@
 0.9.1
-    - TypeName annotation can be used to set the type name 
+    - Type annotation can be used to set the topic name and type name 
       reported to remote entities. 
     
 0.9.0
