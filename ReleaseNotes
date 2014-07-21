@@ -1,7 +1,7 @@
 0.9.1
     - Type annotation can be used to set the topic name and type name 
       reported to remote entities. 
-    - Possibility to access a specific instance from history cache
+    - Possibility to access a specific instance from writers history cache
         
 0.9.0
     - DirectedWrite. RTPSReader checks if incoming data contains 
