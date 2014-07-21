@@ -344,7 +344,8 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         return new HashSet<>(values);
     }
 
-    Instance<T> getInstance(KeyHash key) {
+    @Override
+    public Instance<T> getInstance(KeyHash key) {
         return instances.get(key);
     }
 
