@@ -1,7 +1,12 @@
 0.9.2
     - FIX: Use parameter PID_BUILTIN_TOPIC_KEY(0x005a) during discovery
       instead of KeyHash(0x0070)
-    - First successful interoperability tests with OpenSplice 6.3 :) 
+    - First successful interoperability tests with OpenSplice 6.3.
+      Using Subscriber of examples.ospl.hello with slightly modified 
+      version of Ospl hello example works ok. One need to write
+      something like 10 samples before exiting (waiting 1 sec between
+      samples), because ospl publisher exits before match making during 
+      discovery is finished. 
      
 0.9.1
     - Type annotation can be used to set the topic name and type name 

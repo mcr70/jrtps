@@ -1,13 +1,13 @@
 package net.sf.jrtps.rtps;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.parameter.CoherentSet;
-import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
@@ -34,7 +34,7 @@ public class Sample<T> {
 
     private T obj;      // Sample contains either T or Data, lazily convert to other when needed.
     private Data data;
-    private KeyHash keyHash;
+    private SampleKey key;
 
     private DataEncapsulation marshalledData;
 
@@ -153,22 +153,21 @@ public class Sample<T> {
      * Gets the key of this Sample. Key of the Sample is used to distinguish between
      * instances, when transmitting Samples over the wire.
      * 
-     * @return KeyHash, or null if this Sample does not have a key.
+     * @return Key, or null if this Sample does not have a key.
      */
-    public KeyHash getKey() {
-        if (keyHash == null && marshaller != null && marshaller.hasKey()) {
+    public SampleKey getKey() {
+        if (key == null && marshaller != null && marshaller.hasKey()) {
             T aData = getData();
             if (aData instanceof DiscoveredData) {
                 DiscoveredData dd = (DiscoveredData) aData;
-                byte[] builtinTopicKey = dd.getBuiltinTopicKey().getBytes();
-                keyHash = new KeyHash(builtinTopicKey, true);
+                key = new SampleKey(dd.getBuiltinTopicKey().getBytes());
             }
             else {
-                keyHash = new KeyHash(marshaller.extractKey(aData), false);
+                key = new SampleKey(marshaller.extractKey(aData));
             }
         }
 
-        return keyHash;
+        return key;
     }
 
     /**
@@ -224,6 +223,43 @@ public class Sample<T> {
     public void setCoherentSet(CoherentSet cs) {
         coherentSet = cs;
     }
+    
+    /**
+     * SampleKey represents the key of the Sample. For builtin entities, SampleKey is 
+     * constructed from Guid of the entity. For user entities, Marshaller is consulted
+     * for byte array.
+     * 
+     * @author mcr70
+     *
+     */
+    public class SampleKey {
+        private byte[] bytes;
+
+        private SampleKey(byte[] bytes) {
+            this.bytes = bytes;
+        }
+              
+        public boolean equals(Object other) {
+            if (other instanceof Sample.SampleKey) {
+                return Arrays.equals(bytes, ((Sample.SampleKey)other).bytes);
+            }
+            
+            return false;
+        }
+        
+        public int hashCode() {
+            return Arrays.hashCode(bytes);
+        }
+        
+        public String toString() {
+            return Arrays.toString(bytes);
+        }
+
+        public byte[] getBytes() {
+            return bytes;
+        }
+    }
+    
     
     public String toString() {
         return "Sample[" + seqNum + "]";
