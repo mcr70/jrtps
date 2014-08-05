@@ -1,8 +1,8 @@
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
- 0.9.1
+ 0.9.2
 
-    * Type annotation can be used to set the topic name and type name 
-      reported to remote entities. 
-
-    * Possibility to access a specific instance from writers history cache
+    * FIX: Use parameter PID_BUILTIN_TOPIC_KEY(0x005a) during discovery
+      instead of KeyHash(0x0070)
+    
+	* First successful interoperability tests with OpenSplice 6.3
