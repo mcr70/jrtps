@@ -6,7 +6,7 @@ import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.ParameterListEncapsulation;
-import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.BuiltinTopicKey;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
@@ -37,14 +37,14 @@ public class PublicationDataMarshaller implements Marshaller<PublicationData> {
     }
 
     /**
-     * Extracts the key from PublicationData. Guid of of the writer represented
+     * Extracts the key from PublicationData. Guid of the writer represented
      * by PublicationData is the key.
      * 
      * @return Guid as byte array
      */
     @Override
     public byte[] extractKey(PublicationData data) {
-        return data.getKey().getBytes();
+        return data.getBuiltinTopicKey().getBytes();
     }
 
     @Override
@@ -64,7 +64,7 @@ public class PublicationDataMarshaller implements Marshaller<PublicationData> {
     public DataEncapsulation marshall(PublicationData wd) {
         ParameterList payloadParams = new ParameterList();
 
-        payloadParams.add(new KeyHash(wd.getKey().getBytes(), true));
+        payloadParams.add(new BuiltinTopicKey(wd.getBuiltinTopicKey()));
         payloadParams.add(new TopicName(wd.getTopicName()));
         payloadParams.add(new TypeName(wd.getTypeName()));
 

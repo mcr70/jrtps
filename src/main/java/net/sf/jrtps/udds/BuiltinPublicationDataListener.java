@@ -26,7 +26,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
         for (Sample<PublicationData> pdSample : samples) {
             PublicationData pd = pdSample.getData();
 
-            Guid key = pd.getKey();
+            Guid key = pd.getBuiltinTopicKey();
             if (discoveredWriters.put(key, pd) == null) {
                 log.debug("Discovered a new publication {} for topic {}, type {}, QoS: {}", key, pd.getTopicName(),
                         pd.getTypeName(), pd.getQualityOfService());
@@ -40,7 +40,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
                     // associate
                     QualityOfService offered = pd.getQualityOfService();
                     QualityOfService requested = r.getRTPSReader().getQualityOfService();
-                    log.trace("Check for compatible QoS for {} and {}", pd.getKey().getEntityId(), r.getRTPSReader()
+                    log.trace("Check for compatible QoS for {} and {}", pd.getBuiltinTopicKey().getEntityId(), r.getRTPSReader()
                             .getGuid().getEntityId());
 
                     if (offered.isCompatibleWith(requested)) {

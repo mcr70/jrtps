@@ -6,7 +6,7 @@ import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.ParameterListEncapsulation;
-import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.BuiltinTopicKey;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
@@ -34,7 +34,7 @@ public class TopicDataMarshaller implements Marshaller<TopicData> {
 
     @Override
     public byte[] extractKey(TopicData data) {
-        return data.getKey().getBytes();
+        return data.getBuiltinTopicKey().getBytes();
     }
 
     @Override
@@ -54,9 +54,9 @@ public class TopicDataMarshaller implements Marshaller<TopicData> {
     public DataEncapsulation marshall(TopicData td) {
         ParameterList payloadParams = new ParameterList();
 
+        payloadParams.add(new BuiltinTopicKey(td.getBuiltinTopicKey()));
         payloadParams.add(new TopicName(td.getTopicName()));
         payloadParams.add(new TypeName(td.getTypeName()));
-        payloadParams.add(new KeyHash(td.getKey().getBytes(), true));
 
         addQoS(td, payloadParams);
         payloadParams.add(new Sentinel());

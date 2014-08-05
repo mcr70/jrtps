@@ -153,7 +153,7 @@ public class Endpoint {
      * @return unicast and multicast locator
      */
     LocatorPair getLocators(DiscoveredData dd) {
-        Guid remoteGuid = dd.getKey();
+        Guid remoteGuid = dd.getBuiltinTopicKey();
         LocatorPair locators = new LocatorPair();
 
         // Set the default locators from ParticipantData

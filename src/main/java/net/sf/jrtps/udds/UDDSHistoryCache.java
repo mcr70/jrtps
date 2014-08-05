@@ -313,26 +313,28 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
         List<Sample<T>> pendingSamples = incomingSamples.remove(id); 
 
-        // Add each pending Sample to HistoryCache
-        for (Sample<T> cc : pendingSamples) {
-            long latestSampleTime = 0;
-            if (samples.size() > 0) {
-                latestSampleTime = samples.last().getTimestamp();
+        if (pendingSamples.size() > 0) {
+            // Add each pending Sample to HistoryCache
+            for (Sample<T> cc : pendingSamples) {
+                long latestSampleTime = 0;
+                if (samples.size() > 0) {
+                    latestSampleTime = samples.last().getTimestamp();
+                }
+
+                if (cc.getTimestamp() < latestSampleTime) {
+                    logger.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
+                            cc.getTimestamp(), latestSampleTime);
+                    continue;
+                }
+                else {
+                    addSample(cc);
+                }
             }
 
-            if (cc.getTimestamp() < latestSampleTime) {
-                logger.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
-                        cc.getTimestamp(), latestSampleTime);
-                continue;
+            // Notify listeners 
+            for (SampleListener<T> aListener : listeners) {
+                aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
             }
-            else {
-                addSample(cc);
-            }
-        }
-
-        // Notify listeners 
-        for (SampleListener<T> aListener : listeners) {
-            aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
         }
     }
 

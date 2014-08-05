@@ -118,7 +118,7 @@ public class RTPSWriter<T> extends Endpoint {
                     readerProxies.size());
 
             for (ReaderProxy proxy : readerProxies.values()) {
-                Guid guid = proxy.getSubscriptionData().getKey();
+                Guid guid = proxy.getSubscriptionData().getBuiltinTopicKey();
                 notifyReader(guid, pushMode);
             }
         }
@@ -192,7 +192,7 @@ public class RTPSWriter<T> extends Endpoint {
         ReaderProxy proxy = new ReaderProxy(readerData, locators, getConfiguration().getNackSuppressionDuration());
         proxy.preferMulticast(getConfiguration().preferMulticast());
         
-        readerProxies.put(readerData.getKey(), proxy);
+        readerProxies.put(readerData.getBuiltinTopicKey(), proxy);
 
         QosDurability readerDurability = readerData.getQualityOfService().getDurability();
 
@@ -229,8 +229,8 @@ public class RTPSWriter<T> extends Endpoint {
      * @param readerData
      */
     public void removeMatchedReader(SubscriptionData readerData) {
-        readerProxies.remove(readerData.getKey());
-        logger.debug("[{}] Removed matchedReader {}, {}", getEntityId(), readerData.getKey());
+        readerProxies.remove(readerData.getBuiltinTopicKey());
+        logger.debug("[{}] Removed matchedReader {}, {}", getEntityId(), readerData.getBuiltinTopicKey());
     }
 
     /**
@@ -430,7 +430,7 @@ public class RTPSWriter<T> extends Endpoint {
      * @return true if matched
      */
     public boolean isMatchedWith(SubscriptionData readerData) {
-        return readerProxies.get(readerData.getKey()) != null;
+        return readerProxies.get(readerData.getBuiltinTopicKey()) != null;
     }
 
     boolean isReliable() {

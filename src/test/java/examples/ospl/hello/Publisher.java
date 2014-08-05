@@ -11,6 +11,9 @@ public class Publisher {
 
         DataWriter<Msg> dw = p.createDataWriter(Msg.class, new MsgQoS());
 
+        System.out.println("Press Enter to write samples");
+        System.in.read();
+        
         for (int i = 0; i < 10; i++) {
             Msg m = new Msg(i, "message" + i);
             dw.write(m);

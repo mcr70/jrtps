@@ -513,4 +513,20 @@ public abstract class EntityId {
      * @return endpoint set id.
      */
     public abstract int getEndpointSetId();
+
+    /**
+     * Gets the entityKey of this EntityId
+     * @return an array of length 3
+     */
+    public byte[] getEntityKey() {
+        return entityKey;
+    }
+    
+    /**
+     * Gets the entityKind of this EntityId
+     * @return entityKind
+     */
+    public byte getEntityKind() {
+        return entityKind;
+    }
 }

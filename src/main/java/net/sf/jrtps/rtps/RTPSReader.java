@@ -91,7 +91,7 @@ public class RTPSReader<T> extends Endpoint {
         WriterProxy wp = new WriterProxy(writerData, locators, heartbeatSuppressionDuration);
         wp.preferMulticast(getConfiguration().preferMulticast());
 
-        writerProxies.put(writerData.getKey(), wp);
+        writerProxies.put(writerData.getBuiltinTopicKey(), wp);
 
         log.debug("[{}] Added matchedWriter {}, uc:{}, mc:{}", getEntityId(), writerData,
                 wp.getUnicastLocator(), wp.getMulticastLocator());
@@ -120,9 +120,9 @@ public class RTPSReader<T> extends Endpoint {
      * @param writerData writer to remove. If corresponding writer does not exists, this method silently returns
      */
     public void removeMatchedWriter(PublicationData writerData) {
-        writerProxies.remove(writerData.getKey());
+        writerProxies.remove(writerData.getBuiltinTopicKey());
 
-        log.debug("[{}] Removed matchedWriter {}", getEntityId(), writerData.getKey());
+        log.debug("[{}] Removed matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
     }
 
     /**
@@ -160,7 +160,7 @@ public class RTPSReader<T> extends Endpoint {
      * @return true if matched
      */
     public boolean isMatchedWith(PublicationData pubData) {
-        return writerProxies.get(pubData.getKey()) != null;
+        return writerProxies.get(pubData.getBuiltinTopicKey()) != null;
     }
 
     /**

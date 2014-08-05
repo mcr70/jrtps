@@ -46,6 +46,7 @@ public class PublicationData extends DiscoveredData {
             case PID_TYPE_NAME:
                 super.typeName = ((TypeName) param).getTypeName();
                 break;
+            case PID_BUILTIN_TOPIC_KEY:
             case PID_KEY_HASH:
                 super.key = new Guid(param.getBytes());
                 break;
