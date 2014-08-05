@@ -100,7 +100,7 @@ public class RemoteProxy {
      * @return Guid
      */
     public Guid getGuid() {
-        return discoveredData.getKey();
+        return discoveredData.getBuiltinTopicKey();
     }
 
     /**

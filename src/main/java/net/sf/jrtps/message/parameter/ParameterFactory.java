@@ -188,7 +188,7 @@ public class ParameterFactory {
             param = new PropertyList();
             break;
         case 0x005a: // TODO: see also 0x0070. 0x005a is used in builtin data as builtinTopicKey
-            param = new KeyHash(); // see x-types doc, page 183
+            param = new BuiltinTopicKey(); // see x-types doc, page 183
             break;   // RTPS spec does not have 0x005a, but ospl uses it anyway
         case 0x0060:
             param = new TypeMaxSizeSerialized();

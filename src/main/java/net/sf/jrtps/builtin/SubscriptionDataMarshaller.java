@@ -6,7 +6,7 @@ import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.ParameterListEncapsulation;
-import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.BuiltinTopicKey;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
@@ -38,14 +38,14 @@ public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> 
     }
 
     /**
-     * Extracts the key from PublicationData. Guid of of the reader represented
+     * Extracts the key from PublicationData. Guid of the reader represented
      * by SubscriptionData is the key.
      * 
      * @return Guid as byte array
      */
     @Override
     public byte[] extractKey(SubscriptionData data) {
-        return data.getKey().getBytes();
+        return data.getBuiltinTopicKey().getBytes();
     }
 
     @Override
@@ -65,9 +65,9 @@ public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> 
     public DataEncapsulation marshall(SubscriptionData rd) {
         ParameterList payloadParams = new ParameterList();
 
+        payloadParams.add(new BuiltinTopicKey(rd.getBuiltinTopicKey()));
         payloadParams.add(new TopicName(rd.getTopicName()));
         payloadParams.add(new TypeName(rd.getTypeName()));
-        payloadParams.add(new KeyHash(rd.getKey().getBytes(), true));
 
         addQoS(rd, payloadParams);
         payloadParams.add(new Sentinel());

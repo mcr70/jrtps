@@ -160,7 +160,7 @@ public class Sample<T> {
             T aData = getData();
             if (aData instanceof DiscoveredData) {
                 DiscoveredData dd = (DiscoveredData) aData;
-                byte[] builtinTopicKey = dd.getKey().getBytes();
+                byte[] builtinTopicKey = dd.getBuiltinTopicKey().getBytes();
                 keyHash = new KeyHash(builtinTopicKey, true);
             }
             else {

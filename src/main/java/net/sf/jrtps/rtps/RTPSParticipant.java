@@ -2,6 +2,7 @@ package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -59,14 +60,14 @@ public class RTPSParticipant {
     private final LinkedList<Locator> discoveryLocators = new LinkedList<>();
     private final LinkedList<Locator> userdataLocators = new LinkedList<>();
 
-    
+
     private final Guid guid;
     private RTPSMessageReceiver handler;
 
     private int domainId;
     private int participantId;
 
-    
+
     /**
      * Creates a new participant with given domainId and participantId. Domain
      * ID and participant ID is used to construct unicast locators to this
@@ -101,7 +102,7 @@ public class RTPSParticipant {
     public void start() {
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
         int bufferSize = config.getBufferSize();
-        
+
         // NOTE: We can have only one MessageReceiver. pending samples concept
         // relies on it.
         handler = new RTPSMessageReceiver(this, queue);
@@ -114,7 +115,7 @@ public class RTPSParticipant {
         log.debug("Starting receivers for user data");
         List<URI> listenerURIs = config.getListenerURIs();
         startReceiversForURIs(queue, bufferSize, listenerURIs, false);
-        
+
         log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
                 writerEndpoints.size());
     }
@@ -167,7 +168,7 @@ public class RTPSParticipant {
         log.debug("Closing RTPSParticipant {}", guid);
 
         for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce
-                                                  // thread
+            // thread
             w.close();
         }
 
@@ -210,8 +211,8 @@ public class RTPSParticipant {
         handler.ignoreParticipant(prefix);
     }
 
-    
-    
+
+
     /**
      * Gets the domainId of this participant;
      * 
@@ -265,28 +266,44 @@ public class RTPSParticipant {
         if (readerId != null && !EntityId.UNKNOWN_ENTITY.equals(readerId)) {
             return getReader(readerId);
         }
-    
+
         if (writerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER)) {
             return getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
         }
-    
+
         if (writerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER)) {
             return getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
         }
-    
+
         if (writerId.equals(EntityId.SEDP_BUILTIN_TOPIC_WRITER)) {
             return getReader(EntityId.SEDP_BUILTIN_TOPIC_READER);
         }
-    
+
         if (writerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER)) {
             return getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
         }
-    
+
         if (writerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER)) {
             return getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
         }
-    
-        log.warn("Failed to find RTPSReader for reader entity {} or matching writer entity {}", readerId, writerId);
+
+        return getReaderWithEntityKey(writerId.getEntityKey());
+    }
+
+    private RTPSReader<?> getReaderWithEntityKey(byte[] entityKey) {
+        log.debug("Trying to find reader with entityKey {}", entityKey);
+        StringBuffer sb = new StringBuffer();
+        for (RTPSReader<?> r : readerEndpoints) {
+            if (Arrays.equals(entityKey, r.getEntityId().getEntityKey())) {
+                return r;
+            }
+            
+            sb.append(r.getEntityId());
+            sb.append(" ");
+        }
+
+        log.debug("Failed to find reader with entityKey {} from {}", Arrays.toString(entityKey), sb);
+        
         return null;
     }
 
@@ -294,27 +311,27 @@ public class RTPSParticipant {
         if (writerId != null && !EntityId.UNKNOWN_ENTITY.equals(writerId)) {
             return getWriter(writerId);
         }
-    
+
         if (readerId.equals(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER)) {
             return getWriter(EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
         }
-    
+
         if (readerId.equals(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER)) {
             return getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
         }
-    
+
         if (readerId.equals(EntityId.SEDP_BUILTIN_TOPIC_READER)) {
             return getWriter(EntityId.SEDP_BUILTIN_TOPIC_WRITER);
         }
-    
+
         if (readerId.equals(EntityId.SPDP_BUILTIN_PARTICIPANT_READER)) {
             return getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
         }
-    
+
         if (readerId.equals(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER)) {
             return getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
         }
-    
+
         log.warn("Failed to find Writer for writer {} or matching reader {}", writerId, readerId);
         return null;
     }
@@ -355,16 +372,16 @@ public class RTPSParticipant {
             boolean discovery) {
         for (URI uri : listenerURIs) {
             TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
-            
+
             if (provider != null) {
                 try {
                     Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, 
                             queue, bufferSize);
-                    
+
                     if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
                         this.participantId = receiver.getParticipantId();
                     }
-                    
+
                     setLocator(receiver.getLocator(), discovery);
                     receivers.add(receiver);
                     threadPoolExecutor.execute(receiver);

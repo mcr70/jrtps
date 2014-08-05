@@ -306,7 +306,7 @@ public class Participant {
      * @return a DataReader<T>
      */
     public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {        
-        logger.debug("Creating DataReader for topic {}, type {}", topicName, typeName);
+        logger.debug("Creating DataReader for topic {}, type {}, qos {}", topicName, typeName, qos);
 
         Marshaller<T> m = getMarshaller(type);
         EntityId eId = null;
@@ -324,9 +324,9 @@ public class Participant {
         } else {
             int myIdx = userEntityIdx++;
             byte[] myKey = new byte[3];
-            myKey[0] = (byte) (myIdx & 0xff);
+            myKey[2] = (byte) (myIdx & 0xff); 
             myKey[1] = (byte) (myIdx >> 8 & 0xff);
-            myKey[2] = (byte) (myIdx >> 16 & 0xff);
+            myKey[0] = (byte) (myIdx >> 16 & 0xff);
 
             int kind = 0x07; // User defined reader, with key, see 9.3.1.2
             // Mapping of the EntityId_t
@@ -351,8 +351,8 @@ public class Participant {
             SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
             sw.write(rd);
         }
-        
-        logger.debug("Created DataReader for {}", topicName);
+
+        logger.debug("Created DataReader {}", reader.getGuid());
         
         return reader;
     }
@@ -416,9 +416,9 @@ public class Participant {
         } else {
             int myIdx = userEntityIdx++;
             byte[] myKey = new byte[3];
-            myKey[0] = (byte) (myIdx & 0xff);
+            myKey[2] = (byte) (myIdx & 0xff);
             myKey[1] = (byte) (myIdx >> 8 & 0xff);
-            myKey[2] = (byte) (myIdx >> 16 & 0xff);
+            myKey[0] = (byte) (myIdx >> 16 & 0xff);
 
             int kind = 0x02; // User defined writer, with key, see 9.3.1.2 Mapping of the EntityId_t
             if (!m.hasKey()) {
@@ -445,7 +445,7 @@ public class Participant {
             pw.write(wd);
 
             logger.debug("Created DataWriter for {}, participant guid is {}, Publications guid is {}", 
-                    topicName, getGuid(), wd.getKey());
+                    topicName, getGuid(), wd.getBuiltinTopicKey());
         }
 
 
@@ -812,7 +812,7 @@ public class Participant {
     List<SubscriptionData> getDiscoveredReaders(GuidPrefix prefix) {
         List<SubscriptionData> __readers = new LinkedList<>();
         for (SubscriptionData sd : discoveredReaders.values()) {
-            if (prefix.equals(sd.getKey().getPrefix())) {
+            if (prefix.equals(sd.getBuiltinTopicKey().getPrefix())) {
                 __readers.add(sd);
             }
         }

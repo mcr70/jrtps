@@ -143,12 +143,11 @@ public class DiscoveredData {
     }
 
     /**
-     * Gets the Guid of the entity represented by this DiscoveredData. Guid is
-     * formed from the PID_KEY_HASH parameter.
+     * Gets the Guid of the entity represented by this DiscoveredData. 
      * 
      * @return key as Guid
      */
-    public Guid getKey() {
+    public Guid getBuiltinTopicKey() {
         return key;
     }
 

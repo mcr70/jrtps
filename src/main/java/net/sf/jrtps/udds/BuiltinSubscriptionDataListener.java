@@ -33,7 +33,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
         for (Sample<SubscriptionData> sdSample : samples) {
             SubscriptionData sd = sdSample.getData();
 
-            Guid key = sd.getKey();
+            Guid key = sd.getBuiltinTopicKey();
             if (discoveredReaders.put(key, sd) == null) {
                 log.debug("Discovered a new subscription {} for topic {}, type {}, QoS: {}", key, sd.getTopicName(),
                         sd.getTypeName(), sd.getQualityOfService());
@@ -47,7 +47,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
                     QualityOfService requested = sd.getQualityOfService();
                     QualityOfService offered = w.getRTPSWriter().getQualityOfService();
                     log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), sd
-                            .getKey().getEntityId());
+                            .getBuiltinTopicKey().getEntityId());
 
                     if (offered.isCompatibleWith(requested)) {
                         w.addMatchedReader(sd);

@@ -55,8 +55,8 @@ public class SubscriptionData extends DiscoveredData {
             case PID_TYPE_NAME:
                 super.typeName = ((TypeName) param).getTypeName();
                 break;
+            case PID_BUILTIN_TOPIC_KEY:
             case PID_KEY_HASH:
-                // keyHash = (KeyHash) param;
                 super.key = new Guid(param.getBytes()); // TODO: We should store
                                                         // either GUID, or
                                                         // KeyHash only
