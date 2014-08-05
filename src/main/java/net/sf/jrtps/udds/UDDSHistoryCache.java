@@ -18,7 +18,6 @@ import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.CoherentSet;
-import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosDestinationOrder.Kind;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
@@ -54,7 +53,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
 
     // Main collection to hold instances. ResourceLimits is checked against this map
-    private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
+    private final Map<Sample<T>.SampleKey, Instance<T>> instances = new LinkedHashMap<>();
 
     // An ordered set of cache changes.
     private final SortedSet<Sample<T>> samples = Collections.synchronizedSortedSet(new TreeSet<>(
@@ -132,7 +131,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
     private void addSample(Sample<T> sample) {
         logger.trace("addSample({})", sample);
-        KeyHash key = sample.getKey();
+        Sample<T>.SampleKey key = sample.getKey();
         ChangeKind kind = sample.getKind();
 
         sample.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
@@ -164,7 +163,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     }
 
 
-    private Instance<T> getOrCreateInstance(KeyHash key) {
+    private Instance<T> getOrCreateInstance(Sample<T>.SampleKey key) {
         Instance<T> inst = instances.get(key);
         if (inst == null) {
 
@@ -347,7 +346,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     }
 
     @Override
-    public Instance<T> getInstance(KeyHash key) {
+    public Instance<T> getInstance(Sample<T>.SampleKey key) {
         return instances.get(key);
     }
 

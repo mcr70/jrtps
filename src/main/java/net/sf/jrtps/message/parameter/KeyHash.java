@@ -24,36 +24,41 @@ public class KeyHash extends Parameter implements InlineQoS {
         }
     }    
 
+    private byte[] bytes;
+    
 
     KeyHash() {
         super(ParameterEnum.PID_KEY_HASH);
     }
-
+    
     public KeyHash(byte[] bytes) {
-        this(bytes, false);
+        super(ParameterEnum.PID_KEY_HASH);
+        this.bytes = prepareKey(bytes);
     }
 
-    public KeyHash(byte[] bytes, boolean isBuiltinKey) {
-        super(ParameterEnum.PID_KEY_HASH, prepareKey(bytes, isBuiltinKey));
+    @Override
+    public byte[] getBytes() {
+        return bytes;
     }
-
+    
     /**
      * Get the key hash. Key hash is always of length 16;
      * 
      * @return Key hash as byte array
      */
     public byte[] getKeyHash() {
-        return getBytes();
+        return bytes;
     }
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        readBytes(bb, length);
+        this.bytes = new byte[16];
+        bb.read(bytes);
     }
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        writeBytes(bb);
+        bb.write(bytes);
     }
     
     public boolean equals(Object other) {
@@ -68,11 +73,7 @@ public class KeyHash extends Parameter implements InlineQoS {
         return Arrays.hashCode(getKeyHash());
     }
 
-    private static byte[] prepareKey(byte[] key, boolean isBuiltinKey) {
-        if (isBuiltinKey) {
-            return key; // key is BuiltinTopicKey. Leave as is, no MD5 hashing
-        }
-        
+    private byte[] prepareKey(byte[] key) {        
         if (key == null) {
             key = new byte[0];
         }

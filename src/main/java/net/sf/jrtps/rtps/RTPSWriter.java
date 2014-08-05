@@ -20,6 +20,7 @@ import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -392,7 +393,7 @@ public class RTPSWriter<T> extends Endpoint {
         }
         
         if (sample.hasKey()) { // Add KeyHash if present
-            inlineQos.add(sample.getKey());
+            inlineQos.add(new KeyHash(sample.getKey().getBytes()));
         }
 
         if (!ChangeKind.WRITE.equals(sample.getKind()) && sample.getKind() != null) { 

@@ -15,6 +15,10 @@ OpenDDS 3.5 specific notes
 OSPL 6.3 specific notes
 =======================
 	- Reliability QoS: Reliability kind RELIABLE is still 2 on the wire 
+    - ospl-info.log:
+        1407234991.613463/      recv: malformed packet received from vendor 202.254 state parse:heartbeat <52545053 0201cafe 531
+        90100 0e0f0a0c 0e0b0a0b @0x14 07020000 c7030000 c2030000 00000000 00000000 00000000 00000000 01000000> (note: maybe part
+        ially bswap'd) {{7,2,0},3c7,3c2,0,0}    
 
 OSPL 5.5 specific notes
 =======================

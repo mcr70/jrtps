@@ -3,7 +3,6 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
-import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.Sample;
 
 /**
@@ -15,11 +14,11 @@ import net.sf.jrtps.rtps.Sample;
  * @param <T>
  */
 public class Instance <T> {
-    private final KeyHash key;
+    private final Sample<T>.SampleKey key;
     private final LinkedList<Sample<T>> history = new LinkedList<>();
     private final int maxSize;
 
-    Instance(KeyHash key, int historySize) {
+    Instance(Sample<T>.SampleKey key, int historySize) {
         this.key = key;
         this.maxSize = historySize;
     }
@@ -79,9 +78,9 @@ public class Instance <T> {
 
     /** 
      * Gets the key of this instance.
-     * @return a KeyHash that represents the key of this instance
+     * @return a Key that represents the key of this instance
      */
-    public KeyHash getKey() {
+    public Sample<T>.SampleKey getKey() {
         return key;
     }
     
