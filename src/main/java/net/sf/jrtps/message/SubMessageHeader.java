@@ -79,16 +79,6 @@ public class SubMessageHeader {
     }
 
     /**
-     * Checks, if endianness flag of this SubMessageHeader represents big endian
-     * byte order.
-     * 
-     * @return true for big endian byte order
-     */
-    public boolean isBigEndian() {
-        return !endiannessFlag();
-    }
-
-    /**
      * Get the length of the sub message.
      * 
      * @return length of the sub message
