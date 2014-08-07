@@ -87,7 +87,7 @@ public abstract class EntityId {
     }
 
     public int hashCode() {
-        return Arrays.hashCode(entityKey) + entityKind;
+        return Arrays.hashCode(getBytes());
     }
 
     /**
