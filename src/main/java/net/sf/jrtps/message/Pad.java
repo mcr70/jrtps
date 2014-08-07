@@ -17,10 +17,10 @@ public class Pad extends SubMessage {
 
     private byte[] bytes;
 
-    public Pad(SubMessageHeader smh, RTPSByteBuffer buffer) {
+    public Pad(SubMessageHeader smh, RTPSByteBuffer bb) {
         super(smh);
 
-        readMessage(buffer);
+        readMessage(bb);
     }
 
     private void readMessage(RTPSByteBuffer bb) {
@@ -29,7 +29,7 @@ public class Pad extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write(bytes);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write(bytes);
     }
 }

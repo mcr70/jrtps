@@ -60,12 +60,12 @@ public class SubMessageHeader {
     /**
      * Writes this SubMessageHeader into RTPSByteBuffer
      * 
-     * @param buffer
+     * @param bb
      */
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write_octet(kind);
-        buffer.write_octet(flags);
-        buffer.write_short((short) submessageLength);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write_octet(kind);
+        bb.write_octet(flags);
+        bb.write_short((short) submessageLength);
     }
 
     /**
