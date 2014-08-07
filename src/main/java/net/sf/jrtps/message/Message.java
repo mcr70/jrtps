@@ -48,6 +48,8 @@ public class Message {
                 int smhPosition = bb.position();
 
                 SubMessageHeader smh = new SubMessageHeader(bb);
+                bb.setEndianess(smh.endiannessFlag());
+                
                 int smStart = bb.position();
 
                 SubMessage sm = null;
