@@ -76,11 +76,11 @@ public class Gap extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        gapStart.writeTo(buffer);
-        gapList.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        gapStart.writeTo(bb);
+        gapList.writeTo(bb);
     }
 
     public String toString() {

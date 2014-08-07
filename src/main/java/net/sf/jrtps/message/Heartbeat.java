@@ -33,10 +33,10 @@ public class Heartbeat extends SubMessage {
         header.flags |= 2; // set FinalFlag. No response needed.
     }
 
-    Heartbeat(SubMessageHeader smh, RTPSByteBuffer is) {
+    Heartbeat(SubMessageHeader smh, RTPSByteBuffer bb) {
         super(smh);
 
-        readMessage(is);
+        readMessage(bb);
     }
 
     /**
@@ -130,23 +130,23 @@ public class Heartbeat extends SubMessage {
         return count;
     }
 
-    private void readMessage(RTPSByteBuffer is) {
-        this.readerId = EntityId.readEntityId(is);
-        this.writerId = EntityId.readEntityId(is);
-        this.firstSN = new SequenceNumber(is);
-        this.lastSN = new SequenceNumber(is);
+    private void readMessage(RTPSByteBuffer bb) {
+        this.readerId = EntityId.readEntityId(bb);
+        this.writerId = EntityId.readEntityId(bb);
+        this.firstSN = new SequenceNumber(bb);
+        this.lastSN = new SequenceNumber(bb);
 
-        this.count = is.read_long();
+        this.count = bb.read_long();
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        firstSN.writeTo(buffer);
-        lastSN.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        firstSN.writeTo(bb);
+        lastSN.writeTo(bb);
 
-        buffer.write_long(count);
+        bb.write_long(count);
     }
 
     public String toString() {

@@ -51,13 +51,13 @@ public class Header {
     /**
      * Writer this Header to given RTPSByteBuffer.
      * 
-     * @param buffer
+     * @param bb
      */
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write(hdrStart);
-        version.writeTo(buffer);
-        vendorId.writeTo(buffer);
-        guidPrefix.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write(hdrStart);
+        version.writeTo(bb);
+        vendorId.writeTo(bb);
+        guidPrefix.writeTo(bb);
     }
 
     /**

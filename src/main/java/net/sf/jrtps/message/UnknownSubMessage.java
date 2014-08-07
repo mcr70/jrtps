@@ -25,7 +25,7 @@ public class UnknownSubMessage extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write(bytes);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write(bytes);
     }
 }

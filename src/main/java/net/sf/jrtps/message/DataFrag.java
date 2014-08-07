@@ -135,26 +135,26 @@ public class DataFrag extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write_short(extraFlags);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write_short(extraFlags);
 
         short octets_to_inline_qos = 4 + 4 + 8 + 4 + 2 + 2 + 4;
-        buffer.write_short(octets_to_inline_qos);
+        bb.write_short(octets_to_inline_qos);
 
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        writerSN.writeTo(buffer);
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        writerSN.writeTo(bb);
 
-        buffer.write_long(fragmentStartingNum);
-        buffer.write_short((short) fragmentsInSubmessage);
-        buffer.write_short((short) fragmentSize);
-        buffer.write_long(sampleSize);
+        bb.write_long(fragmentStartingNum);
+        bb.write_short((short) fragmentsInSubmessage);
+        bb.write_short((short) fragmentSize);
+        bb.write_long(sampleSize);
 
         if (inlineQosFlag()) {
-            writeParameterList(buffer);
+            writeParameterList(bb);
         }
 
-        buffer.write(serializedPayload); // TODO: check this
+        bb.write(serializedPayload); // TODO: check this
     }
 
     private void writeParameterList(RTPSByteBuffer buffer) {
