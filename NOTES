@@ -19,6 +19,24 @@ OSPL 6.3 specific notes
         1407234991.613463/      recv: malformed packet received from vendor 202.254 state parse:heartbeat <52545053 0201cafe 531
         90100 0e0f0a0c 0e0b0a0b @0x14 07020000 c7030000 c2030000 00000000 00000000 00000000 00000000 01000000> (note: maybe part
         ially bswap'd) {{7,2,0},3c7,3c2,0,0}    
+      
+      Added OSPLTest utility to track this issue. It parses OSPL dump and creates an RTPS Message out of it:
+        [52, 54, 50, 53] RTPS
+        [02, 01, ca, fe] [Version 2.1][Vendor 0xca, 0xfe (jRTPS)]
+        [93, 61, 02, 00] 
+        [0e, 0f, 0a, 0c]
+        [0e, 0b, 0a, 0b] [GuidPrefix: 93, 61, 02, 00, 0e, 0f, 0a, 0c, 0e, 0b, 0a, 0b]
+        [07, 02, 00, 00] [SubMessageHeader: HB(0x07), flags(0x02), length(0x00, 0x00)]
+        [c7, 04, 00, 00] [EntityId(reader): c7, 04, 00, 00]
+        [c2, 04, 00, 00] [EntityId(writer): c2, 04, 00, 00]
+        [00, 00, 00, 00] 
+        [00, 00, 00, 00] [SequenceNumber(firstSN): 00, 00, 00, 00, 00, 00, 00, 00]
+        [00, 00, 00, 00]
+        [00, 00, 00, 00] [SequenceNumber(lastSN):  00, 00, 00, 00, 00, 00, 00, 00]
+        [01, 00, 00, 00] [count: 01, 00, 00, 00]
+          RTPS, version 2.1, vendor -54,-2(jRTPS), GuidPrefix[-109,97,2,0,14,15,10,12,14,11,10,11], 
+             [Heartbeat:header[0x07,0x02,0] #16777216, [0xc7,0x04,0x00], 0x00, [0xc2,0x04,0x00], 0x00, 0, 0, F:true, L:false]
+      Seems to be a byte order problem...
 
 OSPL 5.5 specific notes
 =======================
