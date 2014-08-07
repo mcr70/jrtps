@@ -45,7 +45,6 @@ public class Message {
         while (bb.getBuffer().hasRemaining()) {
             try {
                 bb.align(4);
-                int smhPosition = bb.position();
 
                 SubMessageHeader smh = new SubMessageHeader(bb);
                 bb.setEndianess(smh.endiannessFlag());
