@@ -50,7 +50,6 @@ public class QualityOfService {
      * Constructor with default QosPolicies.
      */
     public QualityOfService() {
-        //createDefaultPolicies();
     }
 
     /**
@@ -209,6 +208,10 @@ public class QualityOfService {
         
         for (QosPolicy qp : policies.values()) {
             QosPolicy qpOther = other.policies.get(qp.getClass());
+            if (qpOther == null) {
+                qpOther = other.getDefaultFor(qp);
+            }
+            
             if (!qp.isCompatible(qpOther)) {
                 set.add(qpOther);
                 log.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
@@ -218,6 +221,75 @@ public class QualityOfService {
         return set;        
     }
     
+    private QosPolicy getDefaultFor(QosPolicy qp) {
+        // TODO: alternative is to place defaults in constructor
+        //       It causes default QoS to be sent over the network
+        if (qp instanceof QosDeadline) {
+            return QosDeadline.defaultDeadline();
+        }
+        else if (qp instanceof QosDestinationOrder) {
+            return QosDestinationOrder.defaultDestinationOrder();
+        }
+        else if (qp instanceof QosDurability) {
+            return QosDurability.defaultDurability();
+        }
+        else if (qp instanceof QosDurabilityService) {
+            return QosDurabilityService.defaultDurabilityService();
+        }
+        else if (qp instanceof QosGroupData) {
+            return QosGroupData.defaultGroupData();
+        }
+        else if (qp instanceof QosHistory) {
+            return QosHistory.defaultHistory();
+        }
+        else if (qp instanceof QosLatencyBudget) {
+            return QosLatencyBudget.defaultLatencyBudget();
+        }
+        else if (qp instanceof QosLifespan) {
+            return QosLifespan.defaultLifespan();
+        }
+        else if (qp instanceof QosLiveliness) {
+            return QosLiveliness.defaultLiveliness();
+        }
+        else if (qp instanceof QosOwnership) {
+            return QosOwnership.defaultOwnership();
+        }
+        else if (qp instanceof QosOwnershipStrength) {
+            return QosOwnershipStrength.defaultOwnershipStrength();
+        }
+        else if (qp instanceof QosPartition) {
+            return QosPartition.defaultPartition();
+        }
+        else if (qp instanceof QosPresentation) {
+            return QosPresentation.defaultPresentation();
+        }
+        else if (qp instanceof QosOwnershipStrength) {
+            return QosOwnershipStrength.defaultOwnershipStrength();
+        }
+        else if (qp instanceof QosReliability) {
+            return QosReliability.defaultReliability();
+        }
+        else if (qp instanceof QosResourceLimits) {
+            return QosResourceLimits.defaultResourceLimits();
+        }
+        else if (qp instanceof QosTopicData) {
+            return QosTopicData.defaultTopicData();
+        }
+        else if (qp instanceof QosTransportPriority) {
+            return QosTransportPriority.defaultTransportPriority();
+        }
+        else if (qp instanceof QosTimeBasedFilter) {
+            return QosTimeBasedFilter.defaultTimeBasedFilter();
+        }
+        else if (qp instanceof QosUserData) {
+            return QosUserData.defaultUserData();
+        }
+
+        log.warn("Unknown qos policy {}", qp);
+
+        return null;
+    }
+
     /**
      * Checks wheter or not this QualityOfService is compatible with the other.
      * @param other
