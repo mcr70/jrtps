@@ -46,8 +46,8 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
                     if (offered.isCompatibleWith(requested)) {
                         r.addMatchedWriter(pd);
                     } else {
-                        log.warn("Discovered writer had incompatible QoS with reader. {}, {}", pd, r.getRTPSReader()
-                                .getQualityOfService());
+                        log.warn("Discovered writer had incompatible QoS with reader. {}, {}", pd, 
+                                r.getRTPSReader().getQualityOfService());
                         r.inconsistentQoS(pd);
                     }
                 } else if (r.getRTPSReader().isMatchedWith(pd) && pdSample.isDisposed()) {

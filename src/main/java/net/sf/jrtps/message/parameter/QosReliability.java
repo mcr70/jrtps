@@ -66,7 +66,11 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
 
     @Override
     public boolean isCompatible(QosReliability other) {
-        return kind >= other.kind;
+        if (other != null) {
+            return kind >= other.kind;
+        }
+        
+        return false;
     }
 
     /**
