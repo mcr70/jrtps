@@ -36,7 +36,7 @@ OSPL 6.3 specific notes
         [01, 00, 00, 00] [count: 01, 00, 00, 00]
           RTPS, version 2.1, vendor -54,-2(jRTPS), GuidPrefix[-109,97,2,0,14,15,10,12,14,11,10,11], 
              [Heartbeat:header[0x07,0x02,0] #16777216, [0xc7,0x04,0x00], 0x00, [0xc2,0x04,0x00], 0x00, 0, 0, F:true, L:false]
-      Seems to be a byte order problem...
+      Seems to be a byte order problem... Changing SubMessageHeader.DEFAULT_ENDIANNESS_FLAG makes no difference in OSPL dump
 
 OSPL 5.5 specific notes
 =======================
