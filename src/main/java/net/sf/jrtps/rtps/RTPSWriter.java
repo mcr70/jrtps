@@ -425,13 +425,13 @@ public class RTPSWriter<T> extends Endpoint {
 
     /**
      * Checks, if this RTPSWriter is already matched with a RTPSReader
-     * represented by given SubscriptionData.
+     * represented by given Guid.
      * 
-     * @param readerData
+     * @param readerGuid
      * @return true if matched
      */
-    public boolean isMatchedWith(SubscriptionData readerData) {
-        return readerProxies.get(readerData.getBuiltinTopicKey()) != null;
+    public boolean isMatchedWith(Guid readerGuid) {
+        return readerProxies.get(readerGuid) != null;
     }
 
     boolean isReliable() {

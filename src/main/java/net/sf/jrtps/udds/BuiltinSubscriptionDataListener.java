@@ -42,12 +42,12 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 
             List<DataWriter<?>> writers = participant.getWritersForTopic(sd.getTopicName());
             for (DataWriter<?> w : writers) {
-                if (!w.getRTPSWriter().isMatchedWith(sd) && !sdSample.isDisposed()) {
+                if (!w.getRTPSWriter().isMatchedWith(sd.getBuiltinTopicKey()) && !sdSample.isDisposed()) {
                     // Not associated and sample is not a dispose -> do associate
                     QualityOfService requested = sd.getQualityOfService();
                     QualityOfService offered = w.getRTPSWriter().getQualityOfService();
-                    log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), sd
-                            .getBuiltinTopicKey().getEntityId());
+                    log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), 
+                            sd.getBuiltinTopicKey().getEntityId());
 
                     if (offered.isCompatibleWith(requested)) {
                         w.addMatchedReader(sd);
@@ -56,7 +56,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
                                 .getRTPSWriter().getQualityOfService());
                         w.inconsistentQoS(sd);
                     }
-                } else if (w.getRTPSWriter().isMatchedWith(sd) && sdSample.isDisposed()) {
+                } else if (w.getRTPSWriter().isMatchedWith(sd.getBuiltinTopicKey()) && sdSample.isDisposed()) {
                     // Associated and sample is dispose -> remove association
                     w.removeMatchedReader(sd);
                 }
