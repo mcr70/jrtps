@@ -22,6 +22,6 @@ public class Message {
     }
 
     public String toString() {
-        return from + ", " + subject + ", " + subject_id + ", " + text + ", " + count;
+        return "from: " + from + ", subject: " + subject + ", subject_id: " + subject_id + ", text: " + text + ", #" + count;
     }
 }

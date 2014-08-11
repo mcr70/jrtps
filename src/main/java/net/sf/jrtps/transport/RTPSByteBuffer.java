@@ -85,6 +85,7 @@ public class RTPSByteBuffer {
      * @return short
      */
     public int read_short() {
+        align(2);
         return buffer.getShort();
     }
 
@@ -94,7 +95,7 @@ public class RTPSByteBuffer {
      * @param a_short
      */
     public void write_short(int a_short) {
-        // align(2);
+        align(2);
         buffer.putShort((short) a_short);
     }
 
@@ -104,6 +105,7 @@ public class RTPSByteBuffer {
      * @return long
      */
     public int read_long() {
+        align(4);
         return buffer.getInt();
     }
 
@@ -113,7 +115,7 @@ public class RTPSByteBuffer {
      * @param a_long
      */
     public void write_long(int a_long) {
-        // align(4);
+        align(4);
         buffer.putInt(a_long);
     }
 

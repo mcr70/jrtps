@@ -9,6 +9,8 @@ public class MessageListener implements SampleListener<Message> {
 
     @Override
     public void onSamples(List<Sample<Message>> samples) {
-        System.out.println("Got samples: " + samples);
+        for (Sample sample : samples) {
+            System.out.println("Got sample: " + sample.getData());
+        }
     }
 }
