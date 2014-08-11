@@ -289,11 +289,17 @@ public class RTPSParticipant {
 
         Guid writerGuid = new Guid(sourceGuidPrefix, writerId);
         if (EntityId.UNKNOWN_ENTITY.equals(readerId)) {
+            StringBuffer sb = new StringBuffer();
+            log.debug("writer {} wants to talk to UNKNOWN_ENTITY", writerId);
             for (RTPSReader<?> r : readerEndpoints) {
+                log.debug("Check if reader {} is matched: {}", r.getEntityId(), r.isMatchedWith(writerGuid));
+                sb.append(r.getEntityId() + " ");
                 if (r.isMatchedWith(writerGuid)) {
                     return r; // TODO: we should return a List<RTPSReader>
                 }
             }
+
+            log.debug("Known reader entities: {}", sb);
         }
         
         log.warn("None of the readers were matched with writer {}", writerGuid);

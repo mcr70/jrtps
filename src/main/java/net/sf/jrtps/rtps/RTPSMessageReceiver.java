@@ -174,6 +174,7 @@ class RTPSMessageReceiver implements Runnable {
         }
     }
 
+
     private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
         RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), sourceGuidPrefix, ackNack.getReaderId());
 
