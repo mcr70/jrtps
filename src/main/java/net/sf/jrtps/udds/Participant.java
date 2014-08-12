@@ -340,7 +340,7 @@ public class Participant {
         UDDSHistoryCache<T> hc = new UDDSHistoryCache<>(eId, m, qos);
         RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, hc, qos);
 
-        DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);//new DataReader<T>(this, type, rtps_reader);
+        DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
         reader.setHistoryCache(hc);
         readers.add(reader);
 
@@ -432,7 +432,7 @@ public class Participant {
         UDDSHistoryCache<T> hc = new UDDSHistoryCache<>(eId, m, qos);
         RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
 
-        DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, hc);//new DataWriter<>(this, type, rtps_writer, hc);
+        DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, hc);
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
@@ -568,9 +568,6 @@ public class Participant {
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
         
-//        ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, ucLoc, mcLoc,
-//                meta_ucLoc, meta_mcLoc);
-
         ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
                 discoveryLocators, userdataLocators);
 
@@ -592,7 +589,6 @@ public class Participant {
     private void createSPDPResender(final Duration period, final DataWriter<ParticipantData> spdp_writer) {
 
         Runnable resendRunnable = new Runnable() {
-            //Guid guid = new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 
             @Override
             public void run() {
@@ -600,7 +596,6 @@ public class Participant {
                 ParticipantData pd = createSPDPParticipantData();
 
                 spdp_writer.write(pd);
-                //spdp_writer.getRTPSWriter().notifyReader(guid);
             }
         };
 
