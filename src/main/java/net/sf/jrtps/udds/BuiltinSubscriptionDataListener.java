@@ -41,6 +41,8 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
             }
 
             List<DataWriter<?>> writers = participant.getWritersForTopic(sd.getTopicName());
+            log.debug("considering {} writers for topic {}", writers.size(), sd.getTopicName());
+            
             for (DataWriter<?> w : writers) {
                 if (!w.getRTPSWriter().isMatchedWith(sd.getBuiltinTopicKey()) && !sdSample.isDisposed()) {
                     // Not associated and sample is not a dispose -> do associate
