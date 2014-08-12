@@ -18,6 +18,7 @@ import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.LocatorUDPv4_t;
@@ -120,7 +121,7 @@ class RTPSMessageReceiver implements Runnable {
                         r.createSample(msgId, sourceGuidPrefix, data, timestamp);
                     }
                     else {
-                        logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
+                        logger.warn("No Reader was matched with {} to handle Data message", new Guid(sourceGuidPrefix, data.getWriterId()));
                     }
                 } catch (IOException ioe) {
                     logger.warn("Failed to handle data", ioe);
