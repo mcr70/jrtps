@@ -9,9 +9,14 @@ Overview
  {{{./apidocs/net/sf/jrtps/udds/package-summary.html}udds}}, 
  that can be used to read/write data from/to DDS domain. There is also an ongoing effort, 
  {{{http://jdds.sourceforge.net}jDDS}}, that utilizes jRTPS as its transport.
- 
-* Interoperability
 
- jRTPS is known to be interoperable with {{{http://www.opendds.org/}OpenDDS 3.5}}.
- Within jRTPS sources, there are publisher and subscriber (<examples.opendds.messenger>)
- that are compatible with OpenDDS example <DevGuideExamples/DCPS/Messenger>
+* Release notes
+
+ Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
+
+ 0.9.3
+
+ * FIX: primitive types are aligned on their natural boundaries.
+
+ * First succesful interoperability test with OpenDDS. Both subscription
+   and publication tests work with OpenDDS Messenger example.

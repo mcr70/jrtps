@@ -135,9 +135,9 @@ public class RTPSByteBuffer {
      * 
      * @param a_longlong
      */
-    public void write_longlong(long a_long) {
+    public void write_longlong(long a_longlong) {
         align(8);
-        buffer.putLong(a_long);
+        buffer.putLong(a_longlong);
     }
 
     /**
