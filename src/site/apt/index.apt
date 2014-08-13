@@ -1,13 +1,17 @@
 Overview
 
+ <Note: Consider any documentation on this site prior version 1.0 to be subject to changes> 
+
  jRTPS is an implementation of {{{http://www.omg.org/spec/DDS-RTPS/2.1/}RTPS 2.1}} protocol by OMG.
  RTPS protocol is designed to provide interoperability between different 
- {{{http://www.omg.org/spec/DDS/}DDS}} implementations.
- 
- <Note: Consider any documentation on this site prior version 1.0 to be subject to changes> 
- 
+ {{{http://www.omg.org/spec/DDS/}DDS}} implementations. 
  jRTPS also provides a simplistic DDS alike programming interface, 
  {{{./apidocs/net/sf/jrtps/udds/package-summary.html}udds}}, 
  that can be used to read/write data from/to DDS domain. There is also an ongoing effort, 
  {{{http://jdds.sourceforge.net}jDDS}}, that utilizes jRTPS as its transport.
  
+* Interoperability
+
+ jRTPS is known to be interoperable with {{{http://www.opendds.org/}OpenDDS 3.5}}.
+ Within jRTPS sources, there are publisher and subscriber (<examples.opendds.messenger>)
+ that are compatible with OpenDDS example <DevGuideExamples/DCPS/Messenger>
