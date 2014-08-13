@@ -6,16 +6,15 @@
 		</links>
 
 		<menu name="Overview">
-            <item name="Overview" href="index.html" />
-			<item name="Getting started" href="usage.html" />
+            <item name="Overview" href="overview.html" />
             <item name="Quality of Service" href="qos.html" />
-       <!--      <item name="Compatibility" href="compatibility.html" /> -->
-            <item name="ReleaseNotes" href="ReleaseNotes.html" />
+            <item name="Compliance" href="compliance.html" />
 		</menu>
 
 		<!-- <menu ref="reports"/> -->
 
 		<menu name="Development">
+            <item name="Getting started" href="usage.html" />
             <item name="Examples" href="examples.html" />
             <item name="Configuration" href="configuration.html" />
             <item name="Extending jRTPS" href="extending.html" />
