@@ -71,8 +71,8 @@ public class InfoReplyIp4 extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        unicastLocator.writeTo(buffer);
-        multicastLocator.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        unicastLocator.writeTo(bb);
+        multicastLocator.writeTo(bb);
     }
 }

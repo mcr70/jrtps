@@ -98,19 +98,19 @@ public class AckNack extends SubMessage {
         return count;
     }
 
-    private void readMessage(RTPSByteBuffer is) {
-        this.readerId = EntityId.readEntityId(is);
-        this.writerId = EntityId.readEntityId(is);
-        this.readerSNState = new SequenceNumberSet(is);
-        this.count = is.read_long();
+    private void readMessage(RTPSByteBuffer bb) {
+        this.readerId = EntityId.readEntityId(bb);
+        this.writerId = EntityId.readEntityId(bb);
+        this.readerSNState = new SequenceNumberSet(bb);
+        this.count = bb.read_long();
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        readerSNState.writeTo(buffer);
-        buffer.write_long(count);
+    public void writeTo(RTPSByteBuffer bb) {
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        readerSNState.writeTo(bb);
+        bb.write_long(count);
     }
 
     public String toString() {

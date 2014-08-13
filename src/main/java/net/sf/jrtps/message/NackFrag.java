@@ -25,10 +25,10 @@ public class NackFrag extends SubMessage {
     private SequenceNumberSet fragmentNumberState;
     private int count;
 
-    public NackFrag(SubMessageHeader smh, RTPSByteBuffer is) {
+    public NackFrag(SubMessageHeader smh, RTPSByteBuffer bb) {
         super(smh);
 
-        readMessage(is);
+        readMessage(bb);
     }
 
     /**
@@ -82,12 +82,12 @@ public class NackFrag extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        writerSN.writeTo(buffer);
-        fragmentNumberState.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        writerSN.writeTo(bb);
+        fragmentNumberState.writeTo(bb);
 
-        buffer.write_long(count);
+        bb.write_long(count);
     }
 }

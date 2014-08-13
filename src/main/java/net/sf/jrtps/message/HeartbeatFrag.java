@@ -83,12 +83,12 @@ public class HeartbeatFrag extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        writerSN.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        writerSN.writeTo(bb);
 
-        buffer.write_long(lastFragmentNum);
-        buffer.write_long(count);
+        bb.write_long(lastFragmentNum);
+        bb.write_long(count);
     }
 }

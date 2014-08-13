@@ -2,7 +2,6 @@ package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -259,10 +258,11 @@ public class RTPSParticipant {
      * made for SEDP_BUILTIN_PUBLICATIONS_READER.
      * 
      * @param readerId
+     * @param sourceGuidPrefix 
      * @param writerId
      * @return RTPSReader
      */
-    RTPSReader<?> getReader(EntityId readerId, EntityId writerId) {
+    RTPSReader<?> getReader(EntityId readerId, GuidPrefix sourceGuidPrefix, EntityId writerId) {
         if (readerId != null && !EntityId.UNKNOWN_ENTITY.equals(readerId)) {
             return getReader(readerId);
         }
@@ -287,27 +287,28 @@ public class RTPSParticipant {
             return getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
         }
 
-        return getReaderWithEntityKey(writerId.getEntityKey());
-    }
-
-    private RTPSReader<?> getReaderWithEntityKey(byte[] entityKey) {
-        log.debug("Trying to find reader with entityKey {}", entityKey);
-        StringBuffer sb = new StringBuffer();
-        for (RTPSReader<?> r : readerEndpoints) {
-            if (Arrays.equals(entityKey, r.getEntityId().getEntityKey())) {
-                return r;
-            }
+        Guid writerGuid = new Guid(sourceGuidPrefix, writerId);
+        if (EntityId.UNKNOWN_ENTITY.equals(readerId)) {
+            StringBuffer sb = new StringBuffer();
+            log.debug("writer {} wants to talk to UNKNOWN_ENTITY", writerId);
             
-            sb.append(r.getEntityId());
-            sb.append(" ");
-        }
+            for (RTPSReader<?> r : readerEndpoints) {
+                log.trace("Check if reader {} is matched: {}", r.getEntityId(), r.isMatchedWith(writerGuid));
+                sb.append(r.getEntityId() + " ");
+                if (r.isMatchedWith(writerGuid)) {
+                    log.debug("Found reader {} that is matched with {}", r.getEntityId(), writerGuid);
+                    return r; // TODO: we should return a List<RTPSReader>
+                }
+            }
 
-        log.debug("Failed to find reader with entityKey {} from {}", Arrays.toString(entityKey), sb);
+            log.trace("Known reader entities: {}", sb);
+        }
         
         return null;
     }
 
-    RTPSWriter<?> getWriter(EntityId writerId, EntityId readerId) {
+    
+    RTPSWriter<?> getWriter(EntityId writerId, GuidPrefix sourceGuidPrefix, EntityId readerId) {
         if (writerId != null && !EntityId.UNKNOWN_ENTITY.equals(writerId)) {
             return getWriter(writerId);
         }
@@ -332,7 +333,17 @@ public class RTPSParticipant {
             return getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
         }
 
-        log.warn("Failed to find Writer for writer {} or matching reader {}", writerId, readerId);
+        Guid readerGuid = new Guid(sourceGuidPrefix, readerId);
+        if (EntityId.UNKNOWN_ENTITY.equals(writerId)) {
+            for (RTPSWriter<?> writer : writerEndpoints) {
+                if (writer.isMatchedWith(readerGuid)) {
+                    return writer; // TODO: we should return a List<RTPSWriter>
+                }
+            }
+        }
+        
+        log.warn("None of the writers were matched with reader {}", readerGuid);        
+        
         return null;
     }
 

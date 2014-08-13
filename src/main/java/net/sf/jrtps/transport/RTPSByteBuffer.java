@@ -9,10 +9,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * This class is used to marshall and unmarshall data.
+ * This class is used to marshal and unmarshal data to underlying buffer.
+ * Each read and write operation is aligned on their natural boundaries, as specified in
+ * formal-02-06-51.pdf: ch. 15.3 CDR Transfer syntax.
  * 
  * @author mcr70
- * 
  */
 public class RTPSByteBuffer {
     private ByteBuffer buffer;
@@ -62,7 +63,7 @@ public class RTPSByteBuffer {
     }
 
     /**
-     * Reads an octet from underlying buffer.
+     * Reads an octet (1 byte) from underlying buffer.
      * 
      * @return octet
      */
@@ -71,7 +72,7 @@ public class RTPSByteBuffer {
     }
 
     /**
-     * Writes an octet to underlying buffer.
+     * Writes an octet (1 byte) to underlying buffer.
      * 
      * @param an_octet
      */
@@ -80,41 +81,63 @@ public class RTPSByteBuffer {
     }
 
     /**
-     * Reads a short from underlying buffer
+     * Reads a short (2 bytes) from underlying buffer
      * 
-     * @return short
+     * @return a_short
      */
     public int read_short() {
+        align(2);
         return buffer.getShort();
     }
 
     /**
-     * Writes a short to underlying buffer
+     * Writes a short (2 bytes) to underlying buffer
      * 
      * @param a_short
      */
     public void write_short(int a_short) {
-        // align(2);
+        align(2);
         buffer.putShort((short) a_short);
     }
 
     /**
-     * Reads a long from underlying buffer
+     * Reads a long (4 bytes) from underlying buffer
      * 
      * @return long
      */
     public int read_long() {
+        align(4);
         return buffer.getInt();
     }
 
     /**
-     * Writes a long to underlying buffer
+     * Writes a long (4 bytes) to underlying buffer
      * 
      * @param a_long
      */
     public void write_long(int a_long) {
-        // align(4);
+        align(4);
         buffer.putInt(a_long);
+    }
+
+    /**
+     * Reads a longlong (8 bytes) from underlying buffer
+     * 
+     * @return a_longlong
+     */
+    public long read_longlong() {
+        align(8);
+        return buffer.getLong();
+    }
+
+    /**
+     * Writes a longlong (8 bytes) to underlying buffer
+     * 
+     * @param a_longlong
+     */
+    public void write_longlong(long a_longlong) {
+        align(8);
+        buffer.putLong(a_longlong);
     }
 
     /**
@@ -150,16 +173,16 @@ public class RTPSByteBuffer {
      * @return String
      */
     public String read_string() {
-        // @see 9.3.2.7 Strings and Wide Strings, CORBA 3.2 spec,
-        // formal/2011-11-02
-        // TODO: character encoding
-
         int length = read_long() - 1; // ignore trailing NUL character
         byte[] bytes = new byte[length];
         read(bytes);
         read_octet(); // Read terminating NUL character. ignore it.
 
-        return new String(bytes);
+        try {
+            return new String(bytes, "ISO-8859-1");
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -168,12 +191,12 @@ public class RTPSByteBuffer {
      * @param s
      */
     public void write_string(String s) {
-        // @see 9.3.2.7 Strings and Wide Strings, CORBA 3.2 spec,
-        // formal/2011-11-02
-        // TODO: character encoding
-
         write_long(s.length() + 1); // +1 for adding terminating NUL character
-        write(s.getBytes());
+        try {
+            write(s.getBytes("ISO-8859-1"));
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
         write_octet((byte) 0); // terminating NUL character
     }
 
@@ -183,6 +206,7 @@ public class RTPSByteBuffer {
      * @return an int
      */
     public int readInt() {
+        align(4);
         return buffer.getInt();
     }
     
@@ -191,6 +215,7 @@ public class RTPSByteBuffer {
      * @param i
      */
     public void writeInt(int i) {
+        align(4);
         buffer.putInt(i);
     }
     
@@ -199,6 +224,7 @@ public class RTPSByteBuffer {
      * @return a short
      */
     public short readShort() {
+        align(2);
         return buffer.getShort();
     }
     
@@ -207,6 +233,7 @@ public class RTPSByteBuffer {
      * @param s
      */
     public void writeShort(short s) {
+        align(2);
         buffer.putShort(s);
     }
     
@@ -215,6 +242,7 @@ public class RTPSByteBuffer {
      * @return a long
      */
     public long readLong() {
+        align(8);
         return buffer.getLong();
     }
     
@@ -223,6 +251,7 @@ public class RTPSByteBuffer {
      * @param l
      */
     public void writeLong(long l) {
+        align(8);
         buffer.putLong(l);
     }
 
@@ -231,6 +260,7 @@ public class RTPSByteBuffer {
      * @return a float
      */
     public float readFloat() {
+        align(4);
         return buffer.getFloat();
     }
     
@@ -239,6 +269,7 @@ public class RTPSByteBuffer {
      * @param f
      */
     public void writeFloat(float f) {
+        align(4);
         buffer.putFloat(f);
     }
     
@@ -247,6 +278,7 @@ public class RTPSByteBuffer {
      * @return a double
      */
     public double readDouble() {
+        align(8);
         return buffer.getDouble();
     }
     
@@ -255,6 +287,7 @@ public class RTPSByteBuffer {
      * @param d
      */
     public void writeDouble(double d) {
+        align(8);
         buffer.putDouble(d);
     }
     

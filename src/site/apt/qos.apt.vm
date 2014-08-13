@@ -9,9 +9,10 @@ Quality of Service
 * Reliability
 
  Reliability QoS determines how samples are communicated from writers to readers. RELIABLE kind
- causes RTPS entities to exchange <HeartBeat> and <AckNack> messages. I.e. readers will report
- back to writers what samples they have received, and what are still missing. By using these messages,
- writers can eventually communicate all the changes in correct order to readers.
+ causes RTPS entities to exchange <HeartBeat> and <AckNack> messages. I.e. writers advertise 
+ what samples are available and readers will report back what samples they have received, 
+ and what are still missing. By using these messages, writers can eventually communicate all 
+ the changes in correct order to readers.
  
  When BEST_EFFORT kind is used, writers just sends samples to readers. That is the only promise
  writer makes about delivery of messages. Samples might be lost during transmission, or reader

@@ -57,8 +57,8 @@ public class InfoDestination extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        guidPrefix.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        guidPrefix.writeTo(bb);
     }
 
     public String toString() {

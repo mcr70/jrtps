@@ -1,3 +1,8 @@
+0.9.3
+    - FIX: primitive types are aligned on their natural boundaries.
+    - First succesful interoperability test with OpenDDS. Both subscription
+      and publication tests work with OpenDDS Messenger example.
+    
 0.9.2
     - FIX: Use parameter PID_BUILTIN_TOPIC_KEY(0x005a) during discovery
       instead of KeyHash(0x0070)

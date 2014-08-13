@@ -210,23 +210,23 @@ public class Data extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write_short(extraFlags);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write_short(extraFlags);
 
         short octets_to_inline_qos = 4 + 4 + 8;// EntityId.LENGTH + EntityId.LENGTH + SequenceNumber.LENGTH;
-        buffer.write_short(octets_to_inline_qos);
+        bb.write_short(octets_to_inline_qos);
 
-        readerId.writeTo(buffer);
-        writerId.writeTo(buffer);
-        writerSN.writeTo(buffer);
+        readerId.writeTo(bb);
+        writerId.writeTo(bb);
+        writerSN.writeTo(bb);
 
         if (inlineQosFlag()) {
-            inlineQosParams.writeTo(buffer);
+            inlineQosParams.writeTo(bb);
         }
 
         if (dataFlag() || keyFlag()) {
-            buffer.align(4);
-            buffer.write(dataEncapsulation.getSerializedPayload());
+            bb.align(4);
+            bb.write(dataEncapsulation.getSerializedPayload());
         }
     }
 

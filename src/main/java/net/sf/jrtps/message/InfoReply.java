@@ -86,16 +86,16 @@ public class InfoReply extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write_long(unicastLocatorList.size());
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write_long(unicastLocatorList.size());
         for (Locator loc : unicastLocatorList) {
-            loc.writeTo(buffer);
+            loc.writeTo(bb);
         }
 
         if (multicastFlag()) {
-            buffer.write_long(multicastLocatorList.size());
+            bb.write_long(multicastLocatorList.size());
             for (Locator loc : multicastLocatorList) {
-                loc.writeTo(buffer);
+                loc.writeTo(bb);
             }
         }
     }

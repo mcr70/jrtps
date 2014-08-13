@@ -18,6 +18,7 @@ import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.LocatorUDPv4_t;
@@ -111,7 +112,7 @@ class RTPSMessageReceiver implements Runnable {
 
                 try {
                     Data data = (Data) subMsg;
-                    RTPSReader<?> r = participant.getReader(data.getReaderId(), data.getWriterId());
+                    RTPSReader<?> r = participant.getReader(data.getReaderId(), sourceGuidPrefix, data.getWriterId());
                     
                     if (r != null) {
                         if (dataReceivers.add(r)) {
@@ -120,7 +121,7 @@ class RTPSMessageReceiver implements Runnable {
                         r.createSample(msgId, sourceGuidPrefix, data, timestamp);
                     }
                     else {
-                        logger.warn("No Reader({}) to handle Data from {}", data.getReaderId(), data.getWriterId());
+                        logger.warn("No Reader was matched with {} to handle Data message", new Guid(sourceGuidPrefix, data.getWriterId()));
                     }
                 } catch (IOException ioe) {
                     logger.warn("Failed to handle data", ioe);
@@ -174,8 +175,9 @@ class RTPSMessageReceiver implements Runnable {
         }
     }
 
+
     private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
-        RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), ackNack.getReaderId());
+        RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), sourceGuidPrefix, ackNack.getReaderId());
 
         if (writer != null) {
             writer.onAckNack(sourceGuidPrefix, ackNack);
@@ -185,15 +187,15 @@ class RTPSMessageReceiver implements Runnable {
     }
 
     private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
-        RTPSReader<?> reader = participant.getReader(gap.getReaderId(), gap.getWriterId());
+        RTPSReader<?> reader = participant.getReader(gap.getReaderId(), sourceGuidPrefix, gap.getWriterId());
         reader.handleGap(sourceGuidPrefix, gap);
     }
 
-    private void handleHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {
-        RTPSReader<?> reader = participant.getReader(hb.getReaderId(), hb.getWriterId());
+    private void handleHeartbeat(GuidPrefix sourceGuidPrefix, Heartbeat hb) {
+        RTPSReader<?> reader = participant.getReader(hb.getReaderId(), sourceGuidPrefix, hb.getWriterId());
 
         if (reader != null) {
-            reader.onHeartbeat(senderGuidPrefix, hb);
+            reader.onHeartbeat(sourceGuidPrefix, hb);
         } else {
             logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
         }
