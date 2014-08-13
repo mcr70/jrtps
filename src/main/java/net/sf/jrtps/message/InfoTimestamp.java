@@ -23,10 +23,10 @@ public class InfoTimestamp extends SubMessage {
      */
     private Time timestamp;
 
-    public InfoTimestamp(SubMessageHeader smh, RTPSByteBuffer is) {
+    public InfoTimestamp(SubMessageHeader smh, RTPSByteBuffer bb) {
         super(smh);
 
-        readMessage(is);
+        readMessage(bb);
     }
 
     public InfoTimestamp(long systemCurrentMillis) {
@@ -50,9 +50,9 @@ public class InfoTimestamp extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
+    public void writeTo(RTPSByteBuffer bb) {
         if (!invalidateFlag()) {
-            timestamp.writeTo(buffer);
+            timestamp.writeTo(bb);
         }
     }
 

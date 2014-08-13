@@ -87,7 +87,7 @@ public abstract class EntityId {
     }
 
     public int hashCode() {
-        return Arrays.hashCode(entityKey) + entityKind;
+        return Arrays.hashCode(getBytes());
     }
 
     /**
@@ -117,6 +117,50 @@ public abstract class EntityId {
         return (entityKind & 0xc0) == 0x40; // @see 9.3.1.2
     }
 
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write(entityKey);
+        bb.write_octet(entityKind);
+    }
+
+    /**
+     * Gets this EntityId as a byte array. First 3 bytes are key, and last byte
+     * is entity kind.
+     * 
+     * @return a byte array of length 4
+     */
+    public byte[] getBytes() {
+        byte[] bytes = new byte[4];
+        System.arraycopy(this.entityKey, 0, bytes, 0, 3);
+        bytes[3] = entityKind;
+
+        return bytes;
+    }
+
+    /**
+     * Gets endpoint set id. Endpoint set is used with SPDP ParticipantData to
+     * tell remote participant of the builtin endpoints available. Endpoint set
+     * id is a bit representing a known entityId
+     * 
+     * @return endpoint set id.
+     */
+    public abstract int getEndpointSetId();
+
+    /**
+     * Gets the entityKey of this EntityId
+     * @return an array of length 3
+     */
+    public byte[] getEntityKey() {
+        return entityKey;
+    }
+    
+    /**
+     * Gets the entityKind of this EntityId
+     * @return entityKind
+     */
+    public byte getEntityKind() {
+        return entityKind;
+    }
+
     /**
      * Reads EntityId from given byte[] and kind.
      * 
@@ -124,7 +168,7 @@ public abstract class EntityId {
      * @param kind
      * @return EntityId
      */
-    public static EntityId readEntityId(byte[] eKey, int kind) {
+    public static EntityId createEntityId(byte[] eKey, int kind) {
         EntityId entityId = null;
 
         int key = (eKey[0] << 24) | (eKey[1] << 16) | (eKey[2] << 8) | (kind & 0xff);
@@ -188,15 +232,15 @@ public abstract class EntityId {
     /**
      * Reads an EntityId from RTPSByteBuffer.
      * 
-     * @param is
+     * @param bb
      * @return EntityId
      */
-    public static EntityId readEntityId(RTPSByteBuffer is) {
+    public static EntityId readEntityId(RTPSByteBuffer bb) {
         byte[] eKey = new byte[3];
-        is.read(eKey);
-        int kind = is.read_octet() & 0xff;
+        bb.read(eKey);
+        int kind = bb.read_octet() & 0xff;
 
-        return readEntityId(eKey, kind);
+        return createEntityId(eKey, kind);
     }
 
     /**
@@ -472,6 +516,7 @@ public abstract class EntityId {
         }
     }
 
+
     public String toString() {
         if (isBuiltinEntity() || this instanceof UnknownEntity) {
             return getClass().getSimpleName();
@@ -484,49 +529,5 @@ public abstract class EntityId {
 
             return sb.toString();
         }
-    }
-
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write(entityKey);
-        buffer.write_octet(entityKind);
-    }
-
-    /**
-     * Gets this EntityId as a byte array. First 3 bytes are key, and last byte
-     * is entity kind.
-     * 
-     * @return a byte array of length 4
-     */
-    public byte[] getBytes() {
-        byte[] bytes = new byte[4];
-        System.arraycopy(this.entityKey, 0, bytes, 0, 3);
-        bytes[3] = entityKind;
-
-        return bytes;
-    }
-
-    /**
-     * Gets endpoint set id. Endpoint set is used with SPDP ParticipantData to
-     * tell remote participant of the builtin endpoints available. Endpoint set
-     * id is a bit representing a known entityId
-     * 
-     * @return endpoint set id.
-     */
-    public abstract int getEndpointSetId();
-
-    /**
-     * Gets the entityKey of this EntityId
-     * @return an array of length 3
-     */
-    public byte[] getEntityKey() {
-        return entityKey;
-    }
-    
-    /**
-     * Gets the entityKind of this EntityId
-     * @return entityKind
-     */
-    public byte getEntityKind() {
-        return entityKind;
     }
 }

@@ -5,7 +5,7 @@ import net.sf.jrtps.udds.Participant;
 
 public class Publisher {
     public static void main(String[] args) throws Exception {
-        Participant p = new Participant(0, 2); // domain 0, participant 2
+        Participant p = new Participant(0); // domain 0
 
         p.setMarshaller(Msg.class, new MsgMarshaller());
 

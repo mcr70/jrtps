@@ -1,0 +1,28 @@
+Compliance
+
+ This page tries to explain what is implemented and what is not implemented.
+
+* Submessages
+
+ Following submessages are implemented and <should> work as expected: 
+ <ACKNACK, DATA, HEARTBEAT, INFOSOURCE, INFOTIMESTAMP, GAP>. In normal case, 
+ RTPS entities use these submessages to exchange data with each other.
+ 
+ Following submessages are ignored: <INFODESTINATION, INFOREPLY, INFOREPLYIP4>. These
+ messages are used when relaying data, which is not implemented by jRTPS/udds. 
+ 
+ Following submessagse are not handled in any way: <DATAFRAG, HEARTBEATFRAG, NACKFRAG>
+ These messages are used with large data. I.e. Data messages that are bigger than 64k,
+ which is the maximum size (minus some header bytes) of Data to be sent over the network.
+ 
+
+* Interoperability
+
+ Even if interoperability is not about being compliant to anything, if two independent
+ implementations can communicate with each other, there is at least some level of 
+ compliance to specification. With both implementations.
+ 
+ jRTPS is known to be interoperable with {{{http://www.opendds.org/}OpenDDS 3.5}}.
+ Within jRTPS sources, there are publisher and subscriber (<examples.opendds.messenger>)
+ that are compatible with OpenDDS example <DevGuideExamples/DCPS/Messenger>
+ 

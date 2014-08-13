@@ -1,8 +1,0 @@
- Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
-
- 0.9.2
-
-    * FIX: Use parameter PID_BUILTIN_TOPIC_KEY(0x005a) during discovery
-      instead of KeyHash(0x0070)
-    
-	* First successful interoperability tests with OpenSplice 6.3

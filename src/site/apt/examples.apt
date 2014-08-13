@@ -2,7 +2,7 @@ udds examples
 
  {{{./apidocs/net/sf/jrtps/udds/package-summary.html}udds}} provides a minimalistic DDS api, 
  that can be used to read and write data into DDS domain.
- 
+
 
 * Creating a Participant
  

@@ -28,10 +28,10 @@ public class InfoSource extends SubMessage {
         this.guidPrefix = guidPrefix;
     }
 
-    InfoSource(SubMessageHeader smh, RTPSByteBuffer is) {
+    InfoSource(SubMessageHeader smh, RTPSByteBuffer bb) {
         super(smh);
 
-        readMessage(is);
+        readMessage(bb);
     }
 
     /**
@@ -66,11 +66,11 @@ public class InfoSource extends SubMessage {
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        buffer.write_long(0);
-        protocolVersion.writeTo(buffer);
-        vendorId.writeTo(buffer);
-        guidPrefix.writeTo(buffer);
+    public void writeTo(RTPSByteBuffer bb) {
+        bb.write_long(0);
+        protocolVersion.writeTo(bb);
+        vendorId.writeTo(bb);
+        guidPrefix.writeTo(bb);
     }
 
     public String toString() {

@@ -42,7 +42,7 @@ public class Guid {
         System.arraycopy(bytes, 12, entityBytes, 0, 3);
         byte entityKind = bytes[15];
 
-        this.entityId = EntityId.readEntityId(entityBytes, entityKind);
+        this.entityId = EntityId.createEntityId(entityBytes, entityKind);
     }
 
     @Override
