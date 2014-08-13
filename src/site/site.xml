@@ -6,7 +6,7 @@
 		</links>
 
 		<menu name="Overview">
-            <item name="Overview" href="overview.html" />
+            <item name="Overview" href="index.html" />
             <item name="Quality of Service" href="qos.html" />
             <item name="Compliance" href="compliance.html" />
 		</menu>
