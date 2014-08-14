@@ -1,6 +1,7 @@
 Compliance
 
- This page tries to explain what is implemented and what is not implemented.
+ This page tries to explain what is implemented and what is not.
+
 
 * Submessages
 
@@ -14,7 +15,25 @@ Compliance
  Following submessagse are not handled in any way: <DATAFRAG, HEARTBEATFRAG, NACKFRAG>
  These messages are used with large data. I.e. Data messages that are bigger than 64k,
  which is the maximum size (minus some header bytes) of Data to be sent over the network.
+ Data fragmentation is an optional, as explained in chapter 8.4.14 of the RTPS v2.1
+ specification.
+
+
+* Writer Liveliness protocol
+
+ From the writer point of view, all kinds of Liveliness QoS are supported; 
+ <AUTOMATIC, MANUAL_BY_PARTICIPANT, MANUAL_BY_TOPIC>. From the reader point of view,
+ if writers liveliness is lost, application is not aware of this fact.
  
+
+* Coherent sets
+
+ DDS specification specifies coherent sets for access scope <TOPIC> and <GROUP>. 
+ For the access scope <TOPIC>, udds provides means to write collections coherently.
+ For access scope <GROUP>, RTPS specification says that 
+ <"the extensions required for access scope GROUP are not yet defined">, and thus
+ jRTPS does not support access scope <GROUP>. 
+
 
 * Interoperability
 
