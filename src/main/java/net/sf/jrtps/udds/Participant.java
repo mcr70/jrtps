@@ -106,9 +106,10 @@ public class Participant {
     }
 
     /**
-     * Create a Participant with given domainId and participantId -1.
+     * Create a Participant with given domainId and participantId.
      * 
      * @param domainId domainId
+     * @param participantId
      */
     public Participant(int domainId, int participantId) {
         this(domainId, participantId, null, null);
