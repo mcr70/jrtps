@@ -1,7 +1,11 @@
 Compliance
 
- This page tries to explain what is implemented and what is not.
-
+ This page tries to explain what is implemented and what is not. This server two purposes;
+ One is for the users of jRTPS, they should be able to see what to expect. Other is
+ for developers, they should be able to see what needs to be implemented. 
+ 
+ Idea is not to provide very detailed view of the implementation status.
+ 
 
 * Submessages
 
@@ -26,7 +30,7 @@ Compliance
  if writers liveliness is lost, application is not aware of this fact.
  
 
-* Coherent sets
+* Coherent sets (ch. 8.7.5)
 
  DDS specification specifies coherent sets for access scope <TOPIC> and <GROUP>. 
  For the access scope <TOPIC>, udds provides means to write collections coherently.
@@ -35,13 +39,32 @@ Compliance
  jRTPS does not support access scope <GROUP>. 
 
 
+* Directed write (ch. 8.7.6)
+
+ During reception of Data submessage, jRTPS reader checks if it contains a directed write
+ inline QoS parameter (0x0057). If it does, only readers with matching Guid gets the Data.
+ Other readers just ignore the sample, but update their book keeping of the sequence number.
+ 
+ jRTPS writers does not support directed writes.
+ 
+ 
+* Property lists (ch. 8.7.7)
+
+ PropertyLists (0x0059) are not handled in any way by jRTPS.
+
+
+* Original writer info (ch. 8.7.8) 
+
+ OriginalWriterInfo parameter (0x0061) is read, but ignored
+
+
 * Interoperability
 
- Even if interoperability is not about being compliant to anything, if two independent
+ Even while interoperability is not about being compliant to anything, if two independent
  implementations can communicate with each other, there is at least some level of 
  compliance to specification. With both implementations.
  
  jRTPS is known to be interoperable with {{{http://www.opendds.org/}OpenDDS 3.5}}.
  Within jRTPS sources, there are publisher and subscriber (<examples.opendds.messenger>)
- that are compatible with OpenDDS example <DevGuideExamples/DCPS/Messenger>
+ that talk to OpenDDS example <DevGuideExamples/DCPS/Messenger> counterparts.
  

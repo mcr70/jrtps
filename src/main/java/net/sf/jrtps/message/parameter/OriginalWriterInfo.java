@@ -23,6 +23,10 @@ public class OriginalWriterInfo extends Parameter implements InlineQoS {
         this.originalWriterQos = originalWriterQos;
     }
     
+    OriginalWriterInfo() {
+        super(ParameterEnum.PID_ORIGINAL_WRITER_INFO);
+    }
+    
     /**
      * Gets the Guid of the writer that originally wrote the Data sample this parameter is associated with.
      * @return Guid
@@ -45,10 +49,6 @@ public class OriginalWriterInfo extends Parameter implements InlineQoS {
      */
     public ParameterList getOriginalWriterQoS() {
         return originalWriterQos;
-    }
-    
-    OriginalWriterInfo() {
-        super(ParameterEnum.PID_ORIGINAL_WRITER_INFO);
     }
 
     @Override
