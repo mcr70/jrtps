@@ -30,32 +30,25 @@ Compliance
  if writers liveliness is lost, application is not aware of this fact.
  
 
-* Coherent sets (ch. 8.7.5)
+* Inline QoS parameters
 
- DDS specification specifies coherent sets for access scope <TOPIC> and <GROUP>. 
- For the access scope <TOPIC>, udds provides means to write collections coherently.
+ If reader requests inline QoS to be sent with every Data submessages, jRTPS writer will do just that.
+ This is determined during discovery; if subscription data received contains 
+ <PID_EXPECTS_INLINE_QOS(0x0043)>, reader is marked as needing inline QoS to be sent.
+
+ In Addition, following inlineable parameters are recognised and handled by jRTPS: 
+ <PID_COHERENT_SET(0x0056), PID_DIRECTED_WRITE(0x0057), PID_KEYHASH(0x0070), PID_STATUS_INFO(0x0071)>.
+ 
+ For the Coherent sets, udds supports writing of collections coherently.
  For access scope <GROUP>, RTPS specification says that 
  <"the extensions required for access scope GROUP are not yet defined">, and thus
  jRTPS does not support access scope <GROUP>. 
-
-
-* Directed write (ch. 8.7.6)
-
- During reception of Data submessage, jRTPS reader checks if it contains a directed write
- inline QoS parameter (0x0057). If it does, only readers with matching Guid gets the Data.
- Other readers just ignore the sample, but update their book keeping of the sequence number.
  
- jRTPS writers does not support directed writes.
+ jRTPS writers does not support directed writes, but readers handle them correctly(not tested).
  
+ Following inlineable parameters are not handled by jRTPS: 
+ <PID_CONTENT_FILTER_INFO(0x0055), PID_PROPERTY_LIST(0x0059), PID_ORIGINAL_WRITER_INFO(0x0061)>
  
-* Property lists (ch. 8.7.7)
-
- PropertyLists (0x0059) are not handled in any way by jRTPS.
-
-
-* Original writer info (ch. 8.7.8) 
-
- OriginalWriterInfo parameter (0x0061) is read, but ignored
 
 
 * Interoperability
