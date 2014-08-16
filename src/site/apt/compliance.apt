@@ -3,7 +3,6 @@ Compliance
  This page tries to explain what is implemented and what is not. This server two purposes;
  One is for the users of jRTPS, they should be able to see what to expect. Other is
  for developers, they should be able to see what needs to be implemented. 
- 
  Idea is not to provide very detailed view of the implementation status.
  
 
@@ -16,9 +15,9 @@ Compliance
  Following submessages are ignored: <INFODESTINATION, INFOREPLY, INFOREPLYIP4>. These
  messages are used when relaying data, which is not implemented by jRTPS/udds. 
  
- Following submessagse are not handled in any way: <DATAFRAG, HEARTBEATFRAG, NACKFRAG>
+ Following submessages are not handled in any way: <DATAFRAG, HEARTBEATFRAG, NACKFRAG>
  These messages are used with large data. I.e. Data messages that are bigger than 64k,
- which is the maximum size (minus some header bytes) of Data to be sent over the network.
+ which is the maximum size of Data to be sent over the network.
  Data fragmentation is an optional, as explained in chapter 8.4.14 of the RTPS v2.1
  specification.
 
