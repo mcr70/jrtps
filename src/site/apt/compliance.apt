@@ -41,9 +41,8 @@ Compliance
  For the Coherent sets, udds supports writing of collections coherently.
  For access scope <GROUP>, RTPS specification says that 
  <"the extensions required for access scope GROUP are not yet defined">, and thus
- jRTPS does not support access scope <GROUP>. 
- 
- jRTPS writers does not support directed writes, but readers handle them correctly(not tested).
+ jRTPS does not support access scope <GROUP>. jRTPS writers does not support directed writes, 
+ but readers handle them correctly(not tested).
  
  Following inlineable parameters are not handled by jRTPS: 
  <PID_CONTENT_FILTER_INFO(0x0055), PID_PROPERTY_LIST(0x0059), PID_ORIGINAL_WRITER_INFO(0x0061)>
