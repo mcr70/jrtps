@@ -4,6 +4,7 @@ import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.types.SequenceNumberSet;
+import net.sf.jrtps.util.Watchdog.Task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,16 +20,19 @@ public class WriterProxy extends RemoteProxy {
 
     private Heartbeat latestHeartbeat;
 
-    private volatile long livelinessTimestamp;
     private volatile long seqNumMax = 0;
 
 	private final int hbSuppressionDuration;
 	private long latestHBReceiveTime;
 
+    private Task livelinessTask;
 
-    WriterProxy(PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration) {
+
+    WriterProxy(PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration, Task livelinessTask) {
         super(wd, lPair.ucLocator, lPair.mcLocator);
-		hbSuppressionDuration = heartbeatSuppressionDuration;
+		
+        this.hbSuppressionDuration = heartbeatSuppressionDuration;
+        this.livelinessTask = livelinessTask;
     }
 
     /**
@@ -91,7 +95,9 @@ public class WriterProxy extends RemoteProxy {
      * be called by user applications.
      */
     public void assertLiveliness() {
-        livelinessTimestamp = System.currentTimeMillis();
+        if (livelinessTask != null) {
+            livelinessTask.reset();
+        }
     }
 
     /**
