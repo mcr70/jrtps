@@ -47,7 +47,12 @@ public class Watchdog {
     
     
     /**
-     * Watchdog Task.
+     * Watchdog Task. Application is expected to call cancel() or reset()
+     * method before triggertime occurs. Canceling a task removes it from ScheduledExecutorService,
+     * and it cannot be used for watchdog purposes anymore. By calling a reset(),
+     * triggertime is reseted to original value and application is again expected 
+     * to make either call. If application fails to make either call before triggertime
+     * has elapsed, a call to Listeners triggerTimeMissed() is called.
      *  
      * @author mcr70
      */
@@ -80,7 +85,13 @@ public class Watchdog {
             this.scheduledFuture = ses.schedule(runnable, triggerTime, TimeUnit.MILLISECONDS);
         }
     }
-    
+
+    /**
+     * Implementations of Listener interface gets called when Watchdog reset has been 
+     * missed.
+     * 
+     * @author mcr70
+     */
     public interface Listener {
         /**
          * Called when an application failed to call reset() method of Task
