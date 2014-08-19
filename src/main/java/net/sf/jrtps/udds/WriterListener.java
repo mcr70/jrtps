@@ -1,7 +1,7 @@
 package net.sf.jrtps.udds;
 
-import net.sf.jrtps.WriterLivelinessListener;
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.rtps.WriterLivelinessListener;
 
 /**
  * WriterListener can be added to DataReader. This can be used to track remote writers 
