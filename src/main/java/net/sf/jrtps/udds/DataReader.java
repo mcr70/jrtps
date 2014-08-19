@@ -41,8 +41,6 @@ public class DataReader<T> extends Entity<T> {
     protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
         super(p, type, reader.getTopicName(), reader.getGuid());
         this.rtps_reader = reader;
-
-        rtps_reader.setWriterLivelinessListener(new LivelinessListener<T>(this));
     }
 
     /**
@@ -72,6 +70,8 @@ public class DataReader<T> extends Entity<T> {
         synchronized (wListeners) {
             wListeners.add(wl);
         }
+        
+        rtps_reader.addWriterLivelinessListener(wl);
     }
 
 
@@ -152,12 +152,14 @@ public class DataReader<T> extends Entity<T> {
 
     /**
      * Removes a WriterListener from this DataReader.
-     * @param rl WriterListener to remove
+     * @param wl WriterListener to remove
      */
-    public void removeWriterListener(WriterListener rl) {
+    public void removeWriterListener(WriterListener wl) {
         synchronized (wListeners) {
-            wListeners.remove(rl);
+            wListeners.remove(wl);
         }
+        
+        rtps_reader.removeWriterLivelinessListener(wl);
     }
 
     /**

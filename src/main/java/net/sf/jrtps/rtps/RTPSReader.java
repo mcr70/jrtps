@@ -58,7 +58,7 @@ public class RTPSReader<T> extends Endpoint {
 
     private int ackNackCount = 0;
 
-    private WriterLivelinessListener livelinessListener;
+    private List<WriterLivelinessListener> livelinessListeners = new LinkedList<>();
 
 
 
@@ -97,6 +97,7 @@ public class RTPSReader<T> extends Endpoint {
     public WriterProxy addMatchedWriter(final PublicationData writerData) {
         Task livelinessTask = createLivelinessTask(writerData);
         LocatorPair locators = getLocators(writerData);
+        
         WriterProxy wp = new WriterProxy(writerData, locators, heartbeatSuppressionDuration, livelinessTask);
         wp.preferMulticast(getConfiguration().preferMulticast());
 
@@ -111,22 +112,25 @@ public class RTPSReader<T> extends Endpoint {
     }
 
     private Task createLivelinessTask(final PublicationData writerData) {
+        long livelinessDuration = 
+                writerData.getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
+        Watchdog watchdog = getParticipant().getWatchdog();
+        Task livelinessTask = watchdog.addTask(livelinessDuration, new Listener() {
+            @Override
+            public void triggerTimeMissed() {
+                notifyLivelinessLost(writerData);
+            }
+        });
 
-        if (livelinessListener != null) {
-            long livelinessDuration = 
-                    writerData.getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
-            Watchdog watchdog = getParticipant().getWatchdog();
-            Task livelinessTask = watchdog.addTask(livelinessDuration, new Listener() {
-                @Override
-                public void triggerTimeMissed() {
-                    livelinessListener.livelinessLost(writerData);
-                }
-            });
-            return livelinessTask;
-        }
-
-        return null;
+        return livelinessTask;
     }
+
+    private void notifyLivelinessLost(PublicationData writerData) {
+        for (WriterLivelinessListener listener : livelinessListeners) {
+            listener.livelinessLost(writerData);
+        }
+    }
+
 
     /**
      * Removes all the matched writers that have a given GuidPrefix
@@ -192,11 +196,24 @@ public class RTPSReader<T> extends Endpoint {
 
 
     /**
-     * Sets the WriterLivelinessListener
+     * Adds WriterLivelinessListener
      * @param listener
      */
-    public void setWriterLivelinessListener(WriterLivelinessListener listener) {
-        livelinessListener = listener;
+    public void addWriterLivelinessListener(WriterLivelinessListener listener) {
+        synchronized (livelinessListeners) {
+            livelinessListeners.add(listener);    
+        }
+    }
+
+
+    /**
+     * Adds WriterLivelinessListener
+     * @param listener
+     */
+    public void removeWriterLivelinessListener(WriterLivelinessListener listener) {
+        synchronized (livelinessListeners) {
+            livelinessListeners.remove(listener);    
+        }
     }
 
 
