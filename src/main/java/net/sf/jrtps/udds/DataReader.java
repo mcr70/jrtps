@@ -41,6 +41,8 @@ public class DataReader<T> extends Entity<T> {
     protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
         super(p, type, reader.getTopicName(), reader.getGuid());
         this.rtps_reader = reader;
+
+        rtps_reader.setWriterLivelinessListener(new LivelinessListener<T>(this));
     }
 
     /**
