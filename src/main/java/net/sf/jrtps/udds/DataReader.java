@@ -166,20 +166,6 @@ public class DataReader<T> extends Entity<T> {
     }
 
 
-    // ----  Experimental code follows  ------------------------
-    /**
-     * Adds a reader side Filter. When samples are received, they are evaluated with
-     * all the Filters this DataReader has. If a Sample is accepted by all of the Filters,
-     * it is added to history cache of this reader, and clients are notified of new samples.
-     *  
-     * @param filter
-     */
-    void addFilter(SampleFilter<T> filter) {
-        // QosOwnership could be implemented with Filters.
-        // QosResourceLimits could be implemented with Filters.
-    }
-
-
     /**
      * Gets samples that match Filter. History cache is scanned through and for each
      * Sample, a Filter is applied. Only the accepted Samples are returned.
@@ -200,11 +186,6 @@ public class DataReader<T> extends Entity<T> {
         return filteredSampled;
     }
 
-
-    List<Sample<T>> takeSamples() {
-        return null; // NOT TO BE IMPLEMENTED
-        // trying to avoid read/take semantics
-    }
 
 
     void addMatchedWriter(PublicationData pd) {
@@ -228,4 +209,24 @@ public class DataReader<T> extends Entity<T> {
         }
     }
     
+    void livelinessLost(PublicationData pd) {
+        synchronized (wListeners) {
+            for (WriterListener wl : wListeners) {
+                wl.livelinessLost(pd);
+            }
+        }
+    }
+    
+    // ----  Experimental code follows  ------------------------
+    /**
+     * Adds a reader side Filter. When samples are received, they are evaluated with
+     * all the Filters this DataReader has. If a Sample is accepted by all of the Filters,
+     * it is added to history cache of this reader, and clients are notified of new samples.
+     *  
+     * @param filter
+     */
+    void addFilter(SampleFilter<T> filter) {
+        // QosOwnership could be implemented with Filters.
+        // QosResourceLimits could be implemented with Filters.
+    }
 }

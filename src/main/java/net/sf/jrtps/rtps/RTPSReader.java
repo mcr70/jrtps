@@ -9,6 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.WriterLivelinessListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.AckNack;
@@ -25,6 +26,9 @@ import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.types.Time;
+import net.sf.jrtps.util.Watchdog;
+import net.sf.jrtps.util.Watchdog.Listener;
+import net.sf.jrtps.util.Watchdog.Task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,16 +59,21 @@ public class RTPSReader<T> extends Endpoint {
 
     private int ackNackCount = 0;
 
+    private WriterLivelinessListener livelinessListener;
+
 
 
     RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, 
-            ReaderCache<T> rCache, QualityOfService qos, Configuration configuration) {
+            ReaderCache<T> rCache, QualityOfService qos,
+            Configuration configuration) {
         super(participant, entityId, topicName, qos, configuration);
 
         this.rCache = rCache;
+
         this.heartbeatResponseDelay = configuration.getHeartbeatResponseDelay();
         this.heartbeatSuppressionDuration = configuration.getHeartbeatSuppressionDuration();
     }
+
 
     /**
      * Get the BuiltinEndpointSet ID of this RTPSReader. endpointSetId
@@ -86,9 +95,10 @@ public class RTPSReader<T> extends Endpoint {
      * @param writerData
      * @return WriterProxy
      */
-    public WriterProxy addMatchedWriter(PublicationData writerData) {
+    public WriterProxy addMatchedWriter(final PublicationData writerData) {
+        Task livelinessTask = createLivelinessTask(writerData);
         LocatorPair locators = getLocators(writerData);
-        WriterProxy wp = new WriterProxy(writerData, locators, heartbeatSuppressionDuration);
+        WriterProxy wp = new WriterProxy(writerData, locators, heartbeatSuppressionDuration, livelinessTask);
         wp.preferMulticast(getConfiguration().preferMulticast());
 
         writerProxies.put(writerData.getBuiltinTopicKey(), wp);
@@ -99,6 +109,24 @@ public class RTPSReader<T> extends Endpoint {
         //sendAckNack(wp);
 
         return wp;
+    }
+
+    private Task createLivelinessTask(final PublicationData writerData) {
+
+        if (livelinessListener != null) {
+            long livelinessDuration = 
+                    writerData.getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
+            Watchdog watchdog = getParticipant().getWatchdog();
+            Task livelinessTask = watchdog.addTask(livelinessDuration, new Listener() {
+                @Override
+                public void triggerTimeMissed() {
+                    livelinessListener.livelinessLost(writerData);
+                }
+            });
+            return livelinessTask;
+        }
+
+        return null;
     }
 
     /**
@@ -162,6 +190,16 @@ public class RTPSReader<T> extends Endpoint {
     public boolean isMatchedWith(Guid writerGuid) {
         return writerProxies.get(writerGuid) != null;
     }
+
+
+    /**
+     * Sets the WriterLivelinessListener
+     * @param listener
+     */
+    public void setWriterLivelinessListener(WriterLivelinessListener listener) {
+        livelinessListener = listener;
+    }
+
 
     /**
      * Handle incoming HeartBeat message.
@@ -290,7 +328,7 @@ public class RTPSReader<T> extends Endpoint {
                 return false;
             }
         }
-        
+
         return true;
     }
 
@@ -348,7 +386,7 @@ public class RTPSReader<T> extends Endpoint {
             PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
             wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
-                    .getDomainId())), 0);
+                    .getDomainId())), 0, createLivelinessTask(pd));
 
             writerProxies.put(writerGuid, wp);
         }

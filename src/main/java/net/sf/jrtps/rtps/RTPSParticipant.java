@@ -23,6 +23,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +41,8 @@ public class RTPSParticipant {
 
     private final Configuration config;
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
-
+    private final Watchdog watchdog;
+    
     /**
      * Maps that stores discovered participants. discovered participant is
      * shared with all entities created by this participant.
@@ -88,6 +90,7 @@ public class RTPSParticipant {
         this.domainId = domainId; 
         this.participantId = participantId;
         this.threadPoolExecutor = tpe;
+        this.watchdog = new Watchdog(threadPoolExecutor);
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
 
@@ -347,6 +350,15 @@ public class RTPSParticipant {
         return null;
     }
 
+    
+    /**
+     * Gets the Watchdog of this RTPSParticipant.
+     * @return Watchdog
+     */
+    Watchdog getWatchdog() {
+        return watchdog;
+    }
+    
     /**
      * Finds a Reader with given entity id.
      * 

@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import net.sf.jrtps.WriterLivelinessListener;
 import net.sf.jrtps.builtin.PublicationData;
 
 /**
@@ -9,7 +10,7 @@ import net.sf.jrtps.builtin.PublicationData;
  * @author mcr70
  * @see DataReader#addWriterListener(WriterListener)
  */
-public interface WriterListener {
+public interface WriterListener extends WriterLivelinessListener {
     /**
      * This method is called when a remote writer has been successfully matched. 
      * @param pd PublicationData of the remote writer
