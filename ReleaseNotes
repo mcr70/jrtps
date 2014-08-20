@@ -1,3 +1,8 @@
+0.9.4
+    - Removed SampleKey. KeyHash is adequate to represent a key of samples and instances.
+    - WriterLivelinessListener adds support for detecting loss of liveliness
+      of writers.
+
 0.9.3
     - FIX: primitive types are aligned on their natural boundaries.
     - First succesful interoperability test with OpenDDS. Both subscription
