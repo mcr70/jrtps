@@ -14,9 +14,8 @@ Overview
 
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
- 0.9.3
+ 0.9.4
 
- * FIX: primitive types are aligned on their natural boundaries.
-
- * First succesful interoperability test with OpenDDS. Both subscription
-   and publication tests work with OpenDDS Messenger example.
+ * Removed SampleKey. KeyHash is adequate to represent a key of samples and instances.
+ 
+ * WriterLivelinessListener adds support for detecting loss of liveliness of writers.
