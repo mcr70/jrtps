@@ -2,7 +2,7 @@ package net.sf.jrtps.udds;
 
 import java.util.Set;
 
-import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.message.parameter.KeyHash;
 
 /**
  * HistoryCache represents a uDDS history cache. 
@@ -58,5 +58,5 @@ public interface HistoryCache<T> {
      * @param key
      * @return Instance, or null if there was not Instance with given key
      */
-    Instance<T> getInstance(Sample<T>.SampleKey key);
+    Instance<T> getInstance(KeyHash key);
 }
