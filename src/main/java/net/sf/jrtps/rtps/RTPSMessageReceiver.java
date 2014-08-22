@@ -85,7 +85,9 @@ class RTPSMessageReceiver implements Runnable {
     private void handleMessage(Message msg) {
         int msgId = msg.hashCode();
         Time timestamp = null;
-        GuidPrefix destGuidPrefix = GuidPrefix.GUIDPREFIX_UNKNOWN;
+        GuidPrefix destGuidPrefix = participant.getGuid().getPrefix();
+        boolean destinationThisParticipant = true;
+        
         GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
 
         if (participant.getGuid().getPrefix().equals(sourceGuidPrefix)) {
@@ -99,6 +101,10 @@ class RTPSMessageReceiver implements Runnable {
         for (SubMessage subMsg : subMessages) {
             switch (subMsg.getKind()) {
             case ACKNACK:
+                if (!destinationThisParticipant) {
+                    continue;
+                }
+                
                 if (ignoredParticipants.contains(sourceGuidPrefix)) {
                     continue;
                 }
@@ -106,6 +112,10 @@ class RTPSMessageReceiver implements Runnable {
                 handleAckNack(sourceGuidPrefix, (AckNack) subMsg);
                 break;
             case DATA:
+                if (!destinationThisParticipant) {
+                    continue;
+                }
+
                 if (ignoredParticipants.contains(sourceGuidPrefix)) {
                     continue;
                 }
@@ -128,6 +138,10 @@ class RTPSMessageReceiver implements Runnable {
                 }
                 break;
             case HEARTBEAT:
+                if (!destinationThisParticipant) {
+                    continue;
+                }
+
                 if (ignoredParticipants.contains(sourceGuidPrefix)) {
                     continue;
                 }
@@ -136,6 +150,8 @@ class RTPSMessageReceiver implements Runnable {
                 break;
             case INFODESTINATION:
                 destGuidPrefix = ((InfoDestination) subMsg).getGuidPrefix();
+                destinationThisParticipant = participant.getGuid().getPrefix().equals(destGuidPrefix);
+                logger.debug("Got InfoDestionation. Target is this participant: ", destinationThisParticipant);
                 break;
             case INFOSOURCE:
                 sourceGuidPrefix = ((InfoSource) subMsg).getGuidPrefix();
@@ -162,6 +178,10 @@ class RTPSMessageReceiver implements Runnable {
                 logger.warn("InfoReplyIp4 not handled");
                 break;
             case GAP:
+                if (!destinationThisParticipant) {
+                    continue;
+                }
+                
                 handleGap(sourceGuidPrefix, (Gap) subMsg);
                 break;
             default:
