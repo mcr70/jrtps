@@ -9,10 +9,11 @@ Compliance
 * Submessages
 
  Following submessages are implemented and <should> work as expected: 
- <ACKNACK, DATA, HEARTBEAT, INFODESTINATION, INFOSOURCE, INFOTIMESTAMP, GAP>. In normal case, 
- RTPS entities use these submessages to exchange data with each other. Each jRTPS participant
- handles only messages destined to entities it has created. This means that if 
- INFODESTINATION refers to some other participant, all the messages other INFO* are discarded.
+ <ACKNACK, DATA, HEARTBEAT, INFODESTINATION, INFOSOURCE, INFOTIMESTAMP, GAP>. In normal 
+ case, RTPS entities use these submessages to exchange data with each other. Each jRTPS 
+ participant handles only messages destined to entities it has created. This means that 
+ if <INFODESTINATION> refers to some other participant, all the submessages other than 
+ <INFO*> are discarded.
  
  Following submessages are not implemented: <INFOREPLY, INFOREPLYIP4>. 
  
