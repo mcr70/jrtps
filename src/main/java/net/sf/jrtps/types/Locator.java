@@ -26,18 +26,13 @@ public class Locator {
      */
     public static final int LOCATOR_KIND_INVALID = -1;
 
-    private static final int PB = 7400; // NOTE: These should be moved to
-                                          // somewhere else. default ports.
+    private static final int PB = 7400; // NOTE: These should be moved to somewhere else. default ports.
     private static final int DG = 250;
     private static final int PG = 2;
-    private static final int d0 = 0; // used with metatraffic (discovery),
-                                       // multicast @see 9.6.1.1
-    private static final int d1 = 10; // used with metatraffic (discovery),
-                                        // unicast @see 9.6.1.1
-    private static final int d2 = 1; // Used with user traffic, multicast @see
-                                       // 9.6.1.2
-    private static final int d3 = 11; // Used with user traffic, unicast @see
-                                        // 9.6.1.2
+    private static final int d0 = 0;  // used with metatraffic (discovery), multicast @see 9.6.1.1
+    private static final int d1 = 10; // used with metatraffic (discovery), unicast @see 9.6.1.1
+    private static final int d2 = 1;  // Used with user traffic, multicast @see 
+    private static final int d3 = 11; // Used with user traffic, unicast @see 9.6.1.2
 
     private int kind;
     private int port;
@@ -76,8 +71,6 @@ public class Locator {
         this.kind = kind;
         this.port = port;
         this.address = address;
-
-        assert address != null && address.length == 16;
     }
 
     public InetAddress getInetAddress() {

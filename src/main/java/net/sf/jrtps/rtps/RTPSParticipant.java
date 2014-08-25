@@ -94,8 +94,8 @@ public class RTPSParticipant {
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
 
-        UDPProvider handler = new UDPProvider(config); 
-        TransportProvider.registerTransportProvider("udp", handler, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
+        UDPProvider provider = new UDPProvider(config); 
+        TransportProvider.registerTransportProvider("udp", provider, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
     }
 
     /**
