@@ -95,11 +95,12 @@ public class RTPSReader<T> extends Endpoint {
      * @return WriterProxy
      */
     public WriterProxy addMatchedWriter(final PublicationData writerData) {
-        Task livelinessTask = createLivelinessTask(writerData);
+
         LocatorPair locators = getLocators(writerData);
-        
-        WriterProxy wp = new WriterProxy(writerData, locators, heartbeatSuppressionDuration, livelinessTask);
+
+        WriterProxy wp = new WriterProxy(this, writerData, locators, heartbeatSuppressionDuration);
         wp.preferMulticast(getConfiguration().preferMulticast());
+        wp.setLivelinessTask(createLivelinessTask(wp));
 
         writerProxies.put(writerData.getBuiltinTopicKey(), wp);
 
@@ -111,14 +112,15 @@ public class RTPSReader<T> extends Endpoint {
         return wp;
     }
 
-    private Task createLivelinessTask(final PublicationData writerData) {
+    private Task createLivelinessTask(final WriterProxy proxy) {
         long livelinessDuration = 
-                writerData.getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
+                proxy.getPublicationData().getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
         Watchdog watchdog = getParticipant().getWatchdog();
         Task livelinessTask = watchdog.addTask(livelinessDuration, new Listener() {
             @Override
             public void triggerTimeMissed() {
-                notifyLivelinessLost(writerData);
+                proxy.isAlive(false);
+                notifyLivelinessLost(proxy.getPublicationData());
             }
         });
 
@@ -126,11 +128,24 @@ public class RTPSReader<T> extends Endpoint {
     }
 
     private void notifyLivelinessLost(PublicationData writerData) {
-        for (WriterLivelinessListener listener : livelinessListeners) {
-            listener.livelinessLost(writerData);
+        synchronized (livelinessListeners) {
+            for (WriterLivelinessListener listener : livelinessListeners) {
+                listener.livelinessLost(writerData);
+            }            
         }
     }
 
+    /**
+     * Called from WriterProxy when liveliness got restored
+     * @param writerData
+     */
+    void notifyLivelinessRestored(PublicationData writerData) {
+        synchronized (livelinessListeners) {
+            for (WriterLivelinessListener listener : livelinessListeners) {
+                listener.livelinessRestored(writerData);
+            }
+        }
+    }
 
     /**
      * Removes all the matched writers that have a given GuidPrefix
@@ -230,9 +245,11 @@ public class RTPSReader<T> extends Endpoint {
 
         WriterProxy wp = getWriterProxy(new Guid(senderGuidPrefix, hb.getWriterId()));
         if (wp != null) {
+            wp.assertLiveliness(); // Got HB, writer is alive
+
             if (wp.heartbeatReceived(hb)) {
                 if (hb.livelinessFlag()) {
-                    wp.assertLiveliness();
+                    //wp.assertLiveliness(); Not really needed, every HB asserts liveliness??? 
                 }
 
                 if (isReliable()) { // Only reliable readers respond to
@@ -268,25 +285,16 @@ public class RTPSReader<T> extends Endpoint {
      * @param sourceGuidPrefix
      * @param gap
      */
-    void handleGap(GuidPrefix sourcePrefix, Gap gap) {
+    void onGap(GuidPrefix sourcePrefix, Gap gap) {
         Guid writerGuid = new Guid(sourcePrefix, gap.getWriterId());
-
+    
         WriterProxy wp = getWriterProxy(writerGuid);
         if (wp != null) {
+            wp.assertLiveliness();
+            
             log.debug("[{}] Applying {}", getEntityId(), gap);
             wp.applyGap(gap);
         }
-    }
-
-    /**
-     * This methods is called by RTPSMessageReceiver to signal that a message reception has started.
-     * This method is called for the first message received for this RTPSReader.
-     * 
-     * @param msgId Id of the message
-     * @see #stopMessageProcessing(int)
-     */
-    void startMessageProcessing(int msgId) {
-        rCache.changesBegin(msgId);
     }
 
     /**
@@ -302,11 +310,13 @@ public class RTPSReader<T> extends Endpoint {
      * @throws IOException
      * @see #stopMessageProcessing(int)
      */
-    void createSample(int id, GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
+    void onData(int id, GuidPrefix sourcePrefix, Data data, Time timeStamp) throws IOException {
         Guid writerGuid = new Guid(sourcePrefix, data.getWriterId());
 
         WriterProxy wp = getWriterProxy(writerGuid);
         if (wp != null) {
+            wp.assertLiveliness();
+            
             if (wp.acceptData(data.getWriterSequenceNumber())) {
                 if (checkDirectedWrite(data)) { 
                     // Add Data to cache only if permitted by DirectedWrite, or if DirectedWrite does not exist
@@ -322,7 +332,31 @@ public class RTPSReader<T> extends Endpoint {
                     data.getWriterId());
         }
     }
+    
+    /**
+     * This methods is called by RTPSMessageReceiver to signal that a message reception has started.
+     * This method is called for the first message received for this RTPSReader.
+     * 
+     * @param msgId Id of the message
+     * @see #stopMessageProcessing(int)
+     */
+    void startMessageProcessing(int msgId) {
+        rCache.changesBegin(msgId);
+    }
 
+
+
+
+    /**
+     * This method is called by RTPSMessageReceiver to signal that a message reception is done.
+     * 
+     * @param msgId Id of the message
+     * @see #startMessageProcessing(int)
+     * @see #onData(int, GuidPrefix, Data, Time)
+     */
+    void stopMessageProcessing(int msgId) {
+        rCache.changesEnd(msgId);
+    }
 
     /**
      * Checks, if Data has a DirectedWrite attribute, and if so, checks that
@@ -333,31 +367,21 @@ public class RTPSReader<T> extends Endpoint {
     private boolean checkDirectedWrite(Data data) {
         if (data.inlineQosFlag()) {
             DirectedWrite dw = (DirectedWrite) data.getInlineQos().getParameter(ParameterEnum.PID_DIRECTED_WRITE);
-
+    
             if (dw != null) {
                 for (Guid guid : dw.getGuids()) {
                     if (guid.equals(getGuid())) {
                         return true;
                     }
                 }
-
+    
                 return false;
             }
         }
-
+    
         return true;
     }
 
-    /**
-     * This method is called by RTPSMessageReceiver to signal that a message reception is done.
-     * 
-     * @param msgId Id of the message
-     * @see #startMessageProcessing(int)
-     * @see #createSample(int, GuidPrefix, Data, Time)
-     */
-    void stopMessageProcessing(int msgId) {
-        rCache.changesEnd(msgId);
-    }
 
     private void sendAckNack(WriterProxy wp) {
         log.trace("[{}] Wait for heartbeat response delay: {} ms", getEntityId(), heartbeatResponseDelay);
@@ -365,8 +389,7 @@ public class RTPSReader<T> extends Endpoint {
 
         Message m = new Message(getGuid().getPrefix());
 
-        AckNack an = createAckNack(wp); // If all the data is already received,
-        // set finalFlag to true,
+        AckNack an = createAckNack(wp);   // If all the data is already received, set finalFlag to true,
         an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
 
         m.addSubMessage(an);
@@ -377,7 +400,6 @@ public class RTPSReader<T> extends Endpoint {
                 an.getReaderSNState(), an.finalFlag(), targetPrefix);
 
         sendMessage(m, wp);
-        // sendMessage(m, targetPrefix);
     }
 
     private AckNack createAckNack(WriterProxy wp) {
@@ -401,8 +423,9 @@ public class RTPSReader<T> extends Endpoint {
             log.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
             PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
-            wp = new WriterProxy(pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
-                    .getDomainId())), 0, createLivelinessTask(pd));
+            wp = new WriterProxy(this, pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
+                    .getDomainId())), 0);
+            //wp.setLivelinessTask(createLivelinessTask(wp)); // No need to set liveliness task, since liveliness is infinite
 
             writerProxies.put(writerGuid, wp);
         }

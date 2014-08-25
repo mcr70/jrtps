@@ -298,7 +298,18 @@ public class Configuration {
     public boolean getWriteCollectionsCoherently() {
         return getBooleanProperty("udds.collections.coherent", false);
     }
-    
+
+    /**
+     * This configuration flag tells how reader determines when the liveliness
+     * of remote writer is is restored. If set to false, any message from writer
+     * restores liveliness. If set to true, only messages for writer liveliness
+     * protocol triggers livelinessRestored condition.
+     * 
+     * @return true or false
+     */
+    public boolean isLivelinessRestoredByProtocolOnly() {
+        return getBooleanProperty("jrtps.reader.liveliness-restored-by-protocol-only", false);
+    }
     
     private String[] getStringArrayProperty(String key, String[] deflt) {
         String property = props.getProperty(key);

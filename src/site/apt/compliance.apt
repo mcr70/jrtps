@@ -28,9 +28,11 @@ Compliance
 
  From the writer point of view, all kinds of Liveliness QoS are supported; 
  <AUTOMATIC, MANUAL_BY_PARTICIPANT, MANUAL_BY_TOPIC>. From the reader point of view,
- if writers liveliness is lost, application is notified through WriterLivelinessListener
+ if writers liveliness is lost, or restored, application is notified through WriterLivelinessListener
  of this fact.
  
+ After reader detects writers liveliness is lost, it may be restored later on if writer continues
+ to send any messages. Note, that liveliness protocol is only needed if writer does not send messages regularly.
 
 * Inline QoS parameters
 

@@ -93,6 +93,7 @@ udds.collections.coherent=false
   * <<{jrtps.discovery.listener-uris}>>
   A comma separated list of URIs, that will be used to start listeners for discovery.
 
+  
 * uDDS specific configuration
   
   * <<{udds.collections.coherent}>>

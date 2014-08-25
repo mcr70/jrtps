@@ -12,4 +12,11 @@ public interface WriterLivelinessListener {
      * @param pd
      */
     void livelinessLost(PublicationData pd);
+    
+    /**
+     * This method gets called when liveliness is first lost, and then
+     * restored again.
+     * @param pd
+     */
+    void livelinessRestored(PublicationData pd);    
 }

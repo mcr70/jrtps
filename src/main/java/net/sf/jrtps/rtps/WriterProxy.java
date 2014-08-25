@@ -18,23 +18,30 @@ import org.slf4j.LoggerFactory;
 public class WriterProxy extends RemoteProxy {
     private static final Logger log = LoggerFactory.getLogger(WriterProxy.class);
 
+    private final RTPSReader<?> reader;
+    private final int hbSuppressionDuration;
+    
     private Heartbeat latestHeartbeat;
+    private long latestHBReceiveTime;
 
     private volatile long seqNumMax = 0;
-
-	private final int hbSuppressionDuration;
-	private long latestHBReceiveTime;
-
     private Task livelinessTask;
+    
+    private boolean isAlive = true; // reflects status of liveliness
 
 
-    WriterProxy(PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration, Task livelinessTask) {
+    WriterProxy(RTPSReader<?> reader, PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration) {
         super(wd, lPair.ucLocator, lPair.mcLocator);
+        this.reader = reader;
 		
         this.hbSuppressionDuration = heartbeatSuppressionDuration;
-        this.livelinessTask = livelinessTask;
     }
 
+    
+    void setLivelinessTask(Task livelinessTask) {
+        this.livelinessTask = livelinessTask;
+    }
+    
     /**
      * Gets the max Data seqnum that has been received.
      * 
@@ -45,7 +52,8 @@ public class WriterProxy extends RemoteProxy {
     }
 
     /**
-	 * 
+	 * Checks, if all the samples from remote writer is already received or not.
+	 * @return true, if every sample is received
 	 */
     boolean isAllReceived() {
         if (latestHeartbeat == null) {
@@ -89,12 +97,18 @@ public class WriterProxy extends RemoteProxy {
         return false;
     }
 
+
     /**
      * Asserts liveliness of a writer represented by this WriterProxy. Asserting
      * a liveliness marks remote writer as being 'alive'. This method should not
      * be called by user applications.
      */
     public void assertLiveliness() {
+        if (!isAlive) {
+            reader.notifyLivelinessRestored(getPublicationData());
+        }
+        
+        isAlive = true;
         if (livelinessTask != null) {
             livelinessTask.reset();
         }
@@ -133,10 +147,6 @@ public class WriterProxy extends RemoteProxy {
         return false;
     }
 
-    public String toString() {
-        return getGuid().toString();
-    }
-
     void applyGap(Gap gap) {
         SequenceNumberSet gapList = gap.getGapList();
         long bitmapBase = gapList.getBitmapBase();
@@ -145,11 +155,16 @@ public class WriterProxy extends RemoteProxy {
         }
     }
 
-    int getLatestHeartbeatCount() {
-        if (latestHeartbeat == null) {
-            return 0;
-        }
-
-        return latestHeartbeat.getCount();
+    void isAlive(boolean livelinessFlag) {
+        this.isAlive = livelinessFlag;
     }
+    public boolean isAlive() {
+        return isAlive;
+    }
+
+    public String toString() {
+        return getGuid().toString();
+    }
+
+
 }
