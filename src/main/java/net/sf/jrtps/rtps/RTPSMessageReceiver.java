@@ -128,7 +128,7 @@ class RTPSMessageReceiver implements Runnable {
                         if (dataReceivers.add(r)) {
                             r.startMessageProcessing(msgId);
                         }
-                        r.createSample(msgId, sourceGuidPrefix, data, timestamp);
+                        r.onData(msgId, sourceGuidPrefix, data, timestamp);
                     }
                     else {
                         logger.warn("No Reader was matched with {} to handle Data message", new Guid(sourceGuidPrefix, data.getWriterId()));
@@ -208,7 +208,7 @@ class RTPSMessageReceiver implements Runnable {
 
     private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
         RTPSReader<?> reader = participant.getReader(gap.getReaderId(), sourceGuidPrefix, gap.getWriterId());
-        reader.handleGap(sourceGuidPrefix, gap);
+        reader.onGap(sourceGuidPrefix, gap);
     }
 
     private void handleHeartbeat(GuidPrefix sourceGuidPrefix, Heartbeat hb) {
