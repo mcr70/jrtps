@@ -22,7 +22,7 @@ public abstract class TransportProvider {
 
     private static HashMap<String, TransportProvider> providersForScheme = new HashMap<>();
     private static HashMap<Integer, TransportProvider> providersForKind = new HashMap<>();
-
+    
     private Configuration config;
 
     /**
@@ -123,4 +123,11 @@ public abstract class TransportProvider {
      * @throws IOException
      */
     public abstract Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException;
+    
+    /**
+     * Get the default Locator for discovery.
+     * @param domainId
+     * @return Locator
+     */
+    public abstract Locator getDefaultDiscoveryLocator(int domainId);
 }

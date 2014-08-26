@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -25,14 +26,6 @@ public class Locator {
      * An invalid Locator kind 
      */
     public static final int LOCATOR_KIND_INVALID = -1;
-
-    private static final int PB = 7400; // NOTE: These should be moved to somewhere else. default ports.
-    private static final int DG = 250;
-    private static final int PG = 2;
-    private static final int d0 = 0;  // used with metatraffic (discovery), multicast @see 9.6.1.1
-    private static final int d1 = 10; // used with metatraffic (discovery), unicast @see 9.6.1.1
-    private static final int d2 = 1;  // Used with user traffic, multicast @see 
-    private static final int d3 = 11; // Used with user traffic, unicast @see 9.6.1.2
 
     private int kind;
     private int port;
@@ -67,10 +60,21 @@ public class Locator {
         is.read(address);
     }
 
-    private Locator(int kind, int port, byte[] address) {
+    /**
+     * Create new Locator.
+     * @param kind
+     * @param port
+     * @param address address must be an array of length 16
+     * @throws IllegalArgumentException if address is not of length 16
+     */
+    public Locator(int kind, int port, byte[] address) {
         this.kind = kind;
         this.port = port;
         this.address = address;
+        
+        if (address.length != 16) {
+            throw new IllegalArgumentException("address must be an array of length 16");
+        }
     }
 
     public InetAddress getInetAddress() {
@@ -143,20 +147,8 @@ public class Locator {
         buffer.write(address);
     }
 
-    /**
-     * see 9.6.1.4 Default Settings for the Simple Participant Discovery
-     * Protocol
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultDiscoveryMulticastLocator(int domainId) {
-        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
-    
-        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d0, addr);
-    }
 
     public String toString() {
-        return getInetAddress() + ":" + getPort();
+        return kind + "::" + Arrays.toString(address) + ":" + getPort();
     }
 }
