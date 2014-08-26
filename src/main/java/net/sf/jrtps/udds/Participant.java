@@ -32,6 +32,8 @@ import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
+import net.sf.jrtps.transport.TransportProvider;
+import net.sf.jrtps.transport.UDPProvider;
 import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -135,9 +137,14 @@ public class Participant {
      */
     public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
-        
+                
         this.entityFactory = ef != null ? ef : new EntityFactory();;
         this.config = cfg != null ? cfg : new Configuration();
+        
+        // UDPProvider is used 
+        UDPProvider provider = new UDPProvider(config); 
+        TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
+                Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
         
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
@@ -822,7 +829,8 @@ public class Participant {
 
     private void createUnknownParticipantData(int domainId) {
         List<Locator> discoveryLocators = new LinkedList<>();
-        discoveryLocators.add(Locator.defaultDiscoveryMulticastLocator(domainId));
+        TransportProvider provider = TransportProvider.getInstance(UDPProvider.PROVIDER_SCHEME); // Always present
+        discoveryLocators.add(provider.getDefaultDiscoveryLocator(domainId));
         
         ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, discoveryLocators, null);
 

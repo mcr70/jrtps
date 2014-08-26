@@ -18,7 +18,6 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.transport.Receiver;
 import net.sf.jrtps.transport.TransportProvider;
-import net.sf.jrtps.transport.UDPProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -93,9 +92,6 @@ public class RTPSParticipant {
         this.watchdog = new Watchdog(threadPoolExecutor);
         this.discoveredParticipants = discoveredParticipants;
         this.config = config;
-
-        UDPProvider provider = new UDPProvider(config); 
-        TransportProvider.registerTransportProvider("udp", provider, Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
     }
 
     /**

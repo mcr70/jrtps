@@ -22,7 +22,12 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class UDPProvider extends TransportProvider {
-    private static final Logger log = LoggerFactory.getLogger(UDPProvider.class);
+    private static final Logger log = LoggerFactory.getLogger(UDPProvider.class);   
+    
+    /**
+     * Provider scheme, that is used in configuring UDP TranportProvider URIs.
+     */
+    public static final String PROVIDER_SCHEME = "udp";
     
     public UDPProvider(Configuration config) {
         super(config);
@@ -86,5 +91,13 @@ public class UDPProvider extends TransportProvider {
         }
         
         return new ReceiverConfig(participantId, ds, discovery);
+    }
+
+    @Override
+    public Locator getDefaultDiscoveryLocator(int domainId) {
+        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
+        PortNumberParameters pnp = getConfiguration().getPortNumberParameters();
+        
+        return new Locator(Locator.LOCATOR_KIND_UDPv4, pnp.getPortBase() + pnp.getDomainIdGain() * domainId + pnp.getD0(), addr);
     }
 }
