@@ -17,8 +17,11 @@ import net.sf.jrtps.types.Locator;
 
 public class MemProvider extends TransportProvider {
 
+    static final int LOCATOR_KIND = 0x8001;
+    
     private static final Map<Locator, BlockingQueue<byte[]>> queues = new HashMap<>();
     private static final Map<URI, Locator> locators = new HashMap<>();
+    
     
     
     public MemProvider(Configuration config) {
