@@ -30,6 +30,7 @@ import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -189,7 +190,7 @@ public class RTPSWriter<T> extends Endpoint {
      * @return ReaderProxy
      */
     public ReaderProxy addMatchedReader(SubscriptionData readerData) {
-        LocatorPair locators = getLocators(readerData);
+        List<Locator> locators = getLocators(readerData);
         ReaderProxy proxy = new ReaderProxy(readerData, locators, getConfiguration().getNackSuppressionDuration());
         proxy.preferMulticast(getConfiguration().preferMulticast());
         

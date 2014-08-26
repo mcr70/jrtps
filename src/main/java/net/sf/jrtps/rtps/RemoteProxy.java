@@ -1,10 +1,16 @@
 package net.sf.jrtps.rtps;
 
+import java.util.List;
+
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.Locator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A base class used to represent a remote entity. Remote entity may have
@@ -15,27 +21,21 @@ import net.sf.jrtps.types.Locator;
  * @see #preferMulticast(boolean)
  */
 public class RemoteProxy {
+    private static final Logger logger = LoggerFactory.getLogger(RemoteProxy.class);
+    
     private final DiscoveredData discoveredData;
-
-    private final Locator ucLocator;
-    private final Locator mcLocator;
-
+    private final List<Locator> locators;
     private boolean preferMulticast = false;
 
     /**
      * Constructor for RemoteProxy.
      * 
      * @param dd
-     *            DiscoveredData
-     * @param ucLocator
-     *            Unicast locator
-     * @param mcLocator
-     *            Multicast locator
+     * @param locators
      */
-    protected RemoteProxy(DiscoveredData dd, Locator ucLocator, Locator mcLocator) {
+    protected RemoteProxy(DiscoveredData dd, List<Locator> locators) {
         this.discoveredData = dd;
-        this.ucLocator = ucLocator;
-        this.mcLocator = mcLocator;
+        this.locators = locators;
     }
 
     /**
@@ -46,33 +46,43 @@ public class RemoteProxy {
      * @return Locator
      */
     public Locator getLocator() {
-        if (preferMulticast && mcLocator != null) {
-            return mcLocator;
-        } else if (!preferMulticast && ucLocator != null) {
-            return ucLocator;
+        // TODO: We should select Locator that we can handle
+        
+        if (preferMulticast) { // Search for multicast locator
+            for (Locator loc : locators) {                
+                if(TransportProvider.getInstance(loc) == null) { // Try to select this locator only if we can handle it
+                    logger.debug("There was no TransportProvider registered for Locator {}, skipping it.", loc);
+                    continue;
+                }
+
+                if (loc.isMulticastLocator()) {
+                    return loc;
+                }
+            }
+        } 
+
+        for (Locator loc : locators) {
+            if(TransportProvider.getInstance(loc) == null) { // Try to select this locator only if we can handle it
+                continue;
+            }
+
+            return loc;
         }
 
-        return ucLocator != null ? ucLocator : mcLocator;
+        logger.warn("None of our TranportProviders (for Locator kinds {}) can handle remote entities locators {}", 
+                TransportProvider.getLocatorKinds(), locators);
+        
+        return null;
     }
 
     /**
-     * Gets the unicast locator of this RemoteProxy.
-     * 
-     * @return unicast locator, may be null
+     * Gets all the locators for this RemoteProxy
+     * @return
      */
-    public Locator getUnicastLocator() {
-        return ucLocator;
+    public List<Locator> getLocators() {
+        return locators;
     }
-
-    /**
-     * Gets the multicast locator of this RemoteProxy.
-     * 
-     * @return multicast locator, may be null
-     */
-    public Locator getMulticastLocator() {
-        return mcLocator;
-    }
-
+    
     /**
      * Gets the DiscoveredData associated with this Proxy.
      * 
@@ -125,6 +135,6 @@ public class RemoteProxy {
     }
 
     public String toString() {
-        return getGuid().toString() + ", uc: " + ucLocator + ", mc: " + mcLocator + ", prefers mc: " + preferMulticast;
+        return getGuid().toString() + ", locators " + locators + ", prefers mc: " + preferMulticast;
     }
 }

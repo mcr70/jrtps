@@ -1,9 +1,8 @@
 package net.sf.jrtps.builtin;
 
-import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
@@ -49,13 +48,8 @@ public class ParticipantData extends DiscoveredData {
     private GuidPrefix guidPrefix;
     private boolean expectsInlineQos = false;
 
-    private Locator metatrafficUnicastLocator; // TODO: remove these
-    private Locator metatrafficMulticastLocator;
-    private Locator unicastLocator;
-    private Locator multicastLocator;
-
-    private List<Locator> discoveryLocators;
-    private List<Locator> userdataLocators;
+    private final List<Locator> discoveryLocators;
+    private final List<Locator> userdataLocators;
 
     private int availableBuiltinEndpoints;
 
@@ -89,33 +83,6 @@ public class ParticipantData extends DiscoveredData {
         renewLease();
     }
 
-    public ParticipantData(GuidPrefix prefix, int endpoints, Locator u_ucLocator, Locator u_mcLocator,
-            Locator m_ucLocator, Locator m_mcLocator) {
-        super();
-        qos = QualityOfService.getSPDPQualityOfService();
-
-        guidPrefix = prefix;
-        availableBuiltinEndpoints = endpoints;
-
-        if (u_ucLocator != null) {
-            unicastLocator = u_ucLocator;
-        }
-        if (u_mcLocator != null) {
-            multicastLocator = u_mcLocator;
-        }
-        if (m_ucLocator != null) {
-            metatrafficUnicastLocator = m_ucLocator;
-        }
-        if (m_mcLocator != null) {
-            metatrafficMulticastLocator = m_mcLocator;
-        }
-
-        super.topicName = BUILTIN_TOPIC_NAME;
-        super.typeName = ParticipantData.class.getName();
-
-        renewLease();
-    }
-
     /**
      * Reads SPDPdiscoveredParticipantData. It is expected that inputstream is
      * positioned to start of serializedData of Data submessage, aligned at 32
@@ -124,7 +91,10 @@ public class ParticipantData extends DiscoveredData {
      * @param parameterList
      */
     public ParticipantData(ParameterList parameterList) {
-        qos = QualityOfService.getSPDPQualityOfService();
+        this.discoveryLocators = new LinkedList<>();
+        this.userdataLocators = new LinkedList<>();
+        super.qos = QualityOfService.getSPDPQualityOfService();
+        
         Iterator<Parameter> iterator = parameterList.getParameters().iterator();
 
         while (iterator.hasNext()) {
@@ -146,16 +116,16 @@ public class ParticipantData extends DiscoveredData {
                 vendorId = ((VendorId) param).getVendorId();
                 break;
             case PID_DEFAULT_UNICAST_LOCATOR:
-                unicastLocator = ((DefaultUnicastLocator) param).getLocator();
-                break;
-            case PID_METATRAFFIC_UNICAST_LOCATOR:
-                metatrafficUnicastLocator = ((MetatrafficUnicastLocator) param).getLocator();
+                userdataLocators.add(((DefaultUnicastLocator) param).getLocator());
                 break;
             case PID_DEFAULT_MULTICAST_LOCATOR:
-                multicastLocator = ((DefaultMulticastLocator) param).getLocator();
+                userdataLocators.add(((DefaultMulticastLocator) param).getLocator());
+                break;
+            case PID_METATRAFFIC_UNICAST_LOCATOR:
+                discoveryLocators.add(((MetatrafficUnicastLocator) param).getLocator());
                 break;
             case PID_METATRAFFIC_MULTICAST_LOCATOR:
-                metatrafficMulticastLocator = ((MetatrafficMulticastLocator) param).getLocator();
+                discoveryLocators.add(((MetatrafficMulticastLocator) param).getLocator());
                 break;
             case PID_PARTICIPANT_LEASE_DURATION:
                 this.leaseDuration = ((ParticipantLeaseDuration) param).getDuration();
@@ -209,22 +179,6 @@ public class ParticipantData extends DiscoveredData {
         return expectsInlineQos;
     }
 
-    public Locator getMetatrafficUnicastLocator() {
-        return metatrafficUnicastLocator;
-    }
-
-    public Locator getMetatrafficMulticastLocator() {
-        return metatrafficMulticastLocator;
-    }
-
-    public Locator getUnicastLocator() {
-        return unicastLocator;
-    }
-
-    public Locator getMulticastLocator() {
-        return multicastLocator;
-    }
-
     public int getBuiltinEndpoints() {
         return availableBuiltinEndpoints;
     }
@@ -242,22 +196,6 @@ public class ParticipantData extends DiscoveredData {
 
     public int getManualLivelinessCount() {
         return manualLivelinessCount;
-    }
-
-    public Set<Locator> getUserLocators() {
-        Set<Locator> userLocators = new HashSet<Locator>();
-        userLocators.add(multicastLocator);
-        userLocators.add(unicastLocator);
-
-        return userLocators;
-    }
-
-    public Set<Locator> getMetatrafficLocators() {
-        Set<Locator> metaLocators = new HashSet<Locator>();
-        metaLocators.add(metatrafficMulticastLocator);
-        metaLocators.add(metatrafficUnicastLocator);
-
-        return metaLocators;
     }
 
     /**
@@ -312,7 +250,7 @@ public class ParticipantData extends DiscoveredData {
 
     public String toString() {
         return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + ", lease duration "
-                + getLeaseDuration() + ", u_uc: " + unicastLocator + ", u_mc: " + multicastLocator + ", m_uc: "
-                + metatrafficUnicastLocator + ", m_mc: " + metatrafficMulticastLocator + ", " + qos;
+                + getLeaseDuration() + ", userdata locators: " + userdataLocators + 
+                ", discovery locators: " + discoveryLocators + ", " + qos;
     }
 }

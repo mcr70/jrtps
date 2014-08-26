@@ -1,8 +1,11 @@
 package net.sf.jrtps.rtps;
 
+import java.util.List;
+
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
+import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.util.Watchdog.Task;
 
@@ -30,8 +33,8 @@ public class WriterProxy extends RemoteProxy {
     private boolean isAlive = true; // reflects status of liveliness
 
 
-    WriterProxy(RTPSReader<?> reader, PublicationData wd, LocatorPair lPair, int heartbeatSuppressionDuration) {
-        super(wd, lPair.ucLocator, lPair.mcLocator);
+    WriterProxy(RTPSReader<?> reader, PublicationData wd, List<Locator> locators, int heartbeatSuppressionDuration) {
+        super(wd, locators);
         this.reader = reader;
 		
         this.hbSuppressionDuration = heartbeatSuppressionDuration;
