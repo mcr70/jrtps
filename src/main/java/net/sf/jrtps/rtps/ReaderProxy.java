@@ -1,7 +1,10 @@
 package net.sf.jrtps.rtps;
 
+import java.util.List;
+
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
+import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,8 +28,8 @@ public class ReaderProxy extends RemoteProxy {
 	private final int anSuppressionDuration;
 
 
-    ReaderProxy(SubscriptionData rd, LocatorPair lPair, int anSuppressionDuration) {
-        super(rd, lPair.ucLocator, lPair.mcLocator);
+    ReaderProxy(SubscriptionData rd, List<Locator> locators, int anSuppressionDuration) {
+        super(rd, locators);
         this.expectsInlineQoS = rd.expectsInlineQos(); 
 		this.anSuppressionDuration = anSuppressionDuration;
     }

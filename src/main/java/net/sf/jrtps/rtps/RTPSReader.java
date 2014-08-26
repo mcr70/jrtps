@@ -96,7 +96,7 @@ public class RTPSReader<T> extends Endpoint {
      */
     public WriterProxy addMatchedWriter(final PublicationData writerData) {
 
-        LocatorPair locators = getLocators(writerData);
+        List<Locator> locators = getLocators(writerData);
 
         WriterProxy wp = new WriterProxy(this, writerData, locators, heartbeatSuppressionDuration);
         wp.preferMulticast(getConfiguration().preferMulticast());
@@ -104,8 +104,7 @@ public class RTPSReader<T> extends Endpoint {
 
         writerProxies.put(writerData.getBuiltinTopicKey(), wp);
 
-        log.debug("[{}] Added matchedWriter {}, uc:{}, mc:{}", getEntityId(), writerData,
-                wp.getUnicastLocator(), wp.getMulticastLocator());
+        log.debug("[{}] Added matchedWriter {}, locators {}", getEntityId(), writerData, wp.getLocators());
 
         //sendAckNack(wp);
 
@@ -423,8 +422,11 @@ public class RTPSReader<T> extends Endpoint {
             log.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
             PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
-            wp = new WriterProxy(this, pd, new LocatorPair(null, Locator.defaultDiscoveryMulticastLocator(getParticipant()
-                    .getDomainId())), 0);
+            
+            List<Locator> locators = new LinkedList<>();
+            locators.add(Locator.defaultDiscoveryMulticastLocator(getParticipant().getDomainId()));
+            wp = new WriterProxy(this, pd, locators, 0);
+
             //wp.setLivelinessTask(createLivelinessTask(wp)); // No need to set liveliness task, since liveliness is infinite
 
             writerProxies.put(writerGuid, wp);
