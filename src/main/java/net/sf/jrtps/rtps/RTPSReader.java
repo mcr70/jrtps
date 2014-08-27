@@ -20,7 +20,6 @@ import net.sf.jrtps.message.parameter.DirectedWrite;
 import net.sf.jrtps.message.parameter.ParameterEnum;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.transport.TransportProvider;
-import net.sf.jrtps.transport.UDPProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -426,8 +425,13 @@ public class RTPSReader<T> extends Endpoint {
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
             
             List<Locator> locators = new LinkedList<>();
-            TransportProvider provider = TransportProvider.getInstance(UDPProvider.PROVIDER_SCHEME); // UDP provider is always present
-            locators.add(provider.getDefaultDiscoveryLocator(getParticipant().getDomainId()));
+//            TransportProvider provider = TransportProvider.getInstance(UDPProvider.PROVIDER_SCHEME); // UDP provider is always present
+//            locators.add(provider.getDefaultDiscoveryLocator(getParticipant().getDomainId()));
+                        
+            Collection<TransportProvider> providers = TransportProvider.getTransportProviders();
+            for (TransportProvider provider : providers) {
+                locators.add(provider.getDefaultDiscoveryLocator(getParticipant().getDomainId()));
+            }            
             
             wp = new WriterProxy(this, pd, locators, 0);
 
