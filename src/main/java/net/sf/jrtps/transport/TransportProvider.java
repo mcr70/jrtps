@@ -2,6 +2,7 @@ package net.sf.jrtps.transport;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
@@ -97,6 +98,15 @@ public abstract class TransportProvider {
         }
     }
 
+    
+    /**
+     * Gets all the registered TransportProviders.
+     * @return A Collection of TransportProviders
+     */
+    public static Collection<TransportProvider> getTransportProviders() {
+        return providersForScheme.values();
+    }
+    
     /**
      * Creates a new Receiver. If the URI has a port defined, it should be used. If not, domainId, participantId and
      * discovery parameters should be used to create port number according to specification.

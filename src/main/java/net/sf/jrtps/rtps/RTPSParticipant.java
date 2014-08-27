@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
  * 
  */
 public class RTPSParticipant {
-    private static final Logger log = LoggerFactory.getLogger(RTPSParticipant.class);
+    private static final Logger logger = LoggerFactory.getLogger(RTPSParticipant.class);
 
     private final Configuration config;
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
@@ -106,15 +106,15 @@ public class RTPSParticipant {
         handler = new RTPSMessageReceiver(this, queue);
         threadPoolExecutor.execute(handler);
 
-        log.debug("Starting receivers for discovery");
+        logger.debug("Starting receivers for discovery");
         List<URI> discoveryURIs = config.getDiscoveryListenerURIs();
         startReceiversForURIs(queue, bufferSize, discoveryURIs, true);
 
-        log.debug("Starting receivers for user data");
+        logger.debug("Starting receivers for user data");
         List<URI> listenerURIs = config.getListenerURIs();
         startReceiversForURIs(queue, bufferSize, listenerURIs, false);
 
-        log.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
+        logger.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
                 writerEndpoints.size());
     }
 
@@ -163,7 +163,7 @@ public class RTPSParticipant {
      * all the history caches of all entities will be cleared.
      */
     public void close() {
-        log.debug("Closing RTPSParticipant {}", guid);
+        logger.debug("Closing RTPSParticipant {}", guid);
 
         for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce
             // thread
@@ -231,7 +231,7 @@ public class RTPSParticipant {
             try {
                 return !threadPoolExecutor.awaitTermination(millis, TimeUnit.MILLISECONDS);
             } catch (InterruptedException e) {
-                log.debug("waitFor(...) was interrupted");
+                logger.debug("waitFor(...) was interrupted");
             }
         }
 
@@ -289,18 +289,18 @@ public class RTPSParticipant {
         Guid writerGuid = new Guid(sourceGuidPrefix, writerId);
         if (EntityId.UNKNOWN_ENTITY.equals(readerId)) {
             StringBuffer sb = new StringBuffer();
-            log.debug("writer {} wants to talk to UNKNOWN_ENTITY", writerId);
+            logger.debug("writer {} wants to talk to UNKNOWN_ENTITY", writerId);
             
             for (RTPSReader<?> r : readerEndpoints) {
-                log.trace("Check if reader {} is matched: {}", r.getEntityId(), r.isMatchedWith(writerGuid));
+                logger.trace("Check if reader {} is matched: {}", r.getEntityId(), r.isMatchedWith(writerGuid));
                 sb.append(r.getEntityId() + " ");
                 if (r.isMatchedWith(writerGuid)) {
-                    log.debug("Found reader {} that is matched with {}", r.getEntityId(), writerGuid);
+                    logger.debug("Found reader {} that is matched with {}", r.getEntityId(), writerGuid);
                     return r; // TODO: we should return a List<RTPSReader>
                 }
             }
 
-            log.trace("Known reader entities: {}", sb);
+            logger.trace("Known reader entities: {}", sb);
         }
         
         return null;
@@ -341,7 +341,7 @@ public class RTPSParticipant {
             }
         }
         
-        log.warn("None of the writers were matched with reader {}", readerGuid);        
+        logger.warn("None of the writers were matched with reader {}", readerGuid);        
         
         return null;
     }
@@ -394,6 +394,7 @@ public class RTPSParticipant {
 
             if (provider != null) {
                 try {
+                    logger.debug("Starting receiver for {}", uri);
                     Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, 
                             queue, bufferSize);
 
@@ -405,11 +406,11 @@ public class RTPSParticipant {
                     receivers.add(receiver);
                     threadPoolExecutor.execute(receiver);
                 } catch (IOException ioe) {
-                    log.warn("Failed to start receiver for URI {}", uri, ioe);
+                    logger.warn("Failed to start receiver for URI {}", uri, ioe);
                 }
             }
             else {
-                log.warn("Unknown scheme for URI {}", uri);
+                logger.warn("Unknown scheme for URI {}", uri);
             }
         }
     }

@@ -4,6 +4,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
@@ -150,5 +151,25 @@ public class Locator {
 
     public String toString() {
         return kind + "::" + Arrays.toString(address) + ":" + getPort();
+    }
+    
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Locator) {
+            Locator loc = (Locator) other;
+            return kind == loc.kind && port == loc.port && Arrays.equals(address, loc.address);
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        byte[] locBytes = new byte[24];
+        ByteBuffer bb = ByteBuffer.wrap(locBytes);
+        bb.putInt(kind).putInt(port).put(address);
+        
+        return Arrays.hashCode(locBytes);
     }
 }
