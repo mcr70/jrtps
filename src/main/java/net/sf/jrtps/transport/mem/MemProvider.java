@@ -30,10 +30,8 @@ public class MemProvider extends TransportProvider {
     @Override
     public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery,
             BlockingQueue<byte[]> queue, int bufferSize) throws IOException {
-        uri.getHost();
-        BlockingQueue<byte[]> inQueue = getQueue(uri);
-        
-        return new MemReceiver(participantId, inQueue, queue);
+        BlockingQueue<byte[]> inQueue = getQueue(uri);        
+        return new MemReceiver(new MemLocator(uri), participantId, inQueue, queue);
     }
 
     private synchronized BlockingQueue<byte[]> getQueue(URI uri) throws UnknownHostException {

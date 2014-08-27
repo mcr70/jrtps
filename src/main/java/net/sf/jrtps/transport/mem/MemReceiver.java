@@ -5,13 +5,22 @@ import java.util.concurrent.BlockingQueue;
 import net.sf.jrtps.transport.Receiver;
 import net.sf.jrtps.types.Locator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class MemReceiver implements Receiver {
-
-    private BlockingQueue<byte[]> inQueue;
-    private BlockingQueue<byte[]> outQueue;
-    private int participantId;
-
-    public MemReceiver(int participantId, BlockingQueue<byte[]> inQueue, BlockingQueue<byte[]> outQueue) {
+    private static final Logger logger = LoggerFactory.getLogger(MemReceiver.class);
+    
+    private final Locator locator;
+    private final int participantId;
+    private final BlockingQueue<byte[]> inQueue;
+    private final BlockingQueue<byte[]> outQueue;
+    
+    private boolean running = true;
+    
+    
+    public MemReceiver(Locator locator, int participantId, BlockingQueue<byte[]> inQueue, BlockingQueue<byte[]> outQueue) {
+        this.locator = locator;
         this.participantId = participantId;
         this.inQueue = inQueue;
         this.outQueue = outQueue;
@@ -19,14 +28,21 @@ public class MemReceiver implements Receiver {
 
     @Override
     public void run() {
-        // TODO Auto-generated method stub
-        
+        while(running) {
+            try {
+                byte[] bytes = inQueue.take();
+                outQueue.put(bytes);
+            } 
+            catch (InterruptedException e) {
+                logger.debug("Got interrupted, exiting");
+                running = false;
+            }
+        }
     }
 
     @Override
     public Locator getLocator() {
-        // TODO Auto-generated method stub
-        return null;
+        return locator;
     }
 
     @Override
@@ -36,6 +52,7 @@ public class MemReceiver implements Receiver {
 
     @Override
     public void close() {
-        // Nothing to do
+        running = false;
     }
+    
 }
