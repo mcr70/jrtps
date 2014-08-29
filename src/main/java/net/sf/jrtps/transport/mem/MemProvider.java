@@ -35,14 +35,16 @@ public class MemProvider extends TransportProvider {
         logger.debug("Creating receiver for {}", uri);
         
         BlockingQueue<byte[]> inQueue = getQueue(uri);
+        
+        logger.debug("queues: {}", queues);
+        
         return new MemReceiver(new MemLocator(uri), participantId, inQueue, queue);
     }
 
     @Override
     public Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException {
-        logger.debug("Creating transmitter for {}", locator);
-        
         BlockingQueue<byte[]> outQueue = queues.get(locator);
+        logger.debug("Creating transmitter for {}, queue: {}", locator, outQueue.hashCode());
         return new MemTransmitter(outQueue, bufferSize);
     }
 
@@ -56,10 +58,12 @@ public class MemProvider extends TransportProvider {
 
 
     private synchronized BlockingQueue<byte[]> getQueue(URI uri) throws UnknownHostException {
-        BlockingQueue<byte[]> q = queues.get(uri);
+        MemLocator loc = new MemLocator(uri);
+        BlockingQueue<byte[]> q = queues.get(loc);
         if (q == null) {
-            MemLocator loc = new MemLocator(uri);
             q = new ArrayBlockingQueue<>(128); // TODO: hardcoded
+            logger.debug("Adding new queue for {}: {}", loc, q.hashCode());
+            
             queues.put(loc, q);
         }
         
