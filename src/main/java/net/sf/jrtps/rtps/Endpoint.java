@@ -114,24 +114,36 @@ public class Endpoint {
      */
     protected boolean sendMessage(Message m, RemoteProxy proxy) {
         boolean overFlowed = false;
+        List<Locator> locators = new LinkedList<>();
 
-        Locator locator = proxy.getLocator();
-        logger.debug("Sending message to {}", locator);
+        if (GuidPrefix.GUIDPREFIX_UNKNOWN.equals(proxy.getGuid().getPrefix())) {
+            // GUIDPREFIX_UNKNOWN is used with SPDP; let's send message to every
+            // configured locator
+            locators.addAll(proxy.getLocators());
+        }
+        else {
+            locators.add(proxy.getLocator());
+        }
 
-        if (locator != null) {
-            try {
-                TransportProvider handler = TransportProvider.getInstance(locator);
-                Transmitter tr = handler.createTransmitter(locator, configuration.getBufferSize());
-                // TODO: No need to create and close all the time
+        //Locator locator = proxy.getLocator();
+        for (Locator locator : locators) {
+            logger.debug("Sending message to {}", locator);
 
-                overFlowed = tr.sendMessage(m);
-                tr.close();
-            } catch (IOException e) {
-                logger.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+            if (locator != null) {
+                try {
+                    TransportProvider provider = TransportProvider.getInstance(locator);
+                    Transmitter tr = provider.createTransmitter(locator, configuration.getBufferSize());
+                    // TODO: No need to create and close all the time
+
+                    overFlowed = tr.sendMessage(m);
+                    tr.close();
+                } catch (IOException e) {
+                    logger.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+                }
+            } else {
+                logger.debug("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
+                // participant.ignoreParticipant(targetPrefix);
             }
-        } else {
-            logger.debug("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
-            // participant.ignoreParticipant(targetPrefix);
         }
 
         return overFlowed;
@@ -173,7 +185,7 @@ public class Endpoint {
         if (pd == null) {
             logger.debug("PD was null for {}, {}", remoteGuid.getPrefix(), discoveredParticipants.keySet());
         }
-        
+
         if (remoteGuid.getEntityId().isBuiltinEntity()) {
             locators.addAll(pd.getDiscoveryLocators());
         } 

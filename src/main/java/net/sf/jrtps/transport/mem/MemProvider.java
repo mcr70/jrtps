@@ -65,4 +65,15 @@ public class MemProvider extends TransportProvider {
         
         return q;
     }
+
+    @Override
+    public Locator createDiscoveryLocator(URI uri, int domainId) {
+        if (uri.getPort() == -1) {
+            PortNumberParameters pnp = getConfiguration().getPortNumberParameters();
+            
+            return new MemLocator(uri, pnp.getDiscoveryMulticastPort(domainId));
+        }
+        
+        return new MemLocator(uri);
+    }
 }

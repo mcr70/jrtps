@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public abstract class TransportProvider {
-    private static final Logger log = LoggerFactory.getLogger(TransportProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransportProvider.class);
 
     private static HashMap<String, TransportProvider> providersForScheme = new HashMap<>();
     private static HashMap<Integer, TransportProvider> providersForKind = new HashMap<>();
@@ -70,7 +70,12 @@ public abstract class TransportProvider {
      * @return TransportProvider, or null if there was not TransportProvider registered with given Locator.kind
      */
     public static TransportProvider getInstance(Locator locator) {
-        return providersForKind.get(locator.getKind());
+        TransportProvider transportProvider = providersForKind.get(locator.getKind());
+        if (transportProvider == null) {
+            logger.warn("Could not get TransportProvider for Locator kind {}", locator.getKind());
+        }
+        
+        return transportProvider;
     }
     
     /**
@@ -90,7 +95,7 @@ public abstract class TransportProvider {
      * @param kinds Kinds of the Locators, that will be matched to given provider
      */
     public static void registerTransportProvider(String scheme, TransportProvider provider, int ... kinds) {
-        log.debug("Registering provider for scheme '{}', kind {}: {}", scheme, kinds, provider);
+        logger.debug("Registering provider for scheme '{}', kinds {}: {}", scheme, kinds, provider);
         providersForScheme.put(scheme, provider);
 
         for (int kind : kinds) {
@@ -140,4 +145,17 @@ public abstract class TransportProvider {
      * @return Locator
      */
     public abstract Locator getDefaultDiscoveryLocator(int domainId);
+
+    public static Locator getDiscoveryLocator(URI uri, int domainId) {
+        TransportProvider provider = providersForScheme.get(uri.getScheme());
+        if (provider != null) {
+            return provider.createDiscoveryLocator(uri, domainId);
+        }
+        
+        logger.warn("No TranportProvider registered with scheme for {}", uri);
+        
+        return null;
+    }
+
+    public abstract Locator createDiscoveryLocator(URI uri, int domainId);
 }
