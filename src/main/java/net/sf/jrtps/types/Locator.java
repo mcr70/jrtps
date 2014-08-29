@@ -150,7 +150,7 @@ public class Locator {
 
 
     public String toString() {
-        return kind + "::" + Arrays.toString(address) + ":" + getPort();
+        return "Locator(" + kind + ", " + Arrays.toString(address) + ":" + getPort() + ")";
     }
     
     
