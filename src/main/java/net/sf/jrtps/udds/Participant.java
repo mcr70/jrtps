@@ -2,7 +2,7 @@ package net.sf.jrtps.udds;
 
 import java.io.Externalizable;
 import java.io.Serializable;
-import java.util.Collection;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -831,15 +831,13 @@ public class Participant {
     private void createUnknownParticipantData(int domainId) {
         List<Locator> discoveryLocators = new LinkedList<>();
         
-        Collection<TransportProvider> providers = TransportProvider.getTransportProviders();
-        for (TransportProvider provider : providers) {
-            discoveryLocators.add(provider.getDefaultDiscoveryLocator(domainId));
+        List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
+        for (URI uri : discoveryAnnounceURIs) {
+            Locator locator = TransportProvider.getDiscoveryLocator(uri, domainId);
+            discoveryLocators.add(locator);
         }
         
-        logger.debug("Default discovery locators for unknown participant: {}", discoveryLocators);
-        
-        //TransportProvider provider = TransportProvider.getInstance(UDPProvider.PROVIDER_SCHEME); // Always present
-        //discoveryLocators.add(provider.getDefaultDiscoveryLocator(domainId));
+        logger.debug("Locators for discovery announcement: {}", discoveryLocators);
         
         ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, discoveryLocators, null);
 

@@ -8,7 +8,6 @@ import examples.hello.serializable.HelloListener;
 import examples.hello.serializable.HelloMessage;
 
 public class MemTransportReader {
-
     public static void main(String[] args) throws Exception {
         Configuration cfg = new Configuration("/jrtps-mem-test.properties");
         MemProvider mp = new MemProvider(cfg);
