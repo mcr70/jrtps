@@ -41,6 +41,9 @@ public class RemoteProxy {
         for (Locator locator : locators) {
             TransportProvider provider = TransportProvider.getInstance(locator);
             if (provider != null) {
+                // TODO: Convert generic locator to UDPLocator, MemLocator etc.
+                //       and remove all the unnecessary stuff Like InetAddress from
+                //       Locator
                 this.locators.add(locator);
             }
         }
