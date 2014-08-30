@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.Configuration;
@@ -78,14 +77,6 @@ public abstract class TransportProvider {
         return transportProvider;
     }
     
-    /**
-     * Get a Set of Locator kinds, that can be handled with registered TransportProviders.
-     * 
-     * @return a Set<Integer> of kinds that can be handled
-     */
-    public static Set<Integer> getLocatorKinds() {
-        return providersForKind.keySet();
-    }
     
     /**
      * Registers a TranportProvider with given scheme and kind

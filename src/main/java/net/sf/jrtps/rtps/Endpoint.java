@@ -178,6 +178,7 @@ public class Endpoint {
             }
         }
 
+        
         Guid remoteGuid = dd.getBuiltinTopicKey();
 
         // Set the default locators from ParticipantData

@@ -834,7 +834,9 @@ public class Participant {
         List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
         for (URI uri : discoveryAnnounceURIs) {
             Locator locator = TransportProvider.getDiscoveryLocator(uri, domainId);
-            discoveryLocators.add(locator);
+            if (locator != null) {
+                discoveryLocators.add(locator);
+            }
         }
         
         logger.debug("Locators for discovery announcement: {}", discoveryLocators);

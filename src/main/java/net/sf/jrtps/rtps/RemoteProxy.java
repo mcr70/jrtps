@@ -1,5 +1,6 @@
 package net.sf.jrtps.rtps;
 
+import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.builtin.DiscoveredData;
@@ -24,7 +25,7 @@ public class RemoteProxy {
     private static final Logger logger = LoggerFactory.getLogger(RemoteProxy.class);
     
     private final DiscoveredData discoveredData;
-    private final List<Locator> locators;
+    private final List<Locator> locators = new LinkedList<>();
     private boolean preferMulticast = false;
 
     /**
@@ -35,7 +36,14 @@ public class RemoteProxy {
      */
     protected RemoteProxy(DiscoveredData dd, List<Locator> locators) {
         this.discoveredData = dd;
-        this.locators = locators;
+
+        // Add only locators we can handle
+        for (Locator locator : locators) {
+            TransportProvider provider = TransportProvider.getInstance(locator);
+            if (provider != null) {
+                this.locators.add(locator);
+            }
+        }
     }
 
     /**
@@ -69,8 +77,7 @@ public class RemoteProxy {
             return loc;
         }
 
-        logger.warn("None of our TranportProviders (for Locator kinds {}) can handle remote entities locators {}", 
-                TransportProvider.getLocatorKinds(), locators);
+        logger.warn("Could not find a suitable Locator from {}", locators);
         
         return null;
     }
