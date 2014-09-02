@@ -45,7 +45,7 @@ public class UDPProvider extends TransportProvider {
 
     @Override
     public Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException {
-        return new UDPTransmitter(locator, bufferSize);
+        return new UDPTransmitter(new UDPLocator(locator), bufferSize);
     }
 
     private ReceiverConfig getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
@@ -130,7 +130,7 @@ public class UDPProvider extends TransportProvider {
                 port = pnp.getDiscoveryMulticastPort(domainId);
             }
             
-            return new Locator(kind, port, address);
+            return new UDPLocator(kind, port, address);
         } catch (UnknownHostException e) {
             logger.warn("Failed to create Locator", e);
         }
