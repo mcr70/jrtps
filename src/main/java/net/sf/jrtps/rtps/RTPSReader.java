@@ -425,8 +425,6 @@ public class RTPSReader<T> extends Endpoint {
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
             
             List<Locator> locators = new LinkedList<>();
-//            TransportProvider provider = TransportProvider.getInstance(UDPProvider.PROVIDER_SCHEME); // UDP provider is always present
-//            locators.add(provider.getDefaultDiscoveryLocator(getParticipant().getDomainId()));
                         
             Collection<TransportProvider> providers = TransportProvider.getTransportProviders();
             for (TransportProvider provider : providers) {

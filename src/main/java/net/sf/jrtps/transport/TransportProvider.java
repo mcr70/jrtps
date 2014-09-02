@@ -50,12 +50,13 @@ public abstract class TransportProvider {
     }
     
     /**
-     * get a provider for given scheme. Scheme is the same, as is used by
+     * Get a TranportProvider for given scheme. Scheme is the same, as is used by
      * java.net.URI class. A TransportProvider need to be first registered with
      * registerProvider.
      * 
      * @param scheme scheme
      * @return TransportProvider, or null if there was not TransportProvider registered with given scheme
+     * @see java.net.URI#getScheme()
      */
     public static TransportProvider getInstance(String scheme) {
         return providersForScheme.get(scheme);
@@ -137,16 +138,12 @@ public abstract class TransportProvider {
      */
     public abstract Locator getDefaultDiscoveryLocator(int domainId);
 
-    public static Locator getDiscoveryLocator(URI uri, int domainId) {
-        TransportProvider provider = providersForScheme.get(uri.getScheme());
-        if (provider != null) {
-            return provider.createDiscoveryLocator(uri, domainId);
-        }
-        
-        logger.warn("No TranportProvider registered with scheme for {}", uri);
-        
-        return null;
-    }
-
+    /**
+     * Create a discovery locator with given URI and domainId. This method is called based on
+     * the value given in configuration parameter 'jrtps.discovery.announce-uris'
+     * @param uri
+     * @param domainId
+     * @return Discovery locator
+     */
     public abstract Locator createDiscoveryLocator(URI uri, int domainId);
 }
