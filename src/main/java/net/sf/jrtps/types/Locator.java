@@ -1,9 +1,8 @@
 package net.sf.jrtps.types;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
+import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -25,19 +24,6 @@ public class Locator {
      * An invalid Locator kind 
      */
     public static final int LOCATOR_KIND_INVALID = -1;
-
-    private static final int PB = 7400; // NOTE: These should be moved to
-                                          // somewhere else. default ports.
-    private static final int DG = 250;
-    private static final int PG = 2;
-    private static final int d0 = 0; // used with metatraffic (discovery),
-                                       // multicast @see 9.6.1.1
-    private static final int d1 = 10; // used with metatraffic (discovery),
-                                        // unicast @see 9.6.1.1
-    private static final int d2 = 1; // Used with user traffic, multicast @see
-                                       // 9.6.1.2
-    private static final int d3 = 11; // Used with user traffic, unicast @see
-                                        // 9.6.1.2
 
     private int kind;
     private int port;
@@ -72,59 +58,23 @@ public class Locator {
         is.read(address);
     }
 
-    private Locator(int kind, int port, byte[] address) {
+    /**
+     * Create new Locator.
+     * @param kind
+     * @param port
+     * @param address address must be an array of length 16
+     * @throws IllegalArgumentException if address is not of length 16
+     */
+    public Locator(int kind, int port, byte[] address) {
         this.kind = kind;
         this.port = port;
         this.address = address;
-
-        assert address != null && address.length == 16;
-    }
-
-    public InetAddress getInetAddress() {
-        InetAddress inetAddress = null;
-
-        try {
-            switch (kind) {
-            case LOCATOR_KIND_UDPv4:
-                byte[] addr = new byte[4];
-                addr[0] = address[12];
-                addr[1] = address[13];
-                addr[2] = address[14];
-                addr[3] = address[15];
-                inetAddress = InetAddress.getByAddress(addr);
-                break;
-            case LOCATOR_KIND_UDPv6:
-                inetAddress = InetAddress.getByAddress(address);
-                break;
-            default:
-                throw new IllegalArgumentException("Internal error: Unknown Locator kind: 0x"
-                        + String.format("%04x", kind) + ", port: " + String.format("%04x", port));
-            }
-        } catch (UnknownHostException uhe) {
-            // Not Possible. InetAddress.getByAddress throws this exception if
-            // byte[] length is not
-            // 4 or 16. We have ensured this in constructor & switch-case
+        
+        if (address.length != 16) {
+            throw new IllegalArgumentException("address must be an array of length 16");
         }
-
-        return inetAddress;
     }
 
-    /**
-     * Get the remote socket address
-     * 
-     * @return SocketAddress
-     */
-    public SocketAddress getSocketAddress() {
-        return new InetSocketAddress(getInetAddress(), port);
-    }
-
-    /**
-     * Checks, if this Locator represents a multicast locator.
-     * @return true, if multicast locator.
-     */
-    public boolean isMulticastLocator() {
-        return getInetAddress().isMulticastAddress();
-    }
     
     /** 
      * Gets the kind of this Locator. Each Locator has a kind associated with it to distinguish different types 
@@ -137,33 +87,57 @@ public class Locator {
         return kind;
     }
     
+    /**
+     * Gets the port of this Locator.
+     * @return port
+     */
     public int getPort() {
         // TODO: check this. port is ulong (32 bits), but in practice, 16 last
         // bits (0-65535) is our port number
         // For large port numbers (> 32767), we need to mask out negativeness
         return port & 0xffff;
     }
-
+    
+    /**
+     * Gets the address of this Locator.
+     * @return address
+     */
+    public byte[] getAddress() {
+        return address;
+    }
+    
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_long(kind);
         buffer.write_long(port);
         buffer.write(address);
     }
 
-    /**
-     * see 9.6.1.4 Default Settings for the Simple Participant Discovery
-     * Protocol
-     * 
-     * @param domainId
-     * 
-     */
-    public static Locator defaultDiscoveryMulticastLocator(int domainId) {
-        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
-    
-        return new Locator(LOCATOR_KIND_UDPv4, PB + DG * domainId + d0, addr);
-    }
 
     public String toString() {
-        return getInetAddress() + ":" + getPort();
+        return "Locator(" + kind + ", " + Arrays.toString(address) + ":" + getPort() + ")";
+    }
+    
+    
+    @Override
+    public boolean equals(Object other) {
+        if (other instanceof Locator) {
+            Locator loc = (Locator) other;
+            return kind == loc.kind && port == loc.port && Arrays.equals(address, loc.address);
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public int hashCode() {
+        byte[] locBytes = new byte[24];
+        ByteBuffer bb = ByteBuffer.wrap(locBytes);
+        bb.putInt(kind).putInt(port).put(address);
+        
+        return Arrays.hashCode(locBytes);
+    }
+
+    public boolean isMulticastLocator() {
+        return false;
     }
 }

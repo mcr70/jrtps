@@ -1,41 +1,49 @@
 package net.sf.jrtps.rtps;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.Locator;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
- * A base class used to represent a remote entity. Remote entity may have
- * advertised both an unicast locator and a multicast locator. This class allows
- * to set which one will be used.
+ * A base class used to represent a remote entity. 
  * 
  * @author mcr70
- * @see #preferMulticast(boolean)
  */
 public class RemoteProxy {
+    private static final Logger logger = LoggerFactory.getLogger(RemoteProxy.class);
+    
     private final DiscoveredData discoveredData;
-
-    private final Locator ucLocator;
-    private final Locator mcLocator;
-
-    private boolean preferMulticast = false;
+    private final List<Locator> locators = new LinkedList<>();
+    private boolean preferMulticast = false; // TODO: not used at the moment
 
     /**
      * Constructor for RemoteProxy.
      * 
      * @param dd
-     *            DiscoveredData
-     * @param ucLocator
-     *            Unicast locator
-     * @param mcLocator
-     *            Multicast locator
+     * @param locators
      */
-    protected RemoteProxy(DiscoveredData dd, Locator ucLocator, Locator mcLocator) {
+    protected RemoteProxy(DiscoveredData dd, List<Locator> locators) {
         this.discoveredData = dd;
-        this.ucLocator = ucLocator;
-        this.mcLocator = mcLocator;
+
+        // Add only locators we can handle
+        for (Locator locator : locators) {
+            TransportProvider provider = TransportProvider.getInstance(locator);
+            if (provider != null) {
+                // TODO: Convert generic locator to UDPLocator, MemLocator etc.
+                //       and remove all the unnecessary stuff Like InetAddress from
+                //       Locator
+                this.locators.add(locator);
+            }
+        }
     }
 
     /**
@@ -46,33 +54,23 @@ public class RemoteProxy {
      * @return Locator
      */
     public Locator getLocator() {
-        if (preferMulticast && mcLocator != null) {
-            return mcLocator;
-        } else if (!preferMulticast && ucLocator != null) {
-            return ucLocator;
+        if (locators.size() > 0) {  // TODO: should we return the first one, or should we do some filtering
+            return locators.get(0); // Get the first available locator
         }
-
-        return ucLocator != null ? ucLocator : mcLocator;
+        
+        logger.warn("Could not find a suitable Locator from {}", locators);
+        
+        return null;
     }
 
     /**
-     * Gets the unicast locator of this RemoteProxy.
-     * 
-     * @return unicast locator, may be null
+     * Gets all the locators for this RemoteProxy
+     * @return All the locators that can be handled by TransportProviders
      */
-    public Locator getUnicastLocator() {
-        return ucLocator;
+    public List<Locator> getLocators() {
+        return locators;
     }
-
-    /**
-     * Gets the multicast locator of this RemoteProxy.
-     * 
-     * @return multicast locator, may be null
-     */
-    public Locator getMulticastLocator() {
-        return mcLocator;
-    }
-
+    
     /**
      * Gets the DiscoveredData associated with this Proxy.
      * 
@@ -125,6 +123,6 @@ public class RemoteProxy {
     }
 
     public String toString() {
-        return getGuid().toString() + ", uc: " + ucLocator + ", mc: " + mcLocator + ", prefers mc: " + preferMulticast;
+        return getGuid().toString() + ", locators " + locators + ", prefers mc: " + preferMulticast;
     }
 }

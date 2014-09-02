@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport;
+package net.sf.jrtps.transport.udp;
 
 import java.net.DatagramSocket;
 

@@ -54,3 +54,44 @@ public class CustomDataWriter<T> extends DataWriter<T> {
     CustomDataWriter<HelloMessage> cdw = (CustomDataWriter<HelloMessage>) p.createDataWriter(HelloMessage.class);
     cdw.write(new HelloMessage(1, "hello"), System.currentTimeMillis());
 +---
+
+
+* TransportProvider
+
+ RTPS specification says that only UDP base communication is mandatory for the interoperability.
+ There might be good reasons to provide alternate transports. <TransportProvider> is used
+ to provide transports of any kind. As a proof-of-concept, In-memory TransportProvider
+ with scheme <mem> is provided.
+ 
+ TransportProvider server two purposes. One is to provide actual transport specific
+ receivers and transmitters. Other is to provide <Locator>s, that are used to 
+ advertise participants communication capabilities to others.
+
+ Participant uses configuration parametes <jrtps.listener-uris, jrtps.discovery.listener-uris>
+ and <jrtps.discovery.announce-uris> to create <Receiver>s and <Transmitter>s 
+ for readers and writers. For these URIs, Participant uses the scheme of the URI to
+ find a suitable TransportProvider. In order for a TransportProvider to be accessible for
+ this purpose, one needs to register one. This is how it is done with <MemProvider>,
+ which extends a <TransportProvider>
+ 
++----------- 
+ Configuration cfg = new Configuration("/mem-test-1.properties");
+ MemProvider mp = new MemProvider(cfg);
+ TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
++----------- 
+ 
+ Note, that UDP Transport provider is automatically registered the same way,
+ so it is always accessible for Participant(and for configuration files).
+ The code above would allow to use these configuration options in configuration file:
+ 
++----------- 
+ jrtps.listener-uris = mem://10.10.10.11:1234
+ jrtps.discovery.listener-uris = mem://10.10.10.11:1024
+ jrtps.discovery.announce-uris = mem://10.10.10.12:1024
++----------- 
+
+ 
+ <Note, that TransportProvider is a work in progress. In particular, all the abstract
+  methods might need some fine tuning. There is some conceptual overlapping between
+  creation of communication objects and creation of URIs for the same things.>
+

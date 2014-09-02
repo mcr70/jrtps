@@ -2,6 +2,7 @@ package net.sf.jrtps.udds;
 
 import java.io.Externalizable;
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -32,6 +33,8 @@ import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
+import net.sf.jrtps.transport.TransportProvider;
+import net.sf.jrtps.transport.udp.UDPProvider;
 import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -135,9 +138,14 @@ public class Participant {
      */
     public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
-        
+                
         this.entityFactory = ef != null ? ef : new EntityFactory();;
         this.config = cfg != null ? cfg : new Configuration();
+        
+        // UDPProvider is used 
+        UDPProvider provider = new UDPProvider(config); 
+        TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
+                Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
         
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
@@ -821,8 +829,23 @@ public class Participant {
     }
 
     private void createUnknownParticipantData(int domainId) {
-        ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, null, null, null,
-                Locator.defaultDiscoveryMulticastLocator(domainId));
+        List<Locator> discoveryLocators = new LinkedList<>();
+        
+        List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
+        for (URI uri : discoveryAnnounceURIs) {
+            TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
+            if (provider != null) {
+                Locator locator = provider.createDiscoveryLocator(uri, domainId); 
+                discoveryLocators.add(locator);
+            }
+            else {
+                logger.warn("No TranportProvider registered with scheme for {}", uri);
+            }
+        }
+        
+        logger.debug("Locators for discovery announcement: {}", discoveryLocators);
+        
+        ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, discoveryLocators, null);
 
         // Set the lease duration to max integer. I.e. Never expires.
         pd.setLeaseDuration(new Duration(Integer.MAX_VALUE));

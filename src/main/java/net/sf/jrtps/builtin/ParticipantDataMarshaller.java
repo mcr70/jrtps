@@ -82,26 +82,6 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
             }
         }
 
-        Locator metaUnicastLocator = pd.getMetatrafficUnicastLocator();
-        if (metaUnicastLocator != null) {
-            payloadParams.add(new MetatrafficUnicastLocator(metaUnicastLocator));
-        }
-
-        Locator metaMulticastLocator = pd.getMetatrafficMulticastLocator();
-        if (metaMulticastLocator != null) {
-            payloadParams.add(new MetatrafficMulticastLocator(metaMulticastLocator));
-        }
-
-        Locator unicastLocator = pd.getUnicastLocator();
-        if (unicastLocator != null) {
-            payloadParams.add(new DefaultUnicastLocator(unicastLocator));
-        }
-
-        Locator multicastLocator = pd.getMulticastLocator();
-        if (multicastLocator != null) {
-            payloadParams.add(new DefaultMulticastLocator(multicastLocator));
-        }
-
         payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
         payloadParams.add(new Sentinel());
 
