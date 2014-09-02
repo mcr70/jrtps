@@ -24,9 +24,12 @@ public class MemTransmitter implements Transmitter {
         RTPSByteBuffer buffer = new RTPSByteBuffer(ByteBuffer.allocate(bufferSize));
         buffer.getBuffer().order(ByteOrder.LITTLE_ENDIAN);
         boolean overFlowed = msg.writeTo(buffer);
-        buffer.getBuffer().flip();
-
-        outQueue.add(buffer.getBuffer().array());
+        byte[] outputBytes = new byte[buffer.position()];
+        byte[] array = buffer.getBuffer().array();
+        
+        System.arraycopy(array, 0, outputBytes, 0, outputBytes.length);
+        
+        outQueue.add(outputBytes);
 
         return overFlowed;
     }

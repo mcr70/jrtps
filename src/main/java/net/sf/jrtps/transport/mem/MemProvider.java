@@ -23,7 +23,6 @@ public class MemProvider extends TransportProvider {
     static final int LOCATOR_KIND_MEM = 0x8001;
     
     private static final Map<Locator, BlockingQueue<byte[]>> queues = new HashMap<>();
-    private static final Map<URI, Locator> locators = new HashMap<>();
     
     public MemProvider(Configuration config) {
         super(config);
@@ -31,12 +30,8 @@ public class MemProvider extends TransportProvider {
 
     @Override
     public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery,
-            BlockingQueue<byte[]> queue, int bufferSize) throws IOException {
-        logger.debug("Creating receiver for {}", uri);
-        
+            BlockingQueue<byte[]> queue, int bufferSize) throws IOException {        
         BlockingQueue<byte[]> inQueue = getQueue(uri);
-        
-        logger.debug("queues: {}", queues);
         
         return new MemReceiver(new MemLocator(uri), participantId, inQueue, queue);
     }
