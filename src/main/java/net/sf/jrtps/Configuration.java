@@ -278,7 +278,7 @@ public class Configuration {
      * @return Listener URIs
      */
     public List<URI> getListenerURIs() {
-        return __getListenerURIs("jrtps.listener-uris");
+        return __getListenerURIs("jrtps.listener-uris", new String[] {"udp://239.255.0.1", "udp://localhost"});
     }
 
 
@@ -287,9 +287,17 @@ public class Configuration {
      * @return Listener URIs
      */
     public List<URI> getDiscoveryListenerURIs() {
-        return __getListenerURIs("jrtps.discovery.listener-uris");
+        return __getListenerURIs("jrtps.discovery.listener-uris", new String[] {"udp://239.255.0.1", "udp://localhost"});
     }
     
+    /**
+     * Gets the announce URIs for discovery
+     * @return Announce URIs
+     */
+    public List<URI> getDiscoveryAnnounceURIs() {
+        return __getListenerURIs("jrtps.discovery.announce-uris", new String[] {"udp://239.255.0.1"});
+    }
+
     /**
      * Gets whether or not udds DataWriter writes collections coherently or not.
      * 
@@ -299,17 +307,6 @@ public class Configuration {
         return getBooleanProperty("udds.collections.coherent", false);
     }
 
-    /**
-     * This configuration flag tells how reader determines when the liveliness
-     * of remote writer is is restored. If set to false, any message from writer
-     * restores liveliness. If set to true, only messages for writer liveliness
-     * protocol triggers livelinessRestored condition.
-     * 
-     * @return true or false
-     */
-    public boolean isLivelinessRestoredByProtocolOnly() {
-        return getBooleanProperty("jrtps.reader.liveliness-restored-by-protocol-only", false);
-    }
     
     private String[] getStringArrayProperty(String key, String[] deflt) {
         String property = props.getProperty(key);
@@ -332,8 +329,8 @@ public class Configuration {
         return dflt;
     }
 
-    private List<URI> __getListenerURIs(String prop) {
-        String[] uriStrings = getStringArrayProperty(prop, new String[] {"udp://239.255.0.1", "udp://localhost"});
+    private List<URI> __getListenerURIs(String prop, String[] defaults) {
+        String[] uriStrings = getStringArrayProperty(prop, defaults);
 
         List<URI> uriList = new LinkedList<>();
         for (String s : uriStrings) {

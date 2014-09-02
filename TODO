@@ -1,9 +1,4 @@
 o General
-    - We store only one locator for discovery/userdata access. 
-      d_mc, d_uc, u_mc, u_uc.
-      Instead, we should store a List of locators for each. (tcp, ssl, ...).
-      Configuration allows to specify multiple locators, but last one is 
-      actually propagated to remote participant.
     - Parameter getBytes() return bytes[] array stored in instance member. 
       subclasses might not update byte[]. Rethink this. For example, see
       how KeyHash handles this.

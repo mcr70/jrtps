@@ -2,6 +2,7 @@ package net.sf.jrtps.transport;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
@@ -17,11 +18,11 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public abstract class TransportProvider {
-    private static final Logger log = LoggerFactory.getLogger(TransportProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(TransportProvider.class);
 
     private static HashMap<String, TransportProvider> providersForScheme = new HashMap<>();
     private static HashMap<Integer, TransportProvider> providersForKind = new HashMap<>();
-
+    
     private Configuration config;
 
     /**
@@ -49,12 +50,13 @@ public abstract class TransportProvider {
     }
     
     /**
-     * get a provider for given scheme. Scheme is the same, as is used by
+     * Get a TranportProvider for given scheme. Scheme is the same, as is used by
      * java.net.URI class. A TransportProvider need to be first registered with
      * registerProvider.
      * 
      * @param scheme scheme
      * @return TransportProvider, or null if there was not TransportProvider registered with given scheme
+     * @see java.net.URI#getScheme()
      */
     public static TransportProvider getInstance(String scheme) {
         return providersForScheme.get(scheme);
@@ -68,9 +70,15 @@ public abstract class TransportProvider {
      * @return TransportProvider, or null if there was not TransportProvider registered with given Locator.kind
      */
     public static TransportProvider getInstance(Locator locator) {
-        return providersForKind.get(locator.getKind());
+        TransportProvider transportProvider = providersForKind.get(locator.getKind());
+        if (transportProvider == null) {
+            logger.warn("Could not get TransportProvider for Locator kind {}", locator.getKind());
+        }
+        
+        return transportProvider;
     }
-
+    
+    
     /**
      * Registers a TranportProvider with given scheme and kind
      * 
@@ -79,7 +87,7 @@ public abstract class TransportProvider {
      * @param kinds Kinds of the Locators, that will be matched to given provider
      */
     public static void registerTransportProvider(String scheme, TransportProvider provider, int ... kinds) {
-        log.debug("Registering provider for scheme '{}', kind {}: {}", scheme, kinds, provider);
+        logger.debug("Registering provider for scheme '{}', kinds {}: {}", scheme, kinds, provider);
         providersForScheme.put(scheme, provider);
 
         for (int kind : kinds) {
@@ -87,6 +95,15 @@ public abstract class TransportProvider {
         }
     }
 
+    
+    /**
+     * Gets all the registered TransportProviders.
+     * @return A Collection of TransportProviders
+     */
+    public static Collection<TransportProvider> getTransportProviders() {
+        return providersForScheme.values();
+    }
+    
     /**
      * Creates a new Receiver. If the URI has a port defined, it should be used. If not, domainId, participantId and
      * discovery parameters should be used to create port number according to specification.
@@ -113,4 +130,20 @@ public abstract class TransportProvider {
      * @throws IOException
      */
     public abstract Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException;
+    
+    /**
+     * Get the default Locator for discovery.
+     * @param domainId
+     * @return Locator
+     */
+    public abstract Locator getDefaultDiscoveryLocator(int domainId);
+
+    /**
+     * Create a discovery locator with given URI and domainId. This method is called based on
+     * the value given in configuration parameter 'jrtps.discovery.announce-uris'
+     * @param uri
+     * @param domainId
+     * @return Discovery locator
+     */
+    public abstract Locator createDiscoveryLocator(URI uri, int domainId);
 }

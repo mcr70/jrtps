@@ -1,6 +1,7 @@
 package net.sf.jrtps.rtps;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -9,9 +10,8 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.message.parameter.MulticastLocator;
+import net.sf.jrtps.message.parameter.LocatorParameter;
 import net.sf.jrtps.message.parameter.Parameter;
-import net.sf.jrtps.message.parameter.UnicastLocator;
 import net.sf.jrtps.transport.Transmitter;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class Endpoint {
-    private static final Logger log = LoggerFactory.getLogger(Endpoint.class);
+    private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
 
     private final String topicName;
     private final Guid guid;
@@ -84,7 +84,7 @@ public class Endpoint {
     public EntityId getEntityId() {
         return guid.getEntityId();
     }
-    
+
     Configuration getConfiguration() {
         return configuration;
     }
@@ -114,24 +114,36 @@ public class Endpoint {
      */
     protected boolean sendMessage(Message m, RemoteProxy proxy) {
         boolean overFlowed = false;
-        
-        Locator locator = proxy.getLocator();
-        log.debug("Sending message to {}", locator);
+        List<Locator> locators = new LinkedList<>();
 
-        if (locator != null) {
-            try {
-                TransportProvider handler = TransportProvider.getInstance(locator);
-                Transmitter tr = handler.createTransmitter(locator, configuration.getBufferSize());
-                // TODO: No need to create and close all the time
+        if (GuidPrefix.GUIDPREFIX_UNKNOWN.equals(proxy.getGuid().getPrefix())) {
+            // GUIDPREFIX_UNKNOWN is used with SPDP; let's send message to every
+            // configured locator
+            locators.addAll(proxy.getLocators());
+        }
+        else {
+            locators.add(proxy.getLocator());
+        }
 
-                overFlowed = tr.sendMessage(m);
-                tr.close();
-            } catch (IOException e) {
-                log.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+        //Locator locator = proxy.getLocator();
+        for (Locator locator : locators) {
+            logger.debug("Sending message to {}", locator);
+
+            if (locator != null) {
+                try {
+                    TransportProvider provider = TransportProvider.getInstance(locator);
+                    Transmitter tr = provider.createTransmitter(locator, configuration.getBufferSize());
+                    // TODO: No need to create and close all the time
+
+                    overFlowed = tr.sendMessage(m);
+                    tr.close();
+                } catch (IOException e) {
+                    logger.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+                }
+            } else {
+                logger.debug("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
+                // participant.ignoreParticipant(targetPrefix);
             }
-        } else {
-            log.debug("[{}] Unable to send message, no locator for proxy {}", getGuid().getEntityId(), proxy);
-            // participant.ignoreParticipant(targetPrefix);
         }
 
         return overFlowed;
@@ -152,31 +164,34 @@ public class Endpoint {
      * @param dd
      * @return unicast and multicast locator
      */
-    LocatorPair getLocators(DiscoveredData dd) {
+    List<Locator> getLocators(DiscoveredData dd) {
+        List<Locator> locators = new LinkedList<>();
+
+        // check if proxys discovery data contains locator info
+        if (!(dd instanceof ParticipantData)) {
+            List<Parameter> params = dd.getParameters();
+            for (Parameter p : params) {
+                if (p instanceof LocatorParameter) {
+                    LocatorParameter locParam = (LocatorParameter) p;
+                    locators.add(locParam.getLocator());
+                } 
+            }
+        }
+
+        
         Guid remoteGuid = dd.getBuiltinTopicKey();
-        LocatorPair locators = new LocatorPair();
 
         // Set the default locators from ParticipantData
         ParticipantData pd = discoveredParticipants.get(remoteGuid.getPrefix());
-
-        if (remoteGuid.getEntityId().isBuiltinEntity()) {
-            locators.ucLocator = pd.getMetatrafficUnicastLocator();
-            locators.mcLocator = pd.getMetatrafficMulticastLocator();
-        } else {
-            locators.ucLocator = pd.getUnicastLocator();
-            locators.mcLocator = pd.getMulticastLocator();
+        if (pd == null) {
+            logger.debug("PD was null for {}, {}", remoteGuid.getPrefix(), discoveredParticipants.keySet());
         }
 
-        // Then check if proxys discovery data contains locator info
-        List<Parameter> params = dd.getParameters();
-        for (Parameter p : params) {
-            if (p instanceof UnicastLocator) {
-                UnicastLocator ul = (UnicastLocator) p;
-                locators.ucLocator = ul.getLocator();
-            } else if (p instanceof MulticastLocator) {
-                MulticastLocator mc = (MulticastLocator) p;
-                locators.mcLocator = mc.getLocator();
-            }
+        if (remoteGuid.getEntityId().isBuiltinEntity()) {
+            locators.addAll(pd.getDiscoveryLocators());
+        } 
+        else {
+            locators.addAll(pd.getUserdataLocators());
         }
 
         return locators;
