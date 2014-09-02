@@ -54,3 +54,9 @@ public class CustomDataWriter<T> extends DataWriter<T> {
     CustomDataWriter<HelloMessage> cdw = (CustomDataWriter<HelloMessage>) p.createDataWriter(HelloMessage.class);
     cdw.write(new HelloMessage(1, "hello"), System.currentTimeMillis());
 +---
+
+
+* TransportProvider
+
+ <EntityFactory> is used to create <DataWriter> and <DataReader> entities. One can provide a custom
+
