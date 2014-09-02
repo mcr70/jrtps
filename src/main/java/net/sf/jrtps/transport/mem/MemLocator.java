@@ -13,9 +13,5 @@ public class MemLocator extends Locator {
     public MemLocator(URI uri, int port) {
         super(MemProvider.LOCATOR_KIND_MEM, port, ByteBuffer.wrap(new byte[16]).putInt(uri.toString().hashCode()).array());
     }   
-    
-    @Override
-    public boolean isMulticastLocator() {
-        return true;
-    }
+
 }

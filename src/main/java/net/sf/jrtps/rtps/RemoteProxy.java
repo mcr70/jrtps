@@ -14,19 +14,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A base class used to represent a remote entity. Remote entity may have
- * advertised both an unicast locator and a multicast locator. This class allows
- * to set which one will be used.
+ * A base class used to represent a remote entity. 
  * 
  * @author mcr70
- * @see #preferMulticast(boolean)
  */
 public class RemoteProxy {
     private static final Logger logger = LoggerFactory.getLogger(RemoteProxy.class);
     
     private final DiscoveredData discoveredData;
     private final List<Locator> locators = new LinkedList<>();
-    private boolean preferMulticast = false;
+    private boolean preferMulticast = false; // TODO: not used at the moment
 
     /**
      * Constructor for RemoteProxy.
@@ -57,29 +54,10 @@ public class RemoteProxy {
      * @return Locator
      */
     public Locator getLocator() {
-        // TODO: We should select Locator that we can handle
-        
-        if (preferMulticast) { // Search for multicast locator
-            for (Locator loc : locators) {                
-                if(TransportProvider.getInstance(loc) == null) { // Try to select this locator only if we can handle it
-                    logger.debug("There was no TransportProvider registered for Locator {}, skipping it.", loc);
-                    continue;
-                }
-
-                if (loc.isMulticastLocator()) {
-                    return loc;
-                }
-            }
-        } 
-
-        for (Locator loc : locators) {
-            if(TransportProvider.getInstance(loc) == null) { // Try to select this locator only if we can handle it
-                continue;
-            }
-
-            return loc;
+        if (locators.size() > 0) {  // TODO: should we return the first one, or should we do some filtering
+            return locators.get(0); // Get the first available locator
         }
-
+        
         logger.warn("Could not find a suitable Locator from {}", locators);
         
         return null;
@@ -87,7 +65,7 @@ public class RemoteProxy {
 
     /**
      * Gets all the locators for this RemoteProxy
-     * @return
+     * @return All the locators that can be handled by TransportProviders
      */
     public List<Locator> getLocators() {
         return locators;

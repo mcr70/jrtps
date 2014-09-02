@@ -1,9 +1,6 @@
 package net.sf.jrtps.types;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
-import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
@@ -78,51 +75,6 @@ public class Locator {
         }
     }
 
-    public InetAddress getInetAddress() {
-        InetAddress inetAddress = null;
-
-        try {
-            switch (kind) {
-            case LOCATOR_KIND_UDPv4:
-                byte[] addr = new byte[4];
-                addr[0] = address[12];
-                addr[1] = address[13];
-                addr[2] = address[14];
-                addr[3] = address[15];
-                inetAddress = InetAddress.getByAddress(addr);
-                break;
-            case LOCATOR_KIND_UDPv6:
-                inetAddress = InetAddress.getByAddress(address);
-                break;
-            default:
-                throw new IllegalArgumentException("Internal error: Unknown Locator kind: 0x"
-                        + String.format("%04x", kind) + ", port: " + String.format("%04x", port));
-            }
-        } catch (UnknownHostException uhe) {
-            // Not Possible. InetAddress.getByAddress throws this exception if
-            // byte[] length is not
-            // 4 or 16. We have ensured this in constructor & switch-case
-        }
-
-        return inetAddress;
-    }
-
-    /**
-     * Get the remote socket address
-     * 
-     * @return SocketAddress
-     */
-    public SocketAddress getSocketAddress() {
-        return new InetSocketAddress(getInetAddress(), port);
-    }
-
-    /**
-     * Checks, if this Locator represents a multicast locator.
-     * @return true, if multicast locator.
-     */
-    public boolean isMulticastLocator() {
-        return getInetAddress().isMulticastAddress();
-    }
     
     /** 
      * Gets the kind of this Locator. Each Locator has a kind associated with it to distinguish different types 
@@ -135,13 +87,25 @@ public class Locator {
         return kind;
     }
     
+    /**
+     * Gets the port of this Locator.
+     * @return port
+     */
     public int getPort() {
         // TODO: check this. port is ulong (32 bits), but in practice, 16 last
         // bits (0-65535) is our port number
         // For large port numbers (> 32767), we need to mask out negativeness
         return port & 0xffff;
     }
-
+    
+    /**
+     * Gets the address of this Locator.
+     * @return address
+     */
+    public byte[] getAddress() {
+        return address;
+    }
+    
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_long(kind);
         buffer.write_long(port);
@@ -171,5 +135,9 @@ public class Locator {
         bb.putInt(kind).putInt(port).put(address);
         
         return Arrays.hashCode(locBytes);
+    }
+
+    public boolean isMulticastLocator() {
+        return false;
     }
 }

@@ -9,7 +9,6 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,9 +20,9 @@ import org.slf4j.LoggerFactory;
  */
 public class UDPTransmitter implements Transmitter {
     private static final Logger log = LoggerFactory.getLogger(UDPTransmitter.class);
-    private final Locator locator;
-    private DatagramChannel channel;
-    private int bufferSize;
+    private final UDPLocator locator;
+    private final DatagramChannel channel;
+    private final int bufferSize;
 
     /**
      * Constructor for UDPWriter.
@@ -31,13 +30,15 @@ public class UDPTransmitter implements Transmitter {
      * @param bufferSize Size of the buffer that will be used to write messages. 
      * @throws IOException
      */
-    UDPTransmitter(Locator locator, int bufferSize) throws IOException {
+    UDPTransmitter(UDPLocator locator, int bufferSize) throws IOException {
         this.locator = locator;
         this.bufferSize = bufferSize;
         channel = DatagramChannel.open();
         channel.connect(locator.getSocketAddress());
     }
 
+   
+    
     /**
      * Sends a Message to a Locator of this UDPWriter.
      * If an overflow occurs during writing of Message, only submessages that

@@ -398,9 +398,9 @@ public class RTPSParticipant {
                     Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, 
                             queue, bufferSize);
 
-                    if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
-                        this.participantId = receiver.getParticipantId();
-                    }
+                    //if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
+                    this.participantId = receiver.getParticipantId();
+                    //}
 
                     setLocator(receiver.getLocator(), discovery);
                     receivers.add(receiver);
