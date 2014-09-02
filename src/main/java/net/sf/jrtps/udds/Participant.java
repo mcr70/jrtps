@@ -833,9 +833,13 @@ public class Participant {
         
         List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
         for (URI uri : discoveryAnnounceURIs) {
-            Locator locator = TransportProvider.getDiscoveryLocator(uri, domainId);
-            if (locator != null) {
+            TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
+            if (provider != null) {
+                Locator locator = provider.createDiscoveryLocator(uri, domainId); 
                 discoveryLocators.add(locator);
+            }
+            else {
+                logger.warn("No TranportProvider registered with scheme for {}", uri);
             }
         }
         
