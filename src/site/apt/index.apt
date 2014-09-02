@@ -19,3 +19,11 @@ Overview
  * handle INFO_DESTINATION
  
  * Detect of restoration of liveliness. 
+
+ * A Possibility to create custom TransportProviders. As a proof-of-concept,
+   a new memory based TransportProvider is provided. This provider can be 
+   used in configuration URIs with scheme 'mem'. 
+
+ * Config: jrtps.discovery.announce-uris provides a list of URIs, that is used 
+   to determine where to announce presence of participants.
+ 
