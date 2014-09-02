@@ -25,19 +25,18 @@ public class MemTransportTest {
         Participant p2 = new Participant(0, 0, null, cfg);
         DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class);
         
-        for (int i = 0; i < 10; i++) {
-            HelloMessage m = new HelloMessage(i , "Hello");
+        int i = 0;
+        while(i < 100) {
+            HelloMessage m = new HelloMessage(i++ , "Hello");
             dw.write(m);
             Thread.sleep(1000);
         }
         
-        
-        System.out.println("\n*** Press enter to close Participant ***\n");
-        System.in.read();
-        
+                
         System.out.println("Received " + dr.getInstances().size() + " instances from writers.");
         
         p1.close();
+        p2.close();
     }
 
 }
