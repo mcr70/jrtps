@@ -2,7 +2,6 @@ package net.sf.jrtps.transport.mem;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -31,17 +30,18 @@ public class MemProvider extends TransportProvider {
     @Override
     public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery,
             BlockingQueue<byte[]> queue, int bufferSize) throws IOException {        
-        BlockingQueue<byte[]> inQueue = getQueue(uri);
+        BlockingQueue<byte[]> inQueue = getQueue(new MemLocator(uri));
         
         return new MemReceiver(new MemLocator(uri), participantId, inQueue, queue);
     }
 
     @Override
     public Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException {
-        BlockingQueue<byte[]> outQueue = queues.get(locator);
+        BlockingQueue<byte[]> outQueue = getQueue(locator);
         logger.debug("Creating transmitter for {}, queue: {}", locator, outQueue.hashCode());
         return new MemTransmitter(outQueue, bufferSize);
     }
+
 
     @Override
     public Locator getDefaultDiscoveryLocator(int domainId) {
@@ -52,8 +52,8 @@ public class MemProvider extends TransportProvider {
     }
 
 
-    private synchronized BlockingQueue<byte[]> getQueue(URI uri) throws UnknownHostException {
-        MemLocator loc = new MemLocator(uri);
+
+    private synchronized BlockingQueue<byte[]> getQueue(Locator loc) {
         BlockingQueue<byte[]> q = queues.get(loc);
         if (q == null) {
             q = new ArrayBlockingQueue<>(128); // TODO: hardcoded
@@ -65,6 +65,7 @@ public class MemProvider extends TransportProvider {
         return q;
     }
 
+    
     @Override
     public Locator createDiscoveryLocator(URI uri, int domainId) {
         if (uri.getPort() == -1) {

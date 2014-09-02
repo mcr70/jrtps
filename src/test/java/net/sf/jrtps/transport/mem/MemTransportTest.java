@@ -10,7 +10,7 @@ import examples.hello.serializable.HelloMessage;
 
 public class MemTransportTest {
     public static void main(String[] args) throws Exception {
-        Configuration cfg = new Configuration("/jrtps-mem-test.properties");
+        Configuration cfg = new Configuration("/mem-test-1.properties");
         MemProvider mp = new MemProvider(cfg);
         TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
         
@@ -22,7 +22,7 @@ public class MemTransportTest {
         dr.addSampleListener(hl);
         
         // Create a participant for writer
-        Participant p2 = new Participant(0, 0, null, cfg);
+        Participant p2 = new Participant(0, 0, null, new Configuration("/mem-test-2.properties"));
         DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class);
         
         int i = 0;
