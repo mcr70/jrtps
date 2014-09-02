@@ -34,7 +34,7 @@ import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.transport.TransportProvider;
-import net.sf.jrtps.transport.UDPProvider;
+import net.sf.jrtps.transport.udp.UDPProvider;
 import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;

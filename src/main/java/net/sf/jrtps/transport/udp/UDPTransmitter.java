@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport;
+package net.sf.jrtps.transport.udp;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,6 +9,8 @@ import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.DatagramChannel;
 
 import net.sf.jrtps.message.Message;
+import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.transport.Transmitter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
