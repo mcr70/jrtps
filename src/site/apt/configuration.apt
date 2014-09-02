@@ -88,8 +88,7 @@ udds.collections.coherent=false
   * <<{jrtps.listener-uris}>>
   A comma separated list of URIs that will be used to start listeners for user traffic.
   If port number is omitted, it will be calculated using the port number expression defined  
-  in RTPS spec (I.e. use rtps.traffic.port-config). Currently, udp is the only scheme that is supported
-  by jRTPS. However, there is a preliminary work done for adding custom scheme handlers.
+  in RTPS spec (I.e. use rtps.traffic.port-config). 
   
   * <<{jrtps.discovery.listener-uris}>>
   A comma separated list of URIs, that will be used to start listeners for discovery.
