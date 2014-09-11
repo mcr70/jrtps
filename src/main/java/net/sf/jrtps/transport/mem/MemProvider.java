@@ -17,6 +17,11 @@ import net.sf.jrtps.types.Locator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This Provider creates receivers and writers for memory based transport protocol.
+ *  
+ * @author mcr70
+ */
 public class MemProvider extends TransportProvider {
     private static final Logger logger = LoggerFactory.getLogger(MemProvider.class);
     static final int LOCATOR_KIND_MEM = 0x8001;
