@@ -21,7 +21,7 @@ import net.sf.jrtps.rtps.Sample;
  *            like IDL compiler, or it may be more dynamically constructed
  *            Object that is used with uDDS.
  */
-public class DataReader<T> extends Entity<T> {
+public class DataReader<T> extends Entity<T, PublicationData> {
     private final List<WriterListener> wListeners = new LinkedList<>();
     private UDDSHistoryCache<T> hCache;
 

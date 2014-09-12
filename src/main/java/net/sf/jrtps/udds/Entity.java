@@ -1,5 +1,9 @@
 package net.sf.jrtps.udds;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.types.Guid;
 
 /**
@@ -9,12 +13,14 @@ import net.sf.jrtps.types.Guid;
  * @param <T>
  * 
  */
-public class Entity<T> {
+public class Entity<T, COMMTYPE extends DiscoveredData> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
     private Guid guid;
 
+    private List<CommunicationListener<COMMTYPE>> communicationListeners = new LinkedList<>();
+    
     /**
      * Constructor
      * 
@@ -31,6 +37,14 @@ public class Entity<T> {
         this.guid = guid;
     }
 
+    void addCommunicationListener(CommunicationListener<COMMTYPE> cl) {
+        communicationListeners.add(cl);
+    }
+    
+    public List<CommunicationListener<COMMTYPE>> getCommunicationListeners() {
+        return communicationListeners;
+    }
+    
     /**
      * Get the name of the topic of this entity.
      * 
