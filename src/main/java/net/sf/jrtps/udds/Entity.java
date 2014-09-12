@@ -17,9 +17,8 @@ public class Entity<T, COMMTYPE extends DiscoveredData> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
-    private Guid guid;
-
-    private List<CommunicationListener<COMMTYPE>> communicationListeners = new LinkedList<>();
+    private final Guid guid;
+    private final List<CommunicationListener<COMMTYPE>> communicationListeners = new LinkedList<>();
     
     /**
      * Constructor
@@ -37,13 +36,22 @@ public class Entity<T, COMMTYPE extends DiscoveredData> {
         this.guid = guid;
     }
 
+    /**
+     * Adds a new CommunicationListener to this Entity.
+     * @param cl
+     */
     void addCommunicationListener(CommunicationListener<COMMTYPE> cl) {
         communicationListeners.add(cl);
     }
     
-    public List<CommunicationListener<COMMTYPE>> getCommunicationListeners() {
-        return communicationListeners;
+    /**
+     * Removes a CommunicationListener from this Entity.
+     * @param cl
+     */
+    void removeCommunicationListener(CommunicationListener<COMMTYPE> cl) {
+        communicationListeners.remove(cl);
     }
+
     
     /**
      * Get the name of the topic of this entity.
