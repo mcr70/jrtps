@@ -18,7 +18,7 @@ import net.sf.jrtps.rtps.RTPSWriter;
  *            like IDL compiler, or it may be more dynamically constructed
  *            Object that is used with uDDS.
  */
-public class DataWriter<T> extends Entity<T> {
+public class DataWriter<T> extends Entity<T, SubscriptionData> {
     private final List<ReaderListener> rListeners = new LinkedList<>();
     /**
      * RTPSWriter associated with this DataWriter
