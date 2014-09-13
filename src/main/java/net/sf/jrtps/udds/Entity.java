@@ -10,15 +10,18 @@ import net.sf.jrtps.types.Guid;
  * Entity is a base class for DataReader and DataWriter.
  * 
  * @author mcr70
- * @param <T>
- * 
+ * @param <T> Data type, that this Entity works with
+ * @param <COM_LISTENER_TYPE> Type of the communication listener
  */
-public class Entity<T, COMMTYPE extends DiscoveredData> {
+public class Entity<T, COM_LISTENER_TYPE extends DiscoveredData> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
     private final Guid guid;
-    private final List<CommunicationListener<COMMTYPE>> communicationListeners = new LinkedList<>();
+    /**
+     * A List of communication listeners
+     */
+    protected final List<CommunicationListener<COM_LISTENER_TYPE>> communicationListeners = new LinkedList<>();
     
     /**
      * Constructor
@@ -40,7 +43,7 @@ public class Entity<T, COMMTYPE extends DiscoveredData> {
      * Adds a new CommunicationListener to this Entity.
      * @param cl
      */
-    void addCommunicationListener(CommunicationListener<COMMTYPE> cl) {
+    public void addCommunicationListener(CommunicationListener<COM_LISTENER_TYPE> cl) {
         communicationListeners.add(cl);
     }
     
@@ -48,10 +51,9 @@ public class Entity<T, COMMTYPE extends DiscoveredData> {
      * Removes a CommunicationListener from this Entity.
      * @param cl
      */
-    void removeCommunicationListener(CommunicationListener<COMMTYPE> cl) {
+    public void removeCommunicationListener(CommunicationListener<COM_LISTENER_TYPE> cl) {
         communicationListeners.remove(cl);
     }
-
     
     /**
      * Get the name of the topic of this entity.
