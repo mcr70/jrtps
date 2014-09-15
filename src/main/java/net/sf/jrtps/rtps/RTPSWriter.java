@@ -16,6 +16,7 @@ import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.Heartbeat;
+import net.sf.jrtps.message.InfoDestination;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.CoherentSet;
@@ -302,10 +303,13 @@ public class RTPSWriter<T> extends Endpoint {
                     proxy, readersHighestSeqNum);
             return;
         }
+
+        // Add INFO_DESTINATION
+        m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));
         
         long prevTimeStamp = 0;
         EntityId proxyEntityId = proxy.getEntityId();
-
+        
         for (Sample<T> aSample : samples) {
             try {
                 long timeStamp = aSample.getTimestamp();
@@ -348,6 +352,10 @@ public class RTPSWriter<T> extends Endpoint {
 
     private void sendHeartbeat(ReaderProxy proxy, boolean livelinessFlag) {
         Message m = new Message(getGuid().getPrefix());
+
+        // Add INFO_DESTINATION
+        m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));        
+        
         Heartbeat hb = createHeartbeat(proxy.getEntityId());
         hb.livelinessFlag(livelinessFlag);
         m.addSubMessage(hb);

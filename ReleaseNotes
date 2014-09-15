@@ -1,6 +1,7 @@
 0.9.6
     - Removed ReaderListener & WriterListener in favor of CommunicationListener.
     - DEADLINE QoS
+    - FIX: add INFO_DESTINATION to messages
     
 0.9.5
     - handle INFO_DESTINATION
