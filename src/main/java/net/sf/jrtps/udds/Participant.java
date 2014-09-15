@@ -40,6 +40,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,6 +64,8 @@ public class Participant {
     private List<DataReader<?>> readers = new LinkedList<>();
     private List<DataWriter<?>> writers = new LinkedList<>();
 
+    private final Watchdog watchdog;
+    
     /**
      * Each user entity is assigned a unique number, this field is used for that
      * purpose
@@ -156,6 +159,8 @@ public class Participant {
 
         logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
+        this.watchdog = new Watchdog(threadPoolExecutor);
+        
         createUnknownParticipantData(domainId);
 
         Random r = new Random(System.currentTimeMillis());
@@ -256,7 +261,7 @@ public class Participant {
         // Add a matched reader for SPDP writer
         SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(),
                 new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
-        spdp_writer.getRTPSWriter().addMatchedReader(sd);
+        spdp_writer.addMatchedReader(sd);
 
         ParticipantData pd = createSPDPParticipantData();
         logger.debug("Created ParticipantData: {}", pd);
@@ -345,11 +350,12 @@ public class Participant {
 
             eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
-
-        UDDSHistoryCache<T> hc = new UDDSHistoryCache<>(eId, m, qos);
+        
+        UDDSHistoryCache<T, PublicationData> hc = new UDDSHistoryCache<>(eId, m, qos, watchdog);
         RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, hc, qos);
 
         DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
+        hc.setCommunicationListeners(reader.communicationListeners);
         reader.setHistoryCache(hc);
         readers.add(reader);
 
@@ -438,10 +444,12 @@ public class Participant {
         }
 
         
-        UDDSHistoryCache<T> hc = new UDDSHistoryCache<>(eId, m, qos);
+        UDDSHistoryCache<T, SubscriptionData> hc = new UDDSHistoryCache<>(eId, m, qos, watchdog);
         RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
-
         DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, hc);
+
+        hc.setCommunicationListeners(writer.communicationListeners);
+        
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 

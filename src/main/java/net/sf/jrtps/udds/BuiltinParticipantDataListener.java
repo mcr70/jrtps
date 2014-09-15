@@ -56,7 +56,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                         SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
                                 ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
                                         EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());
-                        pw.getRTPSWriter().addMatchedReader(rd);
+                        pw.addMatchedReader(rd);
 
                         // Then, announce our builtin endpoints
                         handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
@@ -95,7 +95,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
             SubscriptionData rd = new SubscriptionData(PublicationData.BUILTIN_TOPIC_NAME,
                     PublicationData.class.getName(), key, sedpQoS);
-            pw.getRTPSWriter().addMatchedReader(rd);
+            pw.addMatchedReader(rd);
         }
         if (eps.hasPublicationAnnouncer()) {
             DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
@@ -103,7 +103,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
             PublicationData wd = new PublicationData(PublicationData.BUILTIN_TOPIC_NAME,
                     PublicationData.class.getName(), key, sedpQoS);
-            pr.getRTPSReader().addMatchedWriter(wd);
+            pr.addMatchedWriter(wd);
         }
         if (eps.hasSubscriptionDetector()) {
             log.trace("Notifying remote subscriptions reader of our subscriptions");
@@ -113,7 +113,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             SubscriptionData rd = new SubscriptionData(SubscriptionData.BUILTIN_TOPIC_NAME,
                     SubscriptionData.class.getName(), key, sedpQoS);
 
-            sw.getRTPSWriter().addMatchedReader(rd);
+            sw.addMatchedReader(rd);
         }
         if (eps.hasSubscriptionAnnouncer()) {
             DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
@@ -121,7 +121,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
             PublicationData wd = new PublicationData(SubscriptionData.BUILTIN_TOPIC_NAME,
                     SubscriptionData.class.getName(), key, sedpQoS);
-            pr.getRTPSReader().addMatchedWriter(wd);
+            pr.addMatchedWriter(wd);
         }
         if (eps.hasParticipantMessageReader()) {
             log.trace("Notifying remote participant message reader");
@@ -131,7 +131,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             SubscriptionData rd = new SubscriptionData(ParticipantMessage.BUILTIN_TOPIC_NAME,
                     ParticipantMessage.class.getName(), key, sedpQoS);
 
-            sw.getRTPSWriter().addMatchedReader(rd);
+            sw.addMatchedReader(rd);
         }
         if (eps.hasParticipantMessageWriter()) {
             DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
@@ -139,7 +139,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
             Guid key = new Guid(prefix, EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
             PublicationData wd = new PublicationData(ParticipantMessage.BUILTIN_TOPIC_NAME,
                     ParticipantMessage.class.getName(), key, sedpQoS);
-            pr.getRTPSReader().addMatchedWriter(wd);
+            pr.addMatchedWriter(wd);
         }
     }
 }
