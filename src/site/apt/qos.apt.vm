@@ -83,7 +83,17 @@ Quality of Service - uDDS
 
 * Deadline
 
- uDDS provides full support for Deadline QoS policy. 
+ Deadline QoS is used to make a contract between reader and writer of how frequently 
+ each instance is to be updated. If a reader detects that deadline has been missed,
+ its <CommunicationListener>s will be notified of this fact. Likewise, udds
+ DataWriter internally monitors that writers fulfill the deadline contract
+ applications has made, and notifies <CommunicationListener>s of failures.
+ 
+ Deadline QoS between reader and writer is compatible if 
+ 
++------
+ offered.deadline_period <= requested.deadline_period
++------
  
 
 * Destination Order
@@ -110,7 +120,7 @@ Quality of Service - uDDS
  <NOTE: This behavior might change in the future to be more in sync with DDS specification>
  
  
- * History
+* History
 
  This Quality of Service controls how the history cache is maintained by an Entity. 
 
