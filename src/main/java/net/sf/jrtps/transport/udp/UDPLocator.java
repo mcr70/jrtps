@@ -7,13 +7,18 @@ import java.net.UnknownHostException;
 
 import net.sf.jrtps.types.Locator;
 
-public class UDPLocator extends Locator {
+/**
+ * A Locator for UDP transport.
+ *
+ * @author mcr70
+ */
+class UDPLocator extends Locator {
 
-    public UDPLocator(int kind, int port, byte[] address) {
+    UDPLocator(int kind, int port, byte[] address) {
         super(kind, port, address);
     }
 
-    public UDPLocator(Locator locator) {
+    UDPLocator(Locator locator) {
         super(locator.getKind(), locator.getPort(), locator.getAddress());
     }
 

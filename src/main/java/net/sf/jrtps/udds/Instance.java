@@ -5,6 +5,7 @@ import java.util.List;
 
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.util.Watchdog.Task;
 
 /**
  * Instance represents Samples with same distinct ID. Instance has a history, which can be obtained 
@@ -18,10 +19,12 @@ public class Instance <T> {
     private final KeyHash key;
     private final LinkedList<Sample<T>> history = new LinkedList<>();
     private final int maxSize;
+    private Task deadLineMonitorTask;
 
-    Instance(KeyHash key, int historySize) {
+    Instance(KeyHash key, int historySize, Task wdTask) {
         this.key = key;
         this.maxSize = historySize;
+        this.deadLineMonitorTask = wdTask;
     }
 
     /**
@@ -31,6 +34,10 @@ public class Instance <T> {
      *       addition caused a drop of the oldest Sample, which will be returned.  
      */
     Sample<T> addSample(Sample<T> aSample) {
+        if (deadLineMonitorTask != null) {
+            deadLineMonitorTask.reset(); // reset deadline monitor
+        }
+        
         synchronized (history) {
             if (history.size() == 0) {
                 history.addFirst(aSample);
@@ -85,9 +92,25 @@ public class Instance <T> {
         return key;
     }
     
-    
+    /**
+     * Get the latest sample
+     * @return Latest sample, or null if there no samples
+     */
     Sample<T> getLatest() {
-        return history.getFirst();
+        if (history.size() > 0) {
+            return history.getFirst();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * This method is called when Instance is being disposed.
+     */
+    void dispose() {
+        if (deadLineMonitorTask != null) {
+            deadLineMonitorTask.cancel();
+        }
     }
 
     public String toString() {

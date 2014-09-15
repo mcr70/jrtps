@@ -8,6 +8,11 @@ import net.sf.jrtps.types.Locator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * A Receiver that receives bytes from a <i>BlockingQueue</i>. 
+ * 
+ * @author mcr70
+ */
 public class MemReceiver implements Receiver {
     private static final Logger logger = LoggerFactory.getLogger(MemReceiver.class);
     
