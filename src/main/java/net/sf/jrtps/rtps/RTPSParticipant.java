@@ -169,11 +169,13 @@ public class RTPSParticipant {
             // thread
             w.close();
         }
-
+        writerEndpoints.clear();
+        
         // close network receivers
         for (Receiver r : receivers) {
             r.close();
         }
+        readerEndpoints.clear();
     }
 
     /**
