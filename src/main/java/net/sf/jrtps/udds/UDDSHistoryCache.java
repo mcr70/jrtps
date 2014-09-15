@@ -156,6 +156,14 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
 
         sample.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
 
+        Instance<T> inst = getOrCreateInstance(key);
+        Sample<T> latest = inst.getLatest();
+        if (latest != null && latest.getTimestamp() > sample.getTimestamp()) {
+            logger.debug("Rejecting sample, since its timestamp {} is less than instances latest timestamp {}", 
+                    sample.getTimestamp(), latest.getTimestamp());
+            return;
+        }
+        
         if (kind == ChangeKind.DISPOSE) {
             Instance<T> removedInstance = instances.remove(key);
             if (removedInstance != null) {
@@ -163,8 +171,6 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             }
         }
         else {
-            Instance<T> inst = getOrCreateInstance(key);
-
             logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
             Sample<T> removedSample = inst.addSample(sample);
@@ -351,19 +357,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         if (pendingSamples.size() > 0) {
             // Add each pending Sample to HistoryCache
             for (Sample<T> cc : pendingSamples) {
-                long latestSampleTime = 0;
-                if (samples.size() > 0) {
-                    latestSampleTime = samples.last().getTimestamp();
-                }
-
-                if (cc.getTimestamp() < latestSampleTime) {
-                    logger.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
-                            cc.getTimestamp(), latestSampleTime);
-                    continue;
-                }
-                else {
-                    addSample(cc);
-                }
+                addSample(cc);
             }
 
             // Notify listeners 

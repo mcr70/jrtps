@@ -94,10 +94,14 @@ public class Instance <T> {
     
     /**
      * Get the latest sample
-     * @return Latest sample.
+     * @return Latest sample, or null if there no samples
      */
     Sample<T> getLatest() {
-        return history.getFirst();
+        if (history.size() > 0) {
+            return history.getFirst();
+        }
+        
+        return null;
     }
     
     /**
