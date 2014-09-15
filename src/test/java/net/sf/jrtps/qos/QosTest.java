@@ -36,8 +36,8 @@ public class QosTest {
     public void testDeadlineMissed() {
         int DEADLINE_PERIOD = 10;
         
-        Configuration cfg1 = new Configuration("/net/sf/jrtps/qos/qos-1.properties");
-        Configuration cfg2 = new Configuration("/net/sf/jrtps/qos/qos-2.properties");
+        Configuration cfg1 = new Configuration("/mem-test-1.properties");
+        Configuration cfg2 = new Configuration("/mem-test-2.properties");
         
         MemProvider mp = new MemProvider(cfg1);
         TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
