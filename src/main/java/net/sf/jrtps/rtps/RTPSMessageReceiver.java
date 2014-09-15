@@ -89,12 +89,13 @@ class RTPSMessageReceiver implements Runnable {
         boolean destinationThisParticipant = true;
         
         GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
-
-        if (participant.getGuid().getPrefix().equals(sourceGuidPrefix)) {
+        GuidPrefix myPrefix = participant.getGuid().getPrefix(); 
+        
+        if (myPrefix.equals(sourceGuidPrefix)) {
             logger.debug("Discarding message originating from this participant");
             return;
         }
-
+        
         Set<RTPSReader<?>> dataReceivers = new HashSet<>();
         List<SubMessage> subMessages = msg.getSubMessages();
 
@@ -150,8 +151,10 @@ class RTPSMessageReceiver implements Runnable {
                 break;
             case INFODESTINATION:
                 destGuidPrefix = ((InfoDestination) subMsg).getGuidPrefix();
-                destinationThisParticipant = participant.getGuid().getPrefix().equals(destGuidPrefix);
-                logger.debug("Got InfoDestionation. Target is this participant: ", destinationThisParticipant);
+                destinationThisParticipant = participant.getGuid().getPrefix().equals(destGuidPrefix) 
+                        || GuidPrefix.GUIDPREFIX_UNKNOWN.equals(destGuidPrefix);
+                
+                logger.debug("Got InfoDestination. Target is this participant: {}", destinationThisParticipant);
                 break;
             case INFOSOURCE:
                 sourceGuidPrefix = ((InfoSource) subMsg).getGuidPrefix();

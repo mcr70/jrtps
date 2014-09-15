@@ -79,6 +79,41 @@ Quality of Service - uDDS
  RTPS is about transmission. But DDS specifies a bunch of more QoS settings. 
  While jRTPS tries to be 100% compatible with RTPS specification, uDDS makes no such promise to 
  DDS specification. This section is about those settings, and how they are supported by uDDS-${project.version}. 
+
+
+* Deadline
+
+ Deadline QoS is used to make a contract between reader and writer of how frequently 
+ each instance is to be updated. If a reader detects that deadline has been missed,
+ its <CommunicationListener>s will be notified of this fact. Likewise, udds
+ DataWriter internally monitors that writers fulfill the deadline contract
+ applications has made, and notifies <CommunicationListener>s of failures.
+ 
+ Deadline QoS between reader and writer is compatible if 
+ 
++------
+ offered.deadline_period <= requested.deadline_period
++------
+ 
+
+* Destination Order
+
+ This QoS policy controls how readers determine the order of Samples from multiple writers. If the kind 
+ is BY_RECEPTION_TIMESTAMP, the latest received value for the instance should be kept. BY_SOURCE_TIMESTAMP
+ indicates that the timestamp set by the writers should be considered instead. Using BY_SOURCE_TIMESTAMP
+ ensures that every subscriber in the system will end up having the same latest value for the instance.
+ 
+ Destination order QoS between reader and writer is compatible if 
+ 
++------
+ offered.kind >= requested.kind
++------
+ 
+ where BY_RECEPTION_TIMESTAMP \< BY_SOURCE_TIMESTAMP 
+ 
+ During reception, jRTPS sets timestamp of the Sample to system time if kind is BY_RECEPTION_TIME
+ or writer does not provide timestamp even though it should. 
+  
  
 * History
 
@@ -105,6 +140,7 @@ Quality of Service - uDDS
  Note also, that History QoS does not follow RxO semantics. I.e. Reader does not know how the writers history cache 
  is configured. Nor can reader enforce writer to use either of the kinds.
  
+
 * Resource Limits
 
  Resource limits is used to provide means to control resource usage of an Entity. DDS specification
@@ -124,25 +160,3 @@ Quality of Service - uDDS
  from the network. Limits are thus checked by the network receiver thread, and application is therefore not 
  aware of the resource limit problem. 
 
-* Destination Order
-
- This QoS policy controls how readers determine the order of Samples from multiple writers. If the kind 
- is BY_RECEPTION_TIMESTAMP, the latest received value for the instance should be kept. BY_SOURCE_TIMESTAMP
- indicates that the timestamp set by the writers should be considered instead. Using BY_SOURCE_TIMESTAMP
- ensures that every subscriber in the system will end up having the same latest value for the instance.
- 
- Destination order QoS between reader and writer is compatible if 
- 
-+------
- offered.kind >= requested.kind
-+------
- 
- where BY_RECEPTION_TIMESTAMP \< BY_SOURCE_TIMESTAMP 
- 
- During reception, jRTPS sets timestamp of the Sample to system time if kind is BY_RECEPTION_TIME
- or writer does not provide timestamp even though it should. Also, jRTPS does not compare timestamp at 
- instance level. Instead, it compares Sample time to previous Sample time received. Regardless of its instance. 
- This ensures that one cannot get 'older' samples during reception. Unfortunately, this is not compatible 
- with the DDS specification.
- 
- <NOTE: This behavior might change in the future to be more in sync with DDS specification>

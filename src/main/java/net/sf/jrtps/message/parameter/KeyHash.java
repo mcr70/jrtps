@@ -72,6 +72,11 @@ public class KeyHash extends Parameter implements InlineQoS {
     public int hashCode() {
         return Arrays.hashCode(getKeyHash());
     }
+    
+    
+    public String toString() {
+        return Arrays.toString(bytes);
+    }
 
     private byte[] prepareKey(byte[] key) {        
         if (key == null) {

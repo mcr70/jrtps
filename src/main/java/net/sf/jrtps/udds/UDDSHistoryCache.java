@@ -16,6 +16,7 @@ import java.util.TreeSet;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
@@ -26,10 +27,14 @@ import net.sf.jrtps.rtps.ChangeKind;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterCache;
+import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumber;
 import net.sf.jrtps.types.Time;
+import net.sf.jrtps.util.Watchdog;
+import net.sf.jrtps.util.Watchdog.Listener;
+import net.sf.jrtps.util.Watchdog.Task;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +44,11 @@ import org.slf4j.LoggerFactory;
  * history of changes so that late joining readers are capable of getting the historical data.
  * <p>
  * Samples on the reader side are made available through HistoryCache.
+ * 
+ * @param T type of the samples managed by this HistoryCache
+ * @param ENTITY_DATA type of the communication listeners attached to this history cache.
  */
-class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCache<T> {
+class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements HistoryCache<T>, WriterCache<T>, ReaderCache<T> {
     private static final Logger logger = LoggerFactory.getLogger(UDDSHistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
@@ -56,6 +64,8 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
 
+    private long deadLinePeriod = -1; // -1 represents INFINITE
+    
     // An ordered set of cache changes.
     private final SortedSet<Sample<T>> samples = Collections.synchronizedSortedSet(new TreeSet<>(
             new Comparator<Sample<T>>() {
@@ -68,12 +78,21 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     private final Marshaller<T> marshaller;
     private final EntityId entityId;
     private final Kind destinationOrderKind;
+    private final Watchdog watchdog;
+    private List<CommunicationListener<ENTITY_DATA>> communicationListeners;
 
 
-    UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos) {
+    UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         this.entityId = eId;
         this.marshaller = marshaller;
+        this.watchdog = watchdog;
 
+        Duration period = qos.getDeadline().getPeriod();
+        
+        if (!Duration.INFINITE.equals(period)) { 
+            this.deadLinePeriod = period.asMillis();
+        }
+        
         resource_limits = qos.getResourceLimits();
         history = qos.getHistory();
         destinationOrderKind = qos.getDestinationOrder().getKind();
@@ -137,12 +156,21 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
 
         sample.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
 
+        Instance<T> inst = getOrCreateInstance(key);
+        Sample<T> latest = inst.getLatest();
+        if (latest != null && latest.getTimestamp() > sample.getTimestamp()) {
+            logger.debug("Rejecting sample, since its timestamp {} is less than instances latest timestamp {}", 
+                    sample.getTimestamp(), latest.getTimestamp());
+            return;
+        }
+        
         if (kind == ChangeKind.DISPOSE) {
-            instances.remove(key);
+            Instance<T> removedInstance = instances.remove(key);
+            if (removedInstance != null) {
+                removedInstance.dispose(); // cancels deadline monitor
+            }
         }
         else {
-            Instance<T> inst = getOrCreateInstance(key);
-
             logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
             Sample<T> removedSample = inst.addSample(sample);
@@ -164,7 +192,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
     }
 
 
-    private Instance<T> getOrCreateInstance(KeyHash key) {
+    private Instance<T> getOrCreateInstance(final KeyHash key) {
         Instance<T> inst = instances.get(key);
         if (inst == null) {
 
@@ -175,7 +203,20 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
                 throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
             }
 
-            inst = new Instance<T>(key, history.getDepth());
+            Task wdTask = null;
+            if (deadLinePeriod != -1) {
+                wdTask = watchdog.addTask(deadLinePeriod, new Listener() {
+                    @Override
+                    public void triggerTimeMissed() {
+                        logger.debug("deadline missed for {}", key);
+                        for (CommunicationListener<?> cl : communicationListeners) {
+                            cl.deadlineMissed(key);
+                        }
+                    }
+                });
+            }
+            
+            inst = new Instance<T>(key, history.getDepth(), wdTask);
             instances.put(key, inst);
         }   
 
@@ -316,19 +357,7 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         if (pendingSamples.size() > 0) {
             // Add each pending Sample to HistoryCache
             for (Sample<T> cc : pendingSamples) {
-                long latestSampleTime = 0;
-                if (samples.size() > 0) {
-                    latestSampleTime = samples.last().getTimestamp();
-                }
-
-                if (cc.getTimestamp() < latestSampleTime) {
-                    logger.debug("Rejecting sample since its timestamp {} is older than latest in cache {}", 
-                            cc.getTimestamp(), latestSampleTime);
-                    continue;
-                }
-                else {
-                    addSample(cc);
-                }
+                addSample(cc);
             }
 
             // Notify listeners 
@@ -375,5 +404,11 @@ class UDDSHistoryCache<T> implements HistoryCache<T>, WriterCache<T>, ReaderCach
         }
         coherentSet = null;
         addSample(new Sample<T>(++seqNum)); // Add a Sample denoting end of CoherentSet
+    }
+
+    
+    void setCommunicationListeners(List<CommunicationListener<ENTITY_DATA>> communicationListeners) {
+        this.communicationListeners = communicationListeners;
+        
     }
 }

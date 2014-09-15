@@ -15,6 +15,7 @@ import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
+import net.sf.jrtps.message.InfoDestination;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.DirectedWrite;
 import net.sf.jrtps.message.parameter.ParameterEnum;
@@ -389,6 +390,9 @@ public class RTPSReader<T> extends Endpoint {
 
         Message m = new Message(getGuid().getPrefix());
 
+        // Add INFO_DESTINATION
+        m.addSubMessage(new InfoDestination(wp.getGuid().getPrefix()));
+        
         AckNack an = createAckNack(wp);   // If all the data is already received, set finalFlag to true,
         an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
 

@@ -1,6 +1,5 @@
 package net.sf.jrtps.udds;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -10,6 +9,8 @@ import net.sf.jrtps.rtps.RTPSWriter;
 
 /**
  * This class represents a strongly typed DataWriter in spirit of DDS specification.
+ * <p>
+ * DataWriter sets COM_LISTENER_TYPE of super class Entity to SubscriptionData.
  * 
  * @author mcr70
  * 
@@ -18,8 +19,7 @@ import net.sf.jrtps.rtps.RTPSWriter;
  *            like IDL compiler, or it may be more dynamically constructed
  *            Object that is used with uDDS.
  */
-public class DataWriter<T> extends Entity<T> {
-    private final List<ReaderListener> rListeners = new LinkedList<>();
+public class DataWriter<T> extends Entity<T, SubscriptionData> {
     /**
      * RTPSWriter associated with this DataWriter
      */
@@ -163,31 +163,12 @@ public class DataWriter<T> extends Entity<T> {
         rtps_writer.notifyReaders();
     }
 
-    /**
-     * Adds a ReaderListener to this DataWriter.
-     * @param rl ReaderListener to add
-     */
-    public void addReaderListener(ReaderListener rl) {
-        synchronized (rListeners) {
-            rListeners.add(rl);
-        }
-    }
-    
-    /**
-     * Removes a ReaderListener from this DataWriter.
-     * @param rl ReaderListener to remove
-     */
-    public void removeReaderListener(ReaderListener rl) {
-        synchronized (rListeners) {
-            rListeners.remove(rl);
-        }
-    }
 
     void addMatchedReader(SubscriptionData sd) {
         rtps_writer.addMatchedReader(sd);
-        synchronized (rListeners) {
-            for (ReaderListener rl : rListeners) {
-                rl.readerMatched(sd);
+        synchronized (communicationListeners) {
+            for (CommunicationListener<SubscriptionData> cl : communicationListeners) {
+                cl.entityMatched(sd);
             }
         }
     }
@@ -197,9 +178,9 @@ public class DataWriter<T> extends Entity<T> {
     }
 
     void inconsistentQoS(SubscriptionData sd) {
-        synchronized (rListeners) {
-            for (ReaderListener rl : rListeners) {
-                rl.inconsistentQoS(sd);
+        synchronized (communicationListeners) {
+            for (CommunicationListener<SubscriptionData> cl : communicationListeners) {
+                cl.inconsistentQoS(sd);
             }
         }
     }

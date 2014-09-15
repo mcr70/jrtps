@@ -7,28 +7,30 @@ import java.util.Set;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.WriterLivelinessListener;
 
 /**
  * This class represents a strongly typed DataReader in spirit of DDS specification.
  * DataReader maintains a history cache where it keeps Samples received from writers on the network.
  * There are two ways to get these Samples from DataReader. One is by using any of the get methods,
  * and the other is by registering a SampleListener.
+ * <p>
+ * DataReader sets COM_LISTENER_TYPE of super class Entity to PublicationData.
  * 
  * @author mcr70
  * 
- * @param <T>
- *            Type of the DataReader. Type may be obtained from an external tool
+ * @param <T> Type of the DataReader. Type may be obtained from an external tool
  *            like IDL compiler, or it may be more dynamically constructed
  *            Object that is used with uDDS.
  */
-public class DataReader<T> extends Entity<T> {
-    private final List<WriterListener> wListeners = new LinkedList<>();
-    private UDDSHistoryCache<T> hCache;
+public class DataReader<T> extends Entity<T, PublicationData> {
+    private UDDSHistoryCache<T, PublicationData> hCache;
 
     /**
      * RTPSReader associated with this DataReader
      */
     protected final RTPSReader<T> rtps_reader;
+
 
 
     /**
@@ -47,7 +49,7 @@ public class DataReader<T> extends Entity<T> {
      * Package access.
      * @param hCache
      */
-    void setHistoryCache(UDDSHistoryCache<T> hCache) {
+    void setHistoryCache(UDDSHistoryCache<T, PublicationData> hCache) {
         this.hCache = hCache;
     }
 
@@ -66,11 +68,7 @@ public class DataReader<T> extends Entity<T> {
      * Adds a WriterListener to this DataReader.
      * @param wl WriterListener to add
      */
-    public void addWriterListener(WriterListener wl) {
-        synchronized (wListeners) {
-            wListeners.add(wl);
-        }
-        
+    public void addWriterListener(WriterLivelinessListener wl) {
         rtps_reader.addWriterLivelinessListener(wl);
     }
 
@@ -154,11 +152,7 @@ public class DataReader<T> extends Entity<T> {
      * Removes a WriterListener from this DataReader.
      * @param wl WriterListener to remove
      */
-    public void removeWriterListener(WriterListener wl) {
-        synchronized (wListeners) {
-            wListeners.remove(wl);
-        }
-        
+    public void removeWriterListener(WriterLivelinessListener wl) {        
         rtps_reader.removeWriterLivelinessListener(wl);
     }
 
@@ -191,12 +185,11 @@ public class DataReader<T> extends Entity<T> {
     }
 
 
-
     void addMatchedWriter(PublicationData pd) {
         rtps_reader.addMatchedWriter(pd);
-        synchronized (wListeners) {
-            for (WriterListener wl : wListeners) {
-                wl.writerMatched(pd);
+        synchronized (communicationListeners) {
+            for (CommunicationListener<PublicationData> cl : communicationListeners) {
+                cl.entityMatched(pd);
             }
         }
     }
@@ -206,20 +199,13 @@ public class DataReader<T> extends Entity<T> {
     }
 
     void inconsistentQoS(PublicationData pd) {
-        synchronized (wListeners) {
-            for (WriterListener wl : wListeners) {
-                wl.inconsistentQoS(pd);
+        synchronized (communicationListeners) {
+            for (CommunicationListener<PublicationData> cl : communicationListeners) {
+                cl.inconsistentQoS(pd);
             }
         }
     }
     
-    void livelinessLost(PublicationData pd) {
-        synchronized (wListeners) {
-            for (WriterListener wl : wListeners) {
-                wl.livelinessLost(pd);
-            }
-        }
-    }
     
     // ----  Experimental code follows  ------------------------
     /**
