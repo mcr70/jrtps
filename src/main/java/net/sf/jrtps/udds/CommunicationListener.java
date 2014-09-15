@@ -4,7 +4,7 @@ import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.KeyHash;
 
 /**
- * CommunicationListener is used by applications that need to know how  
+ * CommunicationListener is used by applications that need to know  
  * of different CommunicationStatuses, as specified n DDS specification.
  * 
  * @author mcr70
