@@ -14,7 +14,7 @@ Overview
 
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
- 0.9.7
+ 0.9.8
   
   * Removed ReaderListener & WriterListener in favor of CommunicationListener.
   
