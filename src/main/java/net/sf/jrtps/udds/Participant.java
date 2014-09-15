@@ -261,7 +261,7 @@ public class Participant {
         // Add a matched reader for SPDP writer
         SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(),
                 new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
-        spdp_writer.getRTPSWriter().addMatchedReader(sd);
+        spdp_writer.addMatchedReader(sd);
 
         ParticipantData pd = createSPDPParticipantData();
         logger.debug("Created ParticipantData: {}", pd);
