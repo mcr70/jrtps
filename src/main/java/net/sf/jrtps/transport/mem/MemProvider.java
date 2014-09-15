@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
  */
 public class MemProvider extends TransportProvider {
     private static final Logger logger = LoggerFactory.getLogger(MemProvider.class);
-    static final int LOCATOR_KIND_MEM = 0x8001;
+    public static final int LOCATOR_KIND_MEM = 0x8001;
     
     private static final Map<Locator, BlockingQueue<byte[]>> queues = new HashMap<>();
     
