@@ -1,3 +1,7 @@
+0.9.6
+    - Removed ReaderListener & WriterListener in favor of CommunicationListener.
+    - DEADLINE QoS
+    
 0.9.5
     - handle INFO_DESTINATION
     - Detect of restoration of liveliness. 

@@ -24,13 +24,13 @@ import net.sf.jrtps.rtps.WriterLivelinessListener;
  *            Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity<T, PublicationData> {
-//    private final List<WriterListener> wListeners = new LinkedList<>();
-    private UDDSHistoryCache<T> hCache;
+    private UDDSHistoryCache<T, PublicationData> hCache;
 
     /**
      * RTPSReader associated with this DataReader
      */
     protected final RTPSReader<T> rtps_reader;
+
 
 
     /**
@@ -49,7 +49,7 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * Package access.
      * @param hCache
      */
-    void setHistoryCache(UDDSHistoryCache<T> hCache) {
+    void setHistoryCache(UDDSHistoryCache<T, PublicationData> hCache) {
         this.hCache = hCache;
     }
 

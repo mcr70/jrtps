@@ -11,9 +11,9 @@ import net.sf.jrtps.types.Guid;
  * 
  * @author mcr70
  * @param <T> Data type, that this Entity works with
- * @param <COM_LISTENER_TYPE> Type of the communication listener
+ * @param <ENTITY_DATA> Type of the remote entity data, that is tracked by communication listeners of this Entity.
  */
-public class Entity<T, COM_LISTENER_TYPE extends DiscoveredData> {
+public class Entity<T, ENTITY_DATA extends DiscoveredData> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
@@ -21,7 +21,7 @@ public class Entity<T, COM_LISTENER_TYPE extends DiscoveredData> {
     /**
      * A List of communication listeners
      */
-    protected final List<CommunicationListener<COM_LISTENER_TYPE>> communicationListeners = new LinkedList<>();
+    protected final List<CommunicationListener<ENTITY_DATA>> communicationListeners = new LinkedList<>();
     
     /**
      * Constructor
@@ -43,7 +43,7 @@ public class Entity<T, COM_LISTENER_TYPE extends DiscoveredData> {
      * Adds a new CommunicationListener to this Entity.
      * @param cl
      */
-    public void addCommunicationListener(CommunicationListener<COM_LISTENER_TYPE> cl) {
+    public void addCommunicationListener(CommunicationListener<ENTITY_DATA> cl) {
         communicationListeners.add(cl);
     }
     
@@ -51,9 +51,11 @@ public class Entity<T, COM_LISTENER_TYPE extends DiscoveredData> {
      * Removes a CommunicationListener from this Entity.
      * @param cl
      */
-    public void removeCommunicationListener(CommunicationListener<COM_LISTENER_TYPE> cl) {
+    public void removeCommunicationListener(CommunicationListener<ENTITY_DATA> cl) {
         communicationListeners.remove(cl);
     }
+    
+
     
     /**
      * Get the name of the topic of this entity.
