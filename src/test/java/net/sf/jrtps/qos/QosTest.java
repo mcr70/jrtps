@@ -24,7 +24,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
-
+/**
+ * Tests for QualityOfService functionality.
+ * @author mcr70
+ */
 public class QosTest {
     /**
      * Test for deadline missed event to occur on both reader and writer.

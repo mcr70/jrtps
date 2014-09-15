@@ -13,7 +13,15 @@ import net.sf.jrtps.message.parameter.KeyHash;
  *        CommunicationListener. This is PublicationData, if listener is
  *        to be attached to DataReader, or SubscriptionData if attached to DataWriter 
  */
-public interface CommunicationListener<ENTITY_DATA extends DiscoveredData> extends DeadlineListener {
+public interface CommunicationListener<ENTITY_DATA extends DiscoveredData> {
+    /**
+     * This method is called when a deadline contract between local and remote entity 
+     * has been violated. 
+     * 
+     * @param instanceKey A key to instance that is affected
+     */
+    void deadlineMissed(KeyHash instanceKey);
+    
     /**
      * This method is called when a local entity has been successfully matched with
      * remote entity
@@ -29,14 +37,4 @@ public interface CommunicationListener<ENTITY_DATA extends DiscoveredData> exten
      * @param ed Discovered entity data of remote entity.
      */
     void inconsistentQoS(ENTITY_DATA ed);
-}
-
-interface DeadlineListener {
-    /**
-     * This method is called when a deadline contract between local and remote entity 
-     * has been violated. 
-     * 
-     * @param instaneceKey A key to instance that is affected
-     */
-    void deadlineMissed(KeyHash instanceKey);
 }
