@@ -1,11 +1,11 @@
-0.9.7
+0.9.8
     - Removed ReaderListener & WriterListener in favor of CommunicationListener.
     - DEADLINE QoS
     - DESTINATION_ORDER follows the same semantics as specified in DDS specification.
       I.e. determination is done at instance level, not at sample level
     - FIX: add INFO_DESTINATION to messages
 
-0.9.6
+0.9.6 - 0.9.7
     - skipped release
 
 0.9.5
