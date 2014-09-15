@@ -112,13 +112,8 @@ Quality of Service - uDDS
  where BY_RECEPTION_TIMESTAMP \< BY_SOURCE_TIMESTAMP 
  
  During reception, jRTPS sets timestamp of the Sample to system time if kind is BY_RECEPTION_TIME
- or writer does not provide timestamp even though it should. Also, jRTPS does not compare timestamp at 
- instance level. Instead, it compares Sample time to previous Sample time received. Regardless of its instance. 
- This ensures that one cannot get 'older' samples during reception. Unfortunately, this is not compatible 
- with the DDS specification.
- 
- <NOTE: This behavior might change in the future to be more in sync with DDS specification>
- 
+ or writer does not provide timestamp even though it should. 
+  
  
 * History
 
