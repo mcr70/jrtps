@@ -1,20 +1,28 @@
 package net.sf.jrtps.udds;
 
+import java.util.LinkedList;
+import java.util.List;
+
+import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.types.Guid;
 
 /**
  * Entity is a base class for DataReader and DataWriter.
  * 
  * @author mcr70
- * @param <T>
- * 
+ * @param <T> Data type, that this Entity works with
+ * @param <ENTITY_DATA> Type of the remote entity data, that is tracked by communication listeners of this Entity.
  */
-public class Entity<T> {
+public class Entity<T, ENTITY_DATA extends DiscoveredData> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
-    private Guid guid;
-
+    private final Guid guid;
+    /**
+     * A List of communication listeners
+     */
+    protected final List<CommunicationListener<ENTITY_DATA>> communicationListeners = new LinkedList<>();
+    
     /**
      * Constructor
      * 
@@ -31,6 +39,24 @@ public class Entity<T> {
         this.guid = guid;
     }
 
+    /**
+     * Adds a new CommunicationListener to this Entity.
+     * @param cl
+     */
+    public void addCommunicationListener(CommunicationListener<ENTITY_DATA> cl) {
+        communicationListeners.add(cl);
+    }
+    
+    /**
+     * Removes a CommunicationListener from this Entity.
+     * @param cl
+     */
+    public void removeCommunicationListener(CommunicationListener<ENTITY_DATA> cl) {
+        communicationListeners.remove(cl);
+    }
+    
+
+    
     /**
      * Get the name of the topic of this entity.
      * 
