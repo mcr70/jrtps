@@ -91,6 +91,8 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         
         if (!Duration.INFINITE.equals(period)) { 
             this.deadLinePeriod = period.asMillis();
+            
+            logger.debug("deadline period was set to {}", deadLinePeriod);
         }
         
         resource_limits = qos.getResourceLimits();

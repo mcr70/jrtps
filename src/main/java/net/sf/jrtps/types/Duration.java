@@ -20,8 +20,14 @@ public class Duration implements Comparable<Duration> {
      * @param millis Duration expressed in milliseconds.
      */
     public Duration(int millis) {
-        this.sec = (int) (millis / 1000);
-        this.nano = 0;
+        if (millis == -1) { // TODO: check Duration. jdds uses long as value, -1 as infinite
+            this.sec = Integer.MAX_VALUE;
+            this.nano = Integer.MAX_VALUE;
+        }
+        else {
+            this.sec = (int) (millis / 1000);
+            this.nano = 0;
+        }
     }
 
     /**
