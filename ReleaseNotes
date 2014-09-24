@@ -1,3 +1,7 @@
+0.9.9
+    - Documentation update
+    - Duration(-1) represents infinite Duration
+    
 0.9.8
     - Removed ReaderListener & WriterListener in favor of CommunicationListener.
     - DEADLINE QoS
