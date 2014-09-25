@@ -58,7 +58,7 @@ public class CustomDataWriter<T> extends DataWriter<T> {
 
 * TransportProvider
 
- RTPS specification says that only UDP base communication is mandatory for the interoperability.
+ RTPS specification says that only UDP based communication is mandatory for the interoperability.
  There might be good reasons to provide alternate transports. <TransportProvider> is used
  to provide transports of any kind. As a proof-of-concept, In-memory TransportProvider
  with scheme <mem> is provided. Actually, it is more than just a proof-of-concept. 
