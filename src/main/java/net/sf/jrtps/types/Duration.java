@@ -9,7 +9,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class Duration implements Comparable<Duration> {
-    // INFINITE: dds v1.2, IDL DURATION_INFINITE_SEC, DURATION_INFINITE_NSEC,
+    // INFINITE: dds v1.2, IDL :
+    //    const long DURATION_INFINITE_SEC  = 0x7fffffff
+    //    const long DURATION_INFINITE_NSEC = 0x7fffffff
     public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, Integer.MAX_VALUE);
     private int sec;
     private int nano;
@@ -20,13 +22,14 @@ public class Duration implements Comparable<Duration> {
      * @param millis Duration expressed in milliseconds.
      */
     public Duration(long millis) {
-        if (millis == -1) { // TODO: check Duration. jdds uses long as value, -1 as infinite
+        if (millis == -1) { 
             this.sec = Integer.MAX_VALUE;
             this.nano = Integer.MAX_VALUE;
         }
         else {
             this.sec = (int) (millis / 1000);
-            this.nano = 0;
+            millis = millis % 1000;
+            this.nano = (int) (millis * 1000000);
         }
     }
 
@@ -71,6 +74,22 @@ public class Duration implements Comparable<Duration> {
             n = nano / 1000000;
         }
         return (long) sec * 1000 + n;
+    }
+
+    /**
+     * Gets the sec attribute of this Duration;
+     * @return seconds
+     */
+    int getSeconds() { // package private. used for testing
+        return sec;
+    }
+    
+    /**
+     * Gets the nano attribute of this Duration;
+     * @return Nano seconds
+     */
+    int getNanoSeconds() { // package private. used for testing
+        return nano;
     }
 
     @Override
