@@ -71,6 +71,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
     @Override
     public boolean isCompatible(QosDeadline other) {
         QosDeadline qOther = (QosDeadline) other;
+        
         return period.asMillis() <= qOther.period.asMillis();
     }
 
