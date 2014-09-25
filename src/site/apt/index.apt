@@ -32,13 +32,8 @@ Overview
 
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
- 0.9.8
+ 0.9.10
   
-  * Removed ReaderListener & WriterListener in favor of CommunicationListener.
+  * Documentation update
   
-  * DEADLINE QoS
-  
-  * DESTINATION_ORDER follows the same semantics as specified in DDS specification.
-    I.e. determination is done at instance level, not at sample level
-
-  * FIX: add INFO_DESTINATION to messages
+  * FIX: gracefully close deadline monitors during participant close
