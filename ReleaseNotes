@@ -1,3 +1,7 @@
+0.9.10
+    - Documentation update
+    - FIX: Duration nsec calculation from millis
+    
 0.9.9
     - Documentation update
     - Duration(-1) represents infinite Duration

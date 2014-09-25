@@ -17,9 +17,9 @@ public class Duration implements Comparable<Duration> {
     private int nano;
 
     /**
-     * Constructor for Duration_t
+     * Constructor for Duration_t.
      * 
-     * @param millis Duration expressed in milliseconds.
+     * @param millis Duration expressed in milliseconds. -1 represents INFINITE duration
      */
     public Duration(long millis) {
         if (millis == -1) { 
