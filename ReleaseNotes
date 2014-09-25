@@ -1,3 +1,10 @@
+0.9.10
+    - Documentation update
+    - FIX: gracefully close deadline monitors during participant close
+    - FIX: Duration nsec calculation from millis
+    - FIX: QoS compatibility check compares to default value, if given policy is 
+      not explicitly found from QoS policies.
+    
 0.9.9
     - Documentation update
     - Duration(-1) represents infinite Duration

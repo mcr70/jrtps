@@ -27,6 +27,18 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
         super(ParameterEnum.PID_DEADLINE);
     }
 
+    /**
+     * Constructor for new Duration with given milliseconds
+     * @param periodAsMillis
+     */
+    public QosDeadline(long periodAsMillis) {
+        this(new Duration(periodAsMillis));
+    }
+
+    /**
+     * Constructor with given duration
+     * @param period
+     */
     public QosDeadline(Duration period) {
         super(ParameterEnum.PID_DEADLINE);
         this.period = period;
@@ -59,6 +71,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
     @Override
     public boolean isCompatible(QosDeadline other) {
         QosDeadline qOther = (QosDeadline) other;
+        
         return period.asMillis() <= qOther.period.asMillis();
     }
 

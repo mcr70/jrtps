@@ -2,8 +2,17 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * QosTypeConsistencyEnforcement
+ * @author mcr70
+ */
 public class QosTypeConsistencyEnforcement extends Parameter implements DataReaderPolicy<QosTypeConsistencyEnforcement> {
 
+    /**
+     * Kind of TypeConsistencyEnforcement
+     * @author mcr70
+     *
+     */
     public enum Kind {
         DISALLOW_TYPE_COERCION,
         ALLOW_TYPE_COERCION
@@ -11,7 +20,18 @@ public class QosTypeConsistencyEnforcement extends Parameter implements DataRead
 
     private int kind;
 
-    public QosTypeConsistencyEnforcement() {
+    public QosTypeConsistencyEnforcement(Kind kind) {
+        super(ParameterEnum.PID_TYPE_CONSISTENCY_ENFORCEMENT);
+        switch(kind) {
+        case ALLOW_TYPE_COERCION: this.kind = 0;
+        case DISALLOW_TYPE_COERCION: this.kind = 1;
+        
+        default: 
+            throw new RuntimeException("Unknown kind " + kind);
+        }
+    }
+    
+    QosTypeConsistencyEnforcement() {
         super(ParameterEnum.PID_TYPE_CONSISTENCY_ENFORCEMENT);
     }
 

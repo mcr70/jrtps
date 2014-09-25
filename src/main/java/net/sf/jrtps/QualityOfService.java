@@ -204,14 +204,25 @@ public class QualityOfService {
      */
     @SuppressWarnings("unchecked")
     public Set<QosPolicy<?>> getIncompatibleQos(QualityOfService other) {
-        Set<QosPolicy<?>> set = new HashSet<>();
+        // Join qos policies defined in both QoS
+        Set<Class<? extends QosPolicy>> commonSet = new HashSet<>();
+        commonSet.addAll(policies.keySet());
+        commonSet.addAll(other.policies.keySet());
         
-        for (QosPolicy qp : policies.values()) {
-            QosPolicy qpOther = other.policies.get(qp.getClass());
-            if (qpOther == null) {
-                qpOther = other.getDefaultFor(qp);
+        Set<QosPolicy<?>> set = new HashSet<>();
+
+        // Loop through each qos policy defined in either of the QoS
+        for (Class<? extends QosPolicy> clazz : commonSet) {
+            QosPolicy qp = policies.get(clazz);
+            if (qp == null) {
+                qp = getDefaultFor(clazz); // get default for 'this'
             }
             
+            QosPolicy qpOther = other.policies.get(clazz);
+            if (qpOther == null) {
+                qpOther = other.getDefaultFor(clazz); // get default for 'other'
+            }
+
             if (!qp.isCompatible(qpOther)) {
                 set.add(qpOther);
                 log.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
@@ -221,71 +232,69 @@ public class QualityOfService {
         return set;        
     }
     
-    private QosPolicy getDefaultFor(QosPolicy qp) {
-        // TODO: alternative is to place defaults in constructor
-        //       It causes default QoS to be sent over the network
-        if (qp instanceof QosDeadline) {
+    private QosPolicy getDefaultFor(Class<? extends QosPolicy> clazz) {
+        if (QosDeadline.class.equals(clazz)) {
             return QosDeadline.defaultDeadline();
         }
-        else if (qp instanceof QosDestinationOrder) {
+        else if (QosDestinationOrder.class.equals(clazz)) {
             return QosDestinationOrder.defaultDestinationOrder();
         }
-        else if (qp instanceof QosDurability) {
+        else if (QosDurability.class.equals(clazz)) {
             return QosDurability.defaultDurability();
         }
-        else if (qp instanceof QosDurabilityService) {
+        else if (QosDurabilityService.class.equals(clazz)) {
             return QosDurabilityService.defaultDurabilityService();
         }
-        else if (qp instanceof QosGroupData) {
+        else if (QosGroupData.class.equals(clazz)) {
             return QosGroupData.defaultGroupData();
         }
-        else if (qp instanceof QosHistory) {
+        else if (QosHistory.class.equals(clazz)) {
             return QosHistory.defaultHistory();
         }
-        else if (qp instanceof QosLatencyBudget) {
+        else if (QosLatencyBudget.class.equals(clazz)) {
             return QosLatencyBudget.defaultLatencyBudget();
         }
-        else if (qp instanceof QosLifespan) {
+        else if (QosLifespan.class.equals(clazz)) {
             return QosLifespan.defaultLifespan();
         }
-        else if (qp instanceof QosLiveliness) {
+        else if (QosLiveliness.class.equals(clazz)) {
             return QosLiveliness.defaultLiveliness();
         }
-        else if (qp instanceof QosOwnership) {
+        else if (QosOwnership.class.equals(clazz)) {
             return QosOwnership.defaultOwnership();
         }
-        else if (qp instanceof QosOwnershipStrength) {
+        else if (QosOwnershipStrength.class.equals(clazz)) {
             return QosOwnershipStrength.defaultOwnershipStrength();
         }
-        else if (qp instanceof QosPartition) {
+        else if (QosPartition.class.equals(clazz)) {
             return QosPartition.defaultPartition();
         }
-        else if (qp instanceof QosPresentation) {
+        else if (QosPresentation.class.equals(clazz)) {
             return QosPresentation.defaultPresentation();
         }
-        else if (qp instanceof QosOwnershipStrength) {
+        else if (QosOwnershipStrength.class.equals(clazz)) {
             return QosOwnershipStrength.defaultOwnershipStrength();
         }
-        else if (qp instanceof QosReliability) {
+        else if (QosReliability.class.equals(clazz)) {
             return QosReliability.defaultReliability();
         }
-        else if (qp instanceof QosResourceLimits) {
+        else if (QosResourceLimits.class.equals(clazz)) {
             return QosResourceLimits.defaultResourceLimits();
         }
-        else if (qp instanceof QosTopicData) {
+        else if (QosTopicData.class.equals(clazz)) {
             return QosTopicData.defaultTopicData();
         }
-        else if (qp instanceof QosTransportPriority) {
+        else if (QosTransportPriority.class.equals(clazz)) {
             return QosTransportPriority.defaultTransportPriority();
         }
-        else if (qp instanceof QosTimeBasedFilter) {
+        else if (QosTimeBasedFilter.class.equals(clazz)) {
             return QosTimeBasedFilter.defaultTimeBasedFilter();
         }
-        else if (qp instanceof QosUserData) {
+        else if (QosUserData.class.equals(clazz)) {
             return QosUserData.defaultUserData();
         }
 
-        log.warn("Unknown qos policy {}", qp);
+        log.warn("Unknown qos policy {}", clazz);
 
         return null;
     }

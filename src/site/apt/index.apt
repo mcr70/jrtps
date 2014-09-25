@@ -2,7 +2,7 @@ Overview
 
  <Note: Consider any documentation on this site prior version 1.0 to be subject to changes> 
 
- jRTPS is an implementation of {{{http://www.omg.org/spec/DDS-RTPS/2.1/}RTPS 2.1}} protocol by OMG.
+ jRTPS is an implementation of {{{http://www.omg.org/spec/DDSI-RTPS/2.1/}RTPS 2.1}} protocol by OMG.
  RTPS protocol is designed to provide interoperability between different 
  {{{http://www.omg.org/spec/DDS/}DDS}} implementations. 
  jRTPS also provides a simplistic DDS alike programming interface, 
@@ -10,17 +10,35 @@ Overview
  that can be used to read/write data from/to DDS domain. There is also an ongoing effort, 
  {{{http://jdds.sourceforge.net}jDDS}}, that utilizes jRTPS as its transport.
 
+ Here is a list of related OMG documents
+ 
+ * {{{http://www.omg.org/spec/DDSI-RTPS/}RTPS}}. This is the main document
+   used in implementation of jRTPS. Current implementation is based on version 
+   2.1 of the specification. However, version 2.2 is also available.
+   
+ * {{{http://www.omg.org/spec/DDS/}DDS}}. DDS specification is used as a reference
+   while implementing uDDS.
+ 
+ * {{{http://www.omg.org/spec/DDS-XTypes/}X-Types}}. Some of the parameter IDs
+   and new QoS policies are found in this document. See Annex D: DDS Built-in Topic Data Types.
+
+ * {{{http://www.omg.org/spec/DDS-SECURITY/}DDS security}}. At some point,
+   jRTPS will be 100% wire compatible with this specification.
+
+ * {{{http://www.omg.org/spec/dds4ccm/}DDS4CCM}}. While jRTPS does not try
+   to address most of this document, XML QoS definition looks interesting. 
+
 * Release notes
 
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
- 0.9.8
+ 0.9.10
   
-  * Removed ReaderListener & WriterListener in favor of CommunicationListener.
+  * Documentation update
   
-  * DEADLINE QoS
+  * FIX: gracefully close deadline monitors during participant close
   
-  * DESTINATION_ORDER follows the same semantics as specified in DDS specification.
-    I.e. determination is done at instance level, not at sample level
-
-  * FIX: add INFO_DESTINATION to messages
+  * FIX: Duration nsec calculation from millis
+  
+  * FIX: QoS compatibility check compares to default value, if given policy is 
+      not explicitly found from QoS policies.
