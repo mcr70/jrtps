@@ -3,6 +3,12 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration;
 
+/**
+ * This QoS policy controls whether or not communication between entities are established as 
+ * reliable or best effort.
+ * @author mcr70
+ *
+ */
 public class QosReliability extends Parameter implements DataReaderPolicy<QosReliability>,
         DataWriterPolicy<QosReliability>, TopicPolicy<QosReliability>, InlineQoS {
     // see Table 9.4 - PSM mapping of the value types that appear on the wire
@@ -15,7 +21,14 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
     private Duration max_blocking_time;
 
     public enum Kind {
-        BEST_EFFORT, RELIABLE;
+        /**
+         * With BEST_EFFORT kind, no promise about delivery is made.
+         */
+        BEST_EFFORT, 
+        /**
+         * RELIABLE kind ensures that all the Data messages are sent to readers in reliable manner.
+         */
+        RELIABLE;
     }
 
     QosReliability() {

@@ -165,14 +165,12 @@ public class RTPSParticipant {
     public void close() {
         logger.debug("Closing RTPSParticipant {}", guid);
 
-        for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce
-            // thread
+        for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce thread
             w.close();
         }
         writerEndpoints.clear();
         
-        // close network receivers
-        for (Receiver r : receivers) {
+        for (Receiver r : receivers) { // close network receivers
             r.close();
         }
         readerEndpoints.clear();
