@@ -160,3 +160,35 @@ Quality of Service - uDDS
  from the network. Limits are thus checked by the network receiver thread, and application is therefore not 
  aware of the resource limit problem. 
 
+
+* UserData, GroupData, TopicData
+
+ These QoS policies allow applications to pass arbitrary byte array to remote entities. uDDS supports adding of
+ these policies to QoS, and thus make remote entities aware of them. However, by default uDDS entities cannot read 
+ the QoS policy values of remote entity. If one needs to read those values, a custom <EntityFactory> which
+ exposes relevant methods of RTPS entity to applications is needed. For example, 
+ 
++---
+public class CustomEntityFactory extends EntityFactory {
+    @Override
+    public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
+            HistoryCache<T> hCache) {
+        return new CustomDataWriter<>(p, type, rtpsWriter, hCache);
+    }
+}
+
+
+public class CustomDataWriter<T> extends DataWriter<T> {
+    CustomDataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+        super(p, type, writer, hCache);
+    }
+
+    public Collection<ReaderProxy> getMathcedReaders() {
+        return rtps_writer.getMatchedReaders();
+    }
+}
++--- 
+  
+ The code above would allow to typecast <DataWriter> to <CustomDataWriter> and call <getMatchedReaders()> method
+ to get a collection of <ReaderProxy>s, which contain the QualityOfService of remote reader. The similar 
+ extension can be made for <WriterProxy>s as well.

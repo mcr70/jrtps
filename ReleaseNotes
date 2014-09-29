@@ -1,3 +1,7 @@
+0.9.11
+    - FIX: During discovery, DataWriterPolicys and DataReaderPolicys are
+      passed to remote entity instead of InlineQoS policies.
+    
 0.9.10
     - Documentation update
     - FIX: gracefully close deadline monitors during participant close

@@ -7,6 +7,7 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.BuiltinTopicKey;
+import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.QosPolicy;
@@ -75,9 +76,9 @@ public class PublicationDataMarshaller implements Marshaller<PublicationData> {
     }
 
     private void addQoS(PublicationData wd, ParameterList payloadParams) {
-        Set<QosPolicy<?>> inlineableQosPolicies = wd.getInlineableQosPolicies();
-        for (QosPolicy<?> qp : inlineableQosPolicies) {
-            payloadParams.add((Parameter) qp);
+        Set<DataWriterPolicy> policies = wd.getQualityOfService().getWriterPolicies();
+        for (QosPolicy<?> qp : policies) {
+            payloadParams.add((Parameter) qp); // safe cast
         }
     }
 }
