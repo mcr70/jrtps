@@ -1,5 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
+import java.util.Arrays;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroupData>, PublisherPolicy<QosGroupData> {
@@ -47,5 +49,9 @@ public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroup
 
     public static QosGroupData defaultGroupData() {
         return new QosGroupData(new byte[0]);
+    }
+
+    public String toString() {
+        return QosGroupData.class.getSimpleName() + "(" + Arrays.toString(groupData) + ")";
     }
 }
