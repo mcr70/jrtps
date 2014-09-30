@@ -1,5 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
+import java.util.Arrays;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosTopicData extends Parameter implements DataReaderPolicy<QosTopicData>, 
@@ -49,5 +51,9 @@ public class QosTopicData extends Parameter implements DataReaderPolicy<QosTopic
 
     public static QosTopicData defaultTopicData() {
         return new QosTopicData(new byte[0]);
+    }
+    
+    public String toString() {
+        return QosTopicData.class.getSimpleName() + "(" + Arrays.toString(topicData) + ")";
     }
 }

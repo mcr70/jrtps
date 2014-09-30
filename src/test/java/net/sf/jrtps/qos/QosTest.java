@@ -1,5 +1,6 @@
 package net.sf.jrtps.qos;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.util.concurrent.CountDownLatch;
@@ -12,6 +13,7 @@ import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosDeadline;
+import net.sf.jrtps.message.parameter.QosPartition;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.transport.mem.MemProvider;
 import net.sf.jrtps.types.Duration;
@@ -115,4 +117,32 @@ public class QosTest {
         p2.close();
     }
 
+    
+    @Test
+    public void testQosPartition() {
+        QosPartition p1 = QosPartition.defaultPartition();
+        QosPartition p2 = QosPartition.defaultPartition();
+        
+        assertTrue(p1.isCompatible(p2));
+        assertTrue(p2.isCompatible(p1));
+        
+        p1 = new QosPartition(new String[]{"p1", "p2", "p3"});
+        assertFalse(p1.isCompatible(p2));
+        assertFalse(p2.isCompatible(p1));
+        
+        p2 = new QosPartition(new String[]{"p2"});
+        assertTrue(p1.isCompatible(p2));
+        assertTrue(p2.isCompatible(p1));
+        
+        p2 = new QosPartition(new String[]{"p.*"});
+        assertTrue(p1.isCompatible(p2));
+        assertTrue(p2.isCompatible(p1));
+        
+        // Note, spec says this should not work; two partitions, both with regexp
+        // This is intentional deviation from spec. It is too complex to determine
+        // if regular expressions are used or not.
+        p1 = new QosPartition(new String[]{"p1.*"});  
+        assertTrue(p1.isCompatible(p2));
+        assertTrue(p2.isCompatible(p1));
+    }
 }

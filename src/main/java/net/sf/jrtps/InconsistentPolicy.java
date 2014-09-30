@@ -7,7 +7,7 @@ package net.sf.jrtps;
  * @see net.sf.jrtps.QualityOfService#setPolicy
  * @author mcr70
  */
-public class InconsistentPolicy extends Exception {
+public class InconsistentPolicy extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     public InconsistentPolicy(String msg) {

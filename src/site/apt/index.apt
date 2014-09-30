@@ -32,13 +32,13 @@ Overview
 
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
- 0.9.10
+ 0.9.11
   
-  * Documentation update
-  
-  * FIX: gracefully close deadline monitors during participant close
-  
-  * FIX: Duration nsec calculation from millis
-  
-  * FIX: QoS compatibility check compares to default value, if given policy is 
-      not explicitly found from QoS policies.
+  * FIX: During discovery, DataWriterPolicys and DataReaderPolicys are
+    passed to remote entity instead of InlineQoS policies.
+
+  * PARTITION QoS policy with minor deviation from spec; partitions can be 
+    compatible, if they both contain regular expressions. For example, 
+    "part.*" partition is compatible with "partition.*". This is accomplished
+    by checking partition names in both ways.
+    

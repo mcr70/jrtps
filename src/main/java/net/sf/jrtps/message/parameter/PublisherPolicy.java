@@ -5,5 +5,5 @@ package net.sf.jrtps.message.parameter;
  * 
  * @author mcr70
  */
-public interface PublisherPolicy<T> extends QosPolicy<T> {
+public interface PublisherPolicy<T> extends DataWriterPolicy<T> {
 }

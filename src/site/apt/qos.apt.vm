@@ -80,6 +80,21 @@ Quality of Service - uDDS
  While jRTPS tries to be 100% compatible with RTPS specification, uDDS makes no such promise to 
  DDS specification. This section is about those settings, and how they are supported by uDDS-${project.version}. 
 
+* Partition
+
+ Partitions are used to create logical isolation of entities, whereas domain physically isolates
+ entities from each other. An entity should not communicate with its counterpart, unless they have a matching
+ partition. An entity tells which partitions it is connected to by using Partition QoS policy. This policy contains
+ an array of <String>s, each representing a partition name. These partition names are transferred to
+ remote entities during discovery. 
+ 
+ Partition names can contain regular expressions. DDS specification says that two partitions should
+ not be matched if they both contain regular expressions. uDDS partition checking is more flexible than
+ this restriction; it allows partitions to match if both partition names contain regular expressions and
+ they match each other in one way or another. For example <"part.*"> will match <"partition.*">
+ 
+ Note, that other implementations might not behave this way and might result in communication not to be 
+ established. For this reason, one should be careful when using regular expressions in partition names.
 
 * Deadline
 
@@ -160,3 +175,35 @@ Quality of Service - uDDS
  from the network. Limits are thus checked by the network receiver thread, and application is therefore not 
  aware of the resource limit problem. 
 
+
+* UserData, GroupData, TopicData
+
+ These QoS policies allow applications to pass arbitrary byte array to remote entities. uDDS supports adding of
+ these policies to QoS, and thus make remote entities aware of them. However, by default uDDS entities cannot read 
+ the QoS policy values of remote entity. If one needs to read those values, a custom <EntityFactory> which
+ exposes relevant methods of RTPS entity to applications is needed. For example, 
+ 
++---
+public class CustomEntityFactory extends EntityFactory {
+    @Override
+    public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
+            HistoryCache<T> hCache) {
+        return new CustomDataWriter<>(p, type, rtpsWriter, hCache);
+    }
+}
+
+
+public class CustomDataWriter<T> extends DataWriter<T> {
+    CustomDataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+        super(p, type, writer, hCache);
+    }
+
+    public Collection<ReaderProxy> getMathcedReaders() {
+        return rtps_writer.getMatchedReaders();
+    }
+}
++--- 
+  
+ The code above would allow to typecast <DataWriter> to <CustomDataWriter> and call <getMatchedReaders()> method
+ to get a collection of <ReaderProxy>s, which contain the QualityOfService of remote reader. The similar 
+ extension can be made for <WriterProxy>s as well.
