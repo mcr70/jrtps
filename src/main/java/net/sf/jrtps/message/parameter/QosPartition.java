@@ -1,5 +1,8 @@
 package net.sf.jrtps.message.parameter;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosPartition extends Parameter implements SubscriberPolicy<QosPartition>, PublisherPolicy<QosPartition>,
@@ -36,9 +39,49 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
         }
     }
 
+    /**
+     * Checks whether or not two QosPartition policies are compatible or not.
+     * For the two to be compatible, at least one partition must be shared.
+     * 
+     * Note, that regular expression comparison is done first from 'this'
+     * policys partitions. If no matching partitions are found that way,
+     * 'other' policys partitions are used as regular expression and compared
+     * to 'this' policys partitions.
+     * 
+     * Note, that this yields to implementation that is not strictly comaptible
+     * with DDS specification, as spec says that two partitions cannot be matched
+     * if both contain regular expressions. I.e. this check is not made.
+     */
     @Override
     public boolean isCompatible(QosPartition other) {
-        return true; // TODO: Partition matching is done differently
+        
+        if (partitions.length == 0 && other.partitions.length == 0) {
+            return true;
+        }
+        
+        // Try to match with regular expression from 'this' partitions
+        for (String partition : partitions) {
+            Pattern p = Pattern.compile(partition);
+            for (String otherPartition : other.partitions) {
+                Matcher matcher = p.matcher(otherPartition);
+                if (matcher.matches()) {
+                    return true;
+                }
+            }
+        }
+        
+        // Try to match with regular expression from 'other' partitions
+        for (String otherPartition : other.partitions) {
+            Pattern p = Pattern.compile(otherPartition);
+            for (String partition : partitions) {
+                Matcher matcher = p.matcher(partition);
+                if (matcher.matches()) {
+                    return true;
+                }
+            }
+        }
+        
+        return false; // TODO: Partition matching is done differently
     }
 
     /**
