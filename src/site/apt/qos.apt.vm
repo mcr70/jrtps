@@ -80,6 +80,21 @@ Quality of Service - uDDS
  While jRTPS tries to be 100% compatible with RTPS specification, uDDS makes no such promise to 
  DDS specification. This section is about those settings, and how they are supported by uDDS-${project.version}. 
 
+* Partition
+
+ Partitions are used to create logical isolation of entities, whereas domain physically isolates
+ entities from each other. An entity should not communicate with its counterpart, unless they have a matching
+ partition. An entity tells which partitions it is connected to by using Partition QoS policy. This policy contains
+ an array of <String>s, each representing a partition name. These partition names are transferred to
+ remote entities during discovery. 
+ 
+ Partition names can contain regular expressions. DDS specification says that two partitions should
+ not be matched if they both contain regular expressions. uDDS partition checking is more flexible than
+ this restriction; it allows partitions to match if both partition names contain regular expressions and
+ they match each other in one way or another. For example <"part.*"> will match <"partition.*">
+ 
+ Note, that other implementations might not behave this way and might result in communication not to be 
+ established. For this reason, one should be careful when using regular expressions in partition names.
 
 * Deadline
 
