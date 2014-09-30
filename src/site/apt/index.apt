@@ -36,3 +36,9 @@ Overview
   
   * FIX: During discovery, DataWriterPolicys and DataReaderPolicys are
     passed to remote entity instead of InlineQoS policies.
+
+  * PARTITION QoS policy with minor deviation from spec; partitions can be 
+    compatible, if they both contain regular expressions. For example, 
+    "part.*" partition is compatible with "partition.*". This is accomplished
+    by checking partition names in both ways.
+    
