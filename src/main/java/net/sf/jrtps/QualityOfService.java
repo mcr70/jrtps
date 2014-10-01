@@ -7,6 +7,7 @@ import java.util.Set;
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.InlineQoS;
+import net.sf.jrtps.message.parameter.QosDataRepresentation;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDestinationOrder;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -329,6 +330,18 @@ public class QualityOfService {
     }
 
 
+    /**
+     * Gets the DataRepresentation QosPolicy
+     * @return QosDataRepresentation
+     */
+    public QosDataRepresentation getDataRepresentation() {
+        QosPolicy policy = policies.get(QosDataRepresentation.class);
+        if (policy != null) {
+            return (QosDataRepresentation) policy;
+        }
+        
+        return QosDataRepresentation.defaultDataRepresentation();
+    }
     
     /**
      * Gets the Deadline QosPolicy

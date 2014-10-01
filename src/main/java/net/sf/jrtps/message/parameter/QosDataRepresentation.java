@@ -2,12 +2,16 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * This QosPolicy is defined in DDS X-Types specification formal-12-11-20-2.pdf, chapter 7.6.2.1 
+ * @author mcr70
+ */
 public class QosDataRepresentation extends Parameter implements DataReaderPolicy<QosDataRepresentation>,
 DataWriterPolicy<QosDataRepresentation>, TopicPolicy<QosDataRepresentation>, InlineQoS {
     public static final short XCDR_DATA_REPRESENTATION = 0;
     public static final short XML_DATA_REPRESENTATION = 1;
     
-    private short[] values; // TODO: check array type: short[], int[], ...
+    private short[] values = new short[0]; 
     
     QosDataRepresentation() {
         super(ParameterEnum.PID_DATA_REPRESENTATION);
@@ -29,10 +33,20 @@ DataWriterPolicy<QosDataRepresentation>, TopicPolicy<QosDataRepresentation>, Inl
         }
     }
 
+    /**
+     * Get a default DataRepresentation QoS policy.
+     * @return QosDataRepresentation with XCDR_DATA_REPRESENTATION
+     */
+    public static QosDataRepresentation defaultDataRepresentation() {
+        return new QosDataRepresentation(); // Defaults to XCDR
+    }
+    
     @Override
     public boolean isCompatible(QosDataRepresentation requested) {
+        short val = values.length > 0 ? values[0] : XCDR_DATA_REPRESENTATION;
+        
         for (short s : requested.values) {
-            if (s == values[0]) { // see x-types doc
+            if (s == val) { // see x-types doc 7.6.2.1
                 return true;
             }
         }
