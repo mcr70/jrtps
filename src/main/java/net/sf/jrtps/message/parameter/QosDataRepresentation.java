@@ -33,6 +33,10 @@ DataWriterPolicy<QosDataRepresentation>, TopicPolicy<QosDataRepresentation>, Inl
         }
     }
 
+    public short[] getValues() {
+        return values;
+    }
+    
     /**
      * Get a default DataRepresentation QoS policy.
      * @return QosDataRepresentation with XCDR_DATA_REPRESENTATION

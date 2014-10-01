@@ -61,6 +61,14 @@ public class QosPresentation extends Parameter implements PublisherPolicy<QosPre
         throw new IllegalArgumentException("Illegal kind " + access_scope + " for QosPresentation");
     }
 
+    public boolean isCoherentAccess() {
+        return coherent_access;
+    }
+    
+    public boolean isOrderedAccess() {
+        return ordered_access;
+    }
+    
     @Override
     public boolean isCompatible(QosPresentation other) {
         if (access_scope >= other.access_scope) {

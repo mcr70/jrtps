@@ -58,4 +58,8 @@ public class QosTypeConsistencyEnforcement extends Parameter implements DataRead
     public boolean isCompatible(QosTypeConsistencyEnforcement requested) {
         return true; // applies only to readers
     }
+
+    public static QosTypeConsistencyEnforcement defaultTypeConsistencyEnforcement() {
+        return new QosTypeConsistencyEnforcement(Kind.DISALLOW_TYPE_COERCION);
+    }
 }
