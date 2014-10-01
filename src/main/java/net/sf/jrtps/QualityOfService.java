@@ -27,6 +27,7 @@ import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.message.parameter.QosTopicData;
 import net.sf.jrtps.message.parameter.QosTransportPriority;
+import net.sf.jrtps.message.parameter.QosTypeConsistencyEnforcement;
 import net.sf.jrtps.message.parameter.QosUserData;
 import net.sf.jrtps.message.parameter.TopicPolicy;
 import net.sf.jrtps.types.Duration;
@@ -590,6 +591,15 @@ public class QualityOfService {
         return QosUserData.defaultUserData();
     }
 
+    
+    public QosTypeConsistencyEnforcement getTypeConsistencyEnforcement() {
+        QosPolicy policy = policies.get(QosTypeConsistencyEnforcement.class);
+        if (policy != null) {
+            return (QosTypeConsistencyEnforcement) policy;
+        }
+        
+        return QosTypeConsistencyEnforcement.defaultTypeConsistencyEnforcement();
+    }
 
     
     private static QualityOfService createSEDPQualityOfService() {
@@ -629,4 +639,5 @@ public class QualityOfService {
     public String toString() {
         return policies.values().toString();
     }
+
 }
