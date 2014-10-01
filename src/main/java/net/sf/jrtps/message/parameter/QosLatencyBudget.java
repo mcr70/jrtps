@@ -21,6 +21,14 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
         this.duration = duration;
     }
 
+    /**
+     * Gets the duration of this LatencyBudget QoS policy.
+     * @return Duration
+     */
+    public Duration getDuration() {
+        return duration;
+    }
+    
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         this.duration = new Duration(bb);
