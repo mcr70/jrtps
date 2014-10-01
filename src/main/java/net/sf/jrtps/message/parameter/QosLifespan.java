@@ -27,6 +27,10 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
         this.duration = duration;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+    
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         this.duration = new Duration(bb);
