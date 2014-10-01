@@ -3,7 +3,7 @@ package net.sf.jrtps.message.parameter;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
- * QosTypeConsistencyEnforcement
+ * QosTypeConsistencyEnforcement, defined in x-types 
  * @author mcr70
  */
 public class QosTypeConsistencyEnforcement extends Parameter implements DataReaderPolicy<QosTypeConsistencyEnforcement> {
