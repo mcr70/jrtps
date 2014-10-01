@@ -63,7 +63,10 @@ public enum ParameterEnum {
     // from x-types:
     PID_DATA_REPRESENTATION(0x0073),
     PID_TYPE_CONSISTENCY_ENFORCEMENT(0x0074),
-
+    PID_EQUIVALENT_TYPE_NAME(0x0075),
+    PID_BASE_TYPE_NAME(0x0076),
+    PID_TYPE_OBJECT(0x0072),
+    
     // Table 9.14 adds following PIDs
     PID_CONTENT_FILTER_INFO(0x0055), 
     PID_COHERENT_SET(0x0056), 
