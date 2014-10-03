@@ -6,11 +6,11 @@ public class ExpectsInlineQos extends Parameter {
     private boolean expectsInlineQos;
     
     ExpectsInlineQos() {
-        super(ParameterEnum.PID_EXPECTS_INLINE_QOS);
+        super(ParameterId.PID_EXPECTS_INLINE_QOS);
     }
 
     public ExpectsInlineQos(boolean b) {
-        super(ParameterEnum.PID_EXPECTS_INLINE_QOS);
+        super(ParameterId.PID_EXPECTS_INLINE_QOS);
         expectsInlineQos = b;
     }
     

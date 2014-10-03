@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class Persistence extends Parameter {
     Persistence() {
-        super(ParameterEnum.PID_PERSISTENCE);
+        super(ParameterId.PID_PERSISTENCE);
     }
 
     @Override

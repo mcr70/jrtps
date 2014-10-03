@@ -6,7 +6,7 @@ package net.sf.jrtps.message.parameter;
  * @author mcr70
  * 
  */
-public enum ParameterEnum {
+public enum ParameterId {
     PID_PAD(0x0000), PID_SENTINEL(0x0001), PID_USER_DATA(0x002c), // UserDataQosPolicy
     PID_TOPIC_NAME(0x0005), // string<256>
     PID_TYPE_NAME(0x0007), // string<256>
@@ -93,7 +93,7 @@ public enum ParameterEnum {
 
     private short kind;
 
-    ParameterEnum(int kind) {
+    ParameterId(int kind) {
         this.kind = (short) kind;
     }
 

@@ -6,13 +6,13 @@ public class TopicName extends Parameter implements InlineQoS {
     private String name;
 
     public TopicName(String name) {
-        super(ParameterEnum.PID_TOPIC_NAME);
+        super(ParameterId.PID_TOPIC_NAME);
         this.name = name;
 
     }
 
     TopicName() {
-        super(ParameterEnum.PID_TOPIC_NAME);
+        super(ParameterId.PID_TOPIC_NAME);
     }
 
     public String getName() {

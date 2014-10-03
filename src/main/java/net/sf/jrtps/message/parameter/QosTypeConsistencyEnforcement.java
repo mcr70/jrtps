@@ -21,7 +21,7 @@ public class QosTypeConsistencyEnforcement extends Parameter implements DataRead
     private int kind;
 
     public QosTypeConsistencyEnforcement(Kind kind) {
-        super(ParameterEnum.PID_TYPE_CONSISTENCY_ENFORCEMENT);
+        super(ParameterId.PID_TYPE_CONSISTENCY_ENFORCEMENT);
         switch(kind) {
         case ALLOW_TYPE_COERCION: this.kind = 0;
         case DISALLOW_TYPE_COERCION: this.kind = 1;
@@ -32,7 +32,7 @@ public class QosTypeConsistencyEnforcement extends Parameter implements DataRead
     }
     
     QosTypeConsistencyEnforcement() {
-        super(ParameterEnum.PID_TYPE_CONSISTENCY_ENFORCEMENT);
+        super(ParameterId.PID_TYPE_CONSISTENCY_ENFORCEMENT);
     }
 
     public Kind getKind() {

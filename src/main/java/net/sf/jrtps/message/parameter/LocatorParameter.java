@@ -11,7 +11,7 @@ public abstract class LocatorParameter extends Parameter {
      * @param pe
      *            Must be one to define a locator. No check is made.
      */
-    protected LocatorParameter(ParameterEnum pe) {
+    protected LocatorParameter(ParameterId pe) {
         super(pe);
     }
 
@@ -20,7 +20,7 @@ public abstract class LocatorParameter extends Parameter {
      * @param pe
      *            Must be one to define a locator. No check is made.
      */
-    protected LocatorParameter(ParameterEnum pe, Locator locator) {
+    protected LocatorParameter(ParameterId pe, Locator locator) {
         super(pe);
         this.locator = locator;
     }

@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class ContentFilterInfo extends Parameter implements InlineQoS {
     ContentFilterInfo() {
-        super(ParameterEnum.PID_CONTENT_FILTER_INFO);
+        super(ParameterId.PID_CONTENT_FILTER_INFO);
     }
 
     @Override

@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class Type2Name extends Parameter {
     Type2Name() {
-        super(ParameterEnum.PID_TYPE2_NAME);
+        super(ParameterId.PID_TYPE2_NAME);
     }
 
     @Override

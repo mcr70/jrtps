@@ -14,7 +14,7 @@ public class QosDurabilityService extends Parameter implements DataWriterPolicy<
     private int max_samples_per_instance;
     
     QosDurabilityService() {
-        super(ParameterEnum.PID_DURABILITY_SERVICE);
+        super(ParameterId.PID_DURABILITY_SERVICE);
         
         service_cleanup_delay = new Duration(0);
         history_kind = 0; // KEEP_LAST

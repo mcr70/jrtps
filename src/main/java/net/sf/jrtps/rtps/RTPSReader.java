@@ -18,7 +18,7 @@ import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoDestination;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.DirectedWrite;
-import net.sf.jrtps.message.parameter.ParameterEnum;
+import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
@@ -367,7 +367,7 @@ public class RTPSReader<T> extends Endpoint {
      */
     private boolean checkDirectedWrite(Data data) {
         if (data.inlineQosFlag()) {
-            DirectedWrite dw = (DirectedWrite) data.getInlineQos().getParameter(ParameterEnum.PID_DIRECTED_WRITE);
+            DirectedWrite dw = (DirectedWrite) data.getInlineQos().getParameter(ParameterId.PID_DIRECTED_WRITE);
     
             if (dw != null) {
                 for (Guid guid : dw.getGuids()) {

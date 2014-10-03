@@ -24,7 +24,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
     private Duration period;
 
     QosDeadline() {
-        super(ParameterEnum.PID_DEADLINE);
+        super(ParameterId.PID_DEADLINE);
     }
 
     /**
@@ -40,7 +40,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
      * @param period
      */
     public QosDeadline(Duration period) {
-        super(ParameterEnum.PID_DEADLINE);
+        super(ParameterId.PID_DEADLINE);
         this.period = period;
     }
 

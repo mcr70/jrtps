@@ -19,11 +19,11 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
     }
 
     QosHistory() {
-        super(ParameterEnum.PID_HISTORY);
+        super(ParameterId.PID_HISTORY);
     }
 
     public QosHistory(Kind kind, int depth) {
-        super(ParameterEnum.PID_HISTORY);
+        super(ParameterId.PID_HISTORY);
 
         switch (kind) {
         case KEEP_LAST:

@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class VargappsSequenceNumberLast extends Parameter {
     VargappsSequenceNumberLast() {
-        super(ParameterEnum.PID_VARGAPPS_SEQUENCE_NUMBER_LAST);
+        super(ParameterId.PID_VARGAPPS_SEQUENCE_NUMBER_LAST);
     }
 
     @Override

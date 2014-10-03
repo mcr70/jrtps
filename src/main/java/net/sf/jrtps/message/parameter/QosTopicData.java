@@ -10,7 +10,7 @@ public class QosTopicData extends Parameter implements DataReaderPolicy<QosTopic
     private byte[] topicData;
 
     public QosTopicData(byte[] topicData) {
-        super(ParameterEnum.PID_TOPIC_DATA);
+        super(ParameterId.PID_TOPIC_DATA);
         if (topicData == null) {
             this.topicData = new byte[0];
         }
@@ -20,7 +20,7 @@ public class QosTopicData extends Parameter implements DataReaderPolicy<QosTopic
     }
 
     QosTopicData() {
-        super(ParameterEnum.PID_TOPIC_DATA);
+        super(ParameterId.PID_TOPIC_DATA);
     }
 
     /**

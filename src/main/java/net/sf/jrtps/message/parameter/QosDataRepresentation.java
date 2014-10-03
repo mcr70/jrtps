@@ -14,7 +14,7 @@ DataWriterPolicy<QosDataRepresentation>, TopicPolicy<QosDataRepresentation>, Inl
     private short[] values = new short[0]; 
     
     QosDataRepresentation() {
-        super(ParameterEnum.PID_DATA_REPRESENTATION);
+        super(ParameterId.PID_DATA_REPRESENTATION);
     }
 
     @Override

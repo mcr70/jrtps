@@ -13,11 +13,11 @@ public class QosPresentation extends Parameter implements PublisherPolicy<QosPre
     private boolean ordered_access;
 
     QosPresentation() {
-        super(ParameterEnum.PID_PRESENTATION);
+        super(ParameterId.PID_PRESENTATION);
     }
 
     public QosPresentation(Kind kind, boolean coherent_access, boolean ordered_access) {
-        super(ParameterEnum.PID_PRESENTATION);
+        super(ParameterId.PID_PRESENTATION);
         switch (kind) {
         case INSTANCE:
             this.access_scope = 0;

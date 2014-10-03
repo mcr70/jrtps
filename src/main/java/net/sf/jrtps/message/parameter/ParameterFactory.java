@@ -207,6 +207,9 @@ public class ParameterFactory {
             break;
 
             // From x-types
+        case 0x0072:
+            param = new TypeObject(); 
+            break;
         case 0x0073:
             param = new QosDataRepresentation(); 
             break;

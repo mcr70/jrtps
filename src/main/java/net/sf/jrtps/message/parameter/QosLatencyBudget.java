@@ -8,7 +8,7 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
     private Duration duration;
 
     QosLatencyBudget() {
-        super(ParameterEnum.PID_LATENCY_BUDGET);
+        super(ParameterId.PID_LATENCY_BUDGET);
     }
 
     /**
@@ -17,7 +17,7 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
      * @param duration
      */
     public QosLatencyBudget(Duration duration) {
-        super(ParameterEnum.PID_LATENCY_BUDGET);
+        super(ParameterId.PID_LATENCY_BUDGET);
         this.duration = duration;
     }
 

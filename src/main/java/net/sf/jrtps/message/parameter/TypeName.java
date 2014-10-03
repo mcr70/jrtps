@@ -6,11 +6,11 @@ public class TypeName extends Parameter {
     private String typeName;
 
     TypeName() {
-        super(ParameterEnum.PID_TYPE_NAME);
+        super(ParameterId.PID_TYPE_NAME);
     }
 
     public TypeName(String typeName) {
-        super(ParameterEnum.PID_TYPE_NAME);
+        super(ParameterId.PID_TYPE_NAME);
         this.typeName = typeName;
     }
 

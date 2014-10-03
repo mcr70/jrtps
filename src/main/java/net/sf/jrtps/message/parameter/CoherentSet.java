@@ -7,7 +7,7 @@ public class CoherentSet extends Parameter implements InlineQoS {
     private SequenceNumber seqNum;
     
     CoherentSet() {
-        super(ParameterEnum.PID_COHERENT_SET);
+        super(ParameterId.PID_COHERENT_SET);
     }
 
     /**
@@ -15,7 +15,7 @@ public class CoherentSet extends Parameter implements InlineQoS {
      * @param seqNum
      */
     public CoherentSet(SequenceNumber seqNum) {
-        super(ParameterEnum.PID_COHERENT_SET);
+        super(ParameterId.PID_COHERENT_SET);
         this.seqNum = seqNum;
     }
     

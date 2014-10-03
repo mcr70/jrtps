@@ -38,7 +38,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
     }
 
     QosLiveliness() {
-        super(ParameterEnum.PID_LIVELINESS);
+        super(ParameterId.PID_LIVELINESS);
     }
 
     /**
@@ -52,7 +52,7 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
      * @see Kind
      */
     public QosLiveliness(Kind kind, Duration lease_duration) {
-        super(ParameterEnum.PID_LIVELINESS);
+        super(ParameterId.PID_LIVELINESS);
         switch (kind) {
         case AUTOMATIC:
             this.kind = 0;

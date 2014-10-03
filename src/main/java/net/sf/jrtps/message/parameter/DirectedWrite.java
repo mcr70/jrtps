@@ -7,11 +7,11 @@ public class DirectedWrite extends Parameter implements InlineQoS {
     private Guid[] guids;
 
     DirectedWrite() {
-        super(ParameterEnum.PID_DIRECTED_WRITE);
+        super(ParameterId.PID_DIRECTED_WRITE);
     }
 
     public DirectedWrite(Guid[] guids) {
-        super(ParameterEnum.PID_DIRECTED_WRITE);
+        super(ParameterId.PID_DIRECTED_WRITE);
         this.guids = guids;        
     }
     

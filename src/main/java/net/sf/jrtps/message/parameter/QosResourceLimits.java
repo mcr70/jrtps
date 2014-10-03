@@ -16,11 +16,11 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy<Qos
     private int max_samples_per_instance;
 
     QosResourceLimits() {
-        super(ParameterEnum.PID_RESOURCE_LIMITS);
+        super(ParameterId.PID_RESOURCE_LIMITS);
     }
 
     public QosResourceLimits(int max_samples, int max_instances, int max_samples_per_instance) {
-        super(ParameterEnum.PID_RESOURCE_LIMITS);
+        super(ParameterId.PID_RESOURCE_LIMITS);
         this.max_samples = max_samples;
         this.max_instances = max_instances;
         this.max_samples_per_instance = max_samples_per_instance;

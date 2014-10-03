@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class ContentFilterProperty extends Parameter {
     ContentFilterProperty() {
-        super(ParameterEnum.PID_CONTENT_FILTER_PROPERTY);
+        super(ParameterId.PID_CONTENT_FILTER_PROPERTY);
     }
 
     @Override

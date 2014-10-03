@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.message.parameter.Parameter;
-import net.sf.jrtps.message.parameter.ParameterEnum;
+import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.ParameterFactory;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.EntityId;
@@ -128,7 +128,7 @@ public class DataFrag extends SubMessage {
             bb.align(4);
             Parameter param = ParameterFactory.readParameter(bb);
             parameterList.add(param);
-            if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
+            if (param.getParameterId() == ParameterId.PID_SENTINEL) {
                 break; 
             }
         }

@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class MetatrafficMulticastIPAddress extends Parameter {
     MetatrafficMulticastIPAddress() {
-        super(ParameterEnum.PID_METATRAFFIC_MULTICAST_IPADDRESS);
+        super(ParameterId.PID_METATRAFFIC_MULTICAST_IPADDRESS);
     }
 
     @Override

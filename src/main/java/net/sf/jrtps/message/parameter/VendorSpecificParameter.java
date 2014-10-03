@@ -8,7 +8,7 @@ public class VendorSpecificParameter extends Parameter {
     private short vendorParamId;
 
     VendorSpecificParameter(short paramId) {
-        super(ParameterEnum.PID_VENDOR_SPECIFIC);
+        super(ParameterId.PID_VENDOR_SPECIFIC);
 
         this.vendorParamId = paramId;
     }

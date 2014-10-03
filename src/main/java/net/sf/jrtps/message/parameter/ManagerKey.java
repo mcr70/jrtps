@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class ManagerKey extends Parameter {
     ManagerKey() {
-        super(ParameterEnum.PID_MANAGER_KEY);
+        super(ParameterId.PID_MANAGER_KEY);
     }
 
     @Override
