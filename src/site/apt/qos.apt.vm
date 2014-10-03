@@ -187,8 +187,8 @@ Quality of Service - uDDS
 * DataRepresentation, TypeConsistencyEnforcement
 
  These two QoS policies are defined in X-Types documentation. For the DataRepresentation,
- only XCDR_DATA_REPRESENTATION is supported. Setting the requested value to anything results
- in incompatible QoS.
+ only XCDR_DATA_REPRESENTATION is supported. Setting the requested value to anything else 
+ results in incompatible QoS.
  
  For the TypeConsistencyEnforcement, it is recognized, but not handled in any way.
  
