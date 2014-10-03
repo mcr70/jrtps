@@ -63,12 +63,12 @@ public class Instance <T> {
             }
             else {
                 Sample<T> first = history.getFirst();
-                if (first.getTimestamp() < aSample.getTimestamp()) {
+                if (first.getTimestamp() <= aSample.getTimestamp()) {
                     history.addFirst(aSample);
                 }
             }
 
-            if (history.size() > historyDepth) {
+            if (history.size() > historyDepth) {                
                 return history.removeLast(); // Discard oldest sample
             }
         }

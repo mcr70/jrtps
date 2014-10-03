@@ -16,6 +16,7 @@ import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosDurability.Kind;
+import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosPartition;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.transport.TransportProvider;
@@ -153,12 +154,16 @@ public class QosTest {
 
 
     /**
-     * Test for deadline missed event to occur on both reader and writer.
+     * Test for durability QoS policy.
+     *  1.   Create two readers; VOLATILE and TRANSIENT_LOCAL and one writer; TRANSIENT_LOCAL.
+     *  2.   write 3 samples.
+     *  3.   wait for entities to be matched
+     *  4.a  if VOLATILE reader receives any data --> FAIL
+     *  4.b  wait for TRANSIENT_LOCAL reader to receive 3 samples in time.
+     *       If timeout occurs --> FAIL 
      */
     @Test
     public void testDurability() {
-        int DEADLINE_PERIOD = 10;
-        
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
         
@@ -264,6 +269,101 @@ public class QosTest {
         try {
             boolean await = trDataLatch.await(1000, TimeUnit.MILLISECONDS); 
             assertTrue("Did not receive samples for transient local reader on time: " + trDataLatch.getCount(), await);
+        } catch (InterruptedException e) {
+            Assert.fail("Interrupted");
+        }
+                
+        p1.close();
+        p2.close();
+    }
+
+
+    /**
+     * Test for HISTORY QoS policy.
+     *  1.  Create TRANSIENT_LOCAL reader TRANSIENT_LOCAL writer with HISTORY(2) 
+     *  2.  write 3 samples to same instance.
+     *  3.  wait for entities to be matched
+     *  4.  wait for TRANSIENT_LOCAL reader to receive _3_ samples.
+     *      If timeout occurs --> SUCCESS
+     */
+    @Test
+    public void testHistory() {
+        Configuration cfg1 = new Configuration("/mem-test-1.properties");
+        Configuration cfg2 = new Configuration("/mem-test-2.properties");
+        
+        MemProvider mp = new MemProvider(cfg1);
+        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
+
+        // Create two participants; one for readers, one for writer
+        Participant p1 = new Participant(0,0, null, cfg1);
+        Participant p2 = new Participant(0,0, null, cfg2);
+
+        QualityOfService qos= new QualityOfService();
+        qos.setPolicy(new QosDurability(Kind.TRANSIENT_LOCAL));
+        qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 2));
+
+        // Create DataWriter and write some samples
+        DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class, qos);
+        
+        dw.write(new HelloMessage(1, "hello"));
+        dw.write(new HelloMessage(1, "hello"));
+        dw.write(new HelloMessage(1, "hello"));
+        
+        // Create DataReaders
+        DataReader<HelloMessage> drTRLocal = p1.createDataReader(HelloMessage.class, qos);
+        
+        // Latch used to synchronize on entity matched
+        final CountDownLatch emLatch = new CountDownLatch(2); 
+        final CountDownLatch trDataLatch = new CountDownLatch(3);
+        drTRLocal.addSampleListener(new SampleListener<HelloMessage>() {
+            @Override
+            public void onSamples(List<Sample<HelloMessage>> samples) {
+                for (int i = 0; i < samples.size(); i++) {
+                    trDataLatch.countDown();
+                }
+            }
+        });
+                
+        drTRLocal.addCommunicationListener(new CommunicationListener<PublicationData>() {            
+            @Override
+            public void deadlineMissed(KeyHash instanceKey) {
+            }
+            @Override
+            public void inconsistentQoS(PublicationData ed) {
+                Assert.fail("Inconsistent QoS not expected");
+            }            
+            @Override
+            public void entityMatched(PublicationData ed) {
+                emLatch.countDown();
+            }
+        });
+
+        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
+            @Override
+            public void deadlineMissed(KeyHash instanceKey) {
+            }
+            
+            @Override
+            public void inconsistentQoS(SubscriptionData ed) {
+                Assert.fail("Inconsistent QoS not expected");
+            }
+            @Override
+            public void entityMatched(SubscriptionData ed) {
+                emLatch.countDown();
+            }
+        });
+
+        // Wait for the readers and writer to be matched
+        try {
+            emLatch.await();
+        } catch (InterruptedException e) {
+            Assert.fail("Interrupted");
+        }
+        
+        // Wait for transient local reader to receive all the samples
+        try {
+            boolean await = trDataLatch.await(1000, TimeUnit.MILLISECONDS); 
+            assertFalse("Received more than 2 samples" + trDataLatch.getCount(), await);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
