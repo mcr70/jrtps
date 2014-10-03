@@ -170,40 +170,26 @@ Quality of Service - uDDS
  <max_samples_per_instance> must be consistent with History QoS <depth>, so that 
  <depth> \<= <max_samples_per_instance> 
 
- udds supports <max_instances> and <max_samples> settings above. When any of the limits is reached, 
- an OutOfResources Exception is thrown. On reader side, resource limits are checked when Samples arrive 
- from the network. Limits are thus checked by the network receiver thread, and application is therefore not 
- aware of the resource limit problem. 
+ udds supports all the settings above. When any of the limits is reached, an OutOfResources 
+ exception is thrown. On reader side, resource limits are checked when Samples arrive 
+ from the network. Limits are thus checked by the network receiver thread, and application is 
+ therefore not aware of the resource limit problem. 
 
 
 * UserData, GroupData, TopicData
 
- These QoS policies allow applications to pass arbitrary byte array to remote entities. uDDS supports adding of
- these policies to QoS, and thus make remote entities aware of them. However, by default uDDS entities cannot read 
- the QoS policy values of remote entity. If one needs to read those values, a custom <EntityFactory> which
- exposes relevant methods of RTPS entity to applications is needed. For example, 
+ These QoS policies allow applications to pass arbitrary byte array to remote entities. 
+ uDDS supports adding of these policies to QoS, and thus make remote entities aware of them. 
+ However, by default uDDS entities cannot read the QoS policy values of remote entity. 
+ If one needs to read those values, one can add a <CommunicationListener> to entity, and get 
+ the Quality Of Service when entities are matched.  
+
+* DataRepresentation, TypeConsistencyEnforcement
+
+ These two QoS policies are defined in X-Types documentation. For the DataRepresentation,
+ only XCDR_DATA_REPRESENTATION is supported. Setting the requested value to anything results
+ in incompatible QoS.
  
-+---
-public class CustomEntityFactory extends EntityFactory {
-    @Override
-    public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
-            HistoryCache<T> hCache) {
-        return new CustomDataWriter<>(p, type, rtpsWriter, hCache);
-    }
-}
-
-
-public class CustomDataWriter<T> extends DataWriter<T> {
-    CustomDataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
-        super(p, type, writer, hCache);
-    }
-
-    public Collection<ReaderProxy> getMathcedReaders() {
-        return rtps_writer.getMatchedReaders();
-    }
-}
-+--- 
-  
- The code above would allow to typecast <DataWriter> to <CustomDataWriter> and call <getMatchedReaders()> method
- to get a collection of <ReaderProxy>s, which contain the QualityOfService of remote reader. The similar 
- extension can be made for <WriterProxy>s as well.
+ For the TypeConsistencyEnforcement, it is recognized, but not handled in any way.
+ 
+ 
