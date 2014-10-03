@@ -31,8 +31,15 @@ public class Instance <T> {
         this.key = key;
         this.maxSamplesPerInstance = maxSamplePerInstance;
         this.historyKind = history.getKind();
-        this.historyDepth = history.getDepth();
+        
         this.deadLineMonitorTask = wdTask;
+        
+        if (historyKind == Kind.KEEP_ALL) {
+            this.historyDepth = Integer.MAX_VALUE;
+        }
+        else {
+            this.historyDepth = history.getDepth();    
+        }
     }
 
     /**

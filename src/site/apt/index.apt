@@ -40,3 +40,4 @@ Overview
  
  * BaseTypeName & EquivalentTypeName parameters on wire are recognized
     
+ * ResourceLimits: max_samples_per_instance
