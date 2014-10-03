@@ -16,7 +16,7 @@ public class OriginalWriterInfo extends Parameter implements InlineQoS {
     
     
     public OriginalWriterInfo(Guid originalWriterGuid, SequenceNumber originalWriterSn, ParameterList originalWriterQos) {
-        super(ParameterEnum.PID_ORIGINAL_WRITER_INFO);
+        super(ParameterId.PID_ORIGINAL_WRITER_INFO);
 
         this.originalWriterGuid = originalWriterGuid;
         this.originalWriterSn = originalWriterSn;
@@ -24,7 +24,7 @@ public class OriginalWriterInfo extends Parameter implements InlineQoS {
     }
     
     OriginalWriterInfo() {
-        super(ParameterEnum.PID_ORIGINAL_WRITER_INFO);
+        super(ParameterId.PID_ORIGINAL_WRITER_INFO);
     }
     
     /**

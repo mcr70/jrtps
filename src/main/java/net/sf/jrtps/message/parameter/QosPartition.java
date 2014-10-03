@@ -15,11 +15,11 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
     private String[] partitions;
 
     QosPartition() {
-        super(ParameterEnum.PID_PARTITION);
+        super(ParameterId.PID_PARTITION);
     }
 
     public QosPartition(String[] partitions) {
-        super(ParameterEnum.PID_PARTITION);
+        super(ParameterId.PID_PARTITION);
         this.partitions = partitions;
 
         if (this.partitions == null) {

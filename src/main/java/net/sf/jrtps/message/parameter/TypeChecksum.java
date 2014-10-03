@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class TypeChecksum extends Parameter {
     TypeChecksum() {
-        super(ParameterEnum.PID_TYPE_CHECKSUM);
+        super(ParameterId.PID_TYPE_CHECKSUM);
     }
 
     @Override

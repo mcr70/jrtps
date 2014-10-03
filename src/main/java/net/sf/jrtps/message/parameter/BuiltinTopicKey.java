@@ -18,11 +18,11 @@ import net.sf.jrtps.types.Guid;
 public class BuiltinTopicKey extends Parameter implements InlineQoS {
 
     BuiltinTopicKey() {
-        super(ParameterEnum.PID_BUILTIN_TOPIC_KEY);
+        super(ParameterId.PID_BUILTIN_TOPIC_KEY);
     }
 
     public BuiltinTopicKey(Guid guid) {
-        super(ParameterEnum.PID_BUILTIN_TOPIC_KEY, guid.getBytes());
+        super(ParameterId.PID_BUILTIN_TOPIC_KEY, guid.getBytes());
     }
 
     /**

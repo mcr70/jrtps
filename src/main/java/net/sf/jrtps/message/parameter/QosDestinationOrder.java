@@ -23,7 +23,7 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy<Q
      * Constructor used when reading from RTPSByteBuffer.
      */
     QosDestinationOrder() {
-        super(ParameterEnum.PID_DESTINATION_ORDER);
+        super(ParameterId.PID_DESTINATION_ORDER);
     }
 
     /**
@@ -32,7 +32,7 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy<Q
      * @param kind
      */
     public QosDestinationOrder(Kind kind) {
-        super(ParameterEnum.PID_DESTINATION_ORDER);
+        super(ParameterId.PID_DESTINATION_ORDER);
         switch (kind) {
         case BY_RECEPTION_TIMESTAMP:
             this.kind = 0;

@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class EntityName extends Parameter {
     EntityName() {
-        super(ParameterEnum.PID_ENTITY_NAME);
+        super(ParameterId.PID_ENTITY_NAME);
     }
 
     @Override

@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class MulticastIPAddress extends Parameter {
     MulticastIPAddress() {
-        super(ParameterEnum.PID_MULTICAST_IPADDRESS);
+        super(ParameterId.PID_MULTICAST_IPADDRESS);
     }
 
     @Override

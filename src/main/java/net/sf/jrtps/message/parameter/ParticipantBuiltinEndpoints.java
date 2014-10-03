@@ -2,10 +2,10 @@ package net.sf.jrtps.message.parameter;
 
 public class ParticipantBuiltinEndpoints extends EndpointSet {
     public ParticipantBuiltinEndpoints(int endpoints) {
-        super(ParameterEnum.PID_PARTICIPANT_BUILTIN_ENDPOINTS, endpoints);
+        super(ParameterId.PID_PARTICIPANT_BUILTIN_ENDPOINTS, endpoints);
     }
 
     ParticipantBuiltinEndpoints() {
-        super(ParameterEnum.PID_PARTICIPANT_BUILTIN_ENDPOINTS, 0);
+        super(ParameterId.PID_PARTICIPANT_BUILTIN_ENDPOINTS, 0);
     }
 }

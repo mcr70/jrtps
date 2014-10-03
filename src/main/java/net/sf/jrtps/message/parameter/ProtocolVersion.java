@@ -18,7 +18,7 @@ public class ProtocolVersion extends Parameter {
     }
 
     ProtocolVersion() {
-        super(ParameterEnum.PID_PROTOCOL_VERSION);
+        super(ParameterId.PID_PROTOCOL_VERSION);
     }
 
     /**

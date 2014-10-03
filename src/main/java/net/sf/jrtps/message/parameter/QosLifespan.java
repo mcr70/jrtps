@@ -14,7 +14,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
     private Duration duration;
 
     QosLifespan() {
-        super(ParameterEnum.PID_LIFESPAN);
+        super(ParameterId.PID_LIFESPAN);
     }
 
     /**
@@ -23,7 +23,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
      * @param duration
      */
     public QosLifespan(Duration duration) {
-        super(ParameterEnum.PID_LIFESPAN);
+        super(ParameterId.PID_LIFESPAN);
         this.duration = duration;
     }
 

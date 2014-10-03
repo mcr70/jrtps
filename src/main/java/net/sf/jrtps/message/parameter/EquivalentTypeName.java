@@ -6,7 +6,7 @@ public class EquivalentTypeName extends Parameter {
     String[] equivalentTypeNames;
     
     EquivalentTypeName() {
-        super(ParameterEnum.PID_EQUIVALENT_TYPE_NAME);
+        super(ParameterId.PID_EQUIVALENT_TYPE_NAME);
     }
 
     @Override

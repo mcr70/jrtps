@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class ExpectsAck extends Parameter {
     ExpectsAck() {
-        super(ParameterEnum.PID_EXPECTS_ACK);
+        super(ParameterId.PID_EXPECTS_ACK);
     }
 
     @Override

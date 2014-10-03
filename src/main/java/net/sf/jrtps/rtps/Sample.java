@@ -7,7 +7,7 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
-import net.sf.jrtps.message.parameter.ParameterEnum;
+import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.types.Guid;
@@ -68,7 +68,7 @@ public class Sample<T> {
         if (data.inlineQosFlag()) {
             ParameterList inlineQos = data.getInlineQos();
             if (inlineQos != null) {
-                coherentSet = (CoherentSet) inlineQos.getParameter(ParameterEnum.PID_COHERENT_SET);
+                coherentSet = (CoherentSet) inlineQos.getParameter(ParameterId.PID_COHERENT_SET);
             }
         }
     }

@@ -1,3 +1,8 @@
+0.9.12
+    - DataRepresentation & TypeConsistencyEnforcement QoS policies as Parameters on wire. 
+      For DataRepresentation, only XCDR_DATA_REPRESENTATION kind is supported.
+    - BaseTypeName & EquivalentTypeName parameters on wire are recognized
+      
 0.9.11
     - FIX: During discovery, DataWriterPolicys and DataReaderPolicys are
       passed to remote entity instead of InlineQoS policies.

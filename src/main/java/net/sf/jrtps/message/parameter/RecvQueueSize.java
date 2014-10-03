@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class RecvQueueSize extends Parameter {
     RecvQueueSize() {
-        super(ParameterEnum.PID_RECV_QUEUE_SIZE);
+        super(ParameterId.PID_RECV_QUEUE_SIZE);
     }
 
     @Override

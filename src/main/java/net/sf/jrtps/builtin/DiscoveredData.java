@@ -8,7 +8,7 @@ import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.InlineQoS;
 import net.sf.jrtps.message.parameter.Parameter;
-import net.sf.jrtps.message.parameter.ParameterEnum;
+import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.types.Guid;
 
@@ -166,7 +166,7 @@ public class DiscoveredData {
      * @param id
      * @return Parameter, or null if not found
      */
-    public Parameter getParameter(ParameterEnum id) {
+    public Parameter getParameter(ParameterId id) {
         for (Parameter p : params) {
             if (p.getParameterId() == id) {
                 return p;

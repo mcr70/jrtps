@@ -6,7 +6,7 @@ public class BaseTypeName extends Parameter {
     String[] baseTypeNames;
     
     BaseTypeName() {
-        super(ParameterEnum.PID_BASE_TYPE_NAME);
+        super(ParameterId.PID_BASE_TYPE_NAME);
     }
 
     @Override

@@ -11,7 +11,7 @@ public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwner
     }
 
     QosOwnership() {
-        super(ParameterEnum.PID_OWNERSHIP);
+        super(ParameterId.PID_OWNERSHIP);
     }
 
     /**
@@ -20,7 +20,7 @@ public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwner
      * @param kind
      */
     public QosOwnership(Kind kind) {
-        super(ParameterEnum.PID_OWNERSHIP);
+        super(ParameterId.PID_OWNERSHIP);
         switch (kind) {
         case SHARED:
             this.kind = 0;

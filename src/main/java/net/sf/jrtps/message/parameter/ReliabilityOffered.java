@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class ReliabilityOffered extends Parameter {
     ReliabilityOffered() {
-        super(ParameterEnum.PID_RELIABILITY_OFFERED);
+        super(ParameterId.PID_RELIABILITY_OFFERED);
     }
 
     @Override

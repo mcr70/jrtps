@@ -8,7 +8,7 @@ public class QosUserData extends Parameter implements DataReaderPolicy<QosUserDa
 	private byte[] userData;
 
 	public QosUserData(byte[] userData) {
-		super(ParameterEnum.PID_USER_DATA);
+		super(ParameterId.PID_USER_DATA);
         if (userData == null) {
             this.userData = new byte[0];
         }
@@ -18,7 +18,7 @@ public class QosUserData extends Parameter implements DataReaderPolicy<QosUserDa
 	}
 	
 	QosUserData() {
-        super(ParameterEnum.PID_USER_DATA);
+        super(ParameterId.PID_USER_DATA);
     }
 
 	/**

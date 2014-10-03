@@ -27,7 +27,7 @@ public class ParameterList {
 
             log.trace("Read Parameter {}, length {} from position {}", param, length, pos1);
 
-            if (param.getParameterId() == ParameterEnum.PID_SENTINEL) {
+            if (param.getParameterId() == ParameterId.PID_SENTINEL) {
                 break;
             }
         }
@@ -66,7 +66,7 @@ public class ParameterList {
         return params.size();
     }
 
-    public Parameter getParameter(ParameterEnum pid) {
+    public Parameter getParameter(ParameterId pid) {
         for (Parameter p : params) {
             if (pid.equals(p.getParameterId())) {
                 return p;

@@ -21,7 +21,7 @@ public class QosDurability extends Parameter implements DataReaderPolicy<QosDura
     }
 
     QosDurability() {
-        super(ParameterEnum.PID_DURABILITY);
+        super(ParameterId.PID_DURABILITY);
     }
 
     /**
@@ -30,7 +30,7 @@ public class QosDurability extends Parameter implements DataReaderPolicy<QosDura
      * @param kind
      */
     public QosDurability(Kind kind) {
-        super(ParameterEnum.PID_DURABILITY);
+        super(ParameterId.PID_DURABILITY);
         switch (kind) {
         case VOLATILE:
             this.kind = 0;

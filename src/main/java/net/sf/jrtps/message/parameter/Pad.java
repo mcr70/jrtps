@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class Pad extends Parameter implements InlineQoS {
     Pad() {
-        super(ParameterEnum.PID_PAD);
+        super(ParameterId.PID_PAD);
     }
 
     @Override

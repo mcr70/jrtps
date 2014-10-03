@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class GroupEntityId extends Parameter {
     GroupEntityId() {
-        super(ParameterEnum.PID_GROUP_ENTITYID);
+        super(ParameterId.PID_GROUP_ENTITYID);
     }
 
     @Override
