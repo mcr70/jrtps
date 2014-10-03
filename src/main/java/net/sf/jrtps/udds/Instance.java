@@ -3,7 +3,10 @@ package net.sf.jrtps.udds;
 import java.util.LinkedList;
 import java.util.List;
 
+import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.QosHistory;
+import net.sf.jrtps.message.parameter.QosHistory.Kind;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.util.Watchdog.Task;
 
@@ -18,12 +21,17 @@ import net.sf.jrtps.util.Watchdog.Task;
 public class Instance <T> {
     private final KeyHash key;
     private final LinkedList<Sample<T>> history = new LinkedList<>();
-    private final int maxSize;
+    private final int maxSamplesPerInstance;
     private Task deadLineMonitorTask;
+    private final QosHistory.Kind historyKind;
+    private final int historyDepth;
+    
 
-    Instance(KeyHash key, int historySize, Task wdTask) {
+    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task wdTask) {
         this.key = key;
-        this.maxSize = historySize;
+        this.maxSamplesPerInstance = maxSamplePerInstance;
+        this.historyKind = history.getKind();
+        this.historyDepth = history.getDepth();
         this.deadLineMonitorTask = wdTask;
     }
 
@@ -34,6 +42,10 @@ public class Instance <T> {
      *       addition caused a drop of the oldest Sample, which will be returned.  
      */
     Sample<T> addSample(Sample<T> aSample) {
+        if (historyKind == Kind.KEEP_ALL && history.size() == historyDepth) {
+            throw new OutOfResources("max_samples_per_instance=" + maxSamplesPerInstance);
+        }
+        
         if (deadLineMonitorTask != null) {
             deadLineMonitorTask.reset(); // reset deadline monitor
         }
@@ -49,7 +61,7 @@ public class Instance <T> {
                 }
             }
 
-            if (history.size() > maxSize) {
+            if (history.size() > historyDepth) {
                 return history.removeLast(); // Discard oldest sample
             }
         }

@@ -218,7 +218,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
                 });
             }
             
-            inst = new Instance<T>(key, history.getDepth(), wdTask);
+            inst = new Instance<T>(key, resource_limits.getMaxSamplesPerInstance(), history, wdTask);
             instances.put(key, inst);
         }   
 
