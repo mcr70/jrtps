@@ -5,7 +5,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 @Deprecated
 public class SendQueueSize extends Parameter {
     SendQueueSize() {
-        super(ParameterEnum.PID_SEND_QUEUE_SIZE);
+        super(ParameterId.PID_SEND_QUEUE_SIZE);
     }
 
     @Override

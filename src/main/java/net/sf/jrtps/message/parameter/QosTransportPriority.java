@@ -7,12 +7,12 @@ public class QosTransportPriority extends Parameter implements TopicPolicy<QosTr
     private int value;
 
     public QosTransportPriority(int value) {
-        super(ParameterEnum.PID_TRANSPORT_PRIORITY);
+        super(ParameterId.PID_TRANSPORT_PRIORITY);
         this.value = value;
     }
 
     QosTransportPriority() {
-        super(ParameterEnum.PID_TRANSPORT_PRIORITY);
+        super(ParameterId.PID_TRANSPORT_PRIORITY);
     }
 
     public int getValue() {

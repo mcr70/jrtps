@@ -24,7 +24,7 @@ public class EndpointSet extends Parameter {
 
     private int endpointSet;
 
-    protected EndpointSet(ParameterEnum e, int endpoints) {
+    protected EndpointSet(ParameterId e, int endpoints) {
         super(e);
 
         endpointSet = endpoints;

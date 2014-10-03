@@ -12,7 +12,7 @@ public class ParticipantGuid extends Parameter {
     }
 
     ParticipantGuid() {
-        super(ParameterEnum.PID_PARTICIPANT_GUID);
+        super(ParameterId.PID_PARTICIPANT_GUID);
     }
 
     public Guid getParticipantGuid() {

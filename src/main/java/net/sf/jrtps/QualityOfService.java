@@ -7,6 +7,7 @@ import java.util.Set;
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.InlineQoS;
+import net.sf.jrtps.message.parameter.QosDataRepresentation;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDestinationOrder;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -26,6 +27,7 @@ import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.message.parameter.QosTopicData;
 import net.sf.jrtps.message.parameter.QosTransportPriority;
+import net.sf.jrtps.message.parameter.QosTypeConsistencyEnforcement;
 import net.sf.jrtps.message.parameter.QosUserData;
 import net.sf.jrtps.message.parameter.TopicPolicy;
 import net.sf.jrtps.types.Duration;
@@ -329,6 +331,18 @@ public class QualityOfService {
     }
 
 
+    /**
+     * Gets the DataRepresentation QosPolicy
+     * @return QosDataRepresentation
+     */
+    public QosDataRepresentation getDataRepresentation() {
+        QosPolicy policy = policies.get(QosDataRepresentation.class);
+        if (policy != null) {
+            return (QosDataRepresentation) policy;
+        }
+        
+        return QosDataRepresentation.defaultDataRepresentation();
+    }
     
     /**
      * Gets the Deadline QosPolicy
@@ -577,6 +591,15 @@ public class QualityOfService {
         return QosUserData.defaultUserData();
     }
 
+    
+    public QosTypeConsistencyEnforcement getTypeConsistencyEnforcement() {
+        QosPolicy policy = policies.get(QosTypeConsistencyEnforcement.class);
+        if (policy != null) {
+            return (QosTypeConsistencyEnforcement) policy;
+        }
+        
+        return QosTypeConsistencyEnforcement.defaultTypeConsistencyEnforcement();
+    }
 
     
     private static QualityOfService createSEDPQualityOfService() {
@@ -616,4 +639,5 @@ public class QualityOfService {
     public String toString() {
         return policies.values().toString();
     }
+
 }

@@ -5,16 +5,21 @@ import java.util.regex.Pattern;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * Partition QoS policy.
+ * @author mcr70
+ *
+ */
 public class QosPartition extends Parameter implements SubscriberPolicy<QosPartition>, PublisherPolicy<QosPartition>,
         InlineQoS {
     private String[] partitions;
 
     QosPartition() {
-        super(ParameterEnum.PID_PARTITION);
+        super(ParameterId.PID_PARTITION);
     }
 
     public QosPartition(String[] partitions) {
-        super(ParameterEnum.PID_PARTITION);
+        super(ParameterId.PID_PARTITION);
         this.partitions = partitions;
 
         if (this.partitions == null) {
@@ -22,6 +27,14 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
         }
     }
 
+    /**
+     * Gets all the defined partition names of this QosPartition.
+     * @return
+     */
+    public String[] getPartitions() {
+        return partitions;
+    }
+    
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         int len = bb.read_long();

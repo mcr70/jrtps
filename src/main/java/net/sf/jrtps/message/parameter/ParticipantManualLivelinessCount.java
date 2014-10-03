@@ -9,7 +9,7 @@ public class ParticipantManualLivelinessCount extends Parameter {
      * Constructs a new ParticipantManualLivelinessCount
      */
     ParticipantManualLivelinessCount() {
-        super(ParameterEnum.PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
+        super(ParameterId.PID_PARTICIPANT_MANUAL_LIVELINESS_COUNT);
     }
 
     @Override

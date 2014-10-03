@@ -28,11 +28,11 @@ public class KeyHash extends Parameter implements InlineQoS {
     
 
     KeyHash() {
-        super(ParameterEnum.PID_KEY_HASH);
+        super(ParameterId.PID_KEY_HASH);
     }
     
     public KeyHash(byte[] bytes) {
-        super(ParameterEnum.PID_KEY_HASH);
+        super(ParameterId.PID_KEY_HASH);
         this.bytes = prepareKey(bytes);
     }
 

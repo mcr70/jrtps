@@ -14,13 +14,13 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
     private Duration minimum_separation;
 
     public QosTimeBasedFilter(Duration minimum_separation) {
-        super(ParameterEnum.PID_TIME_BASED_FILTER);
+        super(ParameterId.PID_TIME_BASED_FILTER);
         this.minimum_separation = minimum_separation;
         // TODO: OSPL 5.5 encodes timebased filter as two bytes: [0,0]
     }
 
     QosTimeBasedFilter() {
-        super(ParameterEnum.PID_TIME_BASED_FILTER);
+        super(ParameterId.PID_TIME_BASED_FILTER);
     }
 
     @Override

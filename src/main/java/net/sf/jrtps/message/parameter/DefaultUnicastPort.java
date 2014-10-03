@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class DefaultUnicastPort extends Parameter {
     DefaultUnicastPort() {
-        super(ParameterEnum.PID_DEFAULT_UNICAST_PORT);
+        super(ParameterId.PID_DEFAULT_UNICAST_PORT);
     }
 
     @Override

@@ -6,6 +6,7 @@ import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
+import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
@@ -26,6 +27,7 @@ public class PublicationData extends DiscoveredData {
     // TODO: for odds 3.5
 
     private static final Logger log = LoggerFactory.getLogger(PublicationData.class);
+    private Guid participantGuid;
 
     public PublicationData(ParameterList parameterList) throws InconsistentPolicy {
         Iterator<Parameter> iter = parameterList.getParameters().iterator();
@@ -43,6 +45,9 @@ public class PublicationData extends DiscoveredData {
             case PID_TOPIC_NAME:
                 super.topicName = ((TopicName) param).getName();
                 break;
+            case PID_PARTICIPANT_GUID:
+                participantGuid = ((ParticipantGuid) param).getParticipantGuid();
+                break;                
             case PID_TYPE_NAME:
                 super.typeName = ((TypeName) param).getTypeName();
                 break;
@@ -75,5 +80,9 @@ public class PublicationData extends DiscoveredData {
 
     public PublicationData(String topicName, String typeName, Guid key, QualityOfService qos) {
         super(typeName, topicName, key, qos);
+    }
+
+    public Guid getParticipantGuid() {
+        return participantGuid;
     }
 }

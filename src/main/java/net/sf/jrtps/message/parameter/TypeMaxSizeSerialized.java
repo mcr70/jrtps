@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class TypeMaxSizeSerialized extends Parameter {
     TypeMaxSizeSerialized() {
-        super(ParameterEnum.PID_TYPE_MAX_SIZE_SERIALIZED);
+        super(ParameterId.PID_TYPE_MAX_SIZE_SERIALIZED);
     }
 
     @Override

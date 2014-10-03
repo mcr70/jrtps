@@ -13,11 +13,11 @@ public class QosPresentation extends Parameter implements PublisherPolicy<QosPre
     private boolean ordered_access;
 
     QosPresentation() {
-        super(ParameterEnum.PID_PRESENTATION);
+        super(ParameterId.PID_PRESENTATION);
     }
 
     public QosPresentation(Kind kind, boolean coherent_access, boolean ordered_access) {
-        super(ParameterEnum.PID_PRESENTATION);
+        super(ParameterId.PID_PRESENTATION);
         switch (kind) {
         case INSTANCE:
             this.access_scope = 0;
@@ -61,6 +61,14 @@ public class QosPresentation extends Parameter implements PublisherPolicy<QosPre
         throw new IllegalArgumentException("Illegal kind " + access_scope + " for QosPresentation");
     }
 
+    public boolean isCoherentAccess() {
+        return coherent_access;
+    }
+    
+    public boolean isOrderedAccess() {
+        return ordered_access;
+    }
+    
     @Override
     public boolean isCompatible(QosPresentation other) {
         if (access_scope >= other.access_scope) {

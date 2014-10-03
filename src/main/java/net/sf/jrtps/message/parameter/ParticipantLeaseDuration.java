@@ -7,12 +7,12 @@ public class ParticipantLeaseDuration extends Parameter {
     private Duration duration;
 
     public ParticipantLeaseDuration(Duration duration) {
-        super(ParameterEnum.PID_PARTICIPANT_LEASE_DURATION);
+        super(ParameterId.PID_PARTICIPANT_LEASE_DURATION);
         this.duration = duration;
     }
 
     ParticipantLeaseDuration() {
-        super(ParameterEnum.PID_PARTICIPANT_LEASE_DURATION);
+        super(ParameterId.PID_PARTICIPANT_LEASE_DURATION);
     }
 
     @Override

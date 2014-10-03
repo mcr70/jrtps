@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class GroupGuid extends Parameter {
     GroupGuid() {
-        super(ParameterEnum.PID_GROUP_GUID);
+        super(ParameterId.PID_GROUP_GUID);
     }
 
     @Override

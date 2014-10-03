@@ -2,7 +2,7 @@ package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 
-import net.sf.jrtps.message.parameter.ParameterEnum;
+import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
 import net.sf.jrtps.transport.RTPSByteBuffer;
@@ -247,7 +247,7 @@ public class Data extends SubMessage {
     public StatusInfo getStatusInfo() {
         StatusInfo sInfo = null;
         if (inlineQosFlag()) {
-            sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterEnum.PID_STATUS_INFO);
+            sInfo = (StatusInfo) inlineQosParams.getParameter(ParameterId.PID_STATUS_INFO);
         }
 
         if (sInfo == null) {

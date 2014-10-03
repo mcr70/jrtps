@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class MetatrafficUnicastPort extends Parameter {
     MetatrafficUnicastPort() {
-        super(ParameterEnum.PID_METATRAFFIC_UNICAST_PORT);
+        super(ParameterId.PID_METATRAFFIC_UNICAST_PORT);
     }
 
     @Override

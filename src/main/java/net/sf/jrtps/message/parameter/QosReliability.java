@@ -32,11 +32,11 @@ public class QosReliability extends Parameter implements DataReaderPolicy<QosRel
     }
 
     QosReliability() {
-        super(ParameterEnum.PID_RELIABILITY);
+        super(ParameterId.PID_RELIABILITY);
     }
 
     public QosReliability(Kind kind, Duration max_blocking_time) {
-        super(ParameterEnum.PID_RELIABILITY);
+        super(ParameterId.PID_RELIABILITY);
         switch (kind) {
         case BEST_EFFORT:
             this.kind = BEST_EFFORT_INT;

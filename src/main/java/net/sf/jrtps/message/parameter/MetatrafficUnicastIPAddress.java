@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class MetatrafficUnicastIPAddress extends Parameter {
     MetatrafficUnicastIPAddress() {
-        super(ParameterEnum.PID_METATRAFFIC_UNICAST_IPADDRESS);
+        super(ParameterId.PID_METATRAFFIC_UNICAST_IPADDRESS);
     }
 
     @Override

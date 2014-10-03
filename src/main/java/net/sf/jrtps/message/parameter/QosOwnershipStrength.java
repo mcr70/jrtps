@@ -6,7 +6,7 @@ public class QosOwnershipStrength extends Parameter implements DataWriterPolicy<
     private int strength;
 
     QosOwnershipStrength() {
-        super(ParameterEnum.PID_OWNERSHIP_STRENGTH);
+        super(ParameterId.PID_OWNERSHIP_STRENGTH);
     }
 
     /**
@@ -15,7 +15,7 @@ public class QosOwnershipStrength extends Parameter implements DataWriterPolicy<
      * @param strength
      */
     public QosOwnershipStrength(int strength) {
-        super(ParameterEnum.PID_OWNERSHIP_STRENGTH);
+        super(ParameterId.PID_OWNERSHIP_STRENGTH);
         this.strength = strength;
     }
 

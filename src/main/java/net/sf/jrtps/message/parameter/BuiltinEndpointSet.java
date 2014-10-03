@@ -19,10 +19,10 @@ package net.sf.jrtps.message.parameter;
  */
 public class BuiltinEndpointSet extends EndpointSet {
     public BuiltinEndpointSet(int endpoints) {
-        super(ParameterEnum.PID_BUILTIN_ENDPOINT_SET, endpoints);
+        super(ParameterId.PID_BUILTIN_ENDPOINT_SET, endpoints);
     }
 
     BuiltinEndpointSet() {
-        super(ParameterEnum.PID_BUILTIN_ENDPOINT_SET, 0);
+        super(ParameterId.PID_BUILTIN_ENDPOINT_SET, 0);
     }
 }
