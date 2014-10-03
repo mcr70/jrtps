@@ -8,7 +8,7 @@ public class UnknownParameter extends Parameter {
     private final short paramId;
 
     protected UnknownParameter(short paramId) {
-        super(ParameterEnum.PID_UNKNOWN_PARAMETER);
+        super(ParameterId.PID_UNKNOWN_PARAMETER);
 
         this.paramId = paramId;
     }

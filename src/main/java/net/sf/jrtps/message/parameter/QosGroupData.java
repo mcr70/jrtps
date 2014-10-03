@@ -8,7 +8,7 @@ public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroup
 	private byte[] groupData;
 
 	public QosGroupData(byte[] groupData) {
-        super(ParameterEnum.PID_GROUP_DATA);
+        super(ParameterId.PID_GROUP_DATA);
         if (groupData == null) {
             this.groupData = new byte[0];
         }
@@ -18,7 +18,7 @@ public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroup
     }
 	
 	QosGroupData() {
-        super(ParameterEnum.PID_GROUP_DATA);
+        super(ParameterId.PID_GROUP_DATA);
     }
 
 	/**

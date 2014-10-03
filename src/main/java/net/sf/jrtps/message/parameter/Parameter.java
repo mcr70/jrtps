@@ -12,7 +12,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public abstract class Parameter {
-    private ParameterEnum parameterId;
+    private ParameterId parameterId;
     private byte[] bytes;
 
     /**
@@ -22,7 +22,7 @@ public abstract class Parameter {
      * @param id
      * @see #read(RTPSByteBuffer, int)
      */
-    protected Parameter(ParameterEnum id) {
+    protected Parameter(ParameterId id) {
         this(id, null);
     }
 
@@ -32,7 +32,7 @@ public abstract class Parameter {
      * @param id
      * @param bytes
      */
-    protected Parameter(ParameterEnum id, byte[] bytes) {
+    protected Parameter(ParameterId id, byte[] bytes) {
         this.parameterId = id;
         this.bytes = bytes;
     }
@@ -43,7 +43,7 @@ public abstract class Parameter {
      * @return ParameterEnum
      * 
      */
-    public ParameterEnum getParameterId() {
+    public ParameterId getParameterId() {
         return parameterId;
     }
 

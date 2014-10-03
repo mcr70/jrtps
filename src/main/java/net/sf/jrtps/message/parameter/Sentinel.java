@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class Sentinel extends Parameter implements InlineQoS {
     public Sentinel() {
-        super(ParameterEnum.PID_SENTINEL);
+        super(ParameterId.PID_SENTINEL);
     }
 
     @Override

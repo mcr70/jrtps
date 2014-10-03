@@ -12,7 +12,7 @@ public class VendorId extends Parameter {
     }
 
     VendorId() {
-        super(ParameterEnum.PID_VENDORID);
+        super(ParameterId.PID_VENDORID);
     }
 
     public VendorId_t getVendorId() {

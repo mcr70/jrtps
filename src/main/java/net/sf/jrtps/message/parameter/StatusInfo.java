@@ -22,7 +22,7 @@ public class StatusInfo extends Parameter implements InlineQoS {
     private byte[] flags;
 
     public StatusInfo(ChangeKind... changeKinds) {
-        super(ParameterEnum.PID_STATUS_INFO);
+        super(ParameterId.PID_STATUS_INFO);
         this.flags = new byte[4];
 
         for (ChangeKind kind : changeKinds) {
@@ -43,7 +43,7 @@ public class StatusInfo extends Parameter implements InlineQoS {
     }
 
     StatusInfo() {
-        super(ParameterEnum.PID_STATUS_INFO);
+        super(ParameterId.PID_STATUS_INFO);
     }
 
     @Override

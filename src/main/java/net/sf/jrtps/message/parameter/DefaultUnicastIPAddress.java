@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class DefaultUnicastIPAddress extends Parameter {
     DefaultUnicastIPAddress() {
-        super(ParameterEnum.PID_DEFAULT_UNICAST_IPADDRESS);
+        super(ParameterId.PID_DEFAULT_UNICAST_IPADDRESS);
     }
 
     @Override

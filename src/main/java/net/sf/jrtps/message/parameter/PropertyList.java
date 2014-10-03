@@ -10,11 +10,11 @@ public class PropertyList extends Parameter implements InlineQoS {
     private Property[] properties;
     
     PropertyList() {
-        super(ParameterEnum.PID_PROPERTY_LIST);
+        super(ParameterId.PID_PROPERTY_LIST);
     }
 
     public PropertyList(Property[] properties) {
-        super(ParameterEnum.PID_PROPERTY_LIST);
+        super(ParameterId.PID_PROPERTY_LIST);
         this.properties = properties;
     }
     
