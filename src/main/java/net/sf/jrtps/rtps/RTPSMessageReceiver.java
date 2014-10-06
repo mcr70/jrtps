@@ -62,10 +62,12 @@ class RTPSMessageReceiver implements Runnable {
                 // concept relies on it.
                 // NOTE2: pending samples concept has changed. Check this.
                 byte[] bytes = queue.take();
-                Message msg = new Message(new RTPSByteBuffer(bytes));
-                logger.debug("Parsed RTPS message {}", msg);
+                if (running) {
+                    Message msg = new Message(new RTPSByteBuffer(bytes));
+                    logger.debug("Parsed RTPS message {}", msg);
 
-                handleMessage(msg);
+                    handleMessage(msg);
+                }
             } catch (InterruptedException e) {
                 running = false;
             } catch(Exception e) {
@@ -87,15 +89,15 @@ class RTPSMessageReceiver implements Runnable {
         Time timestamp = null;
         GuidPrefix destGuidPrefix = participant.getGuid().getPrefix();
         boolean destinationThisParticipant = true;
-        
+
         GuidPrefix sourceGuidPrefix = msg.getHeader().getGuidPrefix();
         GuidPrefix myPrefix = participant.getGuid().getPrefix(); 
-        
+
         if (myPrefix.equals(sourceGuidPrefix)) {
             logger.debug("Discarding message originating from this participant");
             return;
         }
-        
+
         Set<RTPSReader<?>> dataReceivers = new HashSet<>();
         List<SubMessage> subMessages = msg.getSubMessages();
 
@@ -105,7 +107,7 @@ class RTPSMessageReceiver implements Runnable {
                 if (!destinationThisParticipant) {
                     continue;
                 }
-                
+
                 if (ignoredParticipants.contains(sourceGuidPrefix)) {
                     continue;
                 }
@@ -124,7 +126,7 @@ class RTPSMessageReceiver implements Runnable {
                 try {
                     Data data = (Data) subMsg;
                     RTPSReader<?> r = participant.getReader(data.getReaderId(), sourceGuidPrefix, data.getWriterId());
-                    
+
                     if (r != null) {
                         if (dataReceivers.add(r)) {
                             r.startMessageProcessing(msgId);
@@ -153,8 +155,7 @@ class RTPSMessageReceiver implements Runnable {
                 destGuidPrefix = ((InfoDestination) subMsg).getGuidPrefix();
                 destinationThisParticipant = participant.getGuid().getPrefix().equals(destGuidPrefix) 
                         || GuidPrefix.GUIDPREFIX_UNKNOWN.equals(destGuidPrefix);
-                
-                logger.debug("Got InfoDestination. Target is this participant: {}", destinationThisParticipant);
+
                 break;
             case INFOSOURCE:
                 sourceGuidPrefix = ((InfoSource) subMsg).getGuidPrefix();
@@ -163,7 +164,7 @@ class RTPSMessageReceiver implements Runnable {
                 timestamp = ((InfoTimestamp) subMsg).getTimeStamp();
                 break;
             case INFOREPLY: // TODO: HB, AC & DATA needs to use replyLocators,
-                            // if present
+                // if present
                 InfoReply ir = (InfoReply) subMsg;
                 List<Locator> replyLocators = ir.getUnicastLocatorList();
                 if (ir.multicastFlag()) {
@@ -172,7 +173,7 @@ class RTPSMessageReceiver implements Runnable {
                 logger.warn("InfoReply not handled");
                 break;
             case INFOREPLYIP4: // TODO: HB, AC & DATA needs to use these
-                               // Locators, if present
+                // Locators, if present
                 InfoReplyIp4 ir4 = (InfoReplyIp4) subMsg;
                 LocatorUDPv4_t unicastLocator = ir4.getUnicastLocator();
                 if (ir4.multicastFlag()) {
@@ -184,7 +185,7 @@ class RTPSMessageReceiver implements Runnable {
                 if (!destinationThisParticipant) {
                     continue;
                 }
-                
+
                 handleGap(sourceGuidPrefix, (Gap) subMsg);
                 break;
             default:
@@ -226,5 +227,12 @@ class RTPSMessageReceiver implements Runnable {
 
     void ignoreParticipant(GuidPrefix prefix) {
         ignoredParticipants.add(prefix);
+    }
+
+    void close() {
+        // Trying to close RTPSMessageReceiver gracefully, by setting running flag to false
+        // and putting a dummy byte[] into receiver queue to wake up waiting thread
+        running = false;
+        queue.offer(new byte[0]); // Put a dummy array
     }
 }
