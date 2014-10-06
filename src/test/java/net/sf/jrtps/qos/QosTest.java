@@ -40,7 +40,7 @@ public class QosTest {
     /**
      * Test for deadline missed event to occur on both reader and writer.
      */
-    @Test
+    //@Test
     public void testDeadlineMissed() {
         int DEADLINE_PERIOD = 10;
         
@@ -162,7 +162,7 @@ public class QosTest {
      *  4.b  wait for TRANSIENT_LOCAL reader to receive 3 samples in time.
      *       If timeout occurs --> FAIL 
      */
-    @Test
+    //@Test
     public void testDurability() {
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
@@ -286,7 +286,7 @@ public class QosTest {
      *  4.  wait for TRANSIENT_LOCAL reader to receive _3_ samples.
      *      If timeout occurs --> SUCCESS
      */
-    @Test
+    //@Test
     public void testHistory() {
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
