@@ -17,6 +17,9 @@ class JRTPSThreadFactory implements ThreadFactory {
     
     @Override
     public synchronized Thread newThread(Runnable r) {
-        return new Thread(r, prefix + count++);
+        Thread thread = new Thread(r, prefix + count++);
+        thread.setDaemon(true);
+
+        return thread;
     }
 }
