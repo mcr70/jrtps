@@ -59,7 +59,7 @@ class ParticipantLeaseManager implements Runnable {
             running = participant.waitFor(sleepTime);
         }
 
-        log.debug("ParticipantLeaseManager is exiting, running={}", running);
+        log.debug("ParticipantLeaseManager is exiting.");
     }
 
     /**

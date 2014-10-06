@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
@@ -93,6 +94,8 @@ public class Participant {
 
     private Guid guid;
 
+    private JRTPSThreadFactory threadFactory;
+
 
 
     /**
@@ -152,11 +155,12 @@ public class Participant {
         
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
-        threadPoolExecutor = 
-                new ScheduledThreadPoolExecutor(corePoolSize, new JRTPSThreadFactory(domainId, participantId));
+        threadFactory = new JRTPSThreadFactory(domainId);
+        threadPoolExecutor = new ScheduledThreadPoolExecutor(corePoolSize, threadFactory);
         threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         threadPoolExecutor.setRemoveOnCancelPolicy(true);
-
+        threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
+        
         logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
         this.watchdog = new Watchdog(threadPoolExecutor);
@@ -538,9 +542,9 @@ public class Participant {
      * 
      */
     public void close() {
-        threadPoolExecutor.shutdown(); // won't accept new tasks, remaining
-        // tasks keeps on running.
         rtps_participant.close();
+        threadPoolExecutor.shutdown(); // won't accept new tasks, remaining tasks keeps on running.
+        
         threadPoolExecutor.shutdownNow(); // Shutdown now.
     }
 
