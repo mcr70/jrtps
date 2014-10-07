@@ -8,6 +8,7 @@ import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
 import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.util.Watchdog;
 import net.sf.jrtps.util.Watchdog.Task;
 
 /**
@@ -25,15 +26,22 @@ public class Instance <T> {
     private Task deadLineMonitorTask;
     private final QosHistory.Kind historyKind;
     private final int historyDepth;
-    
 
-    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task wdTask) {
+    private final Watchdog watchdog;
+    private final long minimum_separation;
+    private long nextTimeBasedFilterTime = System.currentTimeMillis();
+    private Task tbfTask;
+
+    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task wdTask, 
+            Watchdog watchdog, long minimum_separation) {
         this.key = key;
         this.maxSamplesPerInstance = maxSamplePerInstance;
+        this.watchdog = watchdog;
+        this.minimum_separation = minimum_separation;
         this.historyKind = history.getKind();
-        
+
         this.deadLineMonitorTask = wdTask;
-        
+
         if (historyKind == Kind.KEEP_ALL) {
             this.historyDepth = Integer.MAX_VALUE;
         }
@@ -43,20 +51,58 @@ public class Instance <T> {
     }
 
     /**
+     * Apply time based filtering. 
+     * @param aSample
+     * @return true, if time based filter was applied, and sample was dropped.
+     */
+    boolean applyTimeBasedFilter(final Sample<T> aSample) {
+        // Check for time based filter. minimum_separation of 0
+        // disables time based filter
+
+        if (minimum_separation > 0 && System.currentTimeMillis() < nextTimeBasedFilterTime) {
+            // If minimum_separation has not elapsed, add a watchdog task that
+            // will add this latest sample in question to history cache, if
+            // minimum_separation * 2 time has elapsed.
+            // This provides "long" time as specified in DDS specification.
+//            if (tbfTask != null) {
+//                tbfTask.cancel(); // Cancel previous sample
+//            }
+//
+//            // Add new 'latest' candidate to be added
+//            tbfTask = watchdog.addTask(2 * minimum_separation, new Listener() {
+//                @Override
+//                public void triggerTimeMissed() {
+//                    addSample(aSample);
+//                }
+//            });
+
+            return true;
+        }
+
+//        if (tbfTask != null) {
+//            tbfTask.cancel(); // We are adding a sample, cancel waiting 'latest' sample
+//        }
+
+        // Setup next time based filter time.
+        nextTimeBasedFilterTime = System.currentTimeMillis() + minimum_separation;
+
+        return false;
+    }
+
+    /**
      * Adds a Sample to this Instance. 
      * @param aSample
-     * @return null, is the size of the history grows because of addition. Otherwise,
-     *       addition caused a drop of the oldest Sample, which will be returned.  
+     * @return oldest sample, if history size was exceeded  
      */
-    Sample<T> addSample(Sample<T> aSample) {
+    Sample<T> addSample(final Sample<T> aSample) {
         if (historyKind == Kind.KEEP_ALL && history.size() == historyDepth) {
             throw new OutOfResources("max_samples_per_instance=" + maxSamplesPerInstance);
         }
-        
+
         if (deadLineMonitorTask != null) {
             deadLineMonitorTask.reset(); // reset deadline monitor
         }
-        
+
         synchronized (history) {
             if (history.size() == 0) {
                 history.addFirst(aSample);
@@ -110,7 +156,7 @@ public class Instance <T> {
     public KeyHash getKey() {
         return key;
     }
-    
+
     /**
      * Get the latest sample
      * @return Latest sample, or null if there no samples
@@ -119,10 +165,10 @@ public class Instance <T> {
         if (history.size() > 0) {
             return history.getFirst();
         }
-        
+
         return null;
     }
-    
+
     /**
      * This method is called when Instance is being disposed.
      */
