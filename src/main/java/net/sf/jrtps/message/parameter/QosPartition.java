@@ -29,7 +29,7 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
 
     /**
      * Gets all the defined partition names of this QosPartition.
-     * @return
+     * @return An array of partition names
      */
     public String[] getPartitions() {
         return partitions;

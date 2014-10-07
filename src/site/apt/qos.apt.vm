@@ -199,5 +199,12 @@ Quality of Service - uDDS
  be delivered, if writer stops sending samples for period "long" compared to 
  minimum_separation. 
  
+ TimeBasedFilter must be consistent with deadline QoS policy, so that
+  
++------
+ deadline >= minimum_separation
++------
+
+
  <Note: uDDS history cache does not provide the latest sample even if a sample was 
  the last one delivered and it was previously filtered out by TimeBasedFilter.>
