@@ -58,6 +58,9 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
 
     private long deadLinePeriod = -1; // -1 represents INFINITE
+
+    // For readers time based filter:
+    private final long minimumSeparationMillis;
     
     // An ordered set of cache changes.
     protected final SortedSet<Sample<T>> samples = Collections.synchronizedSortedSet(new TreeSet<>(
@@ -76,7 +79,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     private List<CommunicationListener<ENTITY_DATA>> communicationListeners;
 
 
-    UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
+    UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog, boolean isReaderCache) {
         this.entityId = eId;
         this.marshaller = marshaller;
         this.watchdog = watchdog;
@@ -91,6 +94,13 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         
         resource_limits = qos.getResourceLimits();
         history = qos.getHistory();
+        
+        if (isReaderCache) {
+            minimumSeparationMillis = qos.getTimeBasedFilter().getMinimumSeparation().asMillis();
+        }
+        else {
+            minimumSeparationMillis = 0;
+        }
     }
 
     /**
@@ -158,6 +168,10 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
                     sample.getTimestamp(), latest.getTimestamp());
             return;
         }
+                
+        if (inst.applyTimeBasedFilter(sample)) { // Check, if TIME_BASED_FILTER applies
+            return;
+        }
         
         if (kind == ChangeKind.DISPOSE) {
             Instance<T> removedInstance = instances.remove(key);
@@ -211,7 +225,8 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
                 });
             }
             
-            inst = new Instance<T>(key, resource_limits.getMaxSamplesPerInstance(), history, wdTask);
+            inst = new Instance<T>(key, resource_limits.getMaxSamplesPerInstance(), history, wdTask,
+                    watchdog, minimumSeparationMillis);
             instances.put(key, inst);
         }   
 
