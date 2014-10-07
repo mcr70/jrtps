@@ -33,5 +33,5 @@ public interface ReaderCache<T> {
      *
      * @param id Id of the message that caused this invocation
      */
-    void changesEnd(int id);
+    void changesEnd(int id);    
 }
