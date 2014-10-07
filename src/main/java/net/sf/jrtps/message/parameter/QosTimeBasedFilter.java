@@ -19,6 +19,14 @@ public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<Qo
         // TODO: OSPL 5.5 encodes timebased filter as two bytes: [0,0]
     }
 
+    /**
+     * Constructs QosTimeBasedFilter.
+     * @param millis minimum_separation as milliseconds
+     */
+    public QosTimeBasedFilter(long millis) {
+        this(new Duration(millis));
+    }
+    
     QosTimeBasedFilter() {
         super(ParameterId.PID_TIME_BASED_FILTER);
     }
