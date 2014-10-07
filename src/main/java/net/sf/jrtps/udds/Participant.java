@@ -355,12 +355,12 @@ public class Participant {
             eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
         
-        UDDSHistoryCache<T, PublicationData> hc = new UDDSHistoryCache<>(eId, m, qos, watchdog);
-        RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, hc, qos);
+        UDDSReaderCache<T> rCache = new UDDSReaderCache<>(eId, m, qos, watchdog);
+        RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
 
         DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
-        hc.setCommunicationListeners(reader.communicationListeners);
-        reader.setHistoryCache(hc);
+        rCache.setCommunicationListeners(reader.communicationListeners);
+        reader.setHistoryCache(rCache);
         readers.add(reader);
 
         if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
@@ -448,11 +448,11 @@ public class Participant {
         }
 
         
-        UDDSHistoryCache<T, SubscriptionData> hc = new UDDSHistoryCache<>(eId, m, qos, watchdog);
-        RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, hc, qos);
-        DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, hc);
+        UDDSWriterCache<T> wCache = new UDDSWriterCache<>(eId, m, qos, watchdog);
+        RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);
+        DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
 
-        hc.setCommunicationListeners(writer.communicationListeners);
+        wCache.setCommunicationListeners(writer.communicationListeners);
         
         writers.add(writer);
         livelinessManager.registerWriter(writer);

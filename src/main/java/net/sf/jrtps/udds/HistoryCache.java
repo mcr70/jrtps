@@ -1,8 +1,10 @@
 package net.sf.jrtps.udds;
 
+import java.util.LinkedList;
 import java.util.Set;
 
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.rtps.Sample;
 
 /**
  * HistoryCache represents a uDDS history cache. 
@@ -59,4 +61,13 @@ public interface HistoryCache<T> {
      * @return Instance, or null if there was not Instance with given key
      */
     Instance<T> getInstance(KeyHash key);
+    
+    /**
+     * Gets all the CacheChanges since given sequence number.
+     * Returned CacheChanges are ordered by sequence numbers.
+     * 
+     * @param seqNum sequence number to compare
+     * @return changes since given seqNum. Returned List is newly allocated.
+     */
+    LinkedList<Sample<T>> getSamplesSince(long seqNum);    
 }
