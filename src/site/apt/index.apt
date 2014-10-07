@@ -33,11 +33,6 @@ Overview
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
   
- 0.9.12
+ 0.9.13
  
- * DataRepresentation & TypeConsistencyEnforcement QoS policies as Parameters on wire. 
-   For DataRepresentation, only XCDR_DATA_REPRESENTATION kind is supported.
- 
- * BaseTypeName & EquivalentTypeName parameters on wire are recognized
-    
- * ResourceLimits: max_samples_per_instance
+ * TIME_BASED_FILTER

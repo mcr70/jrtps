@@ -28,11 +28,16 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
     private final Kind destinationOrderKind;
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
+
+    private long nextTimeBasedFilterTime = 0;
+
+    private final long minimumSeparationMillis;
     
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog);
         
         destinationOrderKind = qos.getDestinationOrder().getKind();
+        minimumSeparationMillis = qos.getTimeBasedFilter().getMinimumSeparation().asMillis();
     }
 
     // ----  ReaderCache implementation follows  -------------------------
@@ -111,6 +116,16 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             for (SampleListener<T> aListener : listeners) {
                 aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
             }
+        }
+    }
+    
+    protected void addSample(Sample<T> sample) {
+        if (System.currentTimeMillis() >= nextTimeBasedFilterTime) { // TIME_BASED_FILTER
+            super.addSample(sample);
+            nextTimeBasedFilterTime = System.currentTimeMillis() + minimumSeparationMillis;
+        }
+        else {
+            logger.trace("Skip sample since minimum separation has not elapsed");
         }
     }
 }

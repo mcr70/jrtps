@@ -1,3 +1,6 @@
+0.9.13
+    - TIME_BASE_FILTER
+    
 0.9.12
     - DataRepresentation & TypeConsistencyEnforcement QoS policies as Parameters on wire. 
       For DataRepresentation, only XCDR_DATA_REPRESENTATION kind is supported.
