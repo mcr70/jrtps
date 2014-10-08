@@ -4,6 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.OutOfResources;
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
@@ -25,6 +26,7 @@ public class Instance <T> {
     private final KeyHash key;
     private final LinkedList<Sample<T>> history = new LinkedList<>();
     private final int maxSamplesPerInstance;
+    private final int maxSamples;
     private Task deadLineMonitorTask;
     private final QosHistory.Kind historyKind;
     private final int historyDepth;
@@ -34,21 +36,23 @@ public class Instance <T> {
     private long nextTimeBasedFilterTime = System.currentTimeMillis();
     private Task tbfTask;
 
-    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task wdTask, 
-            Watchdog watchdog, long minimum_separation) {
+//    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task dlMonitorTask, 
+//            Watchdog watchdog, long minimum_separation) {
+    Instance(KeyHash key, QualityOfService qos, Watchdog watchdog, Task dlMonitorTask) {
         this.key = key;
-        this.maxSamplesPerInstance = maxSamplePerInstance;
+        this.maxSamplesPerInstance = qos.getResourceLimits().getMaxSamplesPerInstance();
+        this.maxSamples = qos.getResourceLimits().getMaxSamples();
         this.watchdog = watchdog;
-        this.minimum_separation = minimum_separation;
-        this.historyKind = history.getKind();
+        this.minimum_separation = qos.getTimeBasedFilter().getMinimumSeparation().asMillis();
+        this.historyKind = qos.getHistory().getKind();
 
-        this.deadLineMonitorTask = wdTask;
+        this.deadLineMonitorTask = dlMonitorTask;
 
         if (historyKind == Kind.KEEP_ALL) {
             this.historyDepth = Integer.MAX_VALUE;
         }
         else {
-            this.historyDepth = history.getDepth();    
+            this.historyDepth = qos.getHistory().getDepth();    
         }
     }
 
@@ -97,9 +101,13 @@ public class Instance <T> {
      * @param aSample
      * @return oldest sample, if history size was exceeded  
      */
-    Sample<T> addSample(final Sample<T> aSample) {
-        if (historyKind == Kind.KEEP_ALL && history.size() == historyDepth) {
-            throw new OutOfResources("max_samples_per_instance=" + maxSamplesPerInstance);
+    Sample<T> addSample(final Sample<T> aSample, boolean mayExceedMaxSamples) {
+        System.out.println(historyKind + ", " + history.size() + ", " + maxSamplesPerInstance);
+        if (historyKind == Kind.KEEP_ALL && history.size() == maxSamplesPerInstance) {
+            cancelTimeBasedFilter();
+            System.out.println("MMMMMMMMMMM");
+            throw new OutOfResources(OutOfResources.Kind.MAX_SAMPLES_PER_INSTANCE_EXCEEDED, 
+                    maxSamplesPerInstance);
         }
 
         if (deadLineMonitorTask != null) {
@@ -116,9 +124,13 @@ public class Instance <T> {
                     history.addFirst(aSample);
                 }
             }
-
+            
             if (history.size() > historyDepth) {                
                 return history.removeLast(); // Discard oldest sample
+            }
+            else if (mayExceedMaxSamples) {
+                cancelTimeBasedFilter();
+                throw new OutOfResources(OutOfResources.Kind.MAX_SAMPLES_EXCEEDED, maxSamples);
             }
         }
 
@@ -179,6 +191,12 @@ public class Instance <T> {
         if (deadLineMonitorTask != null) {
             deadLineMonitorTask.cancel();
         }
+    }
+
+    /**
+     * Cancel time based filter
+     */
+    private void cancelTimeBasedFilter() {
         if (tbfTask != null) {
             tbfTask.cancel();
         }

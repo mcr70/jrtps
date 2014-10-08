@@ -57,7 +57,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
 
     // For readers time based filter:
     private final long minimumSeparationMillis;
-    
+
     // An ordered set of cache changes.
     protected final SortedSet<Sample<T>> samples = Collections.synchronizedSortedSet(new TreeSet<>(
             new Comparator<Sample<T>>() {
@@ -70,24 +70,26 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     protected final Marshaller<T> marshaller;
     protected volatile long seqNum; // sequence number of a Sample
     protected final EntityId entityId;
-    
+
     protected final Watchdog watchdog;
     private List<CommunicationListener<ENTITY_DATA>> communicationListeners;
+    private final QualityOfService qos;
 
 
     UDDSHistoryCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog, boolean isReaderCache) {
         this.entityId = eId;
         this.marshaller = marshaller;
+        this.qos = qos;
         this.watchdog = watchdog;
 
         Duration period = qos.getDeadline().getPeriod();
-        
+
         if (!Duration.INFINITE.equals(period)) { 
             this.deadLinePeriod = period.asMillis();
-            
+
             logger.debug("deadline period was set to {}", deadLinePeriod);
         }
-        
+
         resource_limits = qos.getResourceLimits();
         history = qos.getHistory();
 
@@ -157,42 +159,46 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
 
         sample.setCoherentSet(coherentSet); // Set the CoherentSet attribute, if it exists
 
-        Instance<T> inst = getOrCreateInstance(key);
-        Sample<T> latest = inst.getLatest();
-        if (latest != null && latest.getTimestamp() > sample.getTimestamp()) {
-            logger.debug("Rejecting sample, since its timestamp {} is less than instances latest timestamp {}", 
-                    sample.getTimestamp(), latest.getTimestamp());
-            return;
-        }
-                
-        if (inst.applyTimeBasedFilter(this, sample)) { // Check, if TIME_BASED_FILTER applies
-            return;
-        }
-        
-        if (kind == ChangeKind.DISPOSE) {
-            Instance<T> removedInstance = instances.remove(key);
-            if (removedInstance != null) {
-                removedInstance.dispose(); // cancels deadline monitor
+        Instance<T> inst = null;
+        try {
+            inst = getOrCreateInstance(key);
+            Sample<T> latest = inst.getLatest();
+            if (latest != null && latest.getTimestamp() > sample.getTimestamp()) {
+                logger.debug("Rejecting sample, since its timestamp {} is less than instances latest timestamp {}", 
+                        sample.getTimestamp(), latest.getTimestamp());
+                return;
             }
-        }
-        else {
-            logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
 
-            Sample<T> removedSample = inst.addSample(sample);
-            if (removedSample != null) {
-                synchronized (samples) {
-                    samples.remove(removedSample);
+            if (inst.applyTimeBasedFilter(this, sample)) { // Check, if TIME_BASED_FILTER applies
+                return;
+            }
+
+            if (kind == ChangeKind.DISPOSE) {
+                Instance<T> removedInstance = instances.remove(key);
+                if (removedInstance != null) {
+                    removedInstance.dispose(); // cancels deadline monitor
                 }
             }
-        }
+            else {
+                logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
+                
+                Sample<T> removedSample =  
+                        inst.addSample(sample, samples.size() == resource_limits.getMaxSamples());
 
-        if (resource_limits.getMaxSamples() != -1 && 
-                samples.size() >= resource_limits.getMaxSamples()) {
-            throw new OutOfResources("max_samples=" + resource_limits.getMaxSamples());
-        }
+                if (removedSample != null) {
+                    synchronized (samples) {
+                        samples.remove(removedSample);
+                    }
+                }
+            }
 
-        synchronized (samples) {
-            samples.add(sample);
+            synchronized (samples) {
+                samples.add(sample);
+            }
+        }
+        catch(OutOfResources oor) {
+            logger.debug("Got OutOfResources: {}", oor.getMessage());
+            throw oor;
         }
     }
 
@@ -204,8 +210,9 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             logger.trace("[{}] Creating new instance {}", entityId, key);
 
             if (resource_limits.getMaxInstances() != -1 && 
-                    instances.size() > resource_limits.getMaxInstances()) {
-                throw new OutOfResources("max_instances=" + resource_limits.getMaxInstances());
+                    instances.size() == resource_limits.getMaxInstances()) {
+                throw new OutOfResources(OutOfResources.Kind.MAX_INSTANCES_EXCEEDED, 
+                        resource_limits.getMaxInstances());
             }
 
             Task wdTask = null;
@@ -220,9 +227,8 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
                     }
                 });
             }
-            
-            inst = new Instance<T>(key, resource_limits.getMaxSamplesPerInstance(), history, wdTask,
-                    watchdog, minimumSeparationMillis);
+
+            inst = new Instance<T>(key, qos, watchdog, wdTask);
             instances.put(key, inst);
         }   
 
@@ -249,7 +255,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         samples.add(aSample);
         clear(samples);
     }
-    
+
     void clear(List<Sample<T>> samplesToClear) {
         for (Sample<T> s : samplesToClear) {
             Instance<T> inst = instances.get(s.getKey());
@@ -303,7 +309,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         return new LinkedList<>();
     }
 
-    
+
     void setCommunicationListeners(List<CommunicationListener<ENTITY_DATA>> communicationListeners) {
         this.communicationListeners = communicationListeners;        
     }
