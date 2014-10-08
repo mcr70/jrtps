@@ -205,5 +205,5 @@ Quality of Service - uDDS
 * Lifespan
 
  Lifespan QoS policy is used to automatically remove samples from history cache of an 
- entity. Intentention of this policy is to remove samples, that becomes 'stale' after
+ entity. Intention of this policy is to remove samples, that becomes 'stale' after
  given time. So that application does not have access to this 'stale' sample anymore.
