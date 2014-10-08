@@ -26,25 +26,27 @@ public class Sample<T> {
     private static final Logger log = LoggerFactory.getLogger(Sample.class);
 
     private final Guid writerGuid;
-    private final long seqNum;
-    private final StatusInfo sInfo;
-    private final long timestamp;
     private final Marshaller<T> marshaller;
+    private final long seqNum;
+    private final long timestamp;
+    private final long sourceTimeStamp;
+    private final StatusInfo sInfo;
 
     private T obj;      // Sample contains either T or Data, lazily convert to other when needed.
     private Data data;
     private KeyHash key;
 
     private DataEncapsulation marshalledData;
-
     private CoherentSet coherentSet;
 
-    private Sample(Guid writerGuid, Marshaller<T> marshaller, long seqNum, long timestamp, StatusInfo sInfo) {
+    private Sample(Guid writerGuid, Marshaller<T> marshaller, long seqNum, 
+            long timestamp, long sourceTimeStamp, StatusInfo sInfo) {
         this.writerGuid = writerGuid;
         this.marshaller = marshaller;
         this.seqNum = seqNum;
-        this.sInfo = sInfo;
         this.timestamp = timestamp;        
+        this.sourceTimeStamp = sourceTimeStamp;
+        this.sInfo = sInfo;
     }
 
     /**
@@ -53,16 +55,23 @@ public class Sample<T> {
      * @param seqNum
      */
     public Sample(long seqNum) {
-        this(null, null, seqNum, System.currentTimeMillis(), (StatusInfo)null);
+        this(null, null, seqNum, System.currentTimeMillis(), System.currentTimeMillis(), (StatusInfo)null);
     }
 
+    /**
+     * This constructor is used when adding Sample to UDDSWriterCache.
+     */
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, ChangeKind kind, T obj) {
-        this(writerGuid, m, seqNum, timestamp, new StatusInfo(kind));        
+        this(writerGuid, m, seqNum, timestamp, timestamp, new StatusInfo(kind));        
         this.obj = obj;
     }
 
-    public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, Data data) {
-        this(writerGuid, m, seqNum, timestamp, data.getStatusInfo());
+    /**
+     * This constructor is used when adding Sample to UDDSReaderCache.
+     */
+    public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, 
+            long timestamp, long sourceTimestamp, Data data) {
+        this(writerGuid, m, seqNum, timestamp, sourceTimestamp, data.getStatusInfo());
         this.data = data;
         
         if (data.inlineQosFlag()) {
@@ -100,13 +109,26 @@ public class Sample<T> {
 
     /**
      * Gets the timestamp associated with this Sample.
+     * Time stamp can be either local timestamp, or remote writers timestamp,
+     * based on DESTINATION_ORDER QoS policy.
      * 
-     * @return timestamp in millis.
+     * @return timestamp in milliseconds.
      */
     public long getTimestamp() {
         return timestamp;
     }
 
+    /**
+     * Gets the sourceTimestamp associated with this Sample. Returns the timestamp
+     * set by remote writer. If remote writer did not provide timestamp, it has been
+     * set to reception time.
+     * 
+     * @return source timestamp in milliseconds
+     */
+    public long getSourceTimeStamp() {
+        return sourceTimeStamp;
+    }
+    
     /**
      * Gets the value of disposeFlag of StatusInfo parameter. StatusInfo
      * parameter is part of Data submessage.

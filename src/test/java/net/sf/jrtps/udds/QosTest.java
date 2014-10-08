@@ -11,9 +11,9 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
+import net.sf.jrtps.message.parameter.QosLifespan;
 import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.rtps.Sample;
-import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.util.Watchdog;
 
 import org.junit.Test;
@@ -24,10 +24,10 @@ public class QosTest {
         ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
         Watchdog watchdog = new Watchdog(ses);
         
-        // Setup QoS. TBF: 100ms, history to prevent historycache from
+        // Setup QoS. TBF: 100ms, history to prevent historyCache from
         // removing oldest samples.
         QualityOfService qos = new QualityOfService();
-        qos.setPolicy(new QosTimeBasedFilter(new Duration(100)));
+        qos.setPolicy(new QosTimeBasedFilter(100));
         qos.setPolicy(new QosHistory(Kind.KEEP_LAST, 10));  
         UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
         
@@ -56,12 +56,12 @@ public class QosTest {
 
         // Wait until 3 * TimeBasedFilter time has elapsed (*2 is used in the code)
         try {
-            Thread.sleep(1300);
+            Thread.sleep(300);
         } catch (InterruptedException e) {
             fail("Interrupted");
         }
         
-        // Fifth sample should emerge, but it does not some refactoring is needed
+        // Fifth sample should emerge
         assertEquals(3, rCache.getSamplesSince(0).size());
     }
     
@@ -79,5 +79,30 @@ public class QosTest {
         }
         catch(InconsistentPolicy ip) {
         }
+    }
+
+
+    @Test
+    public void testLifespan() {
+        ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
+        Watchdog watchdog = new Watchdog(ses);
+        
+        // Setup QoS. Lifespan: 100ms
+        QualityOfService qos = new QualityOfService();
+        qos.setPolicy(new QosLifespan(100));
+        UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
+        
+        // Add Sample
+        rCache.addSample(new Sample(1));
+        assertEquals(1, rCache.getSamplesSince(0).size());
+                
+        // Wait until Lifespan time has elapsed (+1 ms)
+        try {
+            Thread.sleep(101);
+        } catch (InterruptedException e) {
+            fail("Interrupted");
+        }
+        
+        assertEquals(0, rCache.getSamplesSince(0).size());
     }
 }

@@ -179,6 +179,9 @@ public class Instance <T> {
         if (deadLineMonitorTask != null) {
             deadLineMonitorTask.cancel();
         }
+        if (tbfTask != null) {
+            tbfTask.cancel();
+        }
     }
 
     public String toString() {
