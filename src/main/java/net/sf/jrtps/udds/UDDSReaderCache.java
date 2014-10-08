@@ -18,6 +18,7 @@ import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumber;
 import net.sf.jrtps.types.Time;
 import net.sf.jrtps.util.Watchdog;
+import net.sf.jrtps.util.Watchdog.Listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,11 +29,14 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
     private final Kind destinationOrderKind;
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
+
+    private long lifeSpanDuration;
     
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, true);
         
         destinationOrderKind = qos.getDestinationOrder().getKind();
+        lifeSpanDuration = qos.getLifespan().getDuration().asMillis();
     }
 
     // ----  ReaderCache implementation follows  -------------------------
@@ -45,19 +49,26 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     @Override
     public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
-
-        long ts = 0;
-        if (destinationOrderKind == Kind.BY_RECEPTION_TIMESTAMP || timestamp == null) {
+        long sourceTimeStamp;
+        if (timestamp != null) {
+            sourceTimeStamp = timestamp.timeMillis();
+        }
+        else {
+            sourceTimeStamp = System.currentTimeMillis();
+        }
+        
+        long ts;
+        if (destinationOrderKind == Kind.BY_RECEPTION_TIMESTAMP) {
             ts = System.currentTimeMillis();
         }
         else {
-            ts = timestamp.timeMillis(); 
+            ts = sourceTimeStamp; 
         }
 
         List<Sample<T>> coherentSet = getCoherentSet(writerGuid); // Get current CoherentSet for writer
         List<Sample<T>> pendingSamples = incomingSamples.get(id); 
 
-        Sample<T> sample = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, data);
+        Sample<T> sample = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, sourceTimeStamp, data);
         CoherentSet cs = sample.getCoherentSet();
 
         // Check, if we need to add existing CoherentSet into pendingSamples
@@ -112,5 +123,24 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
                 aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
             }
         }
+    }
+
+
+    @Override
+    public void addSample(final Sample<T> aSample) {
+        if (lifeSpanDuration > 0) {
+            // NOTE, should we try to calculate timediff of source timestamp
+            // and destination timestamp? And network delay? 
+            // Since spec talks about adding duration to source timestamp. 
+            // But allows using destination timestamp as well...
+            watchdog.addTask(lifeSpanDuration, new Listener() {
+                @Override
+                public void triggerTimeMissed() {
+                    clear(aSample);
+                }
+            });
+        }
+        
+        super.addSample(aSample);
     }
 }

@@ -71,7 +71,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     protected volatile long seqNum; // sequence number of a Sample
     protected final EntityId entityId;
     
-    private final Watchdog watchdog;
+    protected final Watchdog watchdog;
     private List<CommunicationListener<ENTITY_DATA>> communicationListeners;
 
 
@@ -244,6 +244,12 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         return instances.get(key);
     }
 
+    void clear(Sample<T> aSample) {
+        LinkedList<Sample<T>> samples = new LinkedList<>();
+        samples.add(aSample);
+        clear(samples);
+    }
+    
     void clear(List<Sample<T>> samplesToClear) {
         for (Sample<T> s : samplesToClear) {
             Instance<T> inst = instances.get(s.getKey());
@@ -296,8 +302,8 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         logger.trace("[{}] No chances to return for seq num {}", entityId, sequenceNumber);
         return new LinkedList<>();
     }
-    
 
+    
     void setCommunicationListeners(List<CommunicationListener<ENTITY_DATA>> communicationListeners) {
         this.communicationListeners = communicationListeners;        
     }

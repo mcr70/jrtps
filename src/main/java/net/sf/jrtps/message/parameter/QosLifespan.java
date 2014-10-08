@@ -4,10 +4,12 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Duration;
 
 /**
+ * QosLifespan policy is used to automatically remove samples from history cache
+ * of entity.
+ * 
  * See DDS specification v1.2, ch 7.1.3.16
  * 
  * @author mcr70
- * 
  */
 public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifespan>, DataWriterPolicy<QosLifespan>,
         TopicPolicy<QosLifespan>, InlineQoS {
@@ -19,7 +21,14 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
 
     /**
      * Constructor for QosLifespan.
-     * 
+     * @param Duration as millis
+     */
+    public QosLifespan(long millis) {
+        this(new Duration(millis));
+    }
+    
+    /**
+     * Constructor for QosLifespan.
      * @param duration
      */
     public QosLifespan(Duration duration) {
@@ -27,6 +36,10 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
         this.duration = duration;
     }
 
+    /**
+     * Get the Duration of lifespan
+     * @return Duration
+     */
     public Duration getDuration() {
         return duration;
     }
