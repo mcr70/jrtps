@@ -69,5 +69,5 @@ public interface HistoryCache<T> {
      * @param seqNum sequence number to compare
      * @return changes since given seqNum. Returned List is newly allocated.
      */
-    LinkedList<Sample<T>> getSamplesSince(long seqNum);    
+    LinkedList<Sample<T>> getSamplesSince(long seqNum); // TODO: this should be removed    
 }

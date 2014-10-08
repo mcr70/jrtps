@@ -46,13 +46,9 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
     private final QosHistory history;
-    
 
-    protected final List<SampleListener<T>> listeners = new LinkedList<>();
-
-    
+    protected final List<SampleListener<T>> listeners = new LinkedList<>();    
     private volatile CoherentSet coherentSet; // Current CoherentSet, used by writer
-    
 
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
@@ -94,7 +90,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         
         resource_limits = qos.getResourceLimits();
         history = qos.getHistory();
-        
+
         if (isReaderCache) {
             minimumSeparationMillis = qos.getTimeBasedFilter().getMinimumSeparation().asMillis();
         }
@@ -169,7 +165,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             return;
         }
                 
-        if (inst.applyTimeBasedFilter(sample)) { // Check, if TIME_BASED_FILTER applies
+        if (inst.applyTimeBasedFilter(this, sample)) { // Check, if TIME_BASED_FILTER applies
             return;
         }
         
@@ -301,7 +297,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         return new LinkedList<>();
     }
     
-    
+
     void setCommunicationListeners(List<CommunicationListener<ENTITY_DATA>> communicationListeners) {
         this.communicationListeners = communicationListeners;        
     }

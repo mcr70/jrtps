@@ -197,7 +197,7 @@ Quality of Service - uDDS
  Time based filter is used to restrict reception of samples at reader to rate specified
  with <minimum_separation>. The specification also says that last sample of writer should 
  be delivered, if writer stops sending samples for period "long" compared to 
- minimum_separation. 
+ minimum_separation, and latest sample was filtered out by TimeBasedFilter. 
  
  TimeBasedFilter must be consistent with deadline QoS policy, so that
   
@@ -205,6 +205,3 @@ Quality of Service - uDDS
  deadline >= minimum_separation
 +------
 
-
- <Note: uDDS history cache does not provide the latest sample even if a sample was 
- the last one delivered and it was previously filtered out by TimeBasedFilter.>

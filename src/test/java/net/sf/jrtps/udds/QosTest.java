@@ -62,7 +62,7 @@ public class QosTest {
         }
         
         // Fifth sample should emerge, but it does not some refactoring is needed
-        //assertEquals(3, rCache.getSamplesSince(0).size());
+        assertEquals(3, rCache.getSamplesSince(0).size());
     }
     
     @Test
