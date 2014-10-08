@@ -111,7 +111,6 @@ public class QosTest {
 
     @Test
     public <T> void testResourceLimitsMaxSamplesPerInstance() {
-        System.out.println("testREsourceLimit");
         ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
         Watchdog watchdog = new Watchdog(ses);
         
@@ -128,6 +127,32 @@ public class QosTest {
         try {
             rCache.addSample(new Sample(2));
             fail("max_samples_per_instance failed");
+        }
+        catch(OutOfResources oor) {
+            // expected
+        }
+    }
+
+
+    @Test
+    public <T> void testResourceLimitsMaxSamples() {
+        ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
+        Watchdog watchdog = new Watchdog(ses);
+        
+        // Setup QoS. ResourceLimits
+        QualityOfService qos = new QualityOfService();
+        qos.setPolicy(new QosResourceLimits(2,-1,-1)); // max_s=2, max_i=-1, max_s/i=-1
+        qos.setPolicy(new QosHistory(Kind.KEEP_ALL, 10));
+        
+        UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
+        
+        // Add Sample
+        rCache.addSample(new Sample(1));
+        rCache.addSample(new Sample(2));
+        assertEquals(2, rCache.getSamplesSince(0).size());
+        try {
+            rCache.addSample(new Sample(3));
+            fail("max_samples failed");
         }
         catch(OutOfResources oor) {
             // expected

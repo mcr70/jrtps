@@ -19,6 +19,13 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy<Qos
         super(ParameterId.PID_RESOURCE_LIMITS);
     }
 
+    /**
+     * Constructs QosResourceLimits. A value of -1 indicates a given resource constraint is 
+     * disabled.
+     * @param max_samples Maximum number of total samples allowed
+     * @param max_instances Maximum number of instances allowed
+     * @param max_samples_per_instance Maximum number of samples per instance allowed
+     */
     public QosResourceLimits(int max_samples, int max_instances, int max_samples_per_instance) {
         super(ParameterId.PID_RESOURCE_LIMITS);
         this.max_samples = max_samples;
@@ -40,21 +47,33 @@ public class QosResourceLimits extends Parameter implements DataReaderPolicy<Qos
         bb.write_long(max_samples_per_instance);
     }
 
+    /**
+     * Get max_samples
+     * @return max_samples
+     */
     public int getMaxSamples() {
         return max_samples;
     }
 
+    /**
+     * Get max_instances
+     * @return max_instances
+     */
     public int getMaxInstances() {
         return max_instances;
     }
 
+    /**
+     * Get max_samples_per_instance
+     * @return max_samples_per_instance
+     */
     public int getMaxSamplesPerInstance() {
         return max_samples_per_instance;
     }
 
     @Override
     public boolean isCompatible(QosResourceLimits other) {
-        return true; // Always true. TODO: must be consistent with QosHistory
+        return true; // Always true
     }
 
     /**

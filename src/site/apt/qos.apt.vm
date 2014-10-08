@@ -159,16 +159,13 @@ Quality of Service - uDDS
 * Resource Limits
 
  Resource limits is used to provide means to control resource usage of an Entity. DDS specification
- defines following attributes to control resource usage:
+ defines following attributes to control resource usage: <max_instances, max_samples_per_instance,
+ max_samples>. These attributes must be defined consistently, so that
  
 +------
- max_instances = <int>
- max_samples_per_instance = <int>
- max_samples = <int>
+ max_samples >= max_samples_per_instance
+ history.depth <= max_samples_per_instance
 +------
-
- <max_samples_per_instance> must be consistent with History QoS <depth>, so that 
- <depth> \<= <max_samples_per_instance> 
 
  udds supports all the settings above. When any of the limits is reached, an OutOfResources 
  exception is thrown. On reader side, resource limits are checked when Samples arrive 
