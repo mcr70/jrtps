@@ -7,11 +7,13 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import net.sf.jrtps.InconsistentPolicy;
+import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
 import net.sf.jrtps.message.parameter.QosLifespan;
+import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.util.Watchdog;
@@ -104,5 +106,31 @@ public class QosTest {
         }
         
         assertEquals(0, rCache.getSamplesSince(0).size());
+    }
+
+
+    @Test
+    public <T> void testResourceLimitsMaxSamplesPerInstance() {
+        System.out.println("testREsourceLimit");
+        ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
+        Watchdog watchdog = new Watchdog(ses);
+        
+        // Setup QoS. ResourceLimits
+        QualityOfService qos = new QualityOfService();
+        qos.setPolicy(new QosResourceLimits(2,2,1)); // max_s=2, max_i=2, max_s/i=1
+        qos.setPolicy(new QosHistory(Kind.KEEP_ALL, 10));
+        
+        UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
+        
+        // Add Sample
+        rCache.addSample(new Sample(1));
+        assertEquals(1, rCache.getSamplesSince(0).size());
+        try {
+            rCache.addSample(new Sample(2));
+            fail("max_samples_per_instance failed");
+        }
+        catch(OutOfResources oor) {
+            // expected
+        }
     }
 }
