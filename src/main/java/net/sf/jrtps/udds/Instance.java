@@ -4,11 +4,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.OutOfResources;
+import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.util.Watchdog;
+import net.sf.jrtps.util.Watchdog.Listener;
 import net.sf.jrtps.util.Watchdog.Task;
 
 /**
@@ -55,7 +57,8 @@ public class Instance <T> {
      * @param aSample
      * @return true, if time based filter was applied, and sample was dropped.
      */
-    boolean applyTimeBasedFilter(final Sample<T> aSample) {
+    boolean applyTimeBasedFilter(final UDDSHistoryCache<T, ? extends DiscoveredData> hc, 
+            final Sample<T> aSample) {
         // Check for time based filter. minimum_separation of 0
         // disables time based filter
 
@@ -64,24 +67,24 @@ public class Instance <T> {
             // will add this latest sample in question to history cache, if
             // minimum_separation * 2 time has elapsed.
             // This provides "long" time as specified in DDS specification.
-//            if (tbfTask != null) {
-//                tbfTask.cancel(); // Cancel previous sample
-//            }
-//
-//            // Add new 'latest' candidate to be added
-//            tbfTask = watchdog.addTask(2 * minimum_separation, new Listener() {
-//                @Override
-//                public void triggerTimeMissed() {
-//                    addSample(aSample);
-//                }
-//            });
+            if (tbfTask != null) {
+                tbfTask.cancel(); // Cancel previous sample
+            }
+
+            // Add new 'latest' candidate to be added
+            tbfTask = watchdog.addTask(2 * minimum_separation, new Listener() {
+                @Override
+                public void triggerTimeMissed() {
+                    hc.addSample(aSample);
+                }
+            });
 
             return true;
         }
 
-//        if (tbfTask != null) {
-//            tbfTask.cancel(); // We are adding a sample, cancel waiting 'latest' sample
-//        }
+        if (tbfTask != null) {
+            tbfTask.cancel(); // We are adding a sample, cancel waiting 'latest' sample
+        }
 
         // Setup next time based filter time.
         nextTimeBasedFilterTime = System.currentTimeMillis() + minimum_separation;
