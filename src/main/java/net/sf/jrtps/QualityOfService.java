@@ -101,7 +101,9 @@ public class QualityOfService {
 
             QosHistory h = (QosHistory) policy;
 
-            if (rl.getMaxSamplesPerInstance() != -1 && rl.getMaxSamplesPerInstance() < h.getDepth()) {
+            if (rl.getMaxSamplesPerInstance() != -1 && 
+                    QosHistory.Kind.KEEP_LAST == h.getKind() &&
+                    rl.getMaxSamplesPerInstance() < h.getDepth()) {
                 throw new InconsistentPolicy("HISTORY.depth must be <= RESOURCE_LIMITS.max_samples_per_instance");
             }
         } 
