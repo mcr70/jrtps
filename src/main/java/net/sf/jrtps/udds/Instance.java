@@ -102,10 +102,8 @@ public class Instance <T> {
      * @return oldest sample, if history size was exceeded  
      */
     Sample<T> addSample(final Sample<T> aSample, boolean mayExceedMaxSamples) {
-        System.out.println(historyKind + ", " + history.size() + ", " + maxSamplesPerInstance);
         if (historyKind == Kind.KEEP_ALL && history.size() == maxSamplesPerInstance) {
             cancelTimeBasedFilter();
-            System.out.println("MMMMMMMMMMM");
             throw new OutOfResources(OutOfResources.Kind.MAX_SAMPLES_PER_INSTANCE_EXCEEDED, 
                     maxSamplesPerInstance);
         }
