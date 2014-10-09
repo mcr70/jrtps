@@ -11,7 +11,7 @@ import net.sf.jrtps.util.Watchdog;
 import net.sf.jrtps.util.Watchdog.Listener;
 
 class UDDSWriterCache<T> extends UDDSHistoryCache<T, SubscriptionData> implements WriterCache<T> {    
-    private long lifeSpanDuration;
+    private final long lifeSpanDuration;
     
     UDDSWriterCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, false);

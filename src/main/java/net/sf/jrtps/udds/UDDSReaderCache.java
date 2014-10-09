@@ -18,6 +18,7 @@ import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumber;
 import net.sf.jrtps.types.Time;
 import net.sf.jrtps.util.Watchdog;
+import net.sf.jrtps.util.Watchdog.Listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,10 +30,13 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private final Kind destinationOrderKind;
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
 
+    private final long lifeSpanDuration;
+
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, true);
         
         destinationOrderKind = qos.getDestinationOrder().getKind();
+        lifeSpanDuration = qos.getLifespan().getDuration().asMillis();
     }
 
     // ----  ReaderCache implementation follows  -------------------------
@@ -119,5 +123,28 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
                 aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
             }
         }
+    }
+
+
+    @Override
+    public void addSample(final Sample<T> aSample) {
+        // TODO: java 5 PSM defines Lifespan as QosPolicy.ForTopic, QosPolicy.ForDataWriter
+        // but SubscriptionBuiltinTopicData also lists this policy. 
+        // Should we copy Lifespan of writer to readers QoS or not.
+        // Currently, both entities can set this policy (to different value if they like)
+        if (lifeSpanDuration > 0) {
+            // NOTE, should we try to calculate timediff of source timestamp
+            // and destination timestamp? And network delay? 
+            // Since spec talks about adding duration to source timestamp. 
+            // But allows using destination timestamp as well...
+            watchdog.addTask(lifeSpanDuration, new Listener() {
+                @Override
+                public void triggerTimeMissed() {
+                    clear(aSample);
+                }
+            });
+        }
+        
+        super.addSample(aSample);
     }
 }
