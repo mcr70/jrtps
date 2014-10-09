@@ -206,4 +206,15 @@ Quality of Service - uDDS
 
  Lifespan QoS policy is used to automatically remove samples from history cache of an 
  entity. Intention of this policy is to remove samples, that becomes 'stale' after
- given time. So that application does not have access to this 'stale' sample anymore.
+ given time. 
+ 
+ RTPS specification says that strict reliable communication requires that a sample
+ cannot be removed until all the readers have acknowledged the 
+ reception of sample. uDDS writer cache does not check this, which makes udds writers
+ not to be strict reliable if using Lifespan QoS policy.
+
+ uDDS allows both readers and writers set this policy individually, regardless of
+ matching entity. It's not clear whether this behavior conforms to specification or not.
+ For example, Java 5 PSM defines this policy as <QosPolicy.ForTopic, QosPolicy.ForDataWriter>,
+ but <SubcriptionBuiltinTopicData> (see RTPS specification) contains this policy as well.
+ 
