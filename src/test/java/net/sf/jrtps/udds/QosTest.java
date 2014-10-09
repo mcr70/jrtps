@@ -84,29 +84,6 @@ public class QosTest {
     }
 
 
-    @Test
-    public void testLifespan() {
-        ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
-        Watchdog watchdog = new Watchdog(ses);
-        
-        // Setup QoS. Lifespan: 100ms
-        QualityOfService qos = new QualityOfService();
-        qos.setPolicy(new QosLifespan(100));
-        UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
-        
-        // Add Sample
-        rCache.addSample(new Sample(1));
-        assertEquals(1, rCache.getSamplesSince(0).size());
-                
-        // Wait until Lifespan time has elapsed (+1 ms)
-        try {
-            Thread.sleep(101);
-        } catch (InterruptedException e) {
-            fail("Interrupted");
-        }
-        
-        assertEquals(0, rCache.getSamplesSince(0).size());
-    }
 
 
     @Test
@@ -157,5 +134,29 @@ public class QosTest {
         catch(OutOfResources oor) {
             // expected
         }
+    }
+
+    @Test
+    public void testLifespan() {
+        ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
+        Watchdog watchdog = new Watchdog(ses);
+        
+        // Setup QoS. Lifespan: 100ms
+        QualityOfService qos = new QualityOfService();
+        qos.setPolicy(new QosLifespan(100));
+        UDDSWriterCache<?> rCache = new UDDSWriterCache<>(null, null, qos, watchdog);
+        
+        // Add Sample
+        rCache.addSample(new Sample(1));
+        assertEquals(1, rCache.getSamplesSince(0).size());
+                
+        // Wait until Lifespan time has elapsed (+1 ms)
+        try {
+            Thread.sleep(101);
+        } catch (InterruptedException e) {
+            fail("Interrupted");
+        }
+        
+        assertEquals(0, rCache.getSamplesSince(0).size());
     }
 }
