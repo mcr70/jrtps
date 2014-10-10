@@ -199,6 +199,11 @@ public class RTPSReader<T> extends Endpoint {
         return proxies;
     }
 
+    public WriterProxy getMatchedWriter(Guid writerGuid) {
+        return writerProxies.get(writerGuid);
+    }
+
+    
     /**
      * Checks, if this RTPSReader is already matched with a RTPSWriter
      * represented by given Guid.

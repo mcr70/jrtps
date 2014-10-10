@@ -11,8 +11,12 @@ import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.QosDestinationOrder.Kind;
+import net.sf.jrtps.message.parameter.QosLifespan;
+import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.WriterProxy;
+import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumber;
@@ -30,15 +34,24 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private final Kind destinationOrderKind;
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
 
-    private final long lifeSpanDuration;
+    private RTPSReader<T> rtps_reader;
 
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, true);
         
         destinationOrderKind = qos.getDestinationOrder().getKind();
-        lifeSpanDuration = qos.getLifespan().getDuration().asMillis();
     }
 
+    /**
+     * Sets RTPSReader associated with this cache. RTPSReader is used to
+     *  
+     * @param rtps_reader
+     */
+    void setRTPSReader(RTPSReader<T> rtps_reader) {
+        this.rtps_reader = rtps_reader;
+    }
+    
+    
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
@@ -128,16 +141,13 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     @Override
     public void addSample(final Sample<T> aSample) {
-        // TODO: java 5 PSM defines Lifespan as QosPolicy.ForTopic, QosPolicy.ForDataWriter
-        // but SubscriptionBuiltinTopicData also lists this policy. 
-        // Should we copy Lifespan of writer to readers QoS or not.
-        // Currently, both entities can set this policy (to different value if they like)
-        if (lifeSpanDuration > 0) {
+        Duration lifespanDuration = getLifespan(aSample.getWriterGuid());
+        if (!Duration.INFINITE.equals(lifespanDuration)) {
             // NOTE, should we try to calculate timediff of source timestamp
             // and destination timestamp? And network delay? 
             // Since spec talks about adding duration to source timestamp. 
             // But allows using destination timestamp as well...
-            watchdog.addTask(lifeSpanDuration, new Listener() {
+            watchdog.addTask(lifespanDuration.asMillis(), new Listener() {
                 @Override
                 public void triggerTimeMissed() {
                     clear(aSample);
@@ -146,5 +156,18 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         }
         
         super.addSample(aSample);
+    }
+
+    private Duration getLifespan(Guid writerGuid) {
+        WriterProxy matchedWriter = rtps_reader.getMatchedWriter(writerGuid);
+        if (matchedWriter != null) {
+            QosLifespan lifespan = matchedWriter.getPublicationData().getQualityOfService().getLifespan();
+            return lifespan.getDuration();
+        }
+        else {
+            logger.warn("Matched writer was removed before Lifespan duration could be determined. Disabling Lifespan");
+        }
+
+        return Duration.INFINITE;
     }
 }

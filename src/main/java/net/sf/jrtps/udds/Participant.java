@@ -357,7 +357,8 @@ public class Participant {
         
         UDDSReaderCache<T> rCache = new UDDSReaderCache<>(eId, m, qos, watchdog);
         RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
-
+        rCache.setRTPSReader(rtps_reader);
+        
         DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
         rCache.setCommunicationListeners(reader.communicationListeners);
         reader.setHistoryCache(rCache);
