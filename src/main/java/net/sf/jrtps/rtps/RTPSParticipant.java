@@ -95,6 +95,7 @@ public class RTPSParticipant {
         this.config = config;
     }
 
+
     /**
      * Starts this Participant. All the configured endpoints are initialized.
      */
@@ -264,6 +265,7 @@ public class RTPSParticipant {
      * @return RTPSReader
      */
     RTPSReader<?> getReader(EntityId readerId, GuidPrefix sourceGuidPrefix, EntityId writerId) {
+        //logger.warn("getReader({}, {}, {}", readerId, sourceGuidPrefix, writerId);
         if (readerId != null && !EntityId.UNKNOWN_ENTITY.equals(readerId)) {
             return getReader(readerId);
         }
@@ -429,5 +431,12 @@ public class RTPSParticipant {
         else {
             userdataLocators.add(loc);
         }    
+    }
+
+    List<RTPSReader<?>> getReaders() {
+        return readerEndpoints;
+    }
+    List<RTPSWriter<?>> getWriters() {
+        return writerEndpoints;
     }
 }
