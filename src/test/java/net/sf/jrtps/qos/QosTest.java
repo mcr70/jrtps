@@ -37,7 +37,7 @@ import examples.hello.serializable.HelloMessage;
 
 
 public class QosTest {
-    private static final long LATCH_WAIT_SECS = 1;
+    private static final long LATCH_WAIT_SECS = 2;
     
     /**
      * Test for deadline missed event to occur on both reader and writer.

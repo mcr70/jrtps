@@ -98,7 +98,7 @@ public class Participant {
     private final QualityOfService spdpQoS; // SPDP
     private final QualityOfService sedpQoS; // SEDP
     private final QualityOfService pmQoS;   // ParticipantMessage
-    
+
     {
         spdpQoS = QualityOfService.getSPDPQualityOfService(); 
         sedpQoS = QualityOfService.getSEDPQualityOfService();
@@ -193,12 +193,16 @@ public class Participant {
 
         registerBuiltinMarshallers();
         createSPDPEntities();
-        
+
         discoveryLocators = rtps_participant.getDiscoveryLocators();
         userdataLocators = rtps_participant.getUserdataLocators();
 
         rtps_participant.start();
         createSEDPEntities();
+        DataReader<ParticipantData> pdReader = (DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+        pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
+
+        createSPDPResender();
 
         livelinessManager.start();
 
@@ -219,8 +223,7 @@ public class Participant {
         DataReader<ParticipantData> pdReader = createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
                 ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
                 spdpQoS);
-        pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
-        
+
         // ---- Create a Writer for SPDP -----------------------
         DataWriter<ParticipantData> spdp_writer = createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME,
                 ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
@@ -248,20 +251,17 @@ public class Participant {
 
         // ---- Create a Readers for SEDP ---------
         DataReader<PublicationData> wdReader = createDataReader(PublicationData.BUILTIN_TOPIC_NAME,
-                PublicationData.class, PublicationData.BUILTIN_TYPE_NAME, // PublicationData.class.getName(),
-                sedpQoS);
+                PublicationData.class, PublicationData.BUILTIN_TYPE_NAME, sedpQoS);
         wdReader.addSampleListener(new BuiltinPublicationDataListener(this, discoveredWriters));
 
         DataReader<SubscriptionData> rdReader = createDataReader(SubscriptionData.BUILTIN_TOPIC_NAME,
-                SubscriptionData.class, SubscriptionData.BUILTIN_TYPE_NAME, // SubscriptionData.class.getName(),
-                sedpQoS);
+                SubscriptionData.class, SubscriptionData.BUILTIN_TYPE_NAME, sedpQoS);
         rdReader.addSampleListener(new BuiltinSubscriptionDataListener(this, discoveredReaders));
 
         // NOTE: It is not mandatory to publish TopicData, create reader anyway.
         // Maybe someone publishes TopicData.
         DataReader<TopicData> tReader = createDataReader(TopicData.BUILTIN_TOPIC_NAME, TopicData.class,
-                TopicData.BUILTIN_TYPE_NAME, // TopicData.class.getName(),
-                sedpQoS);
+                TopicData.BUILTIN_TYPE_NAME, sedpQoS);
         tReader.addSampleListener(new BuiltinTopicDataListener(this));
 
         // Create entities for ParticipantMessage ---------------
@@ -273,15 +273,6 @@ public class Participant {
         // in builtin entities
         createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class,
                 ParticipantMessage.class.getName(), pmQoS);
-
-
-        ParticipantData pd = createSPDPParticipantData();
-        logger.debug("Created ParticipantData: {}", pd);
-        DataWriter<ParticipantData> spdp_writer = 
-                (DataWriter<ParticipantData>) getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
-        spdp_writer.write(pd);
-
-        createSPDPResender(config.getSPDPResendPeriod(), spdp_writer);
     }
 
     /**
@@ -616,10 +607,12 @@ public class Participant {
         return eps;
     }
 
-    private void createSPDPResender(final Duration period, final DataWriter<ParticipantData> spdp_writer) {
+    @SuppressWarnings("unchecked")
+    private void createSPDPResender() {        
+        final DataWriter<ParticipantData> spdp_writer = 
+                (DataWriter<ParticipantData>) getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
 
         Runnable resendRunnable = new Runnable() {
-
             @Override
             public void run() {
                 logger.debug("starting SPDP resend");
@@ -629,7 +622,10 @@ public class Participant {
             }
         };
 
-        logger.debug("[{}] Starting resend thread with period {}", rtps_participant.getGuid().getEntityId(), period);
+        Duration period = config.getSPDPResendPeriod();
+
+        logger.debug("[{}] Starting SPDP announce thread with period {}", 
+                rtps_participant.getGuid().getEntityId(), period);
 
         threadPoolExecutor.scheduleAtFixedRate(resendRunnable, 0, period.asMillis(), TimeUnit.MILLISECONDS);
     }
