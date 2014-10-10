@@ -62,8 +62,8 @@ public class Participant {
     private final RTPSParticipant rtps_participant;
 
     private EntityFactory entityFactory;
-    private List<DataReader<?>> readers = new LinkedList<>();
-    private List<DataWriter<?>> writers = new LinkedList<>();
+    private List<DataReader<?>> readers = new CopyOnWriteArrayList<>();
+    private List<DataWriter<?>> writers = new CopyOnWriteArrayList<>();
 
     private final Watchdog watchdog;
     
@@ -758,11 +758,10 @@ public class Participant {
     }
 
     /**
-     * Gets a writer for given type-
+     * Gets a reader for given type-
      * 
-     * @param type
-     *            Type of the writer
-     * @return DataWriter<T>
+     * @param type Type of the reader
+     * @return DataReader<T>
      */
     @SuppressWarnings("unchecked")
     <T> DataReader<T> getDataReader(Class<T> type) {
@@ -778,8 +777,7 @@ public class Participant {
     /**
      * Gets a writer for given type-
      * 
-     * @param type
-     *            Type of the writer
+     * @param type Type of the writer
      * @return DataWriter<T>
      */
     @SuppressWarnings("unchecked")

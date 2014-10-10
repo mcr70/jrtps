@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -54,8 +55,8 @@ public class RTPSParticipant {
      */
     private Set<Receiver> receivers = new HashSet<>();
 
-    private final List<RTPSReader<?>> readerEndpoints = new LinkedList<>();
-    private final List<RTPSWriter<?>> writerEndpoints = new LinkedList<>();
+    private final List<RTPSReader<?>> readerEndpoints = new CopyOnWriteArrayList<>();
+    private final List<RTPSWriter<?>> writerEndpoints = new CopyOnWriteArrayList<>();
 
     private final LinkedList<Locator> discoveryLocators = new LinkedList<>();
     private final LinkedList<Locator> userdataLocators = new LinkedList<>();
