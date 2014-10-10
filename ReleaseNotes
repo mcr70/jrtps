@@ -1,4 +1,4 @@
-0.9.14
+1.0.0
     - FIX: BuiltinParticipantDataListener is registered after built-in entities 
       have been created. This fixes some timing issues on startup.
     
