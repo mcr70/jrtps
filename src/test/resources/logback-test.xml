@@ -13,7 +13,7 @@
 		</encoder>
 	</appender>
 
-	<root level="debug">
+	<root level="warn">
 		<appender-ref ref="console" />
 	</root>
 	
