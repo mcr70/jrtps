@@ -1,7 +1,9 @@
 package net.sf.jrtps.qos;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -17,7 +19,7 @@ import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosDurability.Kind;
 import net.sf.jrtps.message.parameter.QosHistory;
-import net.sf.jrtps.message.parameter.QosPartition;
+import net.sf.jrtps.message.parameter.QosLifespan;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.transport.mem.MemProvider;
@@ -32,10 +34,8 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
-/**
- * Tests for QualityOfService functionality.
- * @author mcr70
- */
+
+
 public class QosTest {
     /**
      * Test for deadline missed event to occur on both reader and writer.
@@ -124,33 +124,7 @@ public class QosTest {
     }
 
     
-    @Test
-    public void testQosPartition() {
-        QosPartition p1 = QosPartition.defaultPartition();
-        QosPartition p2 = QosPartition.defaultPartition();
-        
-        assertTrue(p1.isCompatible(p2));
-        assertTrue(p2.isCompatible(p1));
-        
-        p1 = new QosPartition(new String[]{"p1", "p2", "p3"});
-        assertFalse(p1.isCompatible(p2));
-        assertFalse(p2.isCompatible(p1));
-        
-        p2 = new QosPartition(new String[]{"p2"});
-        assertTrue(p1.isCompatible(p2));
-        assertTrue(p2.isCompatible(p1));
-        
-        p2 = new QosPartition(new String[]{"p.*"});
-        assertTrue(p1.isCompatible(p2));
-        assertTrue(p2.isCompatible(p1));
-        
-        // Note, spec says this should not work; two partitions, both with regexp
-        // This is intentional deviation from spec. It is too complex to determine
-        // if regular expressions are used or not.
-        p1 = new QosPartition(new String[]{"p1.*"});  
-        assertTrue(p1.isCompatible(p2));
-        assertTrue(p2.isCompatible(p1));
-    }
+
 
 
     /**
@@ -368,6 +342,111 @@ public class QosTest {
             Assert.fail("Interrupted");
         }
                 
+        p1.close();
+        p2.close();
+    }
+
+
+    /**
+     * Test for LIFESPAN QoS policy.
+     *  1.  Create reader, and writer with LIFESPAN of 100ms
+     *  2.  wait for entities to be matched
+     *  3.  write sample
+     *  4.  wait for data to arrive to reader
+     *  5.  wait LIFESPAN to expire 
+     *  6.  Assert that sample has been removed from reader    
+     */
+    @Test
+    public void testLifeSpanOnReader() {
+        final long LIFESPAN_DURATION = 100;
+        Configuration cfg1 = new Configuration("/mem-test-1.properties");
+        Configuration cfg2 = new Configuration("/mem-test-2.properties");
+        
+        MemProvider mp = new MemProvider(cfg1);
+        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
+
+        // Create two participants; one for readers, one for writer
+        Participant p1 = new Participant(0,0, null, cfg1);
+        Participant p2 = new Participant(0,0, null, cfg2);
+
+        QualityOfService qos= new QualityOfService();
+        qos.setPolicy(new QosLifespan(LIFESPAN_DURATION));
+
+        // Create DataWriter
+        DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class, qos);
+        
+        // Create DataReader
+        DataReader<HelloMessage> dr = p1.createDataReader(HelloMessage.class, qos);
+        
+        // Latch used to synchronize on entity matched
+        final CountDownLatch emLatch = new CountDownLatch(2); 
+        final CountDownLatch dataLatch = new CountDownLatch(1);
+        
+        dr.addSampleListener(new SampleListener<HelloMessage>() {
+            @Override
+            public void onSamples(List<Sample<HelloMessage>> samples) {
+                for (int i = 0; i < samples.size(); i++) {
+                    dataLatch.countDown();
+                }
+            }
+        });
+                
+        dr.addCommunicationListener(new CommunicationListener<PublicationData>() {            
+            @Override
+            public void deadlineMissed(KeyHash instanceKey) {
+            }
+            @Override
+            public void inconsistentQoS(PublicationData ed) {
+                Assert.fail("Inconsistent QoS not expected");
+            }            
+            @Override
+            public void entityMatched(PublicationData ed) {
+                emLatch.countDown();
+            }
+        });
+
+        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
+            @Override
+            public void deadlineMissed(KeyHash instanceKey) {
+            }
+            
+            @Override
+            public void inconsistentQoS(SubscriptionData ed) {
+                Assert.fail("Inconsistent QoS not expected");
+            }
+            @Override
+            public void entityMatched(SubscriptionData ed) {
+                emLatch.countDown();
+            }
+        });
+
+        // Wait for the readers and writer to be matched
+        try {
+            emLatch.await();
+        } catch (InterruptedException e) {
+            Assert.fail("Interrupted");
+        }
+        
+        dw.write(new HelloMessage(1, "hello"));
+        
+        // Wait for reader to receive sample
+        try {
+            boolean await = dataLatch.await(1000, TimeUnit.MILLISECONDS); 
+            assertTrue("Did not get sample on time", await);
+        } catch (InterruptedException e) {
+            Assert.fail("Interrupted");
+        }
+        
+        assertEquals(1, dr.getSamples().size()); // assert that we have a sample
+        
+        try {
+            Thread.sleep(LIFESPAN_DURATION + 1);
+        } catch (InterruptedException e) {
+            fail("Gor interrupted");
+        }
+        
+        assertEquals(0, dr.getSamples().size()); // assert that sample is removed
+        
         p1.close();
         p2.close();
     }

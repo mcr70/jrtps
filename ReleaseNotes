@@ -1,5 +1,5 @@
 0.9.13
-    - TIME_BASE_FILTER, LIFESPAN at reader side
+    - TIME_BASE_FILTER, LIFESPAN
     
 0.9.12
     - DataRepresentation & TypeConsistencyEnforcement QoS policies as Parameters on wire. 
