@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements ReaderCache<T> {
     private static final Logger logger = LoggerFactory.getLogger(UDDSReaderCache.class);
-    
+
     private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
     private final Kind destinationOrderKind;
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
@@ -38,7 +38,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, true);
-        
+
         destinationOrderKind = qos.getDestinationOrder().getKind();
     }
 
@@ -50,8 +50,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     void setRTPSReader(RTPSReader<T> rtps_reader) {
         this.rtps_reader = rtps_reader;
     }
-    
-    
+
+
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
@@ -69,7 +69,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         else {
             sourceTimeStamp = System.currentTimeMillis();
         }
-        
+
         long ts;
         if (destinationOrderKind == Kind.BY_RECEPTION_TIMESTAMP) {
             ts = System.currentTimeMillis();
@@ -154,20 +154,21 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
                 }
             });
         }
-        
+
         super.addSample(aSample);
     }
 
     private Duration getLifespan(Guid writerGuid) {
-        WriterProxy matchedWriter = rtps_reader.getMatchedWriter(writerGuid);
-        if (matchedWriter != null) {
-            QosLifespan lifespan = matchedWriter.getPublicationData().getQualityOfService().getLifespan();
-            return lifespan.getDuration();
+        if (rtps_reader != null) {
+            WriterProxy matchedWriter = rtps_reader.getMatchedWriter(writerGuid);
+            if (matchedWriter != null) {
+                QosLifespan lifespan = matchedWriter.getPublicationData().getQualityOfService().getLifespan();
+                return lifespan.getDuration();
+            }
+            else {
+                logger.warn("Matched writer was removed before Lifespan duration could be determined. Disabling Lifespan");
+            }
         }
-        else {
-            logger.warn("Matched writer was removed before Lifespan duration could be determined. Disabling Lifespan");
-        }
-
         return Duration.INFINITE;
     }
 }
