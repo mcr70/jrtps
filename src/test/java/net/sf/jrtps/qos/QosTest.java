@@ -37,11 +37,14 @@ import examples.hello.serializable.HelloMessage;
 
 
 public class QosTest {
+    private static final long LATCH_WAIT_SECS = 1;
+    
     /**
      * Test for deadline missed event to occur on both reader and writer.
      */
     @Test
     public void testDeadlineMissed() {
+        System.out.println("testDeadlineMissed()");
         int DEADLINE_PERIOD = 10;
         
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
@@ -99,7 +102,7 @@ public class QosTest {
         });
 
         try {
-            emLatch.await(); // Wait for the reader and writer to be matched
+            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS); // Wait for the reader and writer to be matched
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
@@ -112,7 +115,7 @@ public class QosTest {
         // If we do not write next message within deadline period, deadline missed should happen
         
         try {
-            boolean await = dlLatch.await(1000, TimeUnit.MILLISECONDS);
+            boolean await = dlLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
             
             assertTrue(await); // check, that deadline missed was called 
         } catch (InterruptedException e) {
@@ -138,6 +141,7 @@ public class QosTest {
      */
     @Test
     public void testDurability() {
+        System.out.println("testDurability()");
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
         
@@ -234,7 +238,7 @@ public class QosTest {
 
         // Wait for the readers and writer to be matched
         try {
-            emLatch.await();
+            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
@@ -262,6 +266,7 @@ public class QosTest {
      */
     @Test
     public void testHistory() {
+        System.out.println("testHistory()");
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
         
@@ -329,7 +334,7 @@ public class QosTest {
 
         // Wait for the readers and writer to be matched
         try {
-            emLatch.await();
+            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
@@ -358,6 +363,7 @@ public class QosTest {
      */
     @Test
     public void testLifeSpanOnReader() {
+        System.out.println("testLifespanOnReader()");
         final long LIFESPAN_DURATION = 100;
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
@@ -422,7 +428,7 @@ public class QosTest {
 
         // Wait for the readers and writer to be matched
         try {
-            emLatch.await();
+            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
