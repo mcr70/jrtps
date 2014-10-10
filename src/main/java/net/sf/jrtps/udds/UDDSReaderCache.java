@@ -142,7 +142,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     @Override
     public void addSample(final Sample<T> aSample) {
         Duration lifespanDuration = getLifespan(aSample.getWriterGuid());
-        if (!Duration.INFINITE.equals(lifespanDuration)) {
+        if (!lifespanDuration.isInfinite()) {
             // NOTE, should we try to calculate timediff of source timestamp
             // and destination timestamp? And network delay? 
             // Since spec talks about adding duration to source timestamp. 
@@ -150,6 +150,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             watchdog.addTask(lifespanDuration.asMillis(), new Listener() {
                 @Override
                 public void triggerTimeMissed() {
+                    logger.debug("Lifespan expired for {}", aSample);
                     clear(aSample);
                 }
             });
@@ -163,12 +164,14 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             WriterProxy matchedWriter = rtps_reader.getMatchedWriter(writerGuid);
             if (matchedWriter != null) {
                 QosLifespan lifespan = matchedWriter.getPublicationData().getQualityOfService().getLifespan();
+                logger.trace("Setting lifespan of sample to {}", lifespan.getDuration());
                 return lifespan.getDuration();
             }
             else {
                 logger.warn("Matched writer was removed before Lifespan duration could be determined. Disabling Lifespan");
             }
         }
+
         return Duration.INFINITE;
     }
 }

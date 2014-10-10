@@ -213,8 +213,6 @@ Quality of Service - uDDS
  reception of sample. uDDS writer cache does not check this, which makes udds writers
  not to be strict reliable if using Lifespan QoS policy.
 
- uDDS allows both readers and writers set this policy individually, regardless of
- matching entity. It's not clear whether this behavior conforms to specification or not.
- For example, Java 5 PSM defines this policy as <QosPolicy.ForTopic, QosPolicy.ForDataWriter>,
- but <SubcriptionBuiltinTopicData> (see RTPS specification) contains this policy as well.
+ At reader side, when a sample arrives it is 'tagged' with an expiration time, which
+ is taken from writers Lifespan QoS policy.
  

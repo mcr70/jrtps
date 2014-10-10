@@ -22,6 +22,7 @@ public class HelloReader {
         System.in.read();
         
         System.out.println("Received " + dr.getInstances().size() + " instances from writers.");
+        System.out.println("total of " + dr.getSamples().size() + " samples available");
         
         p.close();
     }

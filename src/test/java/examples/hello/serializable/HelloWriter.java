@@ -14,6 +14,9 @@ public class HelloWriter {
         
         QualityOfService qos = new QualityOfService();
         qos.setPolicy(new QosPartition(new String[]{"partition-1"}));
+
+        // Remove from comments to see Lifespan policy to remove samples from reader 
+        // qos.setPolicy(new QosLifespan(100)); 
         
         DataWriter<HelloMessage> dw = p.createDataWriter(HelloMessage.class, qos);
         

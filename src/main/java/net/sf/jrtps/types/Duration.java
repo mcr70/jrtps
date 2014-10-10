@@ -109,6 +109,14 @@ public class Duration implements Comparable<Duration> {
         return false;
     }
     
+    /**
+     * Checks whether this Duration is infinite or note
+     * @return true or false
+     */
+    public boolean isInfinite() {
+        return sec == Integer.MAX_VALUE && nano == Integer.MAX_VALUE;
+    }
+    
     public String toString() {
         return "[" + sec + ":" + nano + "]";
     }
