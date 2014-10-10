@@ -15,7 +15,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -66,7 +65,7 @@ public class Participant {
     private List<DataWriter<?>> writers = new CopyOnWriteArrayList<>();
 
     private final Watchdog watchdog;
-    
+
     /**
      * Each user entity is assigned a unique number, this field is used for that
      * purpose
@@ -96,6 +95,19 @@ public class Participant {
 
     private JRTPSThreadFactory threadFactory;
 
+    private final QualityOfService spdpQoS; // SPDP
+    private final QualityOfService sedpQoS; // SEDP
+    private final QualityOfService pmQoS;   // ParticipantMessage
+    
+    {
+        spdpQoS = QualityOfService.getSPDPQualityOfService(); 
+        sedpQoS = QualityOfService.getSEDPQualityOfService();
+        pmQoS = new QualityOfService();
+
+        pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
+        pmQoS.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
+        pmQoS.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
+    }
 
 
     /**
@@ -144,15 +156,15 @@ public class Participant {
      */
     public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
-                
+
         this.entityFactory = ef != null ? ef : new EntityFactory();;
         this.config = cfg != null ? cfg : new Configuration();
-        
+
         // UDPProvider is used 
         UDPProvider provider = new UDPProvider(config); 
         TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
                 Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
-        
+
         int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
         int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
         threadFactory = new JRTPSThreadFactory(domainId);
@@ -160,11 +172,11 @@ public class Participant {
         threadPoolExecutor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
         threadPoolExecutor.setRemoveOnCancelPolicy(true);
         threadPoolExecutor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
-        
+
         logger.debug("Settings for thread-pool: core-size {}, max-size {}", corePoolSize, maxPoolSize);
 
         this.watchdog = new Watchdog(threadPoolExecutor);
-        
+
         createUnknownParticipantData(domainId);
 
         Random r = new Random(System.currentTimeMillis());
@@ -173,16 +185,20 @@ public class Participant {
                 (byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
 
         this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
-        
+
         rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
                 discoveredParticipants, config);
-        rtps_participant.start();
 
+        this.livelinessManager = new WriterLivelinessManager(this);
+
+        registerBuiltinMarshallers();
+        createSPDPEntities();
+        
         discoveryLocators = rtps_participant.getDiscoveryLocators();
         userdataLocators = rtps_participant.getUserdataLocators();
-        
-        this.livelinessManager = new WriterLivelinessManager(this);
-        createBuiltinEntities();
+
+        rtps_participant.start();
+        createSEDPEntities();
 
         livelinessManager.start();
 
@@ -190,27 +206,33 @@ public class Participant {
         addRunnable(leaseManager);
     }
 
-    private void createBuiltinEntities() {
-        // ---- Builtin marshallers ---------------
+    private void registerBuiltinMarshallers() {
         setMarshaller(ParticipantData.class, new ParticipantDataMarshaller());
         setMarshaller(ParticipantMessage.class, new ParticipantMessageMarshaller());
         setMarshaller(PublicationData.class, new PublicationDataMarshaller());
         setMarshaller(SubscriptionData.class, new SubscriptionDataMarshaller());
         setMarshaller(TopicData.class, new TopicDataMarshaller());
+    }
 
-        QualityOfService spdpQoS = QualityOfService.getSPDPQualityOfService(); 
-        QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService();
-        QualityOfService pmQoS = new QualityOfService();
+    private void createSPDPEntities() {
+        // ---- Create a Reader for SPDP -----------------------
+        DataReader<ParticipantData> pdReader = createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
+                ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
+                spdpQoS);
+        pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
+        
+        // ---- Create a Writer for SPDP -----------------------
+        DataWriter<ParticipantData> spdp_writer = createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME,
+                ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
+                spdpQoS);
 
-        try {
-            pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
-            pmQoS.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
-            pmQoS.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
-        } catch (InconsistentPolicy e) {
-            logger.error("Got InconsistentPolicy. This is an internal error", e);
-            throw new RuntimeException(e);
-        }
+        // Add a matched reader for SPDP writer
+        SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(),
+                new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
+        spdp_writer.addMatchedReader(sd);
+    }
 
+    private void createSEDPEntities() {
         // ---- Create a Writers for SEDP ---------
 
         createDataWriter(PublicationData.BUILTIN_TOPIC_NAME, PublicationData.class, PublicationData.BUILTIN_TYPE_NAME, // PublicationData.class.getName(),
@@ -223,11 +245,6 @@ public class Participant {
         // NOTE: It is not mandatory to publish TopicData
         // createWriter(EntityId_t.SEDP_BUILTIN_TOPIC_WRITER, TopicData.BUILTIN_TOPIC_NAME, tMarshaller);
 
-        // ---- Create a Reader for SPDP -----------------------
-        DataReader<ParticipantData> pdReader = createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
-                ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
-                spdpQoS);
-        pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
         // ---- Create a Readers for SEDP ---------
         DataReader<PublicationData> wdReader = createDataReader(PublicationData.BUILTIN_TOPIC_NAME,
@@ -257,19 +274,11 @@ public class Participant {
         createDataWriter(ParticipantMessage.BUILTIN_TOPIC_NAME, ParticipantMessage.class,
                 ParticipantMessage.class.getName(), pmQoS);
 
-        // ---- Create a Writer for SPDP -----------------------
-        DataWriter<ParticipantData> spdp_writer = createDataWriter(ParticipantData.BUILTIN_TOPIC_NAME,
-                ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
-                spdpQoS);
-
-        // Add a matched reader for SPDP writer
-        SubscriptionData sd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME, ParticipantData.class.getName(),
-                new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.SPDP_BUILTIN_PARTICIPANT_READER), spdpQoS);
-        spdp_writer.addMatchedReader(sd);
 
         ParticipantData pd = createSPDPParticipantData();
         logger.debug("Created ParticipantData: {}", pd);
-
+        DataWriter<ParticipantData> spdp_writer = 
+                (DataWriter<ParticipantData>) getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
         spdp_writer.write(pd);
 
         createSPDPResender(config.getSPDPResendPeriod(), spdp_writer);
@@ -282,7 +291,7 @@ public class Participant {
     public Guid getGuid() {
         return guid;
     }
-    
+
     /**
      * Create a new DataReader for given type T. DataReader is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
@@ -328,7 +337,7 @@ public class Participant {
 
         Marshaller<T> m = getMarshaller(type);
         EntityId eId = null;
-        
+
         if (TopicData.BUILTIN_TOPIC_NAME.equals(topicName)) {
             eId = EntityId.SEDP_BUILTIN_TOPIC_READER;
         } else if (SubscriptionData.BUILTIN_TOPIC_NAME.equals(topicName)) {
@@ -354,11 +363,11 @@ public class Participant {
 
             eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
-        
+
         UDDSReaderCache<T> rCache = new UDDSReaderCache<>(eId, m, qos, watchdog);
         RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
         rCache.setRTPSReader(rtps_reader);
-        
+
         DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
         rCache.setCommunicationListeners(reader.communicationListeners);
         reader.setHistoryCache(rCache);
@@ -373,7 +382,7 @@ public class Participant {
         }
 
         logger.debug("Created DataReader {}", reader.getGuid());
-        
+
         return reader;
     }
 
@@ -448,13 +457,13 @@ public class Participant {
             eId = new EntityId.UserDefinedEntityId(myKey, kind);            
         }
 
-        
+
         UDDSWriterCache<T> wCache = new UDDSWriterCache<>(eId, m, qos, watchdog);
         RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);
         DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
 
         wCache.setCommunicationListeners(writer.communicationListeners);
-        
+
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
@@ -470,14 +479,13 @@ public class Participant {
                     topicName, getGuid(), wd.getBuiltinTopicKey());
         }
 
-
         return writer;
     }
 
     private String getTypeName(Class<?> c) {
         Type ta = c.getAnnotation(Type.class);
         String typeName;
-        
+
         if (ta != null) {
             typeName = ta.typeName();
         }
@@ -487,15 +495,15 @@ public class Participant {
 
         return typeName;
     }
-    
+
     private String getTopicName(Class<?> c) {
         Type ta = c.getAnnotation(Type.class);
         String topicName = null;
-        
+
         if (ta != null) {
             topicName = ta.topicName();
         }
-        
+
         if (topicName == null || topicName.length() == 0) {
             topicName = c.getSimpleName();
         }
@@ -527,7 +535,7 @@ public class Participant {
     public void setEntityFactory(EntityFactory ef) {
         entityFactory = ef;
     }
-    
+
     /**
      * Asserts liveliness of writers, whose QosLiveliness kind is MANUAL_BY_PARTICIPANT.
      * 
@@ -545,7 +553,7 @@ public class Participant {
     public void close() {
         rtps_participant.close();
         threadPoolExecutor.shutdown(); // won't accept new tasks, remaining tasks keeps on running.
-        
+
         threadPoolExecutor.shutdownNow(); // Shutdown now.
     }
 
@@ -586,10 +594,10 @@ public class Participant {
     Configuration getConfiguration() {
         return config;
     }
-    
+
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
-        
+
         ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
                 discoveryLocators, userdataLocators);
 
@@ -664,7 +672,7 @@ public class Participant {
             }
         }
 
-        logger.warn("Could not find a writer with entityId {}", writerId);
+        logger.warn("Could not find a writer with entityId {}, {}", writerId, writers);
         return null;
     }
 
@@ -729,7 +737,7 @@ public class Participant {
     public List<DataReader<?>> getReaders() {
         return readers;
     }
-    
+
     /**
      * Gets DataWriters created by this Participant.
      * @return a List of DataWriters
@@ -737,7 +745,7 @@ public class Participant {
     public List<DataWriter<?>> getWriters() {
         return writers;
     }
-    
+
     /**
      * Waits for a given amount of milliseconds.
      * 
@@ -841,7 +849,7 @@ public class Participant {
 
     private void createUnknownParticipantData(int domainId) {
         List<Locator> discoveryLocators = new LinkedList<>();
-        
+
         List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
         for (URI uri : discoveryAnnounceURIs) {
             TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
@@ -853,9 +861,9 @@ public class Participant {
                 logger.warn("No TranportProvider registered with scheme for {}", uri);
             }
         }
-        
+
         logger.debug("Locators for discovery announcement: {}", discoveryLocators);
-        
+
         ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, discoveryLocators, null);
 
         // Set the lease duration to max integer. I.e. Never expires.

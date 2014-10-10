@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class ParameterList {
     Logger log = LoggerFactory.getLogger(ParameterList.class);
 
-    private List<Parameter> params = new LinkedList<Parameter>();
+    private List<Parameter> params = new CopyOnWriteArrayList<>();
 
     public ParameterList() {
     }

@@ -56,6 +56,10 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                         SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
                                 ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
                                         EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());
+                        if (pw == null) {
+                            log.error("No SPDP writer in {}", participant.getWriters());
+                        }
+                        
                         pw.addMatchedReader(rd);
 
                         // Then, announce our builtin endpoints

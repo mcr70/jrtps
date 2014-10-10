@@ -184,4 +184,8 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
             }
         }
     }
+
+    public String toString() {
+        return "DataWriter(" + getGuid() + ")";
+    }
 }
