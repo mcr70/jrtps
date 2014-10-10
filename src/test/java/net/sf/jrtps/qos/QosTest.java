@@ -102,7 +102,8 @@ public class QosTest {
         });
 
         try {
-            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS); // Wait for the reader and writer to be matched
+            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS); // Wait for the reader and writer to be matched
+            assertTrue("Entities were not matched in time", await);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
@@ -238,7 +239,8 @@ public class QosTest {
 
         // Wait for the readers and writer to be matched
         try {
-            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
+            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
+            assertTrue("Entities were not matched in time", await);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
@@ -334,7 +336,8 @@ public class QosTest {
 
         // Wait for the readers and writer to be matched
         try {
-            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
+            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
+            assertTrue("Entities were not matched in time", await);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
@@ -428,7 +431,8 @@ public class QosTest {
 
         // Wait for the readers and writer to be matched
         try {
-            emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
+            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
+            assertTrue("Entities were not matched in time", await);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
