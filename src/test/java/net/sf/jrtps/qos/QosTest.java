@@ -44,7 +44,6 @@ public class QosTest {
      */
     @Test
     public void testDeadlineMissed() {
-        System.out.println("testDeadlineMissed()");
         int DEADLINE_PERIOD = 10;
         
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
@@ -142,7 +141,6 @@ public class QosTest {
      */
     @Test
     public void testDurability() {
-        System.out.println("testDurability()");
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
         
@@ -268,7 +266,6 @@ public class QosTest {
      */
     @Test
     public void testHistory() {
-        System.out.println("testHistory()");
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
         
@@ -366,7 +363,6 @@ public class QosTest {
      */
     @Test
     public void testLifeSpanOnReader() {
-        System.out.println("testLifespanOnReader()");
         final long LIFESPAN_DURATION = 100;
         Configuration cfg1 = new Configuration("/mem-test-1.properties");
         Configuration cfg2 = new Configuration("/mem-test-2.properties");
