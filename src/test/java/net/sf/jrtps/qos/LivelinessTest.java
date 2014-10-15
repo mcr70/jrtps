@@ -1,9 +1,6 @@
 package net.sf.jrtps.qos;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.PublicationData;
@@ -12,7 +9,6 @@ import net.sf.jrtps.rtps.WriterLivelinessListener;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
@@ -56,29 +52,14 @@ public class LivelinessTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        try {
-            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
-            assertTrue("Entities were not matched in time", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
 
         // Wait for liveliness lost event
-        try {
-            boolean await = livelinessLostLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS); 
-            assertTrue("liveliness was not lost", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(livelinessLostLatch, EMLATCH_WAIT_MILLIS, true);
         
         dw.assertLiveliness();
         
-        try {
-            boolean await = livelinessRestoredLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS); 
-            assertTrue("liveliness was not restored", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(livelinessRestoredLatch, EMLATCH_WAIT_MILLIS, true);
     }
 
 }

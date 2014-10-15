@@ -1,12 +1,9 @@
 package net.sf.jrtps.qos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosLifespan;
@@ -15,7 +12,6 @@ import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.SampleListener;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
@@ -62,30 +58,16 @@ public class LifespanTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        try {
-            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
-            assertTrue("Entities were not matched in time", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
 
         dw.write(new HelloMessage(1, "hello"));
 
         // Wait for reader to receive sample
-        try {
-            boolean await = dataLatch.await(1000, TimeUnit.MILLISECONDS); 
-            assertTrue("Did not get sample on time", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(dataLatch, 1000, true);
 
         assertEquals(1, dr.getSamples().size()); // assert that we have a sample
 
-        try {
-            Thread.sleep(2 * LIFESPAN_DURATION);
-        } catch (InterruptedException e) {
-            fail("Gor interrupted");
-        }
+        waitFor(2 * LIFESPAN_DURATION);
 
         assertEquals(0, dr.getSamples().size()); // assert that sample is removed
     }

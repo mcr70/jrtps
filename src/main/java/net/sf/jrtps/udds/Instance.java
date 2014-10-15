@@ -228,7 +228,6 @@ public class Instance <T> {
 
     void livelinessLost(Guid writerGuid) {
         if (owner != null && owner.equals(writerGuid)) {
-            logger.debug("Liveliness of {} was lost", writerGuid);
             owner = null;
             ownerStrength = 0;
         }

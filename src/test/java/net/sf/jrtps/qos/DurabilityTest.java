@@ -1,10 +1,7 @@
 package net.sf.jrtps.qos;
 
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -79,20 +76,10 @@ public class DurabilityTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        try {
-            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
-            assertTrue("Entities were not matched in time", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
 
         // Wait for transient local reader to receive all the samples
-        try {
-            boolean await = trDataLatch.await(1000, TimeUnit.MILLISECONDS); 
-            assertTrue("Did not receive samples for transient local reader on time: " + trDataLatch.getCount(), await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(trDataLatch, EMLATCH_WAIT_MILLIS, true);
     }
 
 
