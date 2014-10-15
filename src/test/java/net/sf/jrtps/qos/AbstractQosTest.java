@@ -1,11 +1,13 @@
 package net.sf.jrtps.qos;
 
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.rtps.WriterLivelinessListener;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.transport.mem.MemProvider;
 import net.sf.jrtps.udds.CommunicationListener;
@@ -21,7 +23,8 @@ import examples.hello.serializable.HelloMessage;
 
 public class AbstractQosTest {
     static final long LATCH_WAIT_SECS = 2;
-
+    static final long EMLATCH_WAIT_MILLIS = 1000;
+    
     static Configuration cfg1 = new Configuration("/mem-test-1.properties");
     static Configuration cfg2 = new Configuration("/mem-test-2.properties");
 
@@ -82,12 +85,35 @@ public class AbstractQosTest {
         });
     }
 
-
+    void addLivelinessListener(DataReader<HelloMessage> dr, final CountDownLatch restoredLatch, final CountDownLatch lostLatch) {
+        dr.addWriterListener(new WriterLivelinessListener() {
+            @Override
+            public void livelinessRestored(PublicationData pd) {
+                restoredLatch.countDown();
+            }
+            
+            @Override
+            public void livelinessLost(PublicationData pd) {
+                lostLatch.countDown();
+            }
+        });
+    }
+    
+    
     void waitFor(long millis) {
         try {
             Thread.currentThread().sleep(millis);
         } catch (InterruptedException e) {
             Assert.fail("interrupted");
         }
+    }
+    
+    void waitFor(CountDownLatch latch, long durationInMillis, boolean countToZeroExpected) {
+        try {
+            boolean await = latch.await(durationInMillis, TimeUnit.MILLISECONDS); 
+            Assert.assertEquals(await, countToZeroExpected);
+        } catch (InterruptedException e) {
+            Assert.fail("Interrupted");
+        }        
     }
 }

@@ -1,11 +1,7 @@
 package net.sf.jrtps.qos;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -16,7 +12,6 @@ import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.SampleListener;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
@@ -64,19 +59,9 @@ public class HistoryTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        try {
-            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
-            assertTrue("Entities were not matched in time", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
 
         // Wait for transient local reader to receive all the samples
-        try {
-            boolean await = trDataLatch.await(1000, TimeUnit.MILLISECONDS); 
-            assertFalse("Received more than 2 samples" + trDataLatch.getCount(), await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
+        waitFor(trDataLatch, 1000, false);
     }
 }
