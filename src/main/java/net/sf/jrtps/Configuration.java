@@ -6,6 +6,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 import net.sf.jrtps.transport.PortNumberParameters;
@@ -36,6 +37,15 @@ public class Configuration {
         this("/jrtps.properties");
     }
 
+    /**
+     * Constructs Configuration with given properties.
+     * @param properties
+     */
+    public Configuration(Map<String, Object> properties) {
+        props = new Properties();
+        props.putAll(properties);
+    }
+    
     /**
      * Creates a new Configuration with given resourceName. If given resourceName
      * is not found, a default Configuration is constructed.
