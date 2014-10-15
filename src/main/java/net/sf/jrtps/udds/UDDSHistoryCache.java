@@ -152,7 +152,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         listeners.remove(aListener);
     }
 
-    protected void addSample(Sample<T> sample) {
+    protected Sample<T> addSample(Sample<T> sample) {
         logger.trace("addSample({})", sample);
         KeyHash key = sample.getKey();
         ChangeKind kind = sample.getKind();
@@ -166,11 +166,11 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             if (latest != null && latest.getTimestamp() > sample.getTimestamp()) {
                 logger.debug("Rejecting sample, since its timestamp {} is less than instances latest timestamp {}", 
                         sample.getTimestamp(), latest.getTimestamp());
-                return;
+                return null;
             }
 
             if (inst.applyTimeBasedFilter(this, sample)) { // Check, if TIME_BASED_FILTER applies
-                return;
+                return null;
             }
 
             if (kind == ChangeKind.DISPOSE) {
@@ -195,6 +195,8 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             synchronized (samples) {
                 samples.add(sample);
             }
+            
+            return sample;
         }
         catch(OutOfResources oor) {
             logger.debug("Got OutOfResources: {}", oor.getMessage());

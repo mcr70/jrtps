@@ -53,7 +53,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Participant {
     private static final Logger logger = LoggerFactory.getLogger(Participant.class);
-
+    private static final Random random = new Random(System.currentTimeMillis());
+    
     private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
     private final Configuration config;
@@ -179,8 +180,7 @@ public class Participant {
 
         createUnknownParticipantData(domainId);
 
-        Random r = new Random(System.currentTimeMillis());
-        int vmid = r.nextInt();
+        int vmid = random.nextInt();
         byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
                 (byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
 
@@ -546,6 +546,7 @@ public class Participant {
         threadPoolExecutor.shutdown(); // won't accept new tasks, remaining tasks keeps on running.
 
         threadPoolExecutor.shutdownNow(); // Shutdown now.
+        threadFactory.stopThreads();
     }
 
     /**
@@ -628,6 +629,9 @@ public class Participant {
                 rtps_participant.getGuid().getEntityId(), period);
 
         threadPoolExecutor.scheduleAtFixedRate(resendRunnable, 0, period.asMillis(), TimeUnit.MILLISECONDS);
+        ParticipantData pd = createSPDPParticipantData();
+
+        spdp_writer.write(pd);
     }
 
     /**

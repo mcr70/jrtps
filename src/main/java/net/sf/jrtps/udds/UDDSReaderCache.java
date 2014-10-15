@@ -128,34 +128,39 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         logger.trace("changesEnd({})", id);        
 
         List<Sample<T>> pendingSamples = incomingSamples.remove(id); 
+        List<Sample<T>> acceptedSamples = new LinkedList<>();
 
         if (pendingSamples.size() > 0) {
             // Add each pending Sample to HistoryCache
             for (Sample<T> cc : pendingSamples) {
-                addSample(cc);
+                if (addSample(cc) != null) {
+                    acceptedSamples.add(cc);
+                }
             }
 
             // Notify listeners 
-            for (SampleListener<T> aListener : listeners) {
-                aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
+            if (acceptedSamples.size() > 0) {
+                for (SampleListener<T> aListener : listeners) {
+                    aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
+                }
             }
         }
     }
 
 
     @Override
-    public void addSample(final Sample<T> aSample) {
+    public Sample<T> addSample(final Sample<T> aSample) {
         if (rtps_reader != null) { 
             WriterProxy matchedWriter = rtps_reader.getMatchedWriter(aSample.getWriterGuid());
             if (matchedWriter == null) {
                 // Could happen asynchronously
                 logger.debug("Ignoring sample from unknown writer {}", aSample.getWriterGuid());
-                return;
+                return null;
             }
 
             if (!checkOwnershipPolicy(matchedWriter, aSample)) {
                 logger.debug("Ignoring sample from {}, since it is not a owner of instance", aSample.getWriterGuid());
-                return;
+                return null;
             }
         }
 
@@ -174,7 +179,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             });
         }
 
-        super.addSample(aSample);
+        return super.addSample(aSample);
     }
 
     private boolean checkOwnershipPolicy(WriterProxy matchedWriter, Sample<T> sample) {
