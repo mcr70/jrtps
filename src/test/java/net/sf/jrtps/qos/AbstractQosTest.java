@@ -80,4 +80,13 @@ public class AbstractQosTest {
             }
         });
     }
+
+
+    void waitFor(long millis) {
+        try {
+            Thread.currentThread().sleep(millis);
+        } catch (InterruptedException e) {
+            Assert.fail("interrupted");
+        }
+    }
 }

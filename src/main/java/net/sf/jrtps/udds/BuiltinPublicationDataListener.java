@@ -52,8 +52,9 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
                     }
                 } 
                 else if (r.getRTPSReader().isMatchedWith(pd.getBuiltinTopicKey()) && pdSample.isDisposed()) {
+                    log.debug("PublicationData was disposed, removing matched writer");
                     // Associated and sample is dispose -> remove association
-                    r.getRTPSReader().removeMatchedWriter(pd);
+                    r.removeMatchedWriter(pd);
                 }
             }
         }

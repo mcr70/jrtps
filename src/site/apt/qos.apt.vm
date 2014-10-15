@@ -214,5 +214,21 @@ Quality of Service - uDDS
  not to be strict reliable if using Lifespan QoS policy.
 
  At reader side, when a sample arrives it is 'tagged' with an expiration time, which
- is taken from writers Lifespan QoS policy.
+ is calculated using writers Lifespan QoS policy.
+
+
+* Ownership, OwnershipStrength
+
+ These policies are used to provide a concept of ownership of an instance.
+ A <Sample> gets written into readers history cache only if the writer is the owner of
+ the instance, or writer is stronger than owner of the instance. In this case the stronger 
+ writer claims ownership of the Instance. 
  
+ Ownership QoS between reader and writer is compatible if 
+ 
++------
+ offered.kind == requested.kind
++------
+  
+ <NOTE: Currently, writer does not 'loose' ownership, which means that other events like
+  deadline missed, liveliness lost, etc does not affect the ownership of the instance.> 

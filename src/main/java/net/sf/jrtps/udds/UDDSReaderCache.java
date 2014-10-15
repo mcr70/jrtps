@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
@@ -16,6 +17,7 @@ import net.sf.jrtps.message.parameter.QosOwnership;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.rtps.WriterLivelinessListener;
 import net.sf.jrtps.rtps.WriterProxy;
 import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.types.EntityId;
@@ -28,7 +30,7 @@ import net.sf.jrtps.util.Watchdog.Listener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements ReaderCache<T> {
+class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements ReaderCache<T>, WriterLivelinessListener {
     private static final Logger logger = LoggerFactory.getLogger(UDDSReaderCache.class);
 
     private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
@@ -53,6 +55,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
      */
     void setRTPSReader(RTPSReader<T> rtps_reader) {
         this.rtps_reader = rtps_reader;
+        this.rtps_reader.addWriterLivelinessListener(this);
     }
 
 
@@ -208,4 +211,22 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
         return Duration.INFINITE;
     }
+
+    
+    // ----  WriterLivelinessListener  ------------------------
+    @Override
+    public void livelinessLost(PublicationData pd) {
+        logger.debug("liveliness of {} detected", pd.getBuiltinTopicKey());
+        // Inform each instance of liveliness lost
+        Set<Instance<T>> instSet = getInstances();
+        for (Instance<T> inst : instSet) {
+            inst.livelinessLost(pd.getBuiltinTopicKey());
+        }
+    }
+
+    @Override
+    public void livelinessRestored(PublicationData pd) {
+        // Ignore
+    }
+    // ----  WriterLivelinessListener  ------------------------    
 }

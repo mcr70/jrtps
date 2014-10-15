@@ -364,11 +364,13 @@ public class Participant {
         reader.setHistoryCache(rCache);
         readers.add(reader);
 
+        SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
+        reader.setSubscriptionData(rd);
+
         if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
             @SuppressWarnings("unchecked")
             DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
                     SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
-            SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
             sw.write(rd);
         }
 
@@ -377,6 +379,21 @@ public class Participant {
         return reader;
     }
 
+    void removeDataReader(DataReader<?> dr) {
+        readers.remove(dr);
+        
+        if (dr.getRTPSReader().getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+            @SuppressWarnings("unchecked")
+            DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
+                    SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
+            sw.write(dr.getSubscriptionData());
+
+        }
+
+        logger.debug("Removed DataReader {} for {}", dr.getGuid(), dr.getTopicName()); 
+    }
+    
+    
     /**
      * Creates a new DataWriter of given type. DataWriter is bound to a topic
      * named c.getSimpleName(), which corresponds to class name of the argument.
@@ -458,20 +475,39 @@ public class Participant {
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
+        PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
+        writer.setPublicationData(wd);
+
         if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
             @SuppressWarnings("unchecked")
             DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
                     PublicationData.BUILTIN_TOPIC_NAME).get(0);
             logger.debug("Writing Publication");
-            PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
             pw.write(wd);
 
-            logger.debug("Created DataWriter for {}, participant guid is {}, Publications guid is {}", 
-                    topicName, getGuid(), wd.getBuiltinTopicKey());
+            logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
         }
 
         return writer;
     }
+    
+    void removeDataWriter(DataWriter<?> dw) {
+        dw.getRTPSWriter().close();
+        writers.remove(dw);
+        livelinessManager.unregisterWriter(dw);
+        
+        if (dw.getRTPSWriter().getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+            @SuppressWarnings("unchecked")
+            DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
+                    PublicationData.BUILTIN_TOPIC_NAME).get(0);
+            logger.debug("Writing Publication");
+            pw.dispose(dw.getPublicationData());
+        }
+        
+        logger.debug("Removed DataWriter {} for {}", dw.getGuid(), dw.getTopicName());
+    }
+    
+    
 
     private String getTypeName(Class<?> c) {
         Type ta = c.getAnnotation(Type.class);
