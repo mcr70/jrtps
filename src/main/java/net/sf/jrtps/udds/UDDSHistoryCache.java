@@ -203,7 +203,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     }
 
 
-    private Instance<T> getOrCreateInstance(final KeyHash key) {
+    protected Instance<T> getOrCreateInstance(final KeyHash key) {
         Instance<T> inst = instances.get(key);
         if (inst == null) {
 
@@ -262,7 +262,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             inst.removeSample(s);
 
             synchronized (samples) {
-                samples.remove(s);    
+                samples.remove(s);
             }
         }
     }
