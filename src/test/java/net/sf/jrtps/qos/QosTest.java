@@ -446,7 +446,7 @@ public class QosTest {
         assertEquals(1, dr.getSamples().size()); // assert that we have a sample
         
         try {
-            Thread.sleep(LIFESPAN_DURATION + 1);
+            Thread.sleep(2 * LIFESPAN_DURATION);
         } catch (InterruptedException e) {
             fail("Gor interrupted");
         }
