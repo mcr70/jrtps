@@ -27,19 +27,22 @@ import examples.hello.serializable.HelloMessage;
 public class OwnershipTest extends AbstractQosTest {
 
     /**
-     * Test for LIFESPAN QoS policy.
-     *  1.  Create reader, and writer with LIFESPAN of 100ms
+     * Test for OWNERSHIP QoS policy.
+     *  1.  Create reader and 2 writers with EXCLUSIVE ownership. 
      *  2.  wait for entities to be matched
-     *  3.  write sample
-     *  4.  wait for data to arrive to reader
-     *  5.  wait LIFESPAN to expire 
-     *  6.  Assert that sample has been removed from reader    
+     *  3.  write 2 samples with weaker writer
+     *  4.  wait for data to arrive to reader. Assert we got 2 samples.
+     *  5.  write 2 samples with stronger writer
+     *  6.  wait for data to arrive to reader. Assert we got 2 samples.
+     *  7.  write 2 samples with weaker writer
+     *  8.  wait for data to arrive to reader. Assert we got 0 samples.
+     *  9.  assert that we have received a total of 4 samples.
      */
     @Test
     public void testOwnership() {
         QualityOfService qosDr = new QualityOfService();
         qosDr.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
-        qosDr.setPolicy(new QosHistory(10));
+        qosDr.setPolicy(new QosHistory(10)); // Keep all the samples we write in this test
         
         QualityOfService qos1 = new QualityOfService();
         qos1.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
