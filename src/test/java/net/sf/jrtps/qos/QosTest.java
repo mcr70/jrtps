@@ -30,7 +30,9 @@ import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
 import net.sf.jrtps.udds.SampleListener;
 
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
@@ -38,6 +40,30 @@ import examples.hello.serializable.HelloMessage;
 
 public class QosTest {
     private static final long LATCH_WAIT_SECS = 2;
+
+    static Configuration cfg1 = new Configuration("/mem-test-1.properties");
+    static Configuration cfg2 = new Configuration("/mem-test-2.properties");
+    
+    static {
+        MemProvider mp = new MemProvider(cfg1);
+        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
+    }
+    
+    Participant p1;
+    Participant p2;
+    
+    @Before
+    public void init() {
+        // Create two participants; one reader, one for writer
+        p1 = new Participant(0,0, null, cfg1);
+        p2 = new Participant(0,0, null, cfg2);
+    }
+    
+    @After 
+    public void destroy() {
+        p1.close();
+        p2.close();
+    }
     
     /**
      * Test for deadline missed event to occur on both reader and writer.
@@ -45,16 +71,6 @@ public class QosTest {
     @Test
     public void testDeadlineMissed() {
         int DEADLINE_PERIOD = 10;
-        
-        Configuration cfg1 = new Configuration("/mem-test-1.properties");
-        Configuration cfg2 = new Configuration("/mem-test-2.properties");
-        
-        MemProvider mp = new MemProvider(cfg1);
-        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
-
-        // Create two participants; one reader, one for writer
-        Participant p1 = new Participant(0,0, null, cfg1);
-        Participant p2 = new Participant(0,0, null, cfg2);
         
         QualityOfService qos = new QualityOfService();
         try {
@@ -68,38 +84,10 @@ public class QosTest {
         
         final CountDownLatch emLatch = new CountDownLatch(2); // Latch used to synchronize on entity matched
         final CountDownLatch dlLatch = new CountDownLatch(2); // Latch used to wait for deadlines to occur
-        
-        dr.addCommunicationListener(new CommunicationListener<PublicationData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-                dlLatch.countDown();
-            }
-            @Override
-            public void inconsistentQoS(PublicationData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }            
-            @Override
-            public void entityMatched(PublicationData ed) {
-                emLatch.countDown();
-            }
-        });
-        
-        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-                dlLatch.countDown();
-            }
-            
-            @Override
-            public void inconsistentQoS(SubscriptionData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }
-            @Override
-            public void entityMatched(SubscriptionData ed) {
-                emLatch.countDown();
-            }
-        });
 
+        addCommunicationListener(dr, dlLatch, emLatch);
+        addCommunicationListener(dw, dlLatch, emLatch);
+        
         try {
             boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS); // Wait for the reader and writer to be matched
             assertTrue("Entities were not matched in time", await);
@@ -121,14 +109,9 @@ public class QosTest {
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
-                
-        p1.close();
-        p2.close();
     }
 
     
-
-
 
     /**
      * Test for durability QoS policy.
@@ -141,16 +124,6 @@ public class QosTest {
      */
     @Test
     public void testDurability() {
-        Configuration cfg1 = new Configuration("/mem-test-1.properties");
-        Configuration cfg2 = new Configuration("/mem-test-2.properties");
-        
-        MemProvider mp = new MemProvider(cfg1);
-        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
-
-        // Create two participants; one for readers, one for writer
-        Participant p1 = new Participant(0,0, null, cfg1);
-        Participant p2 = new Participant(0,0, null, cfg2);
-
         // Create DURABILITY policies to be used by entities
         QualityOfService qosVolatile = new QualityOfService();
         qosVolatile.setPolicy(new QosDurability(Kind.VOLATILE));
@@ -192,48 +165,9 @@ public class QosTest {
             }
         });
         
-        drVolatile.addCommunicationListener(new CommunicationListener<PublicationData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            @Override
-            public void inconsistentQoS(PublicationData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }            
-            @Override
-            public void entityMatched(PublicationData ed) {
-                emLatch.countDown();
-            }
-        });
-        
-        drTRLocal.addCommunicationListener(new CommunicationListener<PublicationData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            @Override
-            public void inconsistentQoS(PublicationData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }            
-            @Override
-            public void entityMatched(PublicationData ed) {
-                emLatch.countDown();
-            }
-        });
-
-        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            
-            @Override
-            public void inconsistentQoS(SubscriptionData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }
-            @Override
-            public void entityMatched(SubscriptionData ed) {
-                emLatch.countDown();
-            }
-        });
+        addCommunicationListener(drVolatile, null, emLatch);
+        addCommunicationListener(drTRLocal, null, emLatch);
+        addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
         try {
@@ -250,9 +184,6 @@ public class QosTest {
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
-                
-        p1.close();
-        p2.close();
     }
 
 
@@ -266,16 +197,6 @@ public class QosTest {
      */
     @Test
     public void testHistory() {
-        Configuration cfg1 = new Configuration("/mem-test-1.properties");
-        Configuration cfg2 = new Configuration("/mem-test-2.properties");
-        
-        MemProvider mp = new MemProvider(cfg1);
-        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
-
-        // Create two participants; one for readers, one for writer
-        Participant p1 = new Participant(0,0, null, cfg1);
-        Participant p2 = new Participant(0,0, null, cfg2);
-
         QualityOfService qos= new QualityOfService();
         qos.setPolicy(new QosDurability(Kind.TRANSIENT_LOCAL));
         qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 2));
@@ -302,34 +223,8 @@ public class QosTest {
             }
         });
                 
-        drTRLocal.addCommunicationListener(new CommunicationListener<PublicationData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            @Override
-            public void inconsistentQoS(PublicationData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }            
-            @Override
-            public void entityMatched(PublicationData ed) {
-                emLatch.countDown();
-            }
-        });
-
-        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            
-            @Override
-            public void inconsistentQoS(SubscriptionData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }
-            @Override
-            public void entityMatched(SubscriptionData ed) {
-                emLatch.countDown();
-            }
-        });
+        addCommunicationListener(drTRLocal, null, emLatch);
+        addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
         try {
@@ -346,9 +241,6 @@ public class QosTest {
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }
-                
-        p1.close();
-        p2.close();
     }
 
 
@@ -364,15 +256,6 @@ public class QosTest {
     @Test
     public void testLifeSpanOnReader() {
         final long LIFESPAN_DURATION = 100;
-        Configuration cfg1 = new Configuration("/mem-test-1.properties");
-        Configuration cfg2 = new Configuration("/mem-test-2.properties");
-        
-        MemProvider mp = new MemProvider(cfg1);
-        TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
-
-        // Create two participants; one for readers, one for writer
-        Participant p1 = new Participant(0,0, null, cfg1);
-        Participant p2 = new Participant(0,0, null, cfg2);
 
         QualityOfService qos= new QualityOfService();
         qos.setPolicy(new QosLifespan(LIFESPAN_DURATION));
@@ -395,35 +278,9 @@ public class QosTest {
                 }
             }
         });
-                
-        dr.addCommunicationListener(new CommunicationListener<PublicationData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            @Override
-            public void inconsistentQoS(PublicationData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }            
-            @Override
-            public void entityMatched(PublicationData ed) {
-                emLatch.countDown();
-            }
-        });
 
-        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
-            @Override
-            public void deadlineMissed(KeyHash instanceKey) {
-            }
-            
-            @Override
-            public void inconsistentQoS(SubscriptionData ed) {
-                Assert.fail("Inconsistent QoS not expected");
-            }
-            @Override
-            public void entityMatched(SubscriptionData ed) {
-                emLatch.countDown();
-            }
-        });
+        addCommunicationListener(dr, null, emLatch);
+        addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
         try {
@@ -452,8 +309,40 @@ public class QosTest {
         }
         
         assertEquals(0, dr.getSamples().size()); // assert that sample is removed
-        
-        p1.close();
-        p2.close();
+    }
+
+
+    private void addCommunicationListener(DataReader<HelloMessage> dr, final CountDownLatch dlLatch, final CountDownLatch emLatch) {
+        dr.addCommunicationListener(new CommunicationListener<PublicationData>() {            
+            @Override
+            public void deadlineMissed(KeyHash instanceKey) {
+                dlLatch.countDown();
+            }
+            @Override
+            public void inconsistentQoS(PublicationData ed) {
+                Assert.fail("Inconsistent QoS not expected");
+            }            
+            @Override
+            public void entityMatched(PublicationData ed) {
+                emLatch.countDown();
+            }
+        });    }
+
+    private void addCommunicationListener(DataWriter<HelloMessage> dw, final CountDownLatch dlLatch, final CountDownLatch emLatch) {
+        dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
+            @Override
+            public void deadlineMissed(KeyHash instanceKey) {
+                dlLatch.countDown();
+            }
+            
+            @Override
+            public void inconsistentQoS(SubscriptionData ed) {
+                Assert.fail("Inconsistent QoS not expected");
+            }
+            @Override
+            public void entityMatched(SubscriptionData ed) {
+                emLatch.countDown();
+            }
+        });
     }
 }
