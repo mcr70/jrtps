@@ -77,6 +77,15 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
     }
 
     /**
+     * Constructs QosLiveliness with given kind and lease_duration
+     * @param kind
+     * @param millis
+     */
+    public QosLiveliness(Kind kind, long millis) {
+        this(kind, new Duration(millis));
+    }
+
+    /**
      * Get the lease_duration
      * 
      * @return lease_duration
