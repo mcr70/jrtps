@@ -15,6 +15,9 @@ import net.sf.jrtps.util.Watchdog;
 import net.sf.jrtps.util.Watchdog.Listener;
 import net.sf.jrtps.util.Watchdog.Task;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Instance represents Samples with same distinct ID. Instance has a history, which can be obtained 
  * from this class. The size of the history is configurable. Default size is 1, which means that only 
@@ -24,6 +27,8 @@ import net.sf.jrtps.util.Watchdog.Task;
  * @param <T>
  */
 public class Instance <T> {
+    private static final Logger logger = LoggerFactory.getLogger(Instance.class);
+    
     private final KeyHash key;
     private final LinkedList<Sample<T>> history = new LinkedList<>();
     private final int maxSamplesPerInstance;
@@ -221,8 +226,15 @@ public class Instance <T> {
         return false;
     }
 
+    void livelinessLost(Guid writerGuid) {
+        if (owner != null && owner.equals(writerGuid)) {
+            logger.debug("Liveliness of {} was lost", writerGuid);
+            owner = null;
+            ownerStrength = 0;
+        }
+    }
+    
     public String toString() {
         return key.toString();
     }
-
 }

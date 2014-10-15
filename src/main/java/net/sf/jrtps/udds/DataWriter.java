@@ -3,6 +3,7 @@ package net.sf.jrtps.udds;
 import java.util.List;
 import java.util.Set;
 
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.QosLiveliness;
 import net.sf.jrtps.rtps.RTPSWriter;
@@ -29,6 +30,7 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
      */
     protected final HistoryCache<T> hCache;
     private final boolean writeCollectionsCoherently;
+    private PublicationData publicationData;
 
     /**
      * Constructor for DataWriter.
@@ -150,6 +152,15 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
     public Set<Instance<T>> getInstances() {
         return hCache.getInstances();
     }
+
+    /**
+     * Closes this DataWriter. Removes all the data related to this DataWriter. 
+     */
+    public void close() {
+        hCache.close();
+        getParticipant().removeDataWriter(this);
+    }
+
     
     RTPSWriter<T> getRTPSWriter() {
         return rtps_writer;
@@ -185,6 +196,14 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
         }
     }
 
+    void setPublicationData(PublicationData wd) {
+        this.publicationData = wd; 
+    }
+
+    PublicationData getPublicationData() {
+        return publicationData;
+    }
+    
     public String toString() {
         return "DataWriter(" + getGuid() + ")";
     }

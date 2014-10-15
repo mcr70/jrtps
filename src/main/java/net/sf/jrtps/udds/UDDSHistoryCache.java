@@ -315,4 +315,12 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     void setCommunicationListeners(List<CommunicationListener<ENTITY_DATA>> communicationListeners) {
         this.communicationListeners = communicationListeners;        
     }
+
+    @Override
+    public void close() {
+        listeners.clear();
+        samples.clear();
+        instances.clear();
+        communicationListeners.clear();
+    }
 }
