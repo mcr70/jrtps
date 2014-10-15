@@ -61,7 +61,8 @@ public class AbstractQosTest {
             public void entityMatched(PublicationData ed) {
                 emLatch.countDown();
             }
-        });    }
+        });    
+    }
 
     void addCommunicationListener(DataWriter<HelloMessage> dw, final CountDownLatch dlLatch, final CountDownLatch emLatch) {
         dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {            
