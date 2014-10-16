@@ -59,6 +59,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
                         w.inconsistentQoS(sd);
                     }
                 } else if (w.getRTPSWriter().isMatchedWith(sd.getBuiltinTopicKey()) && sdSample.isDisposed()) {
+                    log.debug("SubscriptionData was disposed, removing matched writer");
                     // Associated and sample is dispose -> remove association
                     w.removeMatchedReader(sd);
                 }

@@ -70,4 +70,9 @@ public interface HistoryCache<T> {
      * @return changes since given seqNum. Returned List is newly allocated.
      */
     LinkedList<Sample<T>> getSamplesSince(long seqNum); // TODO: this should be removed    
+
+    /**
+     * Close this HistoryCache.
+     */
+    void close();
 }

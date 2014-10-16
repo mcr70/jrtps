@@ -12,6 +12,7 @@ import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.QosDestinationOrder.Kind;
 import net.sf.jrtps.message.parameter.QosLifespan;
+import net.sf.jrtps.message.parameter.QosOwnership;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.ReaderCache;
 import net.sf.jrtps.rtps.Sample;
@@ -33,13 +34,16 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private Map<Guid, List<Sample<T>>> coherentSets = new HashMap<>(); // Used by reader
     private final Kind destinationOrderKind;
     private final Map<Integer, List<Sample<T>>> incomingSamples = new HashMap<>();
+    private final boolean exclusiveOwnership;
 
     private RTPSReader<T> rtps_reader;
+
 
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, true);
 
         destinationOrderKind = qos.getDestinationOrder().getKind();
+        exclusiveOwnership = qos.getOwnership().getKind() == QosOwnership.Kind.EXCLUSIVE;
     }
 
     /**
@@ -49,6 +53,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
      */
     void setRTPSReader(RTPSReader<T> rtps_reader) {
         this.rtps_reader = rtps_reader;
+//        this.rtps_reader.addWriterLivelinessListener(this);
     }
 
 
@@ -124,23 +129,42 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         logger.trace("changesEnd({})", id);        
 
         List<Sample<T>> pendingSamples = incomingSamples.remove(id); 
+        List<Sample<T>> acceptedSamples = new LinkedList<>();
 
         if (pendingSamples.size() > 0) {
             // Add each pending Sample to HistoryCache
             for (Sample<T> cc : pendingSamples) {
-                addSample(cc);
+                if (addSample(cc) != null) {
+                    acceptedSamples.add(cc);
+                }
             }
 
             // Notify listeners 
-            for (SampleListener<T> aListener : listeners) {
-                aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
+            if (acceptedSamples.size() > 0) {
+                for (SampleListener<T> aListener : listeners) {
+                    aListener.onSamples(new LinkedList<>(pendingSamples)); // each Listener has its own List
+                }
             }
         }
     }
 
 
     @Override
-    public void addSample(final Sample<T> aSample) {
+    public Sample<T> addSample(final Sample<T> aSample) {
+        if (rtps_reader != null) { 
+            WriterProxy matchedWriter = rtps_reader.getMatchedWriter(aSample.getWriterGuid());
+            if (matchedWriter == null) {
+                // Could happen asynchronously
+                logger.debug("Ignoring sample from unknown writer {}", aSample.getWriterGuid());
+                return null;
+            }
+
+            if (!checkOwnershipPolicy(matchedWriter, aSample)) {
+                logger.debug("Ignoring sample from {}, since it is not a owner of instance", aSample.getWriterGuid());
+                return null;
+            }
+        }
+
         Duration lifespanDuration = getLifespan(aSample.getWriterGuid());
         if (!lifespanDuration.isInfinite()) {
             // NOTE, should we try to calculate timediff of source timestamp
@@ -156,7 +180,17 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             });
         }
 
-        super.addSample(aSample);
+        return super.addSample(aSample);
+    }
+
+    private boolean checkOwnershipPolicy(WriterProxy matchedWriter, Sample<T> sample) {
+        if (!exclusiveOwnership) {
+            return true;
+        }
+
+        Instance<T> inst = getOrCreateInstance(sample.getKey());
+
+        return inst.claimOwnership(matchedWriter);
     }
 
     private Duration getLifespan(Guid writerGuid) {

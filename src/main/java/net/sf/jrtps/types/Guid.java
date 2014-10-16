@@ -10,7 +10,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  * 
  */
-public class Guid {
+public class Guid implements Comparable<Guid> {
     private final GuidPrefix prefix;
     private final EntityId entityId;
 
@@ -99,5 +99,32 @@ public class Guid {
 
     public String toString() {
         return getPrefix().toString() + ", " + getEntityId().toString();
+    }
+
+    @Override
+    public int compareTo(Guid o) {
+        byte[] prefixBytes1 = prefix.getBytes();
+        byte[] prefixBytes2 = o.prefix.getBytes();
+        
+        for (int i = 0; i < prefixBytes1.length; i++) {
+            if (prefixBytes1[i] == prefixBytes2[i]) {
+                continue;
+            }
+            
+            return prefixBytes1[i] < prefixBytes2[i] ? -1 : 1;
+        }
+        
+        byte[] entityBytes1 = entityId.getBytes();
+        byte[] entityBytes2 = o.entityId.getBytes();
+        
+        for (int i = 0; i < entityBytes1.length; i++) {
+            if (entityBytes1[i] == entityBytes2[i]) {
+                continue;
+            }
+            
+            return (entityBytes1[i] < entityBytes2[i]) ? -1 : 1; 
+        }
+        
+        return 0;
     }
 }

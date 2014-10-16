@@ -6,7 +6,6 @@ import java.util.List;
 
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.message.parameter.QosLiveliness;
-import net.sf.jrtps.rtps.RTPSWriter;
 import net.sf.jrtps.types.Duration;
 
 import org.slf4j.Logger;
@@ -29,7 +28,8 @@ class WriterLivelinessManager implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(WriterLivelinessManager.class);
 
     private final List<Duration> alDurations = new LinkedList<>();
-
+    private final List<DataWriter> writers = new LinkedList<>();
+    
     private final Participant participant;
     private DataWriter<ParticipantMessage> writer;
 
@@ -66,10 +66,10 @@ class WriterLivelinessManager implements Runnable {
         QosLiveliness policy = aWriter.getRTPSWriter().getQualityOfService().getLiveliness();
         if (policy.getKind() == QosLiveliness.Kind.AUTOMATIC) {
             synchronized (alDurations) {
+                writers.add(aWriter);
                 log.debug("Registering DataWriter for automatic liveliness with lease duration of {}",
                         policy.getLeaseDuration());
-                alDurations.add(policy.getLeaseDuration());
-                Collections.sort(alDurations);
+                updateDurations();
             }
         }
     }
@@ -78,15 +78,24 @@ class WriterLivelinessManager implements Runnable {
      * Unregister a writer. Writer is check for its QosLiveliness kind and if it
      * is AUTOMATIC, its lease_period is removed from bookkeeping.
      * 
-     * @param aWriter
+     * @param dw
      */
-    void unregisterWriter(RTPSWriter<?> aWriter) {
-        QosLiveliness policy = aWriter.getQualityOfService().getLiveliness();
+    void unregisterWriter(DataWriter<?> dw) {
+        QosLiveliness policy = dw.getRTPSWriter().getQualityOfService().getLiveliness();
         if (policy.getKind() == QosLiveliness.Kind.AUTOMATIC) {
             synchronized (alDurations) {
-                alDurations.remove(policy.getLeaseDuration());
+                writers.remove(dw);
+                updateDurations();
             }
         }
+    }
+    
+    private void updateDurations() {
+        alDurations.clear();
+        for (DataWriter<?> dw : writers) {
+            alDurations.add(dw.getRTPSWriter().getQualityOfService().getLiveliness().getLeaseDuration());
+        }
+        Collections.sort(alDurations);
     }
 
     /**
