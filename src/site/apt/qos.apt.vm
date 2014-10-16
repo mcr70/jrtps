@@ -222,7 +222,16 @@ Quality of Service - uDDS
  These policies are used to provide a concept of ownership of an instance.
  A <Sample> gets written into readers history cache only if the writer is the owner of
  the instance, or writer is stronger than owner of the instance. In this case the stronger 
- writer claims ownership of the Instance. 
+ writer claims ownership of the Instance.  
+ A writer may loose ownership of instances it owns. This may happen if writer fails 
+ to assert its liveliness, or writer fails to fulfill deadline contract made with
+ reader.
+ 
+ DDS Specification also says that if two equally strong writers exists in the system,
+ service should pick one or the other. And all the readers should pick the same writer
+ throughout the system as the owner. In practice, this is impossible to guarantee,
+ as different vendors may choose differently. uDDS readers choose ownership by 
+ comparing Guids of the writers
  
  Ownership QoS between reader and writer is compatible if 
  
@@ -230,5 +239,3 @@ Quality of Service - uDDS
  offered.kind == requested.kind
 +------
   
- <NOTE: Currently, writer does not 'loose' ownership, which means that other events like
-  deadline missed, liveliness lost, etc does not affect the ownership of the instance.> 

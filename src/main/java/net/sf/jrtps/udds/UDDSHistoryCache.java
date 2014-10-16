@@ -181,7 +181,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             }
             else {
                 logger.trace("[{}] Creating sample {}", entityId, seqNum + 1);
-                
+
                 Sample<T> removedSample =  
                         inst.addSample(sample, samples.size() == resource_limits.getMaxSamples());
 
@@ -195,7 +195,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
             synchronized (samples) {
                 samples.add(sample);
             }
-            
+
             return sample;
         }
         catch(OutOfResources oor) {
@@ -207,34 +207,37 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
 
     protected Instance<T> getOrCreateInstance(final KeyHash key) {
         Instance<T> inst = instances.get(key);
-        if (inst == null) {
+        if (inst != null) {
+            return inst;
+        }
 
-            logger.trace("[{}] Creating new instance {}", entityId, key);
+        logger.trace("[{}] Creating new instance {}", entityId, key);
 
-            if (resource_limits.getMaxInstances() != -1 && 
-                    instances.size() == resource_limits.getMaxInstances()) {
-                throw new OutOfResources(OutOfResources.Kind.MAX_INSTANCES_EXCEEDED, 
-                        resource_limits.getMaxInstances());
-            }
+        if (resource_limits.getMaxInstances() != -1 && 
+                instances.size() == resource_limits.getMaxInstances()) {
+            throw new OutOfResources(OutOfResources.Kind.MAX_INSTANCES_EXCEEDED, 
+                    resource_limits.getMaxInstances());
+        }
 
-            Task wdTask = null;
-            if (deadLinePeriod != -1) {
-                wdTask = watchdog.addTask(deadLinePeriod, new Listener() {
-                    @Override
-                    public void triggerTimeMissed() {
-                        logger.debug("deadline missed for {}", key);
-                        for (CommunicationListener<?> cl : communicationListeners) {
-                            cl.deadlineMissed(key);
-                        }
+        final Instance<T> newInst = new Instance<T>(key, qos, watchdog);
+        if (deadLinePeriod != -1) {
+            Task wdTask = watchdog.addTask(deadLinePeriod, new Listener() {
+                @Override
+                public void triggerTimeMissed() {
+                    logger.debug("deadline missed for {}", key);
+                    newInst.deadlineMissed();
+                    for (CommunicationListener<?> cl : communicationListeners) {
+                        cl.deadlineMissed(key);
                     }
-                });
-            }
+                }
+            });
 
-            inst = new Instance<T>(key, qos, watchdog, wdTask);
-            instances.put(key, inst);
-        }   
+            newInst.setDeadlineMonitorTask(wdTask);
+        }
 
-        return inst;
+        instances.put(key, newInst);
+
+        return newInst;
     }
 
 
