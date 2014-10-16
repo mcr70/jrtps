@@ -32,11 +32,13 @@ public class WriterProxy extends RemoteProxy {
     
     private boolean isAlive = true; // reflects status of liveliness
 
+    private int strength;
+
 
     WriterProxy(RTPSReader<?> reader, PublicationData wd, List<Locator> locators, int heartbeatSuppressionDuration) {
         super(wd, locators);
         this.reader = reader;
-		
+        this.strength = wd.getQualityOfService().getOwnershipStrength().getStrength();		
         this.hbSuppressionDuration = heartbeatSuppressionDuration;
     }
 
@@ -158,15 +160,26 @@ public class WriterProxy extends RemoteProxy {
         }
     }
 
-    void isAlive(boolean livelinessFlag) {
+    /**
+     * Marks writer represented by this proxy as not being alive.
+     * @param livelinessFlag
+     */
+    public void isAlive(boolean livelinessFlag) {
         this.isAlive = livelinessFlag;
     }
+    
     public boolean isAlive() {
         return isAlive;
     }
 
     public String toString() {
         return getGuid().toString();
+    }
+
+
+    public int getStrength() {
+        // TODO Auto-generated method stub
+        return strength;
     }
 
 
