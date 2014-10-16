@@ -53,7 +53,6 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
      */
     void setRTPSReader(RTPSReader<T> rtps_reader) {
         this.rtps_reader = rtps_reader;
-//        this.rtps_reader.addWriterLivelinessListener(this);
     }
 
 
@@ -151,7 +150,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     @Override
     public Sample<T> addSample(final Sample<T> aSample) {
-        if (rtps_reader != null) { 
+        if (rtps_reader != null) { // TODO: can be null on junit tests 
             WriterProxy matchedWriter = rtps_reader.getMatchedWriter(aSample.getWriterGuid());
             if (matchedWriter == null) {
                 // Could happen asynchronously
@@ -183,18 +182,18 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         return super.addSample(aSample);
     }
 
-    private boolean checkOwnershipPolicy(WriterProxy matchedWriter, Sample<T> sample) {
+    private boolean checkOwnershipPolicy(WriterProxy writer, Sample<T> sample) {
         if (!exclusiveOwnership) {
             return true;
         }
 
         Instance<T> inst = getOrCreateInstance(sample.getKey());
 
-        return inst.claimOwnership(matchedWriter);
+        return inst.claimOwnership(writer);
     }
 
     private Duration getLifespan(Guid writerGuid) {
-        if (rtps_reader != null) {
+        if (rtps_reader != null) {  // TODO: can be null on junit tests
             WriterProxy matchedWriter = rtps_reader.getMatchedWriter(writerGuid);
             if (matchedWriter != null) {
                 QosLifespan lifespan = matchedWriter.getPublicationData().getQualityOfService().getLifespan();

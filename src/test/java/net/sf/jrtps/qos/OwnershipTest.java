@@ -1,11 +1,9 @@
 package net.sf.jrtps.qos;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosDeadline;
@@ -20,7 +18,6 @@ import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.SampleListener;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import examples.hello.serializable.HelloMessage;
@@ -78,7 +75,7 @@ public class OwnershipTest extends AbstractQosTest {
         dw1.write(new HelloMessage(1, "w1 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 1000, true);
+        waitFor(listener.dataLatch, 500, true);
 
         assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
         
@@ -87,17 +84,17 @@ public class OwnershipTest extends AbstractQosTest {
         dw2.write(new HelloMessage(1, "s1 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 1000, true);
+        waitFor(listener.dataLatch, 500, true);
 
         assertEquals(2, dr.getSamples().size()); // assert that we have 2 samples
         
         
-        // Write two samples with 'weaker' writer
+        // Write a sample with 'weaker' writer
         listener.resetLatch(1);
         dw1.write(new HelloMessage(1, "w3 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 1000, false);
+        waitFor(listener.dataLatch, 300, false);
 
         assertEquals(2, dr.getSamples().size()); // assert that we have 2 samples
     }
@@ -118,7 +115,7 @@ public class OwnershipTest extends AbstractQosTest {
      */
     @Test
     public void testOwnershipWhenWriterIsClosed() {
-        final int LEASE_DURATION = 1000;
+        final int LEASE_DURATION = 200;
         
         QualityOfService qosDr = new QualityOfService();
         qosDr.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
@@ -131,7 +128,6 @@ public class OwnershipTest extends AbstractQosTest {
         QualityOfService qos2 = new QualityOfService();
         qos2.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
         qos2.setPolicy(new QosOwnershipStrength(2));
-        //qos2.setPolicy(new QosLiveliness(LEASE_DURATION));
 
         // Create DataWriters
         DataWriter<HelloMessage> dw1 = p2.createDataWriter(HelloMessage.class, qos1);
@@ -152,12 +148,6 @@ public class OwnershipTest extends AbstractQosTest {
 
         // Wait for the reader and writers to be matched
         waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
-        try {
-            boolean await = emLatch.await(LATCH_WAIT_SECS, TimeUnit.SECONDS);
-            assertTrue("Entities were not matched in time", await);
-        } catch (InterruptedException e) {
-            Assert.fail("Interrupted");
-        }
 
         // Write a sample with 'stronger' writer
         listener.resetLatch(1);
@@ -179,7 +169,7 @@ public class OwnershipTest extends AbstractQosTest {
         
         dw2.close(); // Close 'stronger' writer 
 
-        waitFor(2 * LEASE_DURATION); // Wait for liveliness to expire
+        waitFor(LEASE_DURATION); // wait for close to propagate to reader
         
         assertEquals(1, dr.getSamples().size()); // assert that we have 1 samples
 
@@ -206,7 +196,7 @@ public class OwnershipTest extends AbstractQosTest {
      */
     @Test
     public void testOwnershipWithLiveliness() {
-        final int LEASE_DURATION = 500;
+        final int LEASE_DURATION = 200;
         
         QualityOfService qosDr = new QualityOfService();
         qosDr.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
