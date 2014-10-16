@@ -30,13 +30,12 @@ public class OwnershipTest extends AbstractQosTest {
      * Test for OWNERSHIP QoS policy.
      *  1.  Create reader and 2 writers with EXCLUSIVE ownership. 
      *  2.  wait for entities to be matched
-     *  3.  write 2 samples with weaker writer
-     *  4.  wait for data to arrive to reader. Assert we got 2 samples.
-     *  5.  write 2 samples with stronger writer
+     *  3.  write a sample with weaker writer
+     *  4.  wait for data to arrive to reader. Assert we got 1 sample.
+     *  5.  write a sample with stronger writer
      *  6.  wait for data to arrive to reader. Assert we got 2 samples.
-     *  7.  write 2 samples with weaker writer
-     *  8.  wait for data to arrive to reader. Assert we got 0 samples.
-     *  9.  assert that we have received a total of 4 samples.
+     *  7.  write a sample with weaker writer
+     *  8.  assert that we have received a total of 2 samples.
      */
     @Test
     public void testOwnership() {
@@ -62,7 +61,7 @@ public class OwnershipTest extends AbstractQosTest {
         // Latch used to synchronize on entity matched
         final CountDownLatch emLatch = new CountDownLatch(3); 
 
-        TestSampleListener<HelloMessage> listener = new TestSampleListener<>();
+        TestListener<HelloMessage> listener = new TestListener<>();
         dr.addSampleListener(listener);
 
         addCommunicationListener(dr, null, emLatch);
@@ -72,36 +71,33 @@ public class OwnershipTest extends AbstractQosTest {
         // Wait for the reader and writers to be matched
         waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
 
-        // Write two samples with 'weaker' writer
-        listener.resetLatch(2);
+        // Write a sample with 'weaker' writer
+        listener.resetLatch(1);
         dw1.write(new HelloMessage(1, "w1 hello"));
-        dw1.write(new HelloMessage(1, "w2 hello"));
+
+        // Wait for reader to receive sample
+        waitFor(listener.dataLatch, 1000, true);
+
+        assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
+        
+        // Write a sample with 'stronger' writer
+        listener.resetLatch(1);
+        dw2.write(new HelloMessage(1, "s1 hello"));
 
         // Wait for reader to receive sample
         waitFor(listener.dataLatch, 1000, true);
 
         assertEquals(2, dr.getSamples().size()); // assert that we have 2 samples
         
-        // Write two samples with 'stronger' writer
-        listener.resetLatch(2);
-        dw2.write(new HelloMessage(1, "s1 hello"));
-        dw2.write(new HelloMessage(1, "s2 hello"));
-
-        // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 1000, true);
-
-        assertEquals(4, dr.getSamples().size()); // assert that we have 4 samples
-        
         
         // Write two samples with 'weaker' writer
         listener.resetLatch(1);
         dw1.write(new HelloMessage(1, "w3 hello"));
-        dw1.write(new HelloMessage(1, "w4 hello"));
 
         // Wait for reader to receive sample
         waitFor(listener.dataLatch, 1000, false);
 
-        assertEquals(4, dr.getSamples().size()); // assert that we have 4 samples
+        assertEquals(2, dr.getSamples().size()); // assert that we have 2 samples
     }
 
     
@@ -145,7 +141,7 @@ public class OwnershipTest extends AbstractQosTest {
         // Latch used to synchronize on entity matched
         final CountDownLatch emLatch = new CountDownLatch(3); 
 
-        TestSampleListener<HelloMessage> listener = new TestSampleListener<>();
+        TestListener<HelloMessage> listener = new TestListener<>();
         dr.addSampleListener(listener);
 
         addCommunicationListener(dr, null, emLatch);
@@ -198,18 +194,17 @@ public class OwnershipTest extends AbstractQosTest {
     /**
      * Test for OWNERSHIP QoS policy.
      *  1.  Create reader and 2 writers with EXCLUSIVE ownership. 
+     *      Stronger writer has a lease_duration set.
      *  2.  wait for entities to be matched
-     *  3.  write 2 samples with weaker writer
-     *  4.  wait for data to arrive to reader. Assert we got 2 samples.
-     *  5.  write 2 samples with stronger writer
-     *  6.  wait for data to arrive to reader. Assert we got 2 samples.
-     *  7.  write 2 samples with weaker writer
-     *  8.  wait for data to arrive to reader. Assert we got 0 samples.
-     *  9.  assert that we have received a total of 4 samples.
+     *  3.  write a sample with stronger writer
+     *  4.  wait for data to arrive to reader. Assert we got the sample.
+     *  5.  wait 2 * LEASE_DURATION (liveliness lost for stronger writer)
+     *  6.  write a sample with weaker writer
+     *  8.  wait for data to arrive to reader. 
      */
     @Test
     public void testOwnershipWithLiveliness() {
-        final int LEASE_DURATION = 1000;
+        final int LEASE_DURATION = 500;
         
         QualityOfService qosDr = new QualityOfService();
         qosDr.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
@@ -234,7 +229,7 @@ public class OwnershipTest extends AbstractQosTest {
         // Latch used to synchronize on entity matched
         final CountDownLatch emLatch = new CountDownLatch(3); 
 
-        TestSampleListener<HelloMessage> listener = new TestSampleListener<>();
+        TestListener<HelloMessage> listener = new TestListener<>();
         dr.addSampleListener(listener);
 
         addCommunicationListener(dr, null, emLatch);
@@ -253,18 +248,7 @@ public class OwnershipTest extends AbstractQosTest {
 
         assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
         
-        // Write sample with 'weaker' writer
-        listener.resetLatch(1);
-        dw1.write(new HelloMessage(1, "s1 hello"));
-
-        // Wait for reader to receive sample
-        waitFor(listener.dataLatch, LEASE_DURATION, false);
-
-        assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
-        
         // Let 'stronger' writer miss liveliness assertion
-        CountDownLatch llLatch = new CountDownLatch(1);
-        //waitFor(llLatch, 2 * LEASE_DURATION, true); // Wait for liveliness to expire
         waitFor(2 * LEASE_DURATION); // Wait for liveliness to expire
         
         listener.resetLatch(1);
@@ -277,7 +261,7 @@ public class OwnershipTest extends AbstractQosTest {
     }
 
     
-    private class TestSampleListener<T> implements SampleListener<T> {
+    private class TestListener<T> implements SampleListener<T> {
         CountDownLatch dataLatch;
         
         void resetLatch(int count) {
