@@ -33,7 +33,7 @@ public class Instance <T> {
     private final LinkedList<Sample<T>> history = new LinkedList<>();
     private final int maxSamplesPerInstance;
     private final int maxSamples;
-    private Task deadLineMonitorTask;
+    
     private final QosHistory.Kind historyKind;
     private final int historyDepth;
 
@@ -41,20 +41,17 @@ public class Instance <T> {
     private final long minimum_separation;
     private long nextTimeBasedFilterTime = System.currentTimeMillis();
     private Task tbfTask;
+    private Task deadLineMonitorTask;    
     private WriterProxy owner;
     private int ownerStrength;
 
-//    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task dlMonitorTask, 
-//            Watchdog watchdog, long minimum_separation) {
-    Instance(KeyHash key, QualityOfService qos, Watchdog watchdog, Task dlMonitorTask) {
+    Instance(KeyHash key, QualityOfService qos, Watchdog watchdog) {
         this.key = key;
         this.maxSamplesPerInstance = qos.getResourceLimits().getMaxSamplesPerInstance();
         this.maxSamples = qos.getResourceLimits().getMaxSamples();
         this.watchdog = watchdog;
         this.minimum_separation = qos.getTimeBasedFilter().getMinimumSeparation().asMillis();
         this.historyKind = qos.getHistory().getKind();
-
-        this.deadLineMonitorTask = dlMonitorTask;
 
         if (historyKind == Kind.KEEP_ALL) {
             this.historyDepth = Integer.MAX_VALUE;
@@ -210,12 +207,14 @@ public class Instance <T> {
 
     /**
      * Tries to claim ownership of this Instance. Ownership changes if strength of the writer
-     * is greater than or equal to current strength 
+     * is greater than strength of the current owner, or owners Guid.compareTo(writer.getGuid()) is
+     * less than 0 
      * @param writerGuid
      * @return true if ownership changed
      */
     boolean claimOwnership(WriterProxy writer) {
-        if (owner == null || !owner.isAlive() || this.ownerStrength <= writer.getStrength()) {
+        if (owner == null || !owner.isAlive() || this.ownerStrength < writer.getStrength() ||
+                owner.getGuid().compareTo(writer.getGuid()) < 0) {
             this.owner = writer;
             this.ownerStrength = writer.getStrength();
             
@@ -227,5 +226,24 @@ public class Instance <T> {
 
     public String toString() {
         return key.toString();
+    }
+
+    /**
+     * Sets the deadline monitor task of this Instance. This is set during 
+     * construction of Instance, if deadline qos has been set to anything other than 
+     * INFINITE.
+     * @param wdTask
+     */
+    void setDeadlineMonitorTask(Task wdTask) {
+        deadLineMonitorTask = wdTask;
+    }
+
+    /**
+     * This method is called by deadline monitor tasks, when deadline has been
+     * missed. Clears ownership of this instance.
+     */
+    void deadlineMissed() {
+        owner = null;
+        ownerStrength = 0;
     }
 }
