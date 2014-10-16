@@ -9,6 +9,7 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterLivelinessListener;
+import net.sf.jrtps.rtps.WriterProxy;
 
 /**
  * This class represents a strongly typed DataReader in spirit of DDS specification.
@@ -198,8 +199,8 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
     void removeMatchedWriter(PublicationData pd) {
-        hCache.livelinessLost(pd);
-        rtps_reader.removeMatchedWriter(pd);
+        WriterProxy writer = rtps_reader.removeMatchedWriter(pd);
+        writer.isAlive(false);
     }
 
     void inconsistentQoS(PublicationData pd) {

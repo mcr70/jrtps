@@ -10,7 +10,7 @@ import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
 import net.sf.jrtps.rtps.Sample;
-import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.rtps.WriterProxy;
 import net.sf.jrtps.util.Watchdog;
 import net.sf.jrtps.util.Watchdog.Listener;
 import net.sf.jrtps.util.Watchdog.Task;
@@ -41,7 +41,7 @@ public class Instance <T> {
     private final long minimum_separation;
     private long nextTimeBasedFilterTime = System.currentTimeMillis();
     private Task tbfTask;
-    private Guid owner;
+    private WriterProxy owner;
     private int ownerStrength;
 
 //    Instance(KeyHash key, int maxSamplePerInstance, QosHistory history, Task dlMonitorTask, 
@@ -212,13 +212,12 @@ public class Instance <T> {
      * Tries to claim ownership of this Instance. Ownership changes if strength of the writer
      * is greater than or equal to current strength 
      * @param writerGuid
-     * @param strength
      * @return true if ownership changed
      */
-    boolean claimOwnership(Guid writerGuid, int strength) {
-        if (owner == null || this.ownerStrength <= strength) {
-            this.owner = writerGuid;
-            this.ownerStrength = strength;
+    boolean claimOwnership(WriterProxy writer) {
+        if (owner == null || !owner.isAlive() || this.ownerStrength <= writer.getStrength()) {
+            this.owner = writer;
+            this.ownerStrength = writer.getStrength();
             
             return true;
         }
@@ -226,13 +225,6 @@ public class Instance <T> {
         return false;
     }
 
-    void livelinessLost(Guid writerGuid) {
-        if (owner != null && owner.equals(writerGuid)) {
-            owner = null;
-            ownerStrength = 0;
-        }
-    }
-    
     public String toString() {
         return key.toString();
     }
