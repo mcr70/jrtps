@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.ThreadFactory;
 
 /**
@@ -10,6 +12,8 @@ import java.util.concurrent.ThreadFactory;
 class JRTPSThreadFactory implements ThreadFactory {
     private final String prefix;
     private int count = 0;
+    private List<Thread> threads = new LinkedList<>();
+    
     
     public JRTPSThreadFactory(int domainId) {
         prefix = "jrtps-d" + domainId + "-t";
@@ -21,5 +25,16 @@ class JRTPSThreadFactory implements ThreadFactory {
         thread.setDaemon(true);
 
         return thread;
+    }
+
+    /**
+     * Called after participant close
+     */
+    synchronized void stopThreads() {
+        for (Thread t : threads) {
+            t.stop();
+        }
+        
+        threads.clear();
     }
 }

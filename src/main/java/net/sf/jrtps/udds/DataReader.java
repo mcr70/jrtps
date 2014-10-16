@@ -5,9 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterLivelinessListener;
+import net.sf.jrtps.rtps.WriterProxy;
 
 /**
  * This class represents a strongly typed DataReader in spirit of DDS specification.
@@ -24,12 +26,14 @@ import net.sf.jrtps.rtps.WriterLivelinessListener;
  *            Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity<T, PublicationData> {
-    private UDDSHistoryCache<T, PublicationData> hCache;
+    private UDDSReaderCache<T> hCache;
 
     /**
      * RTPSReader associated with this DataReader
      */
     protected final RTPSReader<T> rtps_reader;
+
+    private SubscriptionData subscriptionData;
 
 
 
@@ -49,7 +53,7 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * Package access.
      * @param hCache
      */
-    void setHistoryCache(UDDSHistoryCache<T, PublicationData> hCache) {
+    void setHistoryCache(UDDSReaderCache<T> hCache) {
         this.hCache = hCache;
     }
 
@@ -195,7 +199,8 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
     void removeMatchedWriter(PublicationData pd) {
-        rtps_reader.removeMatchedWriter(pd);
+        WriterProxy writer = rtps_reader.removeMatchedWriter(pd);
+        writer.isAlive(false);
     }
 
     void inconsistentQoS(PublicationData pd) {
@@ -207,6 +212,14 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
     
     
+    void setSubscriptionData(SubscriptionData rd) {
+        this.subscriptionData = rd;
+    }
+    
+    SubscriptionData getSubscriptionData() {
+        return subscriptionData;
+    }
+
     // ----  Experimental code follows  ------------------------
     /**
      * Adds a reader side Filter. When samples are received, they are evaluated with

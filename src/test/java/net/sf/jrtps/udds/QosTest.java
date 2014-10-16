@@ -53,13 +53,14 @@ public class QosTest {
     }
     @Test
     public void testTimeBasedFilter() {
+        final int DURATION = 100;
         ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
         Watchdog watchdog = new Watchdog(ses);
         
         // Setup QoS. TBF: 100ms, history to prevent historyCache from
         // removing oldest samples.
         QualityOfService qos = new QualityOfService();
-        qos.setPolicy(new QosTimeBasedFilter(100));
+        qos.setPolicy(new QosTimeBasedFilter(DURATION));
         qos.setPolicy(new QosHistory(Kind.KEEP_LAST, 10));  
         UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
         
@@ -74,7 +75,7 @@ public class QosTest {
         
         // Wait until TimeBasedFilter time has elapsed (+1 ms)
         try {
-            Thread.sleep(101);
+            Thread.sleep(2 * DURATION);
         } catch (InterruptedException e) {
             fail("Interrupted");
         }
@@ -88,7 +89,7 @@ public class QosTest {
 
         // Wait until 3 * TimeBasedFilter time has elapsed (*2 is used in the code)
         try {
-            Thread.sleep(300);
+            Thread.sleep(3 * DURATION);
         } catch (InterruptedException e) {
             fail("Interrupted");
         }
@@ -168,12 +169,13 @@ public class QosTest {
 
     @Test
     public void testLifespanOnWriter() {
+        final int LIFESPAN = 100;
         ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
         Watchdog watchdog = new Watchdog(ses);
         
         // Setup QoS. Lifespan: 100ms
         QualityOfService qos = new QualityOfService();
-        qos.setPolicy(new QosLifespan(100));
+        qos.setPolicy(new QosLifespan(LIFESPAN));
         UDDSWriterCache<?> rCache = new UDDSWriterCache<>(null, null, qos, watchdog);
         
         // Add Sample
@@ -182,11 +184,11 @@ public class QosTest {
                 
         // Wait until Lifespan time has elapsed (+1 ms)
         try {
-            Thread.sleep(101);
+            Thread.sleep(2 * LIFESPAN);
         } catch (InterruptedException e) {
             fail("Interrupted");
         }
-        
+
         assertEquals(0, rCache.getSamplesSince(0).size());
     }
 }

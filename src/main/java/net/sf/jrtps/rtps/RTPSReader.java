@@ -166,10 +166,9 @@ public class RTPSReader<T> extends Endpoint {
      * 
      * @param writerData writer to remove. If corresponding writer does not exists, this method silently returns
      */
-    public void removeMatchedWriter(PublicationData writerData) {
-        writerProxies.remove(writerData.getBuiltinTopicKey());
-
-        log.debug("[{}] Removed matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
+    public WriterProxy removeMatchedWriter(PublicationData writerData) {
+        log.debug("[{}] Removing matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
+        return writerProxies.remove(writerData.getBuiltinTopicKey());
     }
 
     /**

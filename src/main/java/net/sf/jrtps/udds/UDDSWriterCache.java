@@ -58,7 +58,7 @@ class UDDSWriterCache<T> extends UDDSHistoryCache<T, SubscriptionData> implement
 
 
     @Override
-    public void addSample(final Sample<T> aSample) {
+    public Sample<T> addSample(final Sample<T> aSample) {
         if (lifeSpanDuration > 0) {
             // NOTE, should we try to calculate timediff of source timestamp
             // and destination timestamp? And network delay? 
@@ -72,6 +72,6 @@ class UDDSWriterCache<T> extends UDDSHistoryCache<T, SubscriptionData> implement
             });
         }
         
-        super.addSample(aSample);
+        return super.addSample(aSample);
     }
 }

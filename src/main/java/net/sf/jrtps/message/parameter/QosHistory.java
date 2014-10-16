@@ -22,6 +22,18 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
         super(ParameterId.PID_HISTORY);
     }
 
+    /**
+     * Constructs QosHistory with kind KEEP_LAST and given depth
+     * @param depth
+     */
+    public QosHistory(int depth) {
+        this(Kind.KEEP_LAST, depth);
+    }
+    
+    /**
+     * Constructs QosHistory given kind and depth
+     * @param depth
+     */
     public QosHistory(Kind kind, int depth) {
         super(ParameterId.PID_HISTORY);
 
