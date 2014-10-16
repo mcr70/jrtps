@@ -64,7 +64,7 @@ public class QosTest {
         qos.setPolicy(new QosHistory(Kind.KEEP_LAST, 10));  
         UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
         
-        // Add some samples. First smaple should succeed, next two should not
+        // Add some samples. First sample should succeed, next two should not
         rCache.addSample(new Sample(1));
         assertEquals(1, rCache.getSamplesSince(0).size());
         
@@ -82,6 +82,7 @@ public class QosTest {
         
         // fourth sample should succeed
         rCache.addSample(new Sample(4));
+        assertEquals(2, rCache.getSamplesSince(0).size());
         
         // fifth sample shoud fail, for now
         rCache.addSample(new Sample(5));

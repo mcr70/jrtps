@@ -30,7 +30,7 @@ public class LifespanTest extends AbstractQosTest {
      */
     @Test
     public void testLifeSpanOnReader() {
-        final long LIFESPAN_DURATION = 100;
+        final long LIFESPAN_DURATION = 10;
 
         QualityOfService qos= new QualityOfService();
         qos.setPolicy(new QosLifespan(LIFESPAN_DURATION));

@@ -20,16 +20,16 @@ public class LivelinessTest extends AbstractQosTest {
      */
     @Test
     public void testManualByTopic() {
-        final long LIVELINESS_DURATION = 100;
+        final long LIVELINESS_DURATION = 200;
 
         QualityOfService qos= new QualityOfService();
         qos.setPolicy(new QosLiveliness(QosLiveliness.Kind.MANUAL_BY_TOPIC, LIVELINESS_DURATION));
 
+        // Create DataReader
+        DataReader<HelloMessage> dr = p1.createDataReader(HelloMessage.class, qos);
         // Create DataWriter
         DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class, qos);
 
-        // Create DataReader
-        DataReader<HelloMessage> dr = p1.createDataReader(HelloMessage.class, qos);
 
         // Latch used to synchronize on entity matched
         final CountDownLatch emLatch = new CountDownLatch(2); 

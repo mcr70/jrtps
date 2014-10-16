@@ -45,7 +45,7 @@ public class HistoryTest extends AbstractQosTest {
 
         // Latch used to synchronize on entity matched
         final CountDownLatch emLatch = new CountDownLatch(2); 
-        final CountDownLatch trDataLatch = new CountDownLatch(3);
+        final CountDownLatch trDataLatch = new CountDownLatch(2); // We have history depth of 2
         drTRLocal.addSampleListener(new SampleListener<HelloMessage>() {
             @Override
             public void onSamples(List<Sample<HelloMessage>> samples) {
@@ -62,6 +62,6 @@ public class HistoryTest extends AbstractQosTest {
         waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
 
         // Wait for transient local reader to receive all the samples
-        waitFor(trDataLatch, 1000, false);
+        waitFor(trDataLatch, 1000, true);
     }
 }
