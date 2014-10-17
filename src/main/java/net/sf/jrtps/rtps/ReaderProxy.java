@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
@@ -26,10 +27,12 @@ public class ReaderProxy extends RemoteProxy {
 	private long latestAckNackReceiveTime;
 
 	private final int anSuppressionDuration;
+    private final EntityId entityId;
 
 
-    ReaderProxy(SubscriptionData rd, List<Locator> locators, int anSuppressionDuration) {
+    ReaderProxy(EntityId entityId, SubscriptionData rd, List<Locator> locators, int anSuppressionDuration) {
         super(rd, locators);
+        this.entityId = entityId;
         this.expectsInlineQoS = rd.expectsInlineQos(); 
 		this.anSuppressionDuration = anSuppressionDuration;
     }
@@ -110,8 +113,8 @@ public class ReaderProxy extends RemoteProxy {
             return true;
         }
 
-        log.debug("AckNack was not accepted; count {} < proxys count {}, or suppression duration not elapsed; {} < {}", 
-        		ackNack.getCount(), latestAckNack.getCount(), anReceiveTime, latestAckNackReceiveTime + anSuppressionDuration);
+        log.debug("[{}] AckNack was not accepted; count {} < proxys count {}, or suppression duration not elapsed; {} < {}", 
+        		entityId, ackNack.getCount(), latestAckNack.getCount(), anReceiveTime, latestAckNackReceiveTime + anSuppressionDuration);
         
         return false;
     }

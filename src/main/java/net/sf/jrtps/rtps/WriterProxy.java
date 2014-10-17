@@ -5,6 +5,7 @@ import java.util.List;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.util.Watchdog.Task;
@@ -23,7 +24,7 @@ public class WriterProxy extends RemoteProxy {
 
     private final RTPSReader<?> reader;
     private final int hbSuppressionDuration;
-    
+    private final EntityId entityId;
     private Heartbeat latestHeartbeat;
     private long latestHBReceiveTime;
 
@@ -38,6 +39,7 @@ public class WriterProxy extends RemoteProxy {
     WriterProxy(RTPSReader<?> reader, PublicationData wd, List<Locator> locators, int heartbeatSuppressionDuration) {
         super(wd, locators);
         this.reader = reader;
+        this.entityId = reader.getGuid().getEntityId();
         this.strength = wd.getQualityOfService().getOwnershipStrength().getStrength();		
         this.hbSuppressionDuration = heartbeatSuppressionDuration;
     }
@@ -90,8 +92,8 @@ public class WriterProxy extends RemoteProxy {
 
         if (sequenceNumber >= seqNumMax) {
             if (sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
-                log.warn("Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}",
-                        sequenceNumber, seqNumMax);
+                log.warn("[{}] Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}",
+                        entityId, sequenceNumber, seqNumMax);
             }
 
             seqNumMax = sequenceNumber;
@@ -146,8 +148,8 @@ public class WriterProxy extends RemoteProxy {
             return true;
         }
 
-        log.debug("Heartbeat was not accepted; count {} < proxys count {}, or suppression duration not elapsed; {} < {}", 
-        		hb.getCount(), latestHeartbeat.getCount(), hbReceiveTime, latestHBReceiveTime + hbSuppressionDuration);
+        log.debug("[{}] Heartbeat was not accepted; count {} < proxys count {}, or suppression duration not elapsed; {} < {}", 
+        		entityId, hb.getCount(), latestHeartbeat.getCount(), hbReceiveTime, latestHBReceiveTime + hbSuppressionDuration);
 
         return false;
     }

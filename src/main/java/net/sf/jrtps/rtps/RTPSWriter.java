@@ -192,7 +192,7 @@ public class RTPSWriter<T> extends Endpoint {
      */
     public ReaderProxy addMatchedReader(SubscriptionData readerData) {
         List<Locator> locators = getLocators(readerData);
-        ReaderProxy proxy = new ReaderProxy(readerData, locators, getConfiguration().getNackSuppressionDuration());
+        ReaderProxy proxy = new ReaderProxy(getGuid().getEntityId(), readerData, locators, getConfiguration().getNackSuppressionDuration());
         proxy.preferMulticast(getConfiguration().preferMulticast());
         
         readerProxies.put(readerData.getBuiltinTopicKey(), proxy);
