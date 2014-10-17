@@ -22,8 +22,8 @@ jrtps.message-queue.size = 10
 jrtps.buffer-size = 16384
 jrtps.publish-builtin-data = false
 jrtps.prefer-multicast = true
-jrtps.listener-uris=udp://239.255.0.1,udp://localhost
-jrtps.discovery.listener-uris=udp://239.255.0.1,udp://localhost
+jrtps.listener-uris = udp://239.255.0.1,udp://localhost
+jrtps.discovery.listener-uris = udp://239.255.0.1,udp://localhost
 jrtps.discovery.announce-uris = udp://239.255.0.1
 
 # ---  uDDS configuration parameters  ------------------
