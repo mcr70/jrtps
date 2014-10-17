@@ -58,12 +58,12 @@ public class LifespanTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         dw.write(new HelloMessage(1, "hello"));
 
         // Wait for reader to receive sample
-        waitFor(dataLatch, 1000, true);
+        waitFor(dataLatch, LATCH_WAIT_MILLIS, true);
 
         assertEquals(1, dr.getSamples().size()); // assert that we have a sample
 

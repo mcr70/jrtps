@@ -52,14 +52,14 @@ public class LivelinessTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         // Wait for liveliness lost event
-        waitFor(livelinessLostLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(livelinessLostLatch, LATCH_WAIT_MILLIS, true);
         
         dw.assertLiveliness();
         
-        waitFor(livelinessRestoredLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(livelinessRestoredLatch, LATCH_WAIT_MILLIS, true);
     }
 
 }

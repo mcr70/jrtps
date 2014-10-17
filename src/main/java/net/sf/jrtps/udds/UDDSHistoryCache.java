@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
@@ -18,7 +19,6 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
-import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.rtps.ChangeKind;
 import net.sf.jrtps.rtps.Sample;
@@ -45,18 +45,14 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     private static final Logger logger = LoggerFactory.getLogger(UDDSHistoryCache.class);
     // QoS policies affecting writer cache
     private final QosResourceLimits resource_limits;
-    private final QosHistory history;
 
-    protected final List<SampleListener<T>> listeners = new LinkedList<>();    
+    protected final List<SampleListener<T>> listeners = new CopyOnWriteArrayList<>();    
     private volatile CoherentSet coherentSet; // Current CoherentSet, used by writer
 
     // Main collection to hold instances. ResourceLimits is checked against this map
     private final Map<KeyHash, Instance<T>> instances = new LinkedHashMap<>();
 
     private long deadLinePeriod = -1; // -1 represents INFINITE
-
-    // For readers time based filter:
-    private final long minimumSeparationMillis;
 
     // An ordered set of cache changes.
     protected final SortedSet<Sample<T>> samples = Collections.synchronizedSortedSet(new TreeSet<>(
@@ -91,14 +87,6 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         }
 
         resource_limits = qos.getResourceLimits();
-        history = qos.getHistory();
-
-        if (isReaderCache) {
-            minimumSeparationMillis = qos.getTimeBasedFilter().getMinimumSeparation().asMillis();
-        }
-        else {
-            minimumSeparationMillis = 0;
-        }
     }
 
     /**

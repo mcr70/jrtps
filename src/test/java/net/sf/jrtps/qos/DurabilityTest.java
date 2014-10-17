@@ -76,10 +76,10 @@ public class DurabilityTest extends AbstractQosTest {
         addCommunicationListener(dw, null, emLatch);
 
         // Wait for the readers and writer to be matched
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         // Wait for transient local reader to receive all the samples
-        waitFor(trDataLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(trDataLatch, LATCH_WAIT_MILLIS, true);
     }
 
 

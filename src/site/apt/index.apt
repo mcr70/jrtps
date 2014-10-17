@@ -1,7 +1,5 @@
 Overview
 
- <Note: Consider any documentation on this site prior version 1.0 to be subject to changes> 
-
  jRTPS is an implementation of {{{http://www.omg.org/spec/DDSI-RTPS/2.1/}RTPS 2.1}} protocol by OMG.
  RTPS protocol is designed to provide interoperability between different 
  {{{http://www.omg.org/spec/DDS/}DDS}} implementations. 
@@ -33,6 +31,11 @@ Overview
  Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
 
   
- 0.9.13
+ 1.0
  
- * TIME_BASED_FILTER, LIFESPAN
+  * OWNERSHIP, OWNERSHIP_STRENGTH
+  
+  * Config: udds.sedp-delay 
+  
+  * FIX: BuiltinParticipantDataListener is registered after built-in entities 
+    have been created. This fixes some timing issues on startup.
