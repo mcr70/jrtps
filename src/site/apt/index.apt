@@ -26,9 +26,9 @@ Overview
  * {{{http://www.omg.org/spec/dds4ccm/}DDS4CCM}}. While jRTPS does not try
    to address most of this document, XML QoS definition looks interesting. 
 
-* Release notes
+* ChangeLog
 
- Full ReleaseNotes can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ReleaseNotes}here}}
+ Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}
 
   
  1.0

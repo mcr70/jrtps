@@ -192,9 +192,11 @@ Quality of Service - uDDS
 * TimeBasedFilter
 
  Time based filter is used to restrict reception of samples at reader to rate specified
- with <minimum_separation>. The specification also says that last sample of writer should 
+ with <minimum_separation>. When a sample arrives at reader, and <minimum_separation>
+ has not elapsed since previous sample, reader will discard that sample. 
+ The specification also says that last sample of writer should 
  be delivered, if writer stops sending samples for period "long" compared to 
- minimum_separation, and latest sample was filtered out by TimeBasedFilter. 
+ <minimum_separation>, and latest sample was filtered out by TimeBasedFilter. 
  
  TimeBasedFilter must be consistent with deadline QoS policy, so that
   
@@ -220,12 +222,14 @@ Quality of Service - uDDS
 * Ownership, OwnershipStrength
 
  These policies are used to provide a concept of ownership of an instance.
- A <Sample> gets written into readers history cache only if the writer is the owner of
- the instance, or writer is stronger than owner of the instance. In this case the stronger 
- writer claims ownership of the Instance.  
- A writer may loose ownership of instances it owns. This may happen if writer fails 
- to assert its liveliness, or writer fails to fulfill deadline contract made with
- reader.
+ Ownership kind <SHARED> is used when every writer is treated equal, and every
+ writer can make changes to history cache of a reader.
+ With ownership kind <EXCLUSIVE>, a <Sample> gets written into readers history 
+ cache only if the writer is the owner of the instance, or writer is stronger 
+ than owner of the instance. In this case the stronger writer claims ownership 
+ of the Instance. A writer may loose ownership of instances it owns. This may 
+ happen if writer fails to assert its liveliness, or writer fails to fulfill 
+ deadline contract made with reader.
  
  DDS Specification also says that if two equally strong writers exists in the system,
  service should pick one or the other. And all the readers should pick the same writer
