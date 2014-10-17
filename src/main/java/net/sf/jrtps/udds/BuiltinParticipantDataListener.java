@@ -51,7 +51,10 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
                         fireParticipantDetected(pd);
 
-                        // First, make sure remote participant knows about us.
+                        // First, add matched writers for builtin readers
+                        handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
+                        
+                        // Then, make sure remote participant knows about us.
                         DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
                         SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
                                 ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
@@ -62,8 +65,11 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                         
                         pw.addMatchedReader(rd);
 
-                        // Then, announce our builtin endpoints
-                        handleBuiltinEnpointSet(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
+                        participant.waitFor(participant.getConfiguration().getSEDPDelay());
+                        
+                        // Then, add matched readers for builtin writers, 
+                        // and announce our builtin endpoints
+                        handleBuiltinWriters(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
                     }
                 }
                 else {
@@ -86,7 +92,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
      * 
      * @param builtinEndpoints
      */
-    private void handleBuiltinEnpointSet(GuidPrefix prefix, int builtinEndpoints) {
+    private void handleBuiltinWriters(GuidPrefix prefix, int builtinEndpoints) {
         QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService();
 
         BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
@@ -136,6 +142,44 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                     ParticipantMessage.class.getName(), key, sedpQoS);
 
             sw.addMatchedReader(rd);
+        }
+        if (eps.hasParticipantMessageWriter()) {
+            DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
+
+            Guid key = new Guid(prefix, EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
+            PublicationData wd = new PublicationData(ParticipantMessage.BUILTIN_TOPIC_NAME,
+                    ParticipantMessage.class.getName(), key, sedpQoS);
+            pr.addMatchedWriter(wd);
+        }
+    }
+    
+    
+    /**
+     * Handle builtin readers for discovered participant. 
+     * 
+     * @param builtinEndpoints
+     */
+    private void handleBuiltinReaders(GuidPrefix prefix, int builtinEndpoints) {
+        QualityOfService sedpQoS = QualityOfService.getSEDPQualityOfService();
+
+        BuiltinEndpointSet eps = new BuiltinEndpointSet(builtinEndpoints);
+        log.debug("handleBuiltinReaders {}", eps);
+
+        if (eps.hasPublicationAnnouncer()) {
+            DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
+
+            Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
+            PublicationData wd = new PublicationData(PublicationData.BUILTIN_TOPIC_NAME,
+                    PublicationData.class.getName(), key, sedpQoS);
+            pr.addMatchedWriter(wd);
+        }
+        if (eps.hasSubscriptionAnnouncer()) {
+            DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
+
+            Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
+            PublicationData wd = new PublicationData(SubscriptionData.BUILTIN_TOPIC_NAME,
+                    SubscriptionData.class.getName(), key, sedpQoS);
+            pr.addMatchedWriter(wd);
         }
         if (eps.hasParticipantMessageWriter()) {
             DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);

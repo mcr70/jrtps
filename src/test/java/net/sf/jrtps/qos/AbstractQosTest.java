@@ -22,8 +22,7 @@ import org.junit.Before;
 import examples.hello.serializable.HelloMessage;
 
 public class AbstractQosTest {
-    static final long LATCH_WAIT_SECS = 2;
-    static final long EMLATCH_WAIT_MILLIS = 1000;
+    static final long LATCH_WAIT_MILLIS = 2000;
     
     static Configuration cfg1 = new Configuration("/mem-test-1.properties");
     static Configuration cfg2 = new Configuration("/mem-test-2.properties");

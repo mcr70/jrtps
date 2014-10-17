@@ -68,14 +68,14 @@ public class OwnershipTest extends AbstractQosTest {
         addCommunicationListener(dw2, null, emLatch);
 
         // Wait for the reader and writers to be matched
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         // Write a sample with 'weaker' writer
         listener.resetLatch(1);
         dw1.write(new HelloMessage(1, "w1 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 500, true);
+        waitFor(listener.dataLatch, LATCH_WAIT_MILLIS, true);
 
         assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
         
@@ -84,7 +84,7 @@ public class OwnershipTest extends AbstractQosTest {
         dw2.write(new HelloMessage(1, "s1 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 500, true);
+        waitFor(listener.dataLatch, LATCH_WAIT_MILLIS, true);
 
         assertEquals(2, dr.getSamples().size()); // assert that we have 2 samples
         
@@ -147,14 +147,14 @@ public class OwnershipTest extends AbstractQosTest {
         addCommunicationListener(dw2, null, emLatch);
 
         // Wait for the reader and writers to be matched
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         // Write a sample with 'stronger' writer
         listener.resetLatch(1);
         dw2.write(new HelloMessage(1, "w1 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 1000, true);
+        waitFor(listener.dataLatch, LATCH_WAIT_MILLIS, true);
 
         assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
         
@@ -229,14 +229,14 @@ public class OwnershipTest extends AbstractQosTest {
         addCommunicationListener(dw2, null, emLatch);
 
         // Wait for the reader and writers to be matched
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         // Write a sample with 'stronger' writer
         listener.resetLatch(1);
         dw2.write(new HelloMessage(1, "w1 hello"));
 
         // Wait for reader to receive sample
-        waitFor(listener.dataLatch, 1000, true);
+        waitFor(listener.dataLatch, LATCH_WAIT_MILLIS, true);
 
         assertEquals(1, dr.getSamples().size()); // assert that we have 1 sample
         
@@ -284,23 +284,23 @@ public class OwnershipTest extends AbstractQosTest {
         TestListener<HelloMessage> sampleListener = new TestListener<>();
         dr.addSampleListener(sampleListener);
         
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true); // Wait for the entities to be matched
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true); // Wait for the entities to be matched
 
         // Write a sample with stronger writer
         HelloMessage m = new HelloMessage(1 , "Hello ");
         dw2.write(m); 
 
         sampleListener.resetLatch(1);
-        waitFor(sampleListener.dataLatch, EMLATCH_WAIT_MILLIS, true); // Wait for sample to be received
+        waitFor(sampleListener.dataLatch, LATCH_WAIT_MILLIS, true); // Wait for sample to be received
         
         // If we do not write next message within deadline period, deadline missed should happen
-        waitFor(dlLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(dlLatch, LATCH_WAIT_MILLIS, true);
 
         // Write a sample with weaker writer
         sampleListener.resetLatch(1);
         dw1.write(m);
         
-        waitFor(sampleListener.dataLatch, EMLATCH_WAIT_MILLIS, true); // Wait for sample to be received
+        waitFor(sampleListener.dataLatch, LATCH_WAIT_MILLIS, true); // Wait for sample to be received
     }
     
     

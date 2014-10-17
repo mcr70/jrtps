@@ -28,6 +28,7 @@ jrtps.discovery.announce-uris = udp://239.255.0.1
 
 # ---  uDDS configuration parameters  ------------------
 udds.collections.coherent=false
+udds.sedp-delay = 0
 +---
  
 * RTPS specific configuration
@@ -104,3 +105,8 @@ udds.collections.coherent=false
   By writing Collections coherently, means that all the samples delivered to subscribed readers
   will see changes in one single 'transaction'. I.e. samples does not get fragmented
   during transmission.
+  
+  * <<{udds.sedp-delay}>>
+  During discovery, when a ParticipantMessage (SPDP) is received, local participant will first send
+  a ParticipantMessage (SPDP) to remote participant to make sure it knows about us, then waits
+  <udds.sedp-delay> before starting to announce local endpoints (SEDP).

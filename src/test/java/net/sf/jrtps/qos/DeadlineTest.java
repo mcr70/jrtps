@@ -33,7 +33,7 @@ public class DeadlineTest extends AbstractQosTest {
         addCommunicationListener(dr, dlLatch, emLatch);
         addCommunicationListener(dw, dlLatch, emLatch);
 
-        waitFor(emLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
 
         // Write a message once reader and writer has been matched
 
@@ -41,7 +41,7 @@ public class DeadlineTest extends AbstractQosTest {
         dw.write(m); 
 
         // If we do not write next message within deadline period, deadline missed should happen
-        waitFor(dlLatch, EMLATCH_WAIT_MILLIS, true);
+        waitFor(dlLatch, LATCH_WAIT_MILLIS, true);
     }
 
 }

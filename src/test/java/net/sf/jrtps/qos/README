@@ -1,0 +1,16 @@
+Tests in this directory use JUnit as a launching framework.
+But rather than simple unit tests they are actually integration 
+tests.
+
+Due to asynchronous nature of RTPS/DDS, these tests might 
+sometimes fail, sometimes succeed. In case of failures,
+try to adjust configuration parameters in mem-test-1.properties
+and mem-test-2.properties:
+    - rtps.writer.heartbeat-period
+    - rtps.writer.nack-response-delay
+    - rtps.reader.heartbeat-response-delay
+    - rtps.spdp.resend-data-period
+    - udds.sedp-delay
+
+Failures with warnings like 'Rejecting data/heartbeat/... from unknown writer' 
+is a good candidate for some adjustment.

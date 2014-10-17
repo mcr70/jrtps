@@ -317,6 +317,16 @@ public class Configuration {
         return getBooleanProperty("udds.collections.coherent", false);
     }
 
+    /**
+     * Gets the delay after announcing SPDP message for discovered participant,
+     * and before starting to add matched readers of builtin endpoints. I.e.
+     * delay before announcing local endpoints to remote readers.
+     * 
+     * @return delay in millis
+     */
+    public int getSEDPDelay() {
+        return getIntProperty("udds.sedp-delay", 0);
+    }
     
     private String[] getStringArrayProperty(String key, String[] deflt) {
         String property = props.getProperty(key);
@@ -353,4 +363,5 @@ public class Configuration {
         
         return uriList;
     }
+
 }
