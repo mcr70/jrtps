@@ -2,7 +2,7 @@ Quality of Service
 
  Quality Of Service is a way to configure system, and to make a contract between readers and writers 
  of the expected behavior. During discovery, participants interchange Quality of Service information
- of each entity they manage. For any given topic, its readers and writers can start communication
+ of each entity they manage. For any given topic, its readers and writers can start communicating
  if their Quality of Service is compatible. Compatibility of Quality of Service  is presented with 
  request-offer(RxO) semantics, where writers 'offer' Quality of Service and readers 'request' for it. 
 
@@ -13,14 +13,9 @@ Quality of Service
  what samples are available and readers will report back what samples they have received, 
  and what are still missing. By using these messages, writers can eventually communicate all 
  the changes in correct order to readers.
- 
  When BEST_EFFORT kind is used, writers just sends samples to readers. That is the only promise
  writer makes about delivery of messages. Samples might be lost during transmission, or reader
  might decide to drop samples before it passes them to application.
- 
- If a reader requests BEST_EFFORT reliability but writer offers RELIABLE, a communication will
- be established as BEST_EFFORT, since BEST_EFFORT entities does not use <HeartBeat> and <AckNack>
- sub messages.
  
  Reliability QoS between reader and writer is compatible if 
  
@@ -59,9 +54,9 @@ Quality of Service
  
  By using Liveliness kind AUTOMATIC, udds Participant will automatically refresh liveliness 
  of its writers periodically based on lease_duration. 
- MANUAL_BY_PARTICIPANT liveliness needs application to refresh liveliness of its writers by
- calling <Participant.assertLiveliness()>. MANUAL_BY_TOPIC kind is used when each writer needs
- to individually call <DataWriter.assertLiveliness()>
+ If MANUAL_BY_PARTICIPANT kind is used, application is expected to refresh liveliness of its 
+ writers by calling <Participant.assertLiveliness()>. MANUAL_BY_TOPIC kind is used when 
+ each writer needs to individually call <DataWriter.assertLiveliness()>
  
  Liveliness QoS between reader and writer is compatible if 
  
