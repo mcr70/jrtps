@@ -16,7 +16,7 @@
     </Appenders>
 
     <Loggers>
-        <Root level="WARN">
+        <Root level="debug">
             <AppenderRef ref="STDOUT" />
         </Root>
     </Loggers>
