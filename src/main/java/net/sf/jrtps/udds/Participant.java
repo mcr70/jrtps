@@ -220,7 +220,7 @@ public class Participant {
 
     private void createSPDPEntities() {
         // ---- Create a Reader for SPDP -----------------------
-        DataReader<ParticipantData> pdReader = createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
+        createDataReader(ParticipantData.BUILTIN_TOPIC_NAME,
                 ParticipantData.class, ParticipantData.BUILTIN_TYPE_NAME, // ParticipantData.class.getName(),
                 spdpQoS);
 

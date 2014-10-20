@@ -28,7 +28,7 @@ class WriterLivelinessManager implements Runnable {
     private static final Logger log = LoggerFactory.getLogger(WriterLivelinessManager.class);
 
     private final List<Duration> alDurations = new LinkedList<>();
-    private final List<DataWriter> writers = new LinkedList<>();
+    private final List<DataWriter<?>> writers = new LinkedList<>();
     
     private final Participant participant;
     private DataWriter<ParticipantMessage> writer;
