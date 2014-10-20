@@ -18,18 +18,24 @@ import examples.hello.serializable.HelloMessage;
 
 public class DestinationOrderTest extends AbstractQosTest {
     /**
-     * Test for LIFESPAN QoS policy.
-     *  1.  Create reader, and writer with LIFESPAN of 100ms
-     *  2.  wait for entities to be matched
-     *  3.  write sample
-     *  4.  wait for data to arrive to reader
-     *  5.  wait LIFESPAN to expire 
-     *  6.  Assert that sample has been removed from reader    
+     * Test for DestionationOrder QoS policy.
      */
     @Test
     public void testBySourceTimestamp() {
+        executeTest(QosDestinationOrder.Kind.BY_SOURCE_TIMESTAMP, 2);
+    }
+    
+    /**
+     * Test for DestionationOrder QoS policy.
+     */
+    @Test
+    public void testByReceptionTimestamp() {
+        executeTest(QosDestinationOrder.Kind.BY_RECEPTION_TIMESTAMP, 3);
+    }
+
+    private void executeTest(QosDestinationOrder.Kind kind, int count) {      
         QualityOfService qos= new QualityOfService();
-        qos.setPolicy(new QosDestinationOrder(QosDestinationOrder.Kind.BY_SOURCE_TIMESTAMP));
+        qos.setPolicy(new QosDestinationOrder(kind));
         qos.setPolicy(new QosHistory(10));
 
         // Create DataReader
@@ -54,12 +60,11 @@ public class DestinationOrderTest extends AbstractQosTest {
         waitFor(listener.dLatch, LATCH_WAIT_MILLIS, true);
         assertEquals(1, dr.getSamples().size());
 
+        listener.resetLatch(count - 1);
         dw1.write(new HelloMessage(1, "hello"), 9);
-
-        listener.resetLatch(1);
         dw1.write(new HelloMessage(1, "hello"), 11);
+
         waitFor(listener.dLatch, LATCH_WAIT_MILLIS, true);
-        assertEquals(2, dr.getSamples().size());
     }
 
     private class TSampleListener implements SampleListener<HelloMessage> {
