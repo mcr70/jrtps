@@ -82,7 +82,6 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             ts = sourceTimeStamp; 
         }
 
-        logger.debug("{}, TS: {}, STS: {}", destinationOrderKind, ts, sourceTimeStamp);
         List<Sample<T>> coherentSet = getCoherentSet(writerGuid); // Get current CoherentSet for writer
         List<Sample<T>> pendingSamples = incomingSamples.get(id); 
 

@@ -79,7 +79,9 @@ public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> 
     private void addQoS(SubscriptionData rd, ParameterList payloadParams) {
         Set<DataReaderPolicy> policies = rd.getQualityOfService().getReaderPolicies();
         for (QosPolicy<?> qp : policies) {
-            payloadParams.add((Parameter) qp);
+            if (qp instanceof Parameter) {
+                payloadParams.add((Parameter) qp);
+            }
         }
     }
 }
