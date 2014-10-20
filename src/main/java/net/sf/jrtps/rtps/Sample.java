@@ -47,7 +47,6 @@ public class Sample<T> {
         this.timestamp = timestamp;        
         this.sourceTimeStamp = sourceTimeStamp;
         this.sInfo = sInfo;
-        log.debug("++++++ TS: {}, STS: {}", timestamp, sourceTimeStamp);
     }
 
     /**

@@ -43,14 +43,16 @@ public class DestinationOrderTest extends AbstractQosTest {
 
         // Create DataWriter
         TDataWriter<HelloMessage> dw1 = (TDataWriter<HelloMessage>) p2.createDataWriter(HelloMessage.class, qos);
+        TDataWriter<HelloMessage> dw2 = (TDataWriter<HelloMessage>) p2.createDataWriter(HelloMessage.class, qos);
 
         // Latch used to synchronize on entity matched
-        final CountDownLatch emLatch = new CountDownLatch(2); 
+        final CountDownLatch emLatch = new CountDownLatch(4); 
         TSampleListener listener = new TSampleListener();
         dr.addSampleListener(listener);
 
         addCommunicationListener(dr, null, emLatch);
         addCommunicationListener(dw1, null, emLatch);
+        addCommunicationListener(dw2, null, emLatch);
 
         // Wait for the readers and writer to be matched
         waitFor(emLatch, LATCH_WAIT_MILLIS, true);
@@ -61,10 +63,11 @@ public class DestinationOrderTest extends AbstractQosTest {
         assertEquals(1, dr.getSamples().size());
 
         listener.resetLatch(count - 1);
-        dw1.write(new HelloMessage(1, "hello"), 9);
+        dw2.write(new HelloMessage(1, "hello"), 9);
         dw1.write(new HelloMessage(1, "hello"), 11);
 
         waitFor(listener.dLatch, LATCH_WAIT_MILLIS, true);
+        assertEquals(count, dr.getSamples().size());
     }
 
     private class TSampleListener implements SampleListener<HelloMessage> {
