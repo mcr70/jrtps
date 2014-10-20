@@ -23,8 +23,8 @@ public class QosTypeConsistencyEnforcement extends Parameter implements DataRead
     public QosTypeConsistencyEnforcement(Kind kind) {
         super(ParameterId.PID_TYPE_CONSISTENCY_ENFORCEMENT);
         switch(kind) {
-        case ALLOW_TYPE_COERCION: this.kind = 0;
-        case DISALLOW_TYPE_COERCION: this.kind = 1;
+        case ALLOW_TYPE_COERCION: this.kind = 0; break;
+        case DISALLOW_TYPE_COERCION: this.kind = 1; break;
         
         default: 
             throw new RuntimeException("Unknown kind " + kind);
