@@ -17,6 +17,11 @@ DataWriterPolicy<QosDataRepresentation>, TopicPolicy<QosDataRepresentation>, Inl
         super(ParameterId.PID_DATA_REPRESENTATION);
     }
 
+    public QosDataRepresentation(short[] values) {
+        super(ParameterId.PID_DATA_REPRESENTATION);
+        this.values = values;
+    }
+
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         this.values = new short[bb.read_long()];
