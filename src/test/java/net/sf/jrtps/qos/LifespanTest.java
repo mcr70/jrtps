@@ -7,6 +7,7 @@ import java.util.concurrent.CountDownLatch;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosLifespan;
+import net.sf.jrtps.message.parameter.QosPartition;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
@@ -34,6 +35,7 @@ public class LifespanTest extends AbstractQosTest {
 
         QualityOfService qos= new QualityOfService();
         qos.setPolicy(new QosLifespan(LIFESPAN_DURATION));
+        qos.setPolicy(new QosPartition(new String[] {"test"}));
 
         // Create DataWriter
         DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class, qos);
