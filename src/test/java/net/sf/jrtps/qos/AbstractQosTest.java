@@ -40,8 +40,8 @@ public class AbstractQosTest {
     public void init() {
         EntityFactory ef = new TEntityFactory();
         // Create two participants; one reader, one for writer
-        p1 = new Participant(0,0, ef, cfg1);
-        p2 = new Participant(0,0, ef, cfg2);
+        p1 = new Participant(0,0, null, ef, cfg1);
+        p2 = new Participant(0,0, null, ef, cfg2);
     }
 
     @After 
