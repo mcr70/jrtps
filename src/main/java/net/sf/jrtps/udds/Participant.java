@@ -30,7 +30,6 @@ import net.sf.jrtps.builtin.TopicDataMarshaller;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.message.parameter.QosUserData;
 import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
@@ -118,7 +117,7 @@ public class Participant {
      * Create a Participant with domainId 0 and participantId -1.
      */
     public Participant() {
-        this(0, -1, new byte[0], null, null);
+        this(0, -1, QualityOfService.getSPDPQualityOfService(), null, null);
     }
 
     /**
@@ -127,7 +126,7 @@ public class Participant {
      * @param domainId domainId
      */
     public Participant(int domainId) {
-        this(domainId, -1, new byte[0], null, null);
+        this(domainId, -1, QualityOfService.getSPDPQualityOfService(), null, null);
     }
 
     /**
@@ -137,7 +136,7 @@ public class Participant {
      * @param participantId
      */
     public Participant(int domainId, int participantId) {
-        this(domainId, participantId, new byte[0], null, null);
+        this(domainId, participantId, QualityOfService.getSPDPQualityOfService(), null, null);
     }
 
     /**
@@ -159,9 +158,8 @@ public class Participant {
      * @param ef EntityFactory to be used. If ef is null, a default EntityFactory will be used.
      * @param cfg Configuration used. If config is null, default Configuration is used.
      */
-    public Participant(int domainId, int participantId, byte[] userData, EntityFactory ef, Configuration cfg) {
-        this.participantQos = QualityOfService.getSPDPQualityOfService();
-        this.participantQos.setPolicy(new QosUserData(userData));
+    public Participant(int domainId, int participantId, QualityOfService participantQos, EntityFactory ef, Configuration cfg) {
+        this.participantQos = participantQos;
         
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
