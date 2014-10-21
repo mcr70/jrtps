@@ -71,7 +71,11 @@ public class ParticipantData extends DiscoveredData {
     public ParticipantData(GuidPrefix prefix, int endpoints, List<Locator> discoveryLocators,
             List<Locator> userdataLocators, QualityOfService participantQos) {
         super();
+        if (participantQos == null) {
+            participantQos = QualityOfService.getSPDPQualityOfService();
+        }
         qos = participantQos;
+        
 
         this.guidPrefix = prefix;
         this.availableBuiltinEndpoints = endpoints;
