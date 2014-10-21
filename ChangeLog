@@ -1,9 +1,11 @@
 1.0
     - OWNERSHIP, OWNERSHIP_STRENGTH
     - Config: udds.sedp-delay 
-    - FIX: BuiltinParticipantDataListener is registered after built-in entities 
-      have been created. This fixes some timing issues on startup.
-    
+    - FIX: BuiltinParticipantDataListener is registered after built-in 
+      entities have been created. This fixes some timing issues on startup.
+    - FIX: creating an entity returns an existing entity if it has been 
+      created before with the same entityId.    
+      
 0.9.13
     - TIME_BASE_FILTER, LIFESPAN
     
