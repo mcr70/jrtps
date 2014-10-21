@@ -82,6 +82,8 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
             }
         }
 
+        payloadParams.add(pd.getUserData());
+        
         payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
         payloadParams.add(new Sentinel());
 

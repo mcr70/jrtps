@@ -30,6 +30,7 @@ import net.sf.jrtps.builtin.TopicDataMarshaller;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.message.parameter.QosUserData;
 import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
@@ -99,6 +100,8 @@ public class Participant {
     private final QualityOfService spdpQoS; // SPDP
     private final QualityOfService sedpQoS; // SEDP
     private final QualityOfService pmQoS;   // ParticipantMessage
+    private byte[] userData;
+    private QualityOfService participantQos;
 
     {
         spdpQoS = QualityOfService.getSPDPQualityOfService(); 
@@ -115,7 +118,7 @@ public class Participant {
      * Create a Participant with domainId 0 and participantId -1.
      */
     public Participant() {
-        this(0, -1, null, null);
+        this(0, -1, new byte[0], null, null);
     }
 
     /**
@@ -124,7 +127,7 @@ public class Participant {
      * @param domainId domainId
      */
     public Participant(int domainId) {
-        this(domainId, -1, null, null);
+        this(domainId, -1, new byte[0], null, null);
     }
 
     /**
@@ -134,7 +137,7 @@ public class Participant {
      * @param participantId
      */
     public Participant(int domainId, int participantId) {
-        this(domainId, participantId, null, null);
+        this(domainId, participantId, new byte[0], null, null);
     }
 
     /**
@@ -152,10 +155,14 @@ public class Participant {
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
+     * @param userData byte array for QosUserData
      * @param ef EntityFactory to be used. If ef is null, a default EntityFactory will be used.
      * @param cfg Configuration used. If config is null, default Configuration is used.
      */
-    public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
+    public Participant(int domainId, int participantId, byte[] userData, EntityFactory ef, Configuration cfg) {
+        this.participantQos = QualityOfService.getSPDPQualityOfService();
+        this.participantQos.setPolicy(new QosUserData(userData));
+        
         logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
         this.entityFactory = ef != null ? ef : new EntityFactory();;
@@ -625,9 +632,9 @@ public class Participant {
 
     private ParticipantData createSPDPParticipantData() {
         int epSet = createEndpointSet();
-
+        
         ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
-                discoveryLocators, userdataLocators);
+                discoveryLocators, userdataLocators, participantQos);
 
         return pd;
     }
@@ -900,7 +907,8 @@ public class Participant {
 
         logger.debug("Locators for discovery announcement: {}", discoveryLocators);
 
-        ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, discoveryLocators, null);
+        ParticipantData pd = new ParticipantData(GuidPrefix.GUIDPREFIX_UNKNOWN, 0, discoveryLocators, 
+                null, QualityOfService.getSPDPQualityOfService());
 
         // Set the lease duration to max integer. I.e. Never expires.
         pd.setLeaseDuration(new Duration(Integer.MAX_VALUE));

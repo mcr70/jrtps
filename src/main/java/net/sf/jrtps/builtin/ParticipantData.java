@@ -18,6 +18,7 @@ import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ParticipantManualLivelinessCount;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.QosPolicy;
+import net.sf.jrtps.message.parameter.QosUserData;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Duration;
@@ -68,9 +69,9 @@ public class ParticipantData extends DiscoveredData {
     private long leaseExpirationTime;
 
     public ParticipantData(GuidPrefix prefix, int endpoints, List<Locator> discoveryLocators,
-            List<Locator> userdataLocators) {
+            List<Locator> userdataLocators, QualityOfService participantQos) {
         super();
-        qos = QualityOfService.getSPDPQualityOfService();
+        qos = participantQos;
 
         this.guidPrefix = prefix;
         this.availableBuiltinEndpoints = endpoints;
@@ -252,5 +253,13 @@ public class ParticipantData extends DiscoveredData {
         return getGuidPrefix() + ": " + new BuiltinEndpointSet(getBuiltinEndpoints()) + ", lease duration "
                 + getLeaseDuration() + ", userdata locators: " + userdataLocators + 
                 ", discovery locators: " + discoveryLocators + ", " + qos;
+    }
+
+    /**
+     * Gets the UserData QoS policy
+     * @return QosUserData
+     */
+    public QosUserData getUserData() {
+        return qos.getUserData();
     }
 }
