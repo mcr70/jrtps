@@ -359,7 +359,13 @@ public class Participant {
 
             eId = new EntityId.UserDefinedEntityId(myKey, kind);
         }
-
+        
+        DataReader<?> rdr = getReader(eId);
+        if (rdr != null) {
+            logger.debug("A reader with same entityId {} already exists, will not create another one", eId);
+            return (DataReader<T>) rdr;
+        }
+        
         UDDSReaderCache<T> rCache = new UDDSReaderCache<>(eId, m, qos, watchdog);
         RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
         rCache.setRTPSReader(rtps_reader);
@@ -470,7 +476,12 @@ public class Participant {
             eId = new EntityId.UserDefinedEntityId(myKey, kind);            
         }
 
-
+        DataWriter<?> wr = getWriter(eId);
+        if (wr != null) {
+            logger.debug("A writer with same entityId {} already exists, will not create another one", eId);
+            return (DataWriter<T>) wr;
+        }
+        
         UDDSWriterCache<T> wCache = new UDDSWriterCache<>(eId, m, qos, watchdog);
         RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);
         DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
