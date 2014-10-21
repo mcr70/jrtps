@@ -724,7 +724,6 @@ public class Participant {
             }
         }
 
-        logger.warn("Could not find a writer with entityId {}, {}", writerId, writers);
         return null;
     }
 
