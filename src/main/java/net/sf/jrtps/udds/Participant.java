@@ -3,6 +3,7 @@ package net.sf.jrtps.udds;
 import java.io.Externalizable;
 import java.io.Serializable;
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -213,6 +214,8 @@ public class Participant {
 
         this.leaseManager = new ParticipantLeaseManager(this, discoveredParticipants);
         addRunnable(leaseManager);
+        
+        logger.info("Created Participant {}", Arrays.toString(getGuid().getBytes()));
     }
 
     private void registerBuiltinMarshallers() {
@@ -724,7 +727,6 @@ public class Participant {
             }
         }
 
-        logger.warn("Could not find a writer with entityId {}, {}", writerId, writers);
         return null;
     }
 
