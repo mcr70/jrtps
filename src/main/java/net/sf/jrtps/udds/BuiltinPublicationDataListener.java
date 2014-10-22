@@ -42,7 +42,7 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
                     // associate
                     QualityOfService offered = pd.getQualityOfService();
                     QualityOfService requested = r.getRTPSReader().getQualityOfService();
-                    log.debug("Check for compatible QoS for {} and {}", pd.getBuiltinTopicKey().getEntityId(), 
+                    log.trace("Check for compatible QoS for {} and {}", pd.getBuiltinTopicKey().getEntityId(), 
                             r.getRTPSReader().getGuid().getEntityId());
                     
                     if (offered.isCompatibleWith(requested)) {
