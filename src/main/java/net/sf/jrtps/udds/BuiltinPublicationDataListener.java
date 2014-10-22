@@ -34,6 +34,8 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
             }
 
             List<DataReader<?>> readers = participant.getReadersForTopic(pd.getTopicName());
+            log.debug("considering {} readers for topic {}", readers.size(), pd.getTopicName());
+            
             for (DataReader<?> r : readers) {
                 if (!r.getRTPSReader().isMatchedWith(pd.getBuiltinTopicKey()) && !pdSample.isDisposed()) {
                     // Not associated and sample is not a dispose -> do

@@ -487,7 +487,7 @@ public class Participant {
         DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
 
         wCache.setCommunicationListeners(writer.communicationListeners);
-
+        
         writers.add(writer);
         livelinessManager.registerWriter(writer);
 
