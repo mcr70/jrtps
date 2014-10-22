@@ -64,8 +64,6 @@ public class QosDurabilityService extends Parameter implements DataWriterPolicy<
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         this.service_cleanup_delay = new Duration(bb);
-        QosHistory history = new QosHistory();
-        history.read(bb, 8);
         this.history_kind = bb.read_long();
         this.history_depth = bb.read_long();
         this.max_samples = bb.read_long();
