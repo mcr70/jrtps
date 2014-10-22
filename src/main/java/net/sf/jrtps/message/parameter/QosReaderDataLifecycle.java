@@ -1,6 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 
+
 public class QosReaderDataLifecycle implements DataReaderPolicy<QosReaderDataLifecycle> {
 
     private final long autopurge_nowriter_samples_delay;
