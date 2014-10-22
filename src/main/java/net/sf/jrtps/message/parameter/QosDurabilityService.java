@@ -14,14 +14,21 @@ public class QosDurabilityService extends Parameter implements DataWriterPolicy<
     private int max_samples_per_instance;
     
     QosDurabilityService() {
+        this(new Duration(0), QosHistory.Kind.KEEP_LAST, 1, 
+                Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE);
+    }
+
+    public QosDurabilityService(Duration serviceCleanupDelay,
+            QosHistory.Kind historyKind, int historyDepth, int maxSamples, int maxInstances,
+            int maxSamplesPerInstance) {
         super(ParameterId.PID_DURABILITY_SERVICE);
         
-        service_cleanup_delay = new Duration(0);
-        history_kind = 0; // KEEP_LAST
-        history_depth = 1;
-        max_samples = Integer.MAX_VALUE;
-        max_instances = Integer.MAX_VALUE;
-        max_samples_per_instance = Integer.MAX_VALUE;
+        this.service_cleanup_delay = serviceCleanupDelay;
+        this.history_kind = historyKind == Kind.KEEP_LAST ? 0 : 1;
+        this.history_depth = historyDepth;
+        this.max_samples = maxSamples;
+        this.max_instances = maxInstances;
+        this.max_samples_per_instance = maxSamplesPerInstance;
     }
 
     public Duration getService_cleanup_delay() {
