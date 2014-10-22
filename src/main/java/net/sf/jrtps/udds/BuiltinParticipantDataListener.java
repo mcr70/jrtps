@@ -107,14 +107,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                     PublicationData.class.getName(), key, sedpQoS);
             pw.addMatchedReader(rd);
         }
-        if (eps.hasPublicationAnnouncer()) {
-            DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_PUBLICATIONS_READER);
-
-            Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_PUBLICATIONS_WRITER);
-            PublicationData wd = new PublicationData(PublicationData.BUILTIN_TOPIC_NAME,
-                    PublicationData.class.getName(), key, sedpQoS);
-            pr.addMatchedWriter(wd);
-        }
         if (eps.hasSubscriptionDetector()) {
             log.trace("Notifying remote subscriptions reader of our subscriptions");
             DataWriter<?> sw = participant.getWriter(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
@@ -125,14 +117,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
             sw.addMatchedReader(rd);
         }
-        if (eps.hasSubscriptionAnnouncer()) {
-            DataReader<?> pr = participant.getReader(EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_READER);
-
-            Guid key = new Guid(prefix, EntityId.SEDP_BUILTIN_SUBSCRIPTIONS_WRITER);
-            PublicationData wd = new PublicationData(SubscriptionData.BUILTIN_TOPIC_NAME,
-                    SubscriptionData.class.getName(), key, sedpQoS);
-            pr.addMatchedWriter(wd);
-        }
         if (eps.hasParticipantMessageReader()) {
             log.trace("Notifying remote participant message reader");
             DataWriter<?> sw = participant.getWriter(EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
@@ -142,14 +126,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                     ParticipantMessage.class.getName(), key, sedpQoS);
 
             sw.addMatchedReader(rd);
-        }
-        if (eps.hasParticipantMessageWriter()) {
-            DataReader<?> pr = participant.getReader(EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER);
-
-            Guid key = new Guid(prefix, EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER);
-            PublicationData wd = new PublicationData(ParticipantMessage.BUILTIN_TOPIC_NAME,
-                    ParticipantMessage.class.getName(), key, sedpQoS);
-            pr.addMatchedWriter(wd);
         }
     }
     
