@@ -7,6 +7,7 @@ import java.util.Set;
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.InlineQoS;
+import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.QosDataRepresentation;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosDestinationOrder;
@@ -217,6 +218,10 @@ public class QualityOfService {
 
         // Loop through each qos policy defined in either of the QoS
         for (Class<? extends QosPolicy> clazz : commonSet) {
+            if (!clazz.isAssignableFrom(Parameter.class)) {
+                continue;
+            }
+            
             QosPolicy qp = policies.get(clazz);
             if (qp == null) {
                 qp = getDefaultFor(clazz); // get default for 'this'

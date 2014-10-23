@@ -1,6 +1,7 @@
 package net.sf.jrtps.rtps;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.Data;
@@ -22,9 +23,10 @@ import org.slf4j.LoggerFactory;
  * 
  * @param <T>
  */
-public class Sample<T> {
+public class Sample<T> implements Cloneable {
     private static final Logger log = LoggerFactory.getLogger(Sample.class);
 
+    private HashMap<String, Object> properties = new HashMap<>();
     private final Guid writerGuid;
     private final Marshaller<T> marshaller;
     private final long seqNum;
@@ -241,5 +243,20 @@ public class Sample<T> {
     
     public String toString() {
         return "Sample[" + seqNum + "]";
+    }
+
+    public Object getProperty(String key) {
+        return properties.get(key);
+    }
+    public void setProperty(String key, Object value) {
+        properties.put(key, value);
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        Sample s = (Sample) super.clone();
+        s.properties = new HashMap<>(this.properties);
+        
+        return s;
     }
 }

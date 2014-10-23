@@ -78,7 +78,9 @@ public class PublicationDataMarshaller implements Marshaller<PublicationData> {
     private void addQoS(PublicationData wd, ParameterList payloadParams) {
         Set<DataWriterPolicy> policies = wd.getQualityOfService().getWriterPolicies();
         for (QosPolicy<?> qp : policies) {
-            payloadParams.add((Parameter) qp); // safe cast
+            if (qp instanceof Parameter) {
+                payloadParams.add((Parameter) qp); 
+            }
         }
     }
 }
