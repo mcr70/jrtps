@@ -218,7 +218,7 @@ public class QualityOfService {
 
         // Loop through each qos policy defined in either of the QoS
         for (Class<? extends QosPolicy> clazz : commonSet) {
-            if (!clazz.isAssignableFrom(Parameter.class)) {
+            if (!Parameter.class.isAssignableFrom(clazz)) {
                 continue;
             }
             
@@ -231,7 +231,7 @@ public class QualityOfService {
             if (qpOther == null) {
                 qpOther = other.getDefaultFor(clazz); // get default for 'other'
             }
-
+            
             if (!qp.isCompatible(qpOther)) {
                 set.add(qpOther);
                 log.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
@@ -302,8 +302,11 @@ public class QualityOfService {
         else if (QosUserData.class.equals(clazz)) {
             return QosUserData.defaultUserData();
         }
+        else if (QosTypeConsistencyEnforcement.class.equals(clazz)) {
+            return QosTypeConsistencyEnforcement.defaultTypeConsistencyEnforcement();
+        }
 
-        log.warn("Unknown qos policy {}", clazz);
+        log.warn("Don't know how to get default for {}", clazz);
 
         return null;
     }
