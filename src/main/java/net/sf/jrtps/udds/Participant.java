@@ -450,7 +450,7 @@ public class Participant {
      * @return a DataWriter<T>
      */
     public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
-        logger.debug("Creating DataWriter for topic {}, type {}", topicName, typeName);
+        logger.debug("Creating DataWriter for topic {}, type {}, qos {}", topicName, typeName, qos);
 
         Marshaller<T> m = getMarshaller(type);
         EntityId eId = null;
