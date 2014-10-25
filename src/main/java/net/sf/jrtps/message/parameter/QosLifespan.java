@@ -21,7 +21,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
 
     /**
      * Constructor for QosLifespan.
-     * @param Duration as millis
+     * @param millis Duration as millis
      */
     public QosLifespan(long millis) {
         this(new Duration(millis));
