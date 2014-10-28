@@ -117,7 +117,7 @@ public class RTPSReader<T> extends Endpoint {
         long livelinessDuration = 
                 proxy.getPublicationData().getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
         Watchdog watchdog = getParticipant().getWatchdog();
-        System.out.println("*** " + livelinessDuration);
+        
         Task livelinessTask = watchdog.addTask(livelinessDuration, new Listener() {
             @Override
             public void triggerTimeMissed() {
