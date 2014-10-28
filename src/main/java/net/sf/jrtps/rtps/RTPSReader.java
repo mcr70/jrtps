@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class RTPSReader<T> extends Endpoint {
-    private static final Logger log = LoggerFactory.getLogger(RTPSReader.class);
+    private static final Logger logger = LoggerFactory.getLogger(RTPSReader.class);
 
     private final Map<Guid, WriterProxy> writerProxies = new ConcurrentHashMap<>();
     private final ReaderCache<T> rCache;
@@ -106,7 +106,7 @@ public class RTPSReader<T> extends Endpoint {
 
         writerProxies.put(writerData.getBuiltinTopicKey(), wp);
 
-        log.debug("[{}] Added matchedWriter {}, locators {}", getEntityId(), writerData, wp.getLocators());
+        logger.debug("[{}] Added matchedWriter {}, locators {}", getEntityId(), writerData, wp.getLocators());
 
         //sendAckNack(wp);
 
@@ -117,6 +117,7 @@ public class RTPSReader<T> extends Endpoint {
         long livelinessDuration = 
                 proxy.getPublicationData().getQualityOfService().getLiveliness().getLeaseDuration().asMillis();
         Watchdog watchdog = getParticipant().getWatchdog();
+        System.out.println("*** " + livelinessDuration);
         Task livelinessTask = watchdog.addTask(livelinessDuration, new Listener() {
             @Override
             public void triggerTimeMissed() {
@@ -167,7 +168,7 @@ public class RTPSReader<T> extends Endpoint {
      * @param writerData writer to remove. If corresponding writer does not exists, this method silently returns
      */
     public WriterProxy removeMatchedWriter(PublicationData writerData) {
-        log.debug("[{}] Removing matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
+        logger.debug("[{}] Removing matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
         return writerProxies.remove(writerData.getBuiltinTopicKey());
     }
 
@@ -244,7 +245,7 @@ public class RTPSReader<T> extends Endpoint {
      * @param hb
      */
     void onHeartbeat(GuidPrefix senderGuidPrefix, Heartbeat hb) {
-        log.debug("[{}] Got Heartbeat: #{} {}-{}, F:{}, L:{} from {}", getEntityId(), hb.getCount(),
+        logger.debug("[{}] Got Heartbeat: #{} {}-{}, F:{}, L:{} from {}", getEntityId(), hb.getCount(),
                 hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), hb.finalFlag(), hb.livelinessFlag(),
                 senderGuidPrefix);
 
@@ -267,7 +268,7 @@ public class RTPSReader<T> extends Endpoint {
                         if (wp.getGreatestDataSeqNum() < hb.getLastSequenceNumber()) {
                             doSend = true;
                         } else {
-                            log.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}",
+                            logger.trace("[{}] Will no send AckNack, since my seq-num is {} and Heartbeat seq-num is {}",
                                     getEntityId(), wp.getGreatestDataSeqNum(), hb.getLastSequenceNumber());
                         }
                     }
@@ -279,7 +280,7 @@ public class RTPSReader<T> extends Endpoint {
             }
         } 
         else {
-            log.warn("[{}] Discarding Heartbeat from unknown writer {}, {}", getEntityId(), senderGuidPrefix,
+            logger.warn("[{}] Discarding Heartbeat from unknown writer {}, {}", getEntityId(), senderGuidPrefix,
                     hb.getWriterId());
         }
     }
@@ -297,7 +298,7 @@ public class RTPSReader<T> extends Endpoint {
         if (wp != null) {
             wp.assertLiveliness();
             
-            log.debug("[{}] Applying {}", getEntityId(), gap);
+            logger.debug("[{}] Applying {}", getEntityId(), gap);
             wp.applyGap(gap);
         }
     }
@@ -325,15 +326,15 @@ public class RTPSReader<T> extends Endpoint {
             if (wp.acceptData(data.getWriterSequenceNumber())) {
                 if (checkDirectedWrite(data)) { 
                     // Add Data to cache only if permitted by DirectedWrite, or if DirectedWrite does not exist
-                    log.debug("[{}] Got Data: #{}", getEntityId(), data.getWriterSequenceNumber());
+                    logger.debug("[{}] Got Data: #{}", getEntityId(), data.getWriterSequenceNumber());
                     rCache.addChange(id, writerGuid, data, timeStamp);
                 }
             } else {
-                log.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
+                logger.debug("[{}] Data was rejected: Data seq-num={}, proxy seq-num={}", getEntityId(),
                         data.getWriterSequenceNumber(), wp.getGreatestDataSeqNum());
             }
         } else {
-            log.warn("[{}] Discarding Data from unknown writer {}, {}", getEntityId(), sourcePrefix,
+            logger.warn("[{}] Discarding Data from unknown writer {}, {}", getEntityId(), sourcePrefix,
                     data.getWriterId());
         }
     }
@@ -389,7 +390,7 @@ public class RTPSReader<T> extends Endpoint {
 
 
     private void sendAckNack(WriterProxy wp) {
-        log.trace("[{}] Wait for heartbeat response delay: {} ms", getEntityId(), heartbeatResponseDelay);
+        logger.trace("[{}] Wait for heartbeat response delay: {} ms", getEntityId(), heartbeatResponseDelay);
         getParticipant().waitFor(heartbeatResponseDelay);
 
         Message m = new Message(getGuid().getPrefix());
@@ -404,7 +405,7 @@ public class RTPSReader<T> extends Endpoint {
 
         GuidPrefix targetPrefix = wp.getGuid().getPrefix();
 
-        log.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getEntityId(), an.getCount(),
+        logger.debug("[{}] Sending AckNack: #{} {}, F:{} to {}", getEntityId(), an.getCount(),
                 an.getReaderSNState(), an.finalFlag(), targetPrefix);
 
         sendMessage(m, wp);
@@ -428,7 +429,7 @@ public class RTPSReader<T> extends Endpoint {
         WriterProxy wp = writerProxies.get(writerGuid);
 
         if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
-            log.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
+            logger.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
             PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
                     ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
             
