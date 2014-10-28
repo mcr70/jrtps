@@ -130,7 +130,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         if (marshaller.hasKey()) {
             return getOrCreateInstance(new KeyHash(marshaller.extractKey(sample)));
         }
-        
+
         return null;
     }
 
@@ -255,12 +255,13 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     void clear(List<Sample<T>> samplesToClear) {
         for (Sample<T> s : samplesToClear) {
             Instance<T> inst = instances.get(s.getKey());
-            inst.removeSample(s);
-
-            synchronized (samples) {
-                samples.remove(s);
+            if (inst != null) {
+                inst.removeSample(s);
             }
         }
+        synchronized (samples) {
+            samples.removeAll(samplesToClear);
+        }                    
     }
 
     @Override
