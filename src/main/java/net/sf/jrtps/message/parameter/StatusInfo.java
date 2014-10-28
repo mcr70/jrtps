@@ -107,4 +107,8 @@ public class StatusInfo extends Parameter implements InlineQoS {
             return ChangeKind.WRITE;
         }
     }
+    
+    public String toString() {
+        return "StatusInfo:" + getKind().toString();
+    }
 }

@@ -127,8 +127,11 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
      */
     @Override
     public Instance<T> register(T sample, long timestamp) {
-        Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
-        return getOrCreateInstance(dummySample.getKey());
+        if (marshaller.hasKey()) {
+            return getOrCreateInstance(new KeyHash(marshaller.extractKey(sample)));
+        }
+
+        return null;
     }
 
 
@@ -161,7 +164,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
                 return null;
             }
 
-            if (kind == ChangeKind.DISPOSE) {
+            if (kind == ChangeKind.DISPOSE || kind ==ChangeKind.UNREGISTER) {
                 Instance<T> removedInstance = instances.remove(key);
                 if (removedInstance != null) {
                     removedInstance.dispose(); // cancels deadline monitor
@@ -252,12 +255,13 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
     void clear(List<Sample<T>> samplesToClear) {
         for (Sample<T> s : samplesToClear) {
             Instance<T> inst = instances.get(s.getKey());
-            inst.removeSample(s);
-
-            synchronized (samples) {
-                samples.remove(s);
+            if (inst != null) {
+                inst.removeSample(s);
             }
         }
+        synchronized (samples) {
+            samples.removeAll(samplesToClear);
+        }                    
     }
 
     @Override

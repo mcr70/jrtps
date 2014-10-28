@@ -242,7 +242,7 @@ public class Sample<T> implements Cloneable {
     }
     
     public String toString() {
-        return "Sample[" + seqNum + "]";
+        return "Sample[" + seqNum + "]:" + sInfo;
     }
 
     public Object getProperty(String key) {
