@@ -164,7 +164,7 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
                 return null;
             }
 
-            if (kind == ChangeKind.DISPOSE) {
+            if (kind == ChangeKind.DISPOSE || kind ==ChangeKind.UNREGISTER) {
                 Instance<T> removedInstance = instances.remove(key);
                 if (removedInstance != null) {
                     removedInstance.dispose(); // cancels deadline monitor
