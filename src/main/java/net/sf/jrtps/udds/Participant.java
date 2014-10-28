@@ -155,7 +155,7 @@ public class Participant {
      * 
      * @param domainId domainId of this participant.
      * @param participantId participantId of this participant.
-     * @param userData byte array for QosUserData
+     * @param participantQos Quality of service for participant
      * @param ef EntityFactory to be used. If ef is null, a default EntityFactory will be used.
      * @param cfg Configuration used. If config is null, default Configuration is used.
      */

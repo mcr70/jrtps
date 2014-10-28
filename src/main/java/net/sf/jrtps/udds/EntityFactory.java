@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds;
 
+import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
 
@@ -8,7 +9,7 @@ import net.sf.jrtps.rtps.RTPSWriter;
  * By giving an instance of EntityFactory to Participant, one
  * can provide customized entities to application.
  * 
- * @see Participant#Participant(int, int, EntityFactory, net.sf.jrtps.Configuration)
+ * @see Participant#Participant(int, int, QualityOfService, EntityFactory, net.sf.jrtps.Configuration)
  * @see Participant#setEntityFactory(EntityFactory)
  * 
  * @author mcr70
