@@ -127,8 +127,11 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
      */
     @Override
     public Instance<T> register(T sample, long timestamp) {
-        Sample<T> dummySample = new Sample<T>(null, marshaller, ++seqNum, System.currentTimeMillis(), null, sample);
-        return getOrCreateInstance(dummySample.getKey());
+        if (marshaller.hasKey()) {
+            return getOrCreateInstance(new KeyHash(marshaller.extractKey(sample)));
+        }
+        
+        return null;
     }
 
 
