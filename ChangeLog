@@ -1,3 +1,7 @@
+1.0.1
+    - FIX: NPE when explicitly registering an instance. This does not affect uDDS,
+      as relevant API call is not public and not used by uDDS.
+     
 1.0
     - OWNERSHIP, OWNERSHIP_STRENGTH
     - Config: udds.sedp-delay 
