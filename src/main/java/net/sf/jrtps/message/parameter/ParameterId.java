@@ -85,6 +85,11 @@ public enum ParameterId {
     PID_EQUIVALENT_TYPE_NAME(0x0075),
     PID_BASE_TYPE_NAME(0x0076),
     
+    // from DDS Security:
+    PID_IDENTITY_TOKEN(0x1001),
+    PID_PERMISSIONS_TOKEN(0x1002),
+    PID_DATA_TAGS(0x1003),
+    
     PID_VENDOR_SPECIFIC(0x8000), // 0x8000 is just invented, @see 9.6.2.2.1
     // ParameterId space
     PID_UNKNOWN_PARAMETER(0x8001); // 0x8001 is just invented, @see 9.6.2.2.1
