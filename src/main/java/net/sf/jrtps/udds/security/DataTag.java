@@ -1,4 +1,4 @@
-package net.sf.jrtps.message.parameter;
+package net.sf.jrtps.udds.security;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
