@@ -1,5 +1,7 @@
-package net.sf.jrtps.message.parameter;
+package net.sf.jrtps.udds.security;
 
+import net.sf.jrtps.message.parameter.Parameter;
+import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class DataTags extends Parameter {
@@ -14,7 +16,7 @@ public class DataTags extends Parameter {
         this.data_tags = data_tags;
     }
     
-    DataTags() {
+    public DataTags() {
         super(ParameterId.PID_DATA_TAGS);
     }
 
