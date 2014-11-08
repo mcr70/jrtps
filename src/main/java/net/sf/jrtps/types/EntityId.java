@@ -30,17 +30,34 @@ public abstract class EntityId {
      */
     public static final EntityId SEDP_BUILTIN_SUBSCRIPTIONS_WRITER = new SEDPbuiltinSubscriptionsWriter();
     /**
+     * Builtin writer for secure subscriptions
+     */
+    public static final EntityId SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_WRITER = new SEDPbuiltinSubscriptionsSecureWriter();
+    /**
      * Builtin reader for subscriptions
      */
     public static final EntityId SEDP_BUILTIN_SUBSCRIPTIONS_READER = new SEDPbuiltinSubscriptionsReader();
+    /**
+     * Builtin reader for secure subscriptions
+     */
+    public static final EntityId SEDP_BUILTIN_SUBSCRIPTIONS_SECURE_READER = new SEDPbuiltinSubscriptionsSecureReader();
     /**
      * Builtin writer for publications
      */
     public static final EntityId SEDP_BUILTIN_PUBLICATIONS_WRITER = new SEDPbuiltinPublicationsWriter();
     /**
+     * Builtin writer for secure publications
+     */
+    public static final EntityId SEDP_BUILTIN_PUBLICATIONS_SECURE_WRITER = new SEDPbuiltinPublicationsSecureWriter();
+    /**
      * Builtin reader for publications
      */
     public static final EntityId SEDP_BUILTIN_PUBLICATIONS_READER = new SEDPbuiltinPublicationsReader();
+    /**
+     * Builtin reader for secure publications
+     */
+    public static final EntityId SEDP_BUILTIN_PUBLICATIONS_SECURE_READER= new SEDPbuiltinPublicationsSecureReader();
+
     /**
      * Builtin writer for topic
      */
@@ -55,17 +72,30 @@ public abstract class EntityId {
      * @see RTPSParticipant
      */
     public static final EntityId PARTICIPANT = new Participant();
-    /* public */ static final EntityId INTER_PARTICIPANT_WRITER = new InterParticipantStatelessWriter();
-    /* public */ static final EntityId INTER_PARTICIPANT_READER = new InterParticipantStatelessReader();
     
     /**
      * Builtin writer for ParticipantMessage
      */
     public static final EntityId BUILTIN_PARTICIPANT_MESSAGE_WRITER = new BuiltinParticipantMessageWriter();
     /**
+     * Builtin writer for secure ParticipantMessage
+     */
+    public static final EntityId BUILTIN_PARTICIPANT_MESSAGE_SECURE_WRITER = new BuiltinParticipantMessageSecureWriter();
+    /**
      * Builtin reader for ParticipantMessage
      */
     public static final EntityId BUILTIN_PARTICIPANT_MESSAGE_READER = new BuiltinParticipantMessageReader();
+    /**
+     * Builtin reader for secure ParticipantMessage
+     */
+    public static final EntityId BUILTIN_PARTICIPANT_MESSAGE_SECURE_READER = new BuiltinParticipantMessageSecureReader();
+    
+    public static final EntityId BUILTIN_PARTICIPANT_STATELESS_WRITER = new BuiltinParticipantStatelessWriter();
+    public static final EntityId BUILTIN_PARTICIPANT_STATELESS_READER = new BuiltinParticipantStatelessReader();
+
+    public static final EntityId BUILTIN_PARTICIPANT_VOLATILE_WRITER = new BuiltinParticipantVolatileMessageSecureWriter();
+    public static final EntityId BUILTIN_PARTICIPANT_VOLATILE_READER = new BuiltinParticipantVolatileMessageSecureReader();
+
     /**
      * Represents an unknown entity
      */
@@ -211,10 +241,10 @@ public abstract class EntityId {
             entityId = new BuiltinParticipantMessageReader();
             break; // liveliness protocol
         case (2 << 16) | (1 << 8) | 0xc2:
-            entityId = new InterParticipantStatelessWriter(); // for DDS security
+            entityId = new BuiltinParticipantStatelessWriter(); // for DDS security
             break;  
         case (2 << 16) | (1 << 8) | 0xc7:
-            entityId = new InterParticipantStatelessReader(); // for DDS security
+            entityId = new BuiltinParticipantStatelessReader(); // for DDS security
             break;  
             
         default:
@@ -330,11 +360,12 @@ public abstract class EntityId {
 
 
     /**
-     * Used with DDS security. The InterParticipantStatelessWriter is an RTPS Best-Effort StatelessWriter
+     * Used with DDS security. The BuiltinParticipantStatelessWriter is an RTPS 
+     * Best-Effort StatelessWriter
      * @author mcr70
      */
-    static class InterParticipantStatelessWriter extends EntityId {
-        private InterParticipantStatelessWriter() {
+    public static class BuiltinParticipantStatelessWriter extends EntityId {
+        private BuiltinParticipantStatelessWriter() {
             super(new byte[] { 0, 2, 1 }, (byte) 0xc2);
         }
 
@@ -345,11 +376,12 @@ public abstract class EntityId {
     }
 
     /**
-     * Used with DDS security. The InterParticipantStatelessReader is an RTPS Best-Effort StatelessReader
+     * Used with DDS security. The BuiltinParticipantStatelessReader is an RTPS 
+     * Best-Effort StatelessReader
      * @author mcr70
      */
-    static class InterParticipantStatelessReader extends EntityId {
-        private InterParticipantStatelessReader() {
+    public static class BuiltinParticipantStatelessReader extends EntityId {
+        private BuiltinParticipantStatelessReader() {
             super(new byte[] { 0, 2, 1 }, (byte) 0xc7);
         }
 
@@ -359,6 +391,35 @@ public abstract class EntityId {
         }
     }
 
+    /**
+     * Used with DDS security. 
+     * @author mcr70
+     */
+    public static class BuiltinParticipantVolatileMessageSecureWriter extends EntityId {
+        private BuiltinParticipantVolatileMessageSecureWriter() {
+            super(new byte[] { (byte) 0xff, 2, 2 }, (byte) 0xc2);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return 0; // TODO: check this
+        }
+    }
+
+    /**
+     * Used with DDS security. 
+     * @author mcr70
+     */
+    public static class BuiltinParticipantVolatileMessageSecureReader extends EntityId {
+        private BuiltinParticipantVolatileMessageSecureReader() {
+            super(new byte[] { (byte) 0xff, 2, 2 }, (byte) 0xc7);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return 0; // TODO: check this
+        }
+    }
     
     /**
      * EntityId representing SEDP builtin topic reader.
@@ -395,6 +456,23 @@ public abstract class EntityId {
     }
 
     /**
+     * EntityId representing SEDP builtin publications secue writer.
+     * 
+     * @see net.sf.jrtps.builtin.PublicationData
+     * @author mcr70
+     */
+    public static class SEDPbuiltinPublicationsSecureWriter extends EntityId {
+        private SEDPbuiltinPublicationsSecureWriter() {
+            super(new byte[] { (byte) 0xff, 0, 3 }, (byte) 0xc2);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_ANNOUNCER;
+        }
+    }
+
+    /**
      * EntityId representing SEDP builtin publications reader.
      * 
      * @see net.sf.jrtps.builtin.PublicationData
@@ -403,6 +481,23 @@ public abstract class EntityId {
     public static class SEDPbuiltinPublicationsReader extends EntityId {
         private SEDPbuiltinPublicationsReader() {
             super(new byte[] { 0, 0, 3 }, (byte) 0xc7);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_PUBLICATION_DETECTOR;
+        }
+    }
+
+    /**
+     * EntityId representing SEDP builtin publications secure reader.
+     * 
+     * @see net.sf.jrtps.builtin.PublicationData
+     * @author mcr70
+     */
+    public static class SEDPbuiltinPublicationsSecureReader extends EntityId {
+        private SEDPbuiltinPublicationsSecureReader() {
+            super(new byte[] { (byte) 0xff, 0, 3 }, (byte) 0xc7);
         }
 
         @Override
@@ -429,6 +524,23 @@ public abstract class EntityId {
     }
 
     /**
+     * EntityId representing SEDP builtin subscriptions secure writer.
+     * 
+     * @see net.sf.jrtps.builtin.SubscriptionData
+     * @author mcr70
+     */
+    public static class SEDPbuiltinSubscriptionsSecureWriter extends EntityId {
+        private SEDPbuiltinSubscriptionsSecureWriter() {
+            super(new byte[] { (byte) 0xff, 0, 4 }, (byte) 0xc2);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_ANNOUNCER;
+        }
+    }
+
+    /**
      * EntityId representing SEDP builtin subscriptions reader.
      * 
      * @see net.sf.jrtps.builtin.SubscriptionData
@@ -437,6 +549,23 @@ public abstract class EntityId {
     public static class SEDPbuiltinSubscriptionsReader extends EntityId {
         private SEDPbuiltinSubscriptionsReader() {
             super(new byte[] { 0, 0, 4 }, (byte) 0xc7);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return BuiltinEndpointSet.DISC_BUILTIN_ENDPOINT_SUBSCRIPTION_DETECTOR;
+        }
+    }
+
+    /**
+     * EntityId representing SEDP builtin subscriptions reader.
+     * 
+     * @see net.sf.jrtps.builtin.SubscriptionData
+     * @author mcr70
+     */
+    public static class SEDPbuiltinSubscriptionsSecureReader extends EntityId {
+        private SEDPbuiltinSubscriptionsSecureReader() {
+            super(new byte[] { (byte) 0xff, 0, 4 }, (byte) 0xc7);
         }
 
         @Override
@@ -499,6 +628,24 @@ public abstract class EntityId {
     }
 
     /**
+     * EntityId representing builtin ParticipantMessage secure writer.
+     * ParticipantMessages are used with writer liveliness protocol.
+     * 
+     * @see ParticipantMessage
+     * @author mcr70
+     */
+    public static class BuiltinParticipantMessageSecureWriter extends EntityId {
+        private BuiltinParticipantMessageSecureWriter() {
+            super(new byte[] { (byte) 0xff, 2, 0 }, (byte) 0xc2);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_WRITER;
+        }
+    }
+
+    /**
      * EntityId representing builtin ParticipantMessage reader.
      * ParticipantMessages are used with writer liveliness protocol.
      * 
@@ -516,6 +663,23 @@ public abstract class EntityId {
         }
     }
 
+    /**
+     * EntityId representing builtin secure ParticipantMessage reader.
+     * ParticipantMessages are used with writer liveliness protocol.
+     * 
+     * @see ParticipantMessage
+     * @author mcr70
+     */
+    public static class BuiltinParticipantMessageSecureReader extends EntityId {
+        private BuiltinParticipantMessageSecureReader() {
+            super(new byte[] { (byte) 0xff, 2, 0 }, (byte) 0xc7);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return BuiltinEndpointSet.BUILTIN_ENDPOINT_PARTICIPANT_MESSAGE_DATA_READER;
+        }
+    }
 
     public String toString() {
         if (isBuiltinEntity() || this instanceof UnknownEntity) {
