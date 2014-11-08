@@ -1,8 +1,27 @@
 package net.sf.jrtps.udds.security;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import net.sf.jrtps.types.Guid;
 
-class AuthenticationPlugin {
+abstract class Authentication {
+    private static final Map<String, Authentication> authentications = new HashMap<>();
+    
+    public static Authentication getInstance(String authName) {
+        Authentication auth = authentications.get(authName);
+        if (auth == null) {
+            throw new IllegalArgumentException("No Authentication registered with name '" + 
+                    authName + "': " + authentications.keySet());
+        }
+        
+        return auth;
+    }
+    
+    public static void registerAuthentication(String authName, Authentication auth) {
+        authentications.put(authName, auth);
+    }
+    
     public void validate_local_identity(IdentityCredential credential, Guid participant) throws SecurityException {
         // return identityHandle, adjusted_aprticipant_key
     }

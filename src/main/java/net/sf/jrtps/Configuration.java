@@ -364,4 +364,16 @@ public class Configuration {
         return uriList;
     }
 
+
+    public String getKeystorePassword() {
+        return props.getProperty("udds.security.keystore.password", "changeit");
+    }
+
+    public String getSecurityCA() {
+        return props.getProperty("udds.security.ca", "jrtpsCA"); 
+    }
+
+    public String getSecurityPrincipal() {
+        return props.getProperty("udds.security.principal", "jrtps01"); 
+    }
 }
