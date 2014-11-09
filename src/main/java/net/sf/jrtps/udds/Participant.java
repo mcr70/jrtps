@@ -100,17 +100,24 @@ public class Participant {
     private final QualityOfService spdpQoS; // SPDP
     private final QualityOfService sedpQoS; // SEDP
     private final QualityOfService pmQoS;   // ParticipantMessage
-    private byte[] userData;
+	private final QualityOfService pvmQoS;  // ParticipantVolatileMessage
+	
     private QualityOfService participantQos;
+	private boolean isSecure = false; // By default, DDS security is disabled
 
     {
         spdpQoS = QualityOfService.getSPDPQualityOfService(); 
         sedpQoS = QualityOfService.getSEDPQualityOfService();
+        
         pmQoS = new QualityOfService();
-
         pmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
         pmQoS.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT_LOCAL));
         pmQoS.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 1));
+
+        pvmQoS = new QualityOfService();
+        pvmQoS.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, new Duration(0, 0)));
+        pvmQoS.setPolicy(new QosDurability(QosDurability.Kind.VOLATILE));
+        pvmQoS.setPolicy(new QosHistory(QosHistory.Kind.KEEP_ALL, 1));
     }
 
 
@@ -200,6 +207,10 @@ public class Participant {
         registerBuiltinMarshallers();
         createSPDPEntities();
 
+        if (isSecure ) {
+        	createSecurityEndpoints();
+        }
+        
         discoveryLocators = rtps_participant.getDiscoveryLocators();
         userdataLocators = rtps_participant.getUserdataLocators();
 
@@ -218,7 +229,16 @@ public class Participant {
         logger.info("Created Participant {}", Arrays.toString(getGuid().getBytes()));
     }
 
-    private void registerBuiltinMarshallers() {
+    private void createSecurityEndpoints() {
+    	registerSecureBuiltinMarshallers();
+		// TODO Auto-generated method stub
+    }
+
+	private void registerSecureBuiltinMarshallers() {
+		// TODO Auto-generated method stub
+	}
+
+	private void registerBuiltinMarshallers() {
         setMarshaller(ParticipantData.class, new ParticipantDataMarshaller());
         setMarshaller(ParticipantMessage.class, new ParticipantMessageMarshaller());
         setMarshaller(PublicationData.class, new PublicationDataMarshaller());
@@ -401,7 +421,6 @@ public class Participant {
             DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
                     SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
             sw.write(dr.getSubscriptionData());
-
         }
 
         logger.debug("Removed DataReader {} for {}", dr.getGuid(), dr.getTopicName()); 
@@ -501,7 +520,6 @@ public class Participant {
             @SuppressWarnings("unchecked")
             DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
                     PublicationData.BUILTIN_TOPIC_NAME).get(0);
-            logger.debug("Writing Publication");
             pw.write(wd);
 
             logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
@@ -519,7 +537,6 @@ public class Participant {
             @SuppressWarnings("unchecked")
             DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
                     PublicationData.BUILTIN_TOPIC_NAME).get(0);
-            logger.debug("Writing Publication");
             pw.dispose(dw.getPublicationData());
         }
         
