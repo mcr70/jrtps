@@ -18,10 +18,6 @@ public class KeyStoreAuthentication extends Authentication {
     private KeyStore ks;
     private Certificate ca;
     private X509Certificate principal;
-
-    public static void main(String[] args) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException {
-        KeyStoreAuthentication ksa = new KeyStoreAuthentication(new Configuration());
-    }
     
     public KeyStoreAuthentication(Configuration conf) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException {
         ks = KeyStore.getInstance("JKS");
@@ -36,6 +32,4 @@ public class KeyStoreAuthentication extends Authentication {
         
         principal.verify(ca.getPublicKey());
     }
-    
-    
 }
