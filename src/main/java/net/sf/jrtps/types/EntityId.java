@@ -219,14 +219,26 @@ public abstract class EntityId {
         case (3 << 8) | 0xc2:
             entityId = new SEDPbuiltinPublicationsWriter();
             break;
+        case (0xff << 24) | (3 << 8) | 0xc2:
+            entityId = new SEDPbuiltinPublicationsSecureWriter(); // from DDS security
+            break;
         case (3 << 8) | 0xc7:
             entityId = new SEDPbuiltinPublicationsReader();
+            break;
+        case (0xff << 24) | (3 << 8) | 0xc7:
+            entityId = new SEDPbuiltinPublicationsSecureReader(); // from DDS security
             break;
         case (4 << 8) | 0xc2:
             entityId = new SEDPbuiltinSubscriptionsWriter();
             break;
+        case (0xff << 24) | (4 << 8) | 0xc2:
+            entityId = new SEDPbuiltinSubscriptionsSecureWriter(); // from DDS security
+            break;
         case (4 << 8) | 0xc7:
             entityId = new SEDPbuiltinSubscriptionsReader();
+            break;
+        case (0xff << 24) | (4 << 8) | 0xc7:
+            entityId = new SEDPbuiltinSubscriptionsSecureReader(); // from DDS security
             break;
         case (1 << 16) | 0xc2:
             entityId = new SPDPbuiltinParticipantWriter();
@@ -236,15 +248,27 @@ public abstract class EntityId {
             break;
         case (2 << 16) | 0xc2:
             entityId = new BuiltinParticipantMessageWriter();
-            break; // liveliness protocol
+            break; 
+        case (0xff << 24) | (2 << 16) | 0xc2:
+            entityId = new BuiltinParticipantMessageSecureWriter(); // from DDS security
+            break; 
         case (2 << 16) | 0xc7:
             entityId = new BuiltinParticipantMessageReader();
-            break; // liveliness protocol
+            break; 
+        case (0xff << 24) | (2 << 16) | 0xc7:
+            entityId = new BuiltinParticipantMessageSecureReader();
+            break; 
         case (2 << 16) | (1 << 8) | 0xc2:
-            entityId = new BuiltinParticipantStatelessWriter(); // for DDS security
+            entityId = new BuiltinParticipantStatelessWriter(); // from DDS security
             break;  
         case (2 << 16) | (1 << 8) | 0xc7:
-            entityId = new BuiltinParticipantStatelessReader(); // for DDS security
+            entityId = new BuiltinParticipantStatelessReader(); // from DDS security
+            break;  
+        case (0xff << 24) | (2 << 16) | (2 << 8) | 0xc2:
+            entityId = new BuiltinParticipantVolatileMessageSecureWriter(); // from DDS security
+            break;  
+        case (0xff << 24) | (2 << 16) | (2 << 8) | 0xc7:
+            entityId = new BuiltinParticipantVolatileMessageSecureWriter(); // from DDS security
             break;  
             
         default:
@@ -343,9 +367,7 @@ public abstract class EntityId {
 
     /**
      * EntityId representing SEDP builtin topic writer.
-     * 
      * @author mcr70
-     * 
      */
     public static class SEDPbuiltinTopicWriter extends EntityId {
         private SEDPbuiltinTopicWriter() {
@@ -358,6 +380,20 @@ public abstract class EntityId {
         }
     }
 
+    /**
+     * EntityId representing SEDP builtin topic reader.
+     * @author mcr70
+     */
+    public static class SEDPbuiltinTopicReader extends EntityId {
+        private SEDPbuiltinTopicReader() {
+            super(new byte[] { 0, 0, 2 }, (byte) 0xc7);
+        }
+
+        @Override
+        public int getEndpointSetId() {
+            return 0; // TODO: check this
+        }
+    }
 
     /**
      * Used with DDS security. The BuiltinParticipantStatelessWriter is an RTPS 
@@ -371,7 +407,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return 0; // TODO: check this
+            return 0;
         }
     }
 
@@ -387,7 +423,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return 0; // TODO: check this
+            return 0;
         }
     }
 
@@ -402,7 +438,7 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return 0; // TODO: check this
+            return 0; 
         }
     }
 
@@ -417,26 +453,10 @@ public abstract class EntityId {
 
         @Override
         public int getEndpointSetId() {
-            return 0; // TODO: check this
+            return 0; 
         }
     }
     
-    /**
-     * EntityId representing SEDP builtin topic reader.
-     * 
-     * @author mcr70
-     * 
-     */
-    public static class SEDPbuiltinTopicReader extends EntityId {
-        private SEDPbuiltinTopicReader() {
-            super(new byte[] { 0, 0, 2 }, (byte) 0xc7);
-        }
-
-        @Override
-        public int getEndpointSetId() {
-            return 0; // TODO: check this
-        }
-    }
 
     /**
      * EntityId representing SEDP builtin publications writer.
@@ -456,7 +476,7 @@ public abstract class EntityId {
     }
 
     /**
-     * EntityId representing SEDP builtin publications secue writer.
+     * EntityId representing SEDP builtin publications secure writer.
      * 
      * @see net.sf.jrtps.builtin.PublicationData
      * @author mcr70
@@ -558,7 +578,7 @@ public abstract class EntityId {
     }
 
     /**
-     * EntityId representing SEDP builtin subscriptions reader.
+     * EntityId representing SEDP builtin subscriptions secure reader.
      * 
      * @see net.sf.jrtps.builtin.SubscriptionData
      * @author mcr70
