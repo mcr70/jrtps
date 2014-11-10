@@ -12,10 +12,15 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.Configuration;
 
 public class KeyStoreAuthentication extends Authentication {
-    private KeyStore ks;
+	private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthentication.class);
+	
+	private KeyStore ks;
     private Certificate ca;
     private X509Certificate principal;
     
@@ -28,8 +33,17 @@ public class KeyStoreAuthentication extends Authentication {
         ks.load(is, pwd.toCharArray());
         
         ca = ks.getCertificate(conf.getSecurityCA());
-        principal = (X509Certificate) ks.getCertificate(conf.getSecurityPrincipal());
+        if (ca == null) {
+        	throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
+        }
         
+        principal = (X509Certificate) ks.getCertificate(conf.getSecurityPrincipal());
+        if (principal == null) {
+        	throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
+        }
+
         principal.verify(ca.getPublicKey());
+
+        logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
     }
 }
