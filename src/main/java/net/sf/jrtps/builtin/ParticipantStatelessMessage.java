@@ -8,7 +8,9 @@ import net.sf.jrtps.udds.security.ParticipantGenericMessage;
  * @author mcr70
  */
 public class ParticipantStatelessMessage extends ParticipantGenericMessage {
-    public ParticipantStatelessMessage(Guid source_guid) {
+    public static final String BUILTIN_TOPIC_NAME = "DCPSParticipantStatelessMessage";
+
+	public ParticipantStatelessMessage(Guid source_guid) {
         
     }
 }

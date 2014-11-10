@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+    <xs:element name="dds" type="DomainAccessRulesNode" />
+
+    <xs:complexType name="DomainAccessRulesNode">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element name="domain_access_rules" type="DomainAccessRules" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DomainAccessRules">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="domain_rule" type="DomainRule" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="DomainRule">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element name="domain_id" type="xs:string" />
+            <xs:element name="allow_unauthenticated_join" type="BooleanKind" />
+            <xs:element name="enable_join_access_control" type="BooleanKind" />
+            <xs:element name="discovery_protection_kind" type="ProtectionKind" />
+            <xs:element name="liveliness_protection_kind" type="ProtectionKind" />
+            <xs:element name="rtps_protection_kind" type="ProtectionKind" />
+            <xs:element name="topic_access_rules" type="TopicAccessRules" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:simpleType name="ProtectionKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ENCRYPT" />
+            <xs:enumeration value="SIGN" />
+            <xs:enumeration value="NONE" />
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="BooleanKind">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="TRUE" />
+            <xs:enumeration value="FALSE" />
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="TopicAccessRules">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="topic_rule" type="TopicRule" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="TopicRule">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element name="topic_expression" type="TopicExpression" />
+            <xs:element name="enable_discovery_protection" type="BooleanKind" />
+            <xs:element name="enable_read_access_control" type="BooleanKind" />
+            <xs:element name="enable_write_access_control" type="BooleanKind" />
+            <xs:element name="metadata_protection_kind" type="ProtectionKind" />
+            <xs:element name="data_protection_kind" type="ProtectionKind" />
+        </xs:sequence>
+    </xs:complexType>
+
+
+    <xs:simpleType name="TopicExpression">
+        <xs:restriction base="xs:string" />
+    </xs:simpleType>
+
+</xs:schema>

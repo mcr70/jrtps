@@ -3,6 +3,8 @@ package net.sf.jrtps.udds.security;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.sf.jrtps.message.parameter.IdentityToken;
+import net.sf.jrtps.message.parameter.PermissionsToken;
 import net.sf.jrtps.types.Guid;
 
 abstract class Authentication {

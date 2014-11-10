@@ -25,16 +25,16 @@ import examples.hello.serializable.HelloMessage;
 public class AbstractQosTest {
     static final long LATCH_WAIT_MILLIS = 2000;
     
-    static Configuration cfg1 = new Configuration("/mem-test-1.properties");
-    static Configuration cfg2 = new Configuration("/mem-test-2.properties");
+    protected static Configuration cfg1 = new Configuration("/mem-test-1.properties");
+    protected static Configuration cfg2 = new Configuration("/mem-test-2.properties");
 
     static {
         MemProvider mp = new MemProvider(cfg1);
         TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
     }
 
-    Participant p1;
-    Participant p2;
+    protected Participant p1;
+    protected Participant p2;
 
     @Before
     public void init() {

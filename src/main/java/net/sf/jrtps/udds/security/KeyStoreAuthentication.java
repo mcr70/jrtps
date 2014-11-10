@@ -19,8 +19,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.udds.Participant;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,10 +50,11 @@ public class KeyStoreAuthentication extends Authentication {
     private Guid adjustedGuid;
     private IdentityToken identityToken;
     private final Configuration conf;
-
+    private final Participant participant;
     
-    public KeyStoreAuthentication(Configuration conf, Guid guid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException {
-        this.conf = conf;
+    public KeyStoreAuthentication(Participant participant, Configuration conf, Guid guid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        this.participant = participant;
+		this.conf = conf;
         this.originalGuid = guid;
         this.sha256 = MessageDigest.getInstance("MD5");
 
@@ -167,7 +170,7 @@ public class KeyStoreAuthentication extends Authentication {
         int comparison = identityToken.getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
         if (comparison < 0) { // Remote is lexicographically greater
             // VALIDATION_PENDING_HANDSHAKE_REQUEST
-            beginHandshakeRequest();
+            beginHandshakeRequest(remoteIdentity);
         }
         else if (comparison > 0) { // Remote is lexicographically smaller
             // VALIDATION_PENDING_HANDSHAKE_MESSAGE
@@ -193,7 +196,8 @@ public class KeyStoreAuthentication extends Authentication {
         }
     }
 
-    private void beginHandshakeRequest() {
-        // TODO Auto-generated method stub
+    private void beginHandshakeRequest(IdentityToken remoteIdentity) {
+    	//participant.createDataReader(topicName, type, typeName, qos)
+    	// TODO Auto-generated method stub
     }
 }
