@@ -9,6 +9,7 @@ import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.DefaultMulticastLocator;
 import net.sf.jrtps.message.parameter.DefaultUnicastLocator;
 import net.sf.jrtps.message.parameter.EndpointSet;
+import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.MetatrafficMulticastLocator;
 import net.sf.jrtps.message.parameter.MetatrafficUnicastLocator;
 import net.sf.jrtps.message.parameter.Parameter;
@@ -16,6 +17,7 @@ import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
 import net.sf.jrtps.message.parameter.ParticipantManualLivelinessCount;
+import net.sf.jrtps.message.parameter.PermissionsToken;
 import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.QosUserData;
@@ -32,10 +34,18 @@ import net.sf.jrtps.types.VendorId_t;
 import org.slf4j.LoggerFactory;
 
 /**
- * see 8.5.3.2 SPDPdiscoveredParticipantData. DDS::ParticipantBuiltinTopicData
+ * ParticipantData represents data on topic "DCPSParticipants".
+ * In addition to represent data of type ParticipantBuiltinTopicData,
+ * this class also represents data of type ParticipantBuiltinTopicDataSecure,
+ * which extends the former and adds IdentityToken and PermissionsToken 
+ * parameters.<p>
+ * 
+ * See 8.5.3.2 SPDPdiscoveredParticipantData. DDS::ParticipantBuiltinTopicData
+ * of RTPS specification
+ * and 7.4.1.3 Extension to RTPS Standard DCPSParticipants Builtin Topic
+ * of DDS Security
  * 
  * @author mcr70
- * 
  */
 public class ParticipantData extends DiscoveredData {
     public static final String BUILTIN_TOPIC_NAME = "DCPSParticipant";
@@ -67,6 +77,8 @@ public class ParticipantData extends DiscoveredData {
      * Time, that will mark remote participants lease as expired.
      */
     private long leaseExpirationTime;
+	private IdentityToken identityToken;
+	private PermissionsToken permissionsToken;
 
     public ParticipantData(GuidPrefix prefix, int endpoints, List<Locator> discoveryLocators,
             List<Locator> userdataLocators, QualityOfService participantQos) {
@@ -141,6 +153,12 @@ public class ParticipantData extends DiscoveredData {
             case PID_TYPE_NAME:
                 super.typeName = ((TypeName) param).getTypeName();
                 break;
+            case PID_IDENTITY_TOKEN:
+            	identityToken = (IdentityToken)param;
+            	break;
+            case PID_PERMISSIONS_TOKEN:
+            	permissionsToken = (PermissionsToken)param;
+            	break;
             case PID_SENTINEL:
                 break;
             default:
@@ -159,10 +177,34 @@ public class ParticipantData extends DiscoveredData {
         renewLease();
     }
 
+    /**
+     * Gets the IdentityToken of ParticipantData if present.
+     * @return IdentityToken, or null if it does not exist.
+     */
+    public IdentityToken getIdentityToken() {
+		return identityToken;
+	}
+    
+    /**
+     * Gets the PermissionsToken of ParticipantData if present.
+     * @return PermissionsToken, or null if it does not exist.
+     */
+    public PermissionsToken getPermissionsToken() {
+		return permissionsToken;
+	}
+    
+    /**
+     * Gets the ProtocolVersion.
+     * @return ProtocolVersion
+     */
     public ProtocolVersion_t getProtocolVersion() {
         return protocolVersion;
     }
 
+    /**
+     * Gets the guid prefix.
+     * @return GuidPrefix
+     */
     public GuidPrefix getGuidPrefix() {
         return guidPrefix;
     }
@@ -176,10 +218,18 @@ public class ParticipantData extends DiscoveredData {
         return new Guid(guidPrefix, EntityId.PARTICIPANT);
     }
 
+    /**
+     * Get the VendorId
+     * @return VendorId
+     */
     public VendorId_t getVendorId() {
         return vendorId;
     }
 
+    /**
+     * Gets ExpectsInlineQos
+     * @return ExpectsInlineQos
+     */
     public boolean expectsInlineQos() {
         return expectsInlineQos;
     }

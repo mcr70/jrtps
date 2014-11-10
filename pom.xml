@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -39,12 +40,8 @@
             <version>2.0.2</version>
             <scope>test</scope>
         </dependency>
-<!--         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.9</version>
-            <scope>test</scope>
-        </dependency> -->
+		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
+			<version>1.0.9</version> <scope>test</scope> </dependency> -->
 
         <dependency>
             <groupId>junit</groupId>
@@ -73,7 +70,7 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
+			<!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
             <distributionManagement>
                 <site>
                     <id>jrtps.site.sf</id>
@@ -146,6 +143,72 @@
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                     </instructions>
                 </configuration>
+            </plugin>
+<!-- 			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jaxb2-maven-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>xjc-schema1</id>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+						<configuration>
+							<schemaFiles>dds_security_permissions.xsd</schemaFiles>
+							<packageName>net.sf.udds.security.permissions</packageName>
+							<verbose>true</verbose>
+						</configuration>
+					</execution>
+					<execution>
+						<id>xjc-schema2</id>
+						<goals>
+							<goal>xjc</goal>
+						</goals>
+						<configuration>
+							<schemaFiles>dds_security_governance.xsd</schemaFiles>
+							<packageName>net.sf.udds.security.governance</packageName>
+							<clearOutputDir>false</clearOutputDir>
+							<verbose>true</verbose>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+-->
+            <plugin>
+                <groupId>org.jvnet.jaxb2.maven2</groupId>
+                <artifactId>maven-jaxb2-plugin</artifactId>
+                <version>0.11.0</version>
+                <executions>
+                    <execution>
+                        <id>schema1-generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>src/main/xsd</schemaDirectory>
+                            <schemaIncludes>
+                                <include>dds_security_permissions.xsd</include>
+                            </schemaIncludes>
+                            <generatePackage>net.sf.jrtps.udds.security.permissions</generatePackage>
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc1</generateDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>schema2-generate</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>src/main/xsd</schemaDirectory>
+                            <schemaIncludes>
+                                <include>dds_security_governance.xsd</include>
+                            </schemaIncludes>
+                            <generatePackage>net.sf.jrtps.udds.security.governance</generatePackage>
+                            <generateDirectory>${project.build.directory}/generated-sources/xjc2</generateDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
 

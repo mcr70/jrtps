@@ -22,6 +22,7 @@ import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.ParticipantMessageMarshaller;
+import net.sf.jrtps.builtin.ParticipantStatelessMessage;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.PublicationDataMarshaller;
 import net.sf.jrtps.builtin.SubscriptionData;
@@ -365,6 +366,8 @@ public class Participant {
             eId = EntityId.SEDP_BUILTIN_PUBLICATIONS_READER;
         } else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
             eId = EntityId.SPDP_BUILTIN_PARTICIPANT_READER;
+        } else if (ParticipantStatelessMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
+            eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER;
         } else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
             eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER;
         } else {

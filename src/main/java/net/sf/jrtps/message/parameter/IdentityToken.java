@@ -1,7 +1,5 @@
-package net.sf.jrtps.udds.security;
+package net.sf.jrtps.message.parameter;
 
-import net.sf.jrtps.message.parameter.Parameter;
-import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
@@ -15,19 +13,19 @@ public class IdentityToken extends Parameter {
     public static final String CLASS_ID_DDS_AUTH_X509_PEM_SHA256 = "DDS:Auth:X.509‐PEM‐SHA256";
     
     private String class_id;
-
     private byte[] binary_value1;
 
     public IdentityToken(byte[] binary_value1) {
         super(ParameterId.PID_IDENTITY_TOKEN);
         this.class_id = CLASS_ID_DDS_AUTH_X509_PEM_SHA256;
         this.binary_value1 = binary_value1;
+        
         if (binary_value1.length != 32) {
             throw new IllegalArgumentException("the length of encoded SHA256 hash must be 32: " + binary_value1.length);
         }
     }
 
-    public IdentityToken() {
+    IdentityToken() {
         super(ParameterId.PID_IDENTITY_TOKEN);
     }
 
@@ -61,6 +59,7 @@ public class IdentityToken extends Parameter {
         if (count != 32) {
             throw new IllegalArgumentException("the length of encoded SHA256 hash must be 32: " + count);
         }
+        
         binary_value1 = new byte[count];
         bb.read(binary_value1);
     }
