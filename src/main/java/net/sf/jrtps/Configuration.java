@@ -376,4 +376,8 @@ public class Configuration {
     public String getSecurityPrincipal() {
         return props.getProperty("udds.security.principal"); 
     }
+
+    public long getHandshakeTimeout() {
+        return getIntProperty("udds.security.handshake.timeout", 2000);
+    }
 }

@@ -12,7 +12,11 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.types.EntityId;
@@ -21,11 +25,21 @@ import net.sf.jrtps.types.Guid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * KeyStoreAuthentication is an Authentication plugin as discussed in
+ * DDS Security specification. Chapter 9.3.3 <i>DDS:Auth:PKI-RSA/DSA-DH plugin behavior</i>
+ * describes the plugin behavior.
+ * 
+ * @author mcr70
+ */
 public class KeyStoreAuthentication extends Authentication {
     private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthentication.class);
     private static MessageDigest sha256 = null;
     private static Random random = new Random(System.currentTimeMillis()); 
 
+    // Latches used to wait for remote participants
+    private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
+    
     private final KeyStore ks;
     private final Certificate ca;
     private final X509Certificate principal;
@@ -33,8 +47,11 @@ public class KeyStoreAuthentication extends Authentication {
     private final Guid originalGuid;
     private Guid adjustedGuid;
     private IdentityToken identityToken;
+    private final Configuration conf;
 
+    
     public KeyStoreAuthentication(Configuration conf, Guid guid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException {
+        this.conf = conf;
         this.originalGuid = guid;
         this.sha256 = MessageDigest.getInstance("MD5");
 
@@ -137,16 +154,46 @@ public class KeyStoreAuthentication extends Authentication {
     }
 
 
+    /**
+     * This method is called when a remote participant has been detected and it has 
+     * DDS security capabilities by providing IdentityToken with ParticipantBuiltinTopicData.
+     * 
+     * See ch. 7.4.1.3 of DDS Security specification: Extension to RTPS Standard DCPSParticipants 
+     * Builtin Topic, and ch. 9.3.3 DDS:Auth:PKI-RSA/DSA-DH plugin behavior
+     * 
+     * @param remoteIdentity IdentityToken of remote participant
+     */
     public void validateRemoteIdentity(IdentityToken remoteIdentity) {
         int comparison = identityToken.getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
         if (comparison < 0) { // Remote is lexicographically greater
             // VALIDATION_PENDING_HANDSHAKE_REQUEST
+            beginHandshakeRequest();
         }
         else if (comparison > 0) { // Remote is lexicographically smaller
             // VALIDATION_PENDING_HANDSHAKE_MESSAGE
+            // Wait for remote entity to send handshae message
+            CountDownLatch latch = handshakeLatches.remove(remoteIdentity);
+            try {
+                boolean await = latch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
+                handshakeLatches.remove(remoteIdentity);
+                if (await) {
+                    // TODO: then what
+                }
+                else {
+                    logger.warn("Failed to get handshake message from remote entity on time");
+                }
+            } catch (InterruptedException e) {
+                handshakeLatches.remove(remoteIdentity);
+                logger.warn("Interrupted. Returning from validateRemoteIdentity()");
+                return;
+            }
         }
         else { // Remote has the same identity as local
             // ???
         }
+    }
+
+    private void beginHandshakeRequest() {
+        // TODO Auto-generated method stub
     }
 }
