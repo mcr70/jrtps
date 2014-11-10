@@ -18,9 +18,9 @@ import org.junit.Test;
 public class AuthenticationTest {
 	@Test
 	public void testKeyStore() throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, IOException {
-		KeyStoreAuthentication ks = new KeyStoreAuthentication(new Configuration());
+		KeyStoreAuthentication ks = new KeyStoreAuthentication(new Configuration(), new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.PARTICIPANT));
 
-		System.out.println(ks.getGuid(new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.PARTICIPANT)));
+		System.out.println(ks.getAdjustedGuid());
 		System.out.println(ks.getIdentityToken());
 	}
 }
