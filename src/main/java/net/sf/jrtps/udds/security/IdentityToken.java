@@ -20,6 +20,7 @@ public class IdentityToken extends Parameter {
 
     public IdentityToken(byte[] certificateHash) {
         super(ParameterId.PID_IDENTITY_TOKEN);
+        this.class_id = CLASS_ID_DDS_AUTH_X509_PEM_SHA256;
         this.binary_value1 = certificateHash;
         if (certificateHash.length != 32) {
             throw new IllegalArgumentException("the length of SHA256 hash must be 32");
@@ -64,5 +65,16 @@ public class IdentityToken extends Parameter {
         bb.write_string(class_id);
         bb.write_long(binary_value1.length);
         bb.write(binary_value1);
+    }
+    
+    public String toString() {
+        StringBuffer sb = new StringBuffer("IdentityToken: ");
+        sb.append(class_id);
+        sb.append(", ");
+        for (int i = 0; i < binary_value1.length; i++) {
+            sb.append((char)binary_value1[i]);
+        }
+        
+        return sb.toString();
     }
 }
