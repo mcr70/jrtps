@@ -17,7 +17,6 @@ import java.util.Random;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
-import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -56,7 +55,6 @@ public class KeyStoreAuthentication extends Authentication {
         principal.verify(ca.getPublicKey());
 
         logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
-        getGuid(new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.PARTICIPANT));
     }
     
     /**
@@ -107,16 +105,17 @@ public class KeyStoreAuthentication extends Authentication {
         System.arraycopy(EntityId.PARTICIPANT.getBytes(), 0, guidBytes, 12, 4);
 
         guid = new Guid(guidBytes);
-        getIdentityToken();
+
         return guid;
     }
     
     public IdentityToken getIdentityToken() {
         byte[] bytes = guid.getBytes();
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++)
-        sb.append(String.format("%02X", bytes[i]));
-
+        for (int i = 0; i < bytes.length; i++) { // convert sha256 (16 bytes) to characters (32 bytes)
+            sb.append(String.format("%02X", bytes[i]));
+        }
+        
         byte[] token = sb.toString().getBytes(); // TODO: character encoding
         
         return new IdentityToken(token);
