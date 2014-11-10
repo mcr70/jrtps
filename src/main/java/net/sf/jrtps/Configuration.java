@@ -366,7 +366,7 @@ public class Configuration {
 
 
     public String getKeystorePassword() {
-        return props.getProperty("udds.security.keystore.password", "changeit");
+        return props.getProperty("udds.security.keystore.password");
     }
 
     public String getSecurityCA() {
@@ -374,6 +374,6 @@ public class Configuration {
     }
 
     public String getSecurityPrincipal() {
-        return props.getProperty("udds.security.principal", "jrtps01"); 
+        return props.getProperty("udds.security.principal"); 
     }
 }
