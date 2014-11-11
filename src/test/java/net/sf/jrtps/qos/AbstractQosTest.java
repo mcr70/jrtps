@@ -103,7 +103,7 @@ public class AbstractQosTest {
     
     void waitFor(long millis) {
         try {
-            Thread.currentThread().sleep(millis);
+            Thread.sleep(millis);
         } catch (InterruptedException e) {
             Assert.fail("interrupted");
         }

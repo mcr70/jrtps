@@ -8,7 +8,6 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.cert.CertificateException;
 
-import net.sf.jrtps.Configuration;
 import net.sf.jrtps.qos.AbstractQosTest;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
