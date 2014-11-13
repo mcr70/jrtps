@@ -11,6 +11,7 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
@@ -45,21 +46,16 @@ public class KeyStoreAuthenticationService {
     private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
     
     private final KeyStore ks;
-    private final Certificate ca;
-    private final X509Certificate principal;
 
-    private final Guid originalGuid;
-    private Guid adjustedGuid;
-    private IdentityToken identityToken;
     private final Configuration conf;
     private final DataWriter<ParticipantStatelessMessage> statelessWriter;
 
     private final LocalIdentity identity;
+	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
     
-    public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid guid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
+    public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
 		this.statelessWriter = null;
         this.conf = conf;
-        this.originalGuid = guid;
 
         ks = KeyStore.getInstance("JKS");
 
@@ -68,14 +64,14 @@ public class KeyStoreAuthenticationService {
 
         ks.load(is, pwd.toCharArray());
 
-        ca = ks.getCertificate(conf.getSecurityCA());
+        Certificate ca = ks.getCertificate(conf.getSecurityCA());
         if (ca == null) {
             throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
         }
         
         String alias = conf.getSecurityPrincipal();
 
-        principal = (X509Certificate) ks.getCertificate(alias);
+        X509Certificate principal = (X509Certificate) ks.getCertificate(alias);
         if (principal == null) {
             throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
         }
@@ -91,7 +87,7 @@ public class KeyStoreAuthenticationService {
 
 
     public Guid getOriginalGuid() {
-        return originalGuid;
+        return identity.getOriginalGuid();
     }
 
 
@@ -103,9 +99,11 @@ public class KeyStoreAuthenticationService {
      * Builtin Topic, and ch. 9.3.3 DDS:Auth:PKI-RSA/DSA-DH plugin behavior
      * 
      * @param remoteIdentity IdentityToken of remote participant
+     * @throws NoSuchAlgorithmException 
+     * @throws CertificateEncodingException 
      */
-    public void validateRemoteIdentity(IdentityToken remoteIdentity) {
-        int comparison = identityToken.getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
+    public void validateRemoteIdentity(IdentityToken remoteIdentity) throws CertificateEncodingException, NoSuchAlgorithmException {
+        int comparison = identity.getIdentityToken().getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
         if (comparison < 0) { // Remote is lexicographically greater
             // VALIDATION_PENDING_HANDSHAKE_REQUEST
             beginHandshakeRequest(remoteIdentity);
@@ -135,8 +133,12 @@ public class KeyStoreAuthenticationService {
     }
 
     void beginHandshakeRequest(IdentityToken remoteIdentity) {
-        //ParticipantStatelessMessage psm = new ParticipantStatelessMessage(getOriginalGuid());
-        //statelessWriter.write(psm);
+        ParticipantStatelessMessage psm = 
+        		new ParticipantStatelessMessage(new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+        				null); // TODO: remote guid
+        
+        statelessWriter.write(psm);
+        
     	// TODO Auto-generated method stub
     }
 
