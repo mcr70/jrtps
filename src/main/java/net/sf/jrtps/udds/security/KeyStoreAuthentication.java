@@ -22,6 +22,7 @@ import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.Participant;
 
 import org.slf4j.Logger;
@@ -196,8 +197,10 @@ public class KeyStoreAuthentication extends Authentication {
         }
     }
 
-    private void beginHandshakeRequest(IdentityToken remoteIdentity) {
+    void beginHandshakeRequest(IdentityToken remoteIdentity) {
     	//participant.createDataReader(topicName, type, typeName, qos)
+    	DataReader<?> reader = participant.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
+    	System.out.println("** " + reader);
     	// TODO Auto-generated method stub
     }
 }

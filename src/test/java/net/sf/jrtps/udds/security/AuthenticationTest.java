@@ -22,5 +22,6 @@ public class AuthenticationTest extends AbstractQosTest {
 
 		System.out.println(ks.getAdjustedGuid());
 		System.out.println(ks.getIdentityToken());
+		ks.beginHandshakeRequest(null);
 	}
 }
