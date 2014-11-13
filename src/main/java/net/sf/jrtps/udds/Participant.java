@@ -208,7 +208,7 @@ public class Participant {
         registerBuiltinMarshallers();
         createSPDPEntities();
 
-        if (isSecure ) {
+        if (isSecure) {
         	createSecurityEndpoints();
         }
         

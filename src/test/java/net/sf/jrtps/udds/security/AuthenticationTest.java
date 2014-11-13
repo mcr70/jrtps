@@ -6,6 +6,7 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
 
 import net.sf.jrtps.qos.AbstractQosTest;
@@ -17,8 +18,8 @@ import org.junit.Test;
 
 public class AuthenticationTest extends AbstractQosTest {
 	@Test
-	public void testKeyStore() throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, IOException {
-		KeyStoreAuthentication ks = new KeyStoreAuthentication(p1, cfg1, new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.PARTICIPANT));
+	public void testKeyStore() throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException {
+		KeyStoreAuthenticationService ks = new KeyStoreAuthenticationService(p1, cfg1, new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.PARTICIPANT));
 
 		System.out.println(ks.getAdjustedGuid());
 		System.out.println(ks.getIdentityToken());

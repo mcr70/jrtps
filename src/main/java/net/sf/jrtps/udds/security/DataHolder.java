@@ -2,6 +2,7 @@ package net.sf.jrtps.udds.security;
 
 
 /**
+ * See 7.2.3.1 IDL representation for DataHolder
  * 
  * @author mcr70
  */
@@ -16,7 +17,7 @@ public abstract class DataHolder {
     private Property[] string_properties;
     private BinaryProperty[] binary_properties;
     private String[] string_values;
-    private BinaryProperty binary_property1;
-    private BinaryProperty binary_property2;
+    private byte[] binary_value1;
+    private byte[] binary_value2;
     private long longlongs_value;
 }

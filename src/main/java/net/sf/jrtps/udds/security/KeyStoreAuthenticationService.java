@@ -9,6 +9,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
@@ -19,10 +20,11 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.builtin.ParticipantStatelessMessage;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
-import net.sf.jrtps.udds.DataReader;
+import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
 
 import org.slf4j.Logger;
@@ -35,8 +37,8 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class KeyStoreAuthentication extends Authentication {
-    private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthentication.class);
+public class KeyStoreAuthenticationService {
+    private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthenticationService.class);
     private static MessageDigest sha256 = null;
     private static Random random = new Random(System.currentTimeMillis()); 
 
@@ -51,13 +53,14 @@ public class KeyStoreAuthentication extends Authentication {
     private Guid adjustedGuid;
     private IdentityToken identityToken;
     private final Configuration conf;
-    private final Participant participant;
+    private final DataWriter<ParticipantStatelessMessage> statelessWriter;
+    private IdentityCredential identityCreadential;
     
-    public KeyStoreAuthentication(Participant participant, Configuration conf, Guid guid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException {
-        this.participant = participant;
-		this.conf = conf;
+    public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid guid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
+		this.statelessWriter = null;
+        this.conf = conf;
         this.originalGuid = guid;
-        this.sha256 = MessageDigest.getInstance("MD5");
+        sha256 = MessageDigest.getInstance("MD5");
 
         ks = KeyStore.getInstance("JKS");
 
@@ -70,19 +73,25 @@ public class KeyStoreAuthentication extends Authentication {
         if (ca == null) {
             throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
         }
+        
+        String alias = conf.getSecurityPrincipal();
 
-        principal = (X509Certificate) ks.getCertificate(conf.getSecurityPrincipal());
+        principal = (X509Certificate) ks.getCertificate(alias);
         if (principal == null) {
             throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
         }
 
         principal.verify(ca.getPublicKey());
 
+        identityCreadential = new IdentityCredential(principal, ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray()));
+        
         adjustedGuid = getAdjustedGuid();
+        LocalIdentity identity = new LocalIdentity(originalGuid, adjustedGuid, identityCreadential);
         identityToken = getIdentityToken();
         
         logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
     }
+
 
     public Guid getOriginalGuid() {
         return originalGuid;
@@ -198,9 +207,8 @@ public class KeyStoreAuthentication extends Authentication {
     }
 
     void beginHandshakeRequest(IdentityToken remoteIdentity) {
-    	//participant.createDataReader(topicName, type, typeName, qos)
-    	DataReader<?> reader = participant.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
-    	System.out.println("** " + reader);
+        //ParticipantStatelessMessage psm = new ParticipantStatelessMessage(getOriginalGuid());
+        //statelessWriter.write(psm);
     	// TODO Auto-generated method stub
     }
 }

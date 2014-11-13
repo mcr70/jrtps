@@ -9,7 +9,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  * 
  */
-public class IdentityToken extends Parameter {
+public class IdentityToken extends Parameter /* extends DataHolder */ {
     public static final String CLASS_ID_DDS_AUTH_X509_PEM_SHA256 = "DDS:Auth:X.509‐PEM‐SHA256";
     
     private String class_id;
