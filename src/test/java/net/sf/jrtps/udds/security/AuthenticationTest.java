@@ -21,8 +21,11 @@ public class AuthenticationTest extends AbstractQosTest {
 	public void testKeyStore() throws InvalidKeyException, KeyStoreException, NoSuchAlgorithmException, CertificateException, NoSuchProviderException, SignatureException, IOException, UnrecoverableKeyException {
 		KeyStoreAuthenticationService ks = new KeyStoreAuthenticationService(p1, cfg1, new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.PARTICIPANT));
 
-		System.out.println(ks.getAdjustedGuid());
-		System.out.println(ks.getIdentityToken());
+		System.out.println(ks.getLocalIdentity().getOriginalGuid());
+		System.out.println(ks.getLocalIdentity().getAdjustedGuid());
+		System.out.println(ks.getLocalIdentity().getIdentityToken());
+		System.out.println(ks.getLocalIdentity().getIdentityCreadential());
+		
 		ks.beginHandshakeRequest(null);
 	}
 }

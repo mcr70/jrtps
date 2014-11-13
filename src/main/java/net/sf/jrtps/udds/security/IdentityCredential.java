@@ -1,6 +1,7 @@
 package net.sf.jrtps.udds.security;
 
 import java.security.Key;
+import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
 class IdentityCredential /* extends DataHolder */ {
@@ -16,8 +17,14 @@ class IdentityCredential /* extends DataHolder */ {
         this.privateKey = key;
     }
     
-    String getPEMEncodedPrincipal() {
-        return null; // TODO:
+    String getPEMEncodedCertificate() throws CertificateEncodingException {
+        StringBuffer sb = new StringBuffer();
+        byte[] bytes = principal.getEncoded();
+        for (int i = 0; i < bytes.length; i++) { // convert sha256 (16 bytes) to characters (32 bytes)
+            sb.append(String.format("%02X", bytes[i]));
+        }
+
+        return sb.toString();
     }
     
     X509Certificate getPrincipal() {
