@@ -721,10 +721,10 @@ public class Participant {
     /**
      * Finds a Reader with given entity id.
      * 
-     * @param readerId
-     * @return DataReader
+     * @param readerId EntityId of the Reader
+     * @return DataReader, or null if not found
      */
-    DataReader<?> getReader(EntityId readerId) {
+    public DataReader<?> getReader(EntityId readerId) {
         for (DataReader<?> reader : readers) {
             if (reader.getRTPSReader().getEntityId().equals(readerId)) {
                 return reader;
@@ -737,10 +737,10 @@ public class Participant {
     /**
      * Finds a Writer with given entity id.
      * 
-     * @param writerId
-     * @return DataWriter
+     * @param writerId EntityId of the Writer
+     * @return DataWriter, or null if not found
      */
-    DataWriter<?> getWriter(EntityId writerId) {
+    public DataWriter<?> getWriter(EntityId writerId) {
         for (DataWriter<?> writer : writers) {
             if (writer.getRTPSWriter().getEntityId().equals(writerId)) {
                 return writer;
