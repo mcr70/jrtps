@@ -10,7 +10,7 @@ public class ParticipantGenericMessage {
     Guid /*BuiltinTopicKey*/ destination_endpoint_key;
     Guid /*BuiltinTopicKey*/ source_endpoint_key;
     
-    String message_class_id;
+    protected String message_class_id;
     DataHolder[] message_data;
     
     
