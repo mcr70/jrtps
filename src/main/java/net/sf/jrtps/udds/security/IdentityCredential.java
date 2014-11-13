@@ -4,6 +4,14 @@ import java.security.Key;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
+import javax.xml.bind.DatatypeConverter;
+/**
+ * IdentityCredential.
+ * See 9.3.2.1 DDS:Auth:PKI-RSA/DSA-DH IdentityCredential
+ * 
+ * @see net.sf.jrtps.message.parameter.IdentityToken
+ * @author mcr70
+ */
 class IdentityCredential /* extends DataHolder */ {
     private final transient X509Certificate principal;
     private final transient Key privateKey;
@@ -12,18 +20,17 @@ class IdentityCredential /* extends DataHolder */ {
     private byte[] binary_value1;
     private byte[] binary_value2;
     
-    IdentityCredential(X509Certificate principal, Key key) {
+    IdentityCredential(X509Certificate principal, Key key) throws CertificateEncodingException {
         this.principal = principal;
         this.privateKey = key;
+        this.binary_value1 = principal.getEncoded();
     }
     
-    String getPEMEncodedCertificate() throws CertificateEncodingException {
-        StringBuffer sb = new StringBuffer();
-        byte[] bytes = principal.getEncoded();
-        for (int i = 0; i < bytes.length; i++) { // convert sha256 (16 bytes) to characters (32 bytes)
-            sb.append(String.format("%02X", bytes[i]));
-        }
-
+    String getPEMEncodedCertificate() {
+    	StringBuffer sb = new StringBuffer("-----BEGIN CERTIFICATE-----\n");
+    	sb.append(DatatypeConverter.printBase64Binary(binary_value1));
+    	sb.append("\n-----END CERTIFICATE-----");
+    	
         return sb.toString();
     }
     
@@ -33,5 +40,9 @@ class IdentityCredential /* extends DataHolder */ {
 
     Key getPrivateKey() {
         return privateKey;
+    }
+
+    public String toString() {
+    	return "IdentityCredential: " + class_id + ", " + getPEMEncodedCertificate();
     }
 }

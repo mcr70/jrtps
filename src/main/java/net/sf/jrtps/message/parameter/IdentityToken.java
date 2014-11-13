@@ -9,8 +9,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * IdentityToken is used with DDS security.
  * See DDS Security specification: ch. 9.3.2.2 DDS:Auth:PKI-RSA/DSA-DH IdentityToken for
  * more details.
+ *
+ * @see net.sf.jrtps.udds.security.IdentityCredential
  * @author mcr70
- * 
  */
 public class IdentityToken extends Parameter /* extends DataHolder */ {
     public static final String CLASS_ID_DDS_AUTH_X509_PEM_SHA256 = "DDS:Auth:X.509‐PEM‐SHA256";
@@ -20,7 +21,11 @@ public class IdentityToken extends Parameter /* extends DataHolder */ {
 	private String class_id;
     private byte[] binary_value1;
 
-
+    /**
+     * Constructs IdentityToken.
+     * @param pem PEM encoded certificate
+     * @throws NoSuchAlgorithmException id SHA-256 algorithm is not found
+     */
     public IdentityToken(String pem) throws NoSuchAlgorithmException {
         super(ParameterId.PID_IDENTITY_TOKEN);
         sha256 = MessageDigest.getInstance("SHA-256");
@@ -31,7 +36,7 @@ public class IdentityToken extends Parameter /* extends DataHolder */ {
             binary_value1 = sha256.digest(pem.getBytes());
             sha256.reset();     
         }
-        
+       
         if (binary_value1.length != 32) {
             throw new IllegalArgumentException("the length of encoded SHA256 hash must be 32: " + binary_value1.length);
         }
