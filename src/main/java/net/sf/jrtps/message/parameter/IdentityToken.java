@@ -1,5 +1,8 @@
 package net.sf.jrtps.message.parameter;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
@@ -12,21 +15,31 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class IdentityToken extends Parameter /* extends DataHolder */ {
     public static final String CLASS_ID_DDS_AUTH_X509_PEM_SHA256 = "DDS:Auth:X.509‐PEM‐SHA256";
     
-    private String class_id;
+	private static MessageDigest sha256;
+
+	private String class_id;
     private byte[] binary_value1;
 
-    public IdentityToken(byte[] binary_value1) {
+
+    public IdentityToken(String pem) throws NoSuchAlgorithmException {
         super(ParameterId.PID_IDENTITY_TOKEN);
+        sha256 = MessageDigest.getInstance("SHA-256");
+	
         this.class_id = CLASS_ID_DDS_AUTH_X509_PEM_SHA256;
-        this.binary_value1 = binary_value1;
+
+        synchronized (sha256) { // Create SHA256 of cert PEM
+            binary_value1 = sha256.digest(pem.getBytes());
+            sha256.reset();     
+        }
         
         if (binary_value1.length != 32) {
             throw new IllegalArgumentException("the length of encoded SHA256 hash must be 32: " + binary_value1.length);
         }
     }
 
-    IdentityToken() {
+    IdentityToken() throws NoSuchAlgorithmException {
         super(ParameterId.PID_IDENTITY_TOKEN);
+        sha256 = MessageDigest.getInstance("SHA-256");
     }
 
     /**
@@ -45,8 +58,8 @@ public class IdentityToken extends Parameter /* extends DataHolder */ {
      */
     public String getEncodedHash() {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < binary_value1.length; i++) {
-            sb.append((char)binary_value1[i]);
+        for (int i = 0; i < binary_value1.length; i++) { // convert sha256 (16 bytes) to characters (32 bytes)
+            sb.append(String.format("%02X", binary_value1[i]));
         }
 
         return sb.toString();
