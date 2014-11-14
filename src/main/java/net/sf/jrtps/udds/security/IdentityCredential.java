@@ -26,10 +26,15 @@ class IdentityCredential /* extends DataHolder */ {
         this.binary_value1 = principal.getEncoded();
     }
     
+    /**
+     * Gets the certificate as PEM (Base64) encoded.
+     * @return PEM encoded certificate
+     */
     String getPEMEncodedCertificate() {
-    	StringBuffer sb = new StringBuffer("-----BEGIN CERTIFICATE-----\n");
-    	sb.append(DatatypeConverter.printBase64Binary(binary_value1));
-    	sb.append("\n-----END CERTIFICATE-----");
+    	//StringBuffer sb = new StringBuffer("-----BEGIN CERTIFICATE-----\n");
+    	StringBuffer sb = new StringBuffer();
+        sb.append(DatatypeConverter.printBase64Binary(binary_value1));
+    	//sb.append("\n-----END CERTIFICATE-----");
     	
         return sb.toString();
     }
