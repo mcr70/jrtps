@@ -32,7 +32,7 @@ abstract class Authentication {
         return null;
     }
 
-    void set_permissions_credential_and_token(IdentityHandle handle, PermissionCredential pc, PermissionsToken pt) throws SecurityException {
+    void set_permissions_credential_and_token(IdentityHandle handle, PermissionsCredential pc, PermissionsToken pt) throws SecurityException {
         
     }
     
