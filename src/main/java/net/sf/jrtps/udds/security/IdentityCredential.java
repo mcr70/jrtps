@@ -16,7 +16,7 @@ class IdentityCredential /* extends DataHolder */ {
     private final transient X509Certificate principal;
     private final transient Key privateKey;
 
-    private final String class_id = "DDS:Auth:X.509‐PEM";
+    private final String class_id = "DDS:Auth:X.509-PEM";
     private byte[] binary_value1;
     private byte[] binary_value2;
     

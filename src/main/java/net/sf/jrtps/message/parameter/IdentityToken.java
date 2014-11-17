@@ -59,11 +59,12 @@ public class IdentityToken extends Parameter /* extends DataHolder */ {
      * Gets the binary_value1 of IdentityToken. It contains SHA256 hash
      * of binary_value1 of IdentityCredential, which contains the characters in the PEM‐encoded X.509
      * certificate for the DomainParticipant signed by the shared Certificate Authority 
+     * 
      * @return SHA256 hash of DomainParticipants PEM encoded X.509 certificate
      */
     public String getEncodedHash() {
         StringBuffer sb = new StringBuffer();
-        for (int i = 0; i < binary_value1.length; i++) { // convert sha256 (16 bytes) to characters (32 bytes)
+        for (int i = 0; i < binary_value1.length; i++) {
             sb.append(String.format("%02X", binary_value1[i]));
         }
 
