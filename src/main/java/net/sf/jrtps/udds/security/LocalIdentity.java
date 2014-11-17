@@ -2,7 +2,13 @@ package net.sf.jrtps.udds.security;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.Signer;
 import java.security.cert.CertificateEncodingException;
+import java.security.spec.PKCS8EncodedKeySpec;
+
+import javax.xml.crypto.dsig.XMLSignContext;
+import javax.xml.crypto.dsig.XMLSignature;
+import javax.xml.crypto.dsig.XMLSignature.SignatureValue;
 
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
@@ -28,7 +34,7 @@ class LocalIdentity {
     
     
     IdentityCredential getIdentityCreadential() {
-        return identityCreadential;
+        return identityCreadential; 
     }
     
     /**

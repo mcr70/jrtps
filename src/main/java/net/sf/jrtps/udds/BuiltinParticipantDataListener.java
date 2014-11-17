@@ -29,8 +29,11 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
 
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
+	private boolean securityEnabled;
+
     BuiltinParticipantDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
         super(p);
+        this.securityEnabled = p.getConfiguration().isSecurityEnabled();
         this.discoveredParticipants = discoveredParticipants;
     }
 
