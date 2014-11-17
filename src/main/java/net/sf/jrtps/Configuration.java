@@ -365,6 +365,14 @@ public class Configuration {
     }
 
 
+    public boolean isSecurityEnabled() {
+        return getBooleanProperty("udds.security.enabled", false);
+    }
+
+    public String getKeystore() {
+        return props.getProperty("udds.security.keystore");
+    }
+
     public String getKeystorePassword() {
         return props.getProperty("udds.security.keystore.password");
     }
