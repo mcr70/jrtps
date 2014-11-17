@@ -1,19 +1,38 @@
 package net.sf.jrtps.udds.security;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 /**
  * See 9.4.2.1 DDS:Access:PKI-Signed-XML-Permissions PermissionsCredential
  * 
  * @author mcr70
  */
 class PermissionsCredential {
-    private final String class_id = "DDS:Access:PKI‐Signed‐XML‐Permissions"; 
+    static final String CLASS_ID = "DDS:Access:PKI‐Signed‐XML‐Permissions"; 
+    static final String CLASS_ID_JRTPS_XML_PERMISSIONS = "jRTPS:XML‐Permissions";
     
-    String getClassId() {
-            return class_id;
+    private String class_id;
+    private byte[] binary_value1;
+    
+    public PermissionsCredential(InputStream xml) throws IOException {
+        this.class_id = CLASS_ID_JRTPS_XML_PERMISSIONS;
+        
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        int i;
+        while((i = xml.read()) != -1) {
+            baos.write(i);
+        }
+        
+        binary_value1 = baos.toByteArray();
     }
     
-	String getPEMEncodedSignature() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    String getClassId() {
+        return class_id;
+    }
+
+    byte[] getBinaryValue1() {
+        return binary_value1;
+    }
 }
