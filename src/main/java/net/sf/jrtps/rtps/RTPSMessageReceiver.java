@@ -16,6 +16,7 @@ import net.sf.jrtps.message.InfoReplyIp4;
 import net.sf.jrtps.message.InfoSource;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
+import net.sf.jrtps.message.SecureSubMessage;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
@@ -190,6 +191,13 @@ class RTPSMessageReceiver implements Runnable {
 
                 handleGap(sourceGuidPrefix, (Gap) subMsg);
                 break;
+            case SECURESUBMSG:
+                if (!destinationThisParticipant) {
+                    continue;
+                }
+
+                handleSecureSubMessage((SecureSubMessage)subMsg);
+                break;
             default:
                 logger.warn("SubMessage not handled: {}", subMsg);
             }
@@ -202,7 +210,12 @@ class RTPSMessageReceiver implements Runnable {
     }
 
 
-    private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
+    private void handleSecureSubMessage(SecureSubMessage subMsg) {
+    	// TODO: implement SecureSubMessage handling
+    	logger.warn("SecureSubMessage is not implemented. Ignoring it.");
+    }
+
+	private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
         RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), sourceGuidPrefix, ackNack.getReaderId());
 
         if (writer != null) {
