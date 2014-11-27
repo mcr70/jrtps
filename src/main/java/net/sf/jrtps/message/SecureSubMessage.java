@@ -9,15 +9,27 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-class SecureSubMessage extends SubMessage {
+public class SecureSubMessage extends SubMessage {
     public static final int KIND = 0x30;
     
     private int transformationKind; // long
     private byte[] trasformationId; // octet[8]
     private byte[] cipherText;      // octet[*]
     
-    SecureSubMessage() { // TODO: implement public constructor
+    public SecureSubMessage(int transformationKind, byte[] transformationId, byte[] cipherText) {
         super(new SubMessageHeader(KIND));
+        
+        this.transformationKind = transformationKind;
+        this.trasformationId = transformationId;
+        this.cipherText = cipherText;
+        
+        if (transformationId == null || transformationId.length != 8) {
+            throw new IllegalArgumentException("transformationId must be a byte array of length 8");
+        }
+        
+        if (cipherText == null) {
+            throw new IllegalArgumentException("cipherText cannot be null");
+        }
     }
 
     SecureSubMessage(SubMessageHeader smh, RTPSByteBuffer bb) {
