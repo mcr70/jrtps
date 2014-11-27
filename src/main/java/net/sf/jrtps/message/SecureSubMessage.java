@@ -33,7 +33,7 @@ public class SecureSubMessage extends SubMessage {
     }
 
     SecureSubMessage(SubMessageHeader smh, RTPSByteBuffer bb) {
-        super(new SubMessageHeader(KIND));
+        super(smh);
         
         transformationKind = bb.read_long();
         trasformationId = new byte[8];
