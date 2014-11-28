@@ -258,6 +258,11 @@ public class ParameterFactory {
             param = new ReliabilityOffered();
             break;
 
+        // jRTPS specific parameters
+        case (short) 0x8001:
+            param = new X509Cert();
+            break;
+            
         default:
             if ((paramId & 0x8000) == 0x8000) {
                 param = new VendorSpecificParameter(paramId);
