@@ -38,7 +38,6 @@ public class AuthenticationTest extends AbstractQosTest {
 		X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(bytes));
 		System.out.println("Got certificate from PEM: " + certificate.getSubjectDN());
 		
-		
 		//ks.beginHandshakeRequest(null);
 	}
 }
