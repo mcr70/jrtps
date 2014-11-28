@@ -1,9 +1,9 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.message.parameter.ProtocolVersion;
+import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
-import net.sf.jrtps.types.VendorId_t;
 
 /**
  * This message modifies the logical source of the Submessages that follow.
@@ -17,14 +17,14 @@ public class InfoSource extends SubMessage {
     public static final int KIND = 0x0c;
 
     private ProtocolVersion protocolVersion;
-    private VendorId_t vendorId;
+    private VendorId vendorId;
     private GuidPrefix guidPrefix;    
     
     public InfoSource(GuidPrefix guidPrefix) {
         super(new SubMessageHeader(KIND));
 
         this.protocolVersion = ProtocolVersion.PROTOCOLVERSION_2_1;
-        this.vendorId = VendorId_t.VENDORID_JRTPS;
+        this.vendorId = VendorId.VENDORID_JRTPS;
         this.guidPrefix = guidPrefix;
     }
 
@@ -45,7 +45,7 @@ public class InfoSource extends SubMessage {
      * Indicates the VendorId of the vendor that encapsulated subsequent
      * Submessages.
      */
-    public VendorId_t getVendorId() {
+    public VendorId getVendorId() {
         return vendorId;
     }
 
@@ -61,7 +61,7 @@ public class InfoSource extends SubMessage {
         bb.read_long(); // unused
 
         protocolVersion = new ProtocolVersion(bb);
-        vendorId = new VendorId_t(bb);
+        vendorId = new VendorId(bb);
         guidPrefix = new GuidPrefix(bb);
     }
 
