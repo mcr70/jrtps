@@ -28,7 +28,6 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
-import net.sf.jrtps.types.VendorId_t;
 
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +53,7 @@ public class ParticipantData extends DiscoveredData {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
 
     private ProtocolVersion protocolVersion = ProtocolVersion.PROTOCOLVERSION_2_1;
-    private VendorId_t vendorId = VendorId_t.VENDORID_JRTPS;
+    private VendorId vendorId = VendorId.VENDORID_JRTPS;
     private GuidPrefix guidPrefix;
     private boolean expectsInlineQos = false;
 
@@ -126,10 +125,10 @@ public class ParticipantData extends DiscoveredData {
                 availableBuiltinEndpoints = ((EndpointSet) param).getEndpointSet();
                 break;
             case PID_PROTOCOL_VERSION:
-                protocolVersion = (ProtocolVersion) param;
+                protocolVersion = (ProtocolVersion)param;
                 break;
             case PID_VENDORID:
-                vendorId = ((VendorId) param).getVendorId();
+                vendorId = (VendorId)param;
                 break;
             case PID_DEFAULT_UNICAST_LOCATOR:
                 userdataLocators.add(((DefaultUnicastLocator) param).getLocator());
@@ -221,7 +220,7 @@ public class ParticipantData extends DiscoveredData {
      * Get the VendorId
      * @return VendorId
      */
-    public VendorId_t getVendorId() {
+    public VendorId getVendorId() {
         return vendorId;
     }
 

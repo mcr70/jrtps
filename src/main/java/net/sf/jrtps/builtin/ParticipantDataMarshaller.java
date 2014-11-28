@@ -52,7 +52,7 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
 
         payloadParams.add(pd.getProtocolVersion());
         payloadParams.add(new ParticipantGuid(pd.getGuid()));
-        payloadParams.add(new VendorId(pd.getVendorId()));
+        payloadParams.add(pd.getVendorId());
 
         payloadParams.add(new ParticipantBuiltinEndpoints(pd.getBuiltinEndpoints()));
         payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));

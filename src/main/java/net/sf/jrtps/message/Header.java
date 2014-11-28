@@ -1,9 +1,9 @@
 package net.sf.jrtps.message;
 
 import net.sf.jrtps.message.parameter.ProtocolVersion;
+import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
-import net.sf.jrtps.types.VendorId_t;
 
 /**
  * The Header identifies the message as belonging to the RTPS protocol. The
@@ -18,7 +18,7 @@ public class Header {
     // private ProtocolId_t protocol;
     private byte[] hdrStart;
     private ProtocolVersion version;
-    private VendorId_t vendorId;
+    private VendorId vendorId;
     private GuidPrefix guidPrefix;
 
     /**
@@ -30,7 +30,7 @@ public class Header {
     public Header(GuidPrefix prefix) {
         hdrStart = HDR_START;
         version = ProtocolVersion.PROTOCOLVERSION_2_1;
-        vendorId = VendorId_t.VENDORID_JRTPS; // VENDORID_UNKNOWN;
+        vendorId = VendorId.VENDORID_JRTPS;
         guidPrefix = prefix;
     }
 
@@ -44,7 +44,7 @@ public class Header {
         hdrStart = new byte[4];
         bb.read(hdrStart);
         version = new ProtocolVersion(bb);
-        vendorId = new VendorId_t(bb);
+        vendorId = new VendorId(bb);
         guidPrefix = new GuidPrefix(bb);
     }
 
@@ -72,7 +72,7 @@ public class Header {
      * Indicates the vendor that provides the implementation of the RTPS
      * protocol.
      */
-    public VendorId_t getVendorId() {
+    public VendorId getVendorId() {
         return vendorId;
     }
 

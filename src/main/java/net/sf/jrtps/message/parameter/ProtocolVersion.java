@@ -6,27 +6,20 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * ProtocolVersion parameter.
  * 
  * @author mcr70
- *
  */
 public class ProtocolVersion extends Parameter {
     public static final ProtocolVersion PROTOCOLVERSION_1_0 = new ProtocolVersion(1, 0);
     public static final ProtocolVersion PROTOCOLVERSION_1_1 = new ProtocolVersion(1, 1);
     public static final ProtocolVersion PROTOCOLVERSION_2_0 = new ProtocolVersion(2, 0);
     public static final ProtocolVersion PROTOCOLVERSION_2_1 = new ProtocolVersion(2, 1);
+    public static final ProtocolVersion PROTOCOLVERSION_2_2 = new ProtocolVersion(2, 2);
 
     private byte[] bytes;
 	
-    public ProtocolVersion(byte[] bytes) {
+    private ProtocolVersion(int major, int minor) {
     	super(ParameterId.PID_PROTOCOL_VERSION);
-    	this.bytes = bytes;
-        
-    	if (bytes.length != 2) {
-    		throw new IllegalArgumentException("ProtocolVersion length must be 2");
-    	}
-    }
 
-    public ProtocolVersion(int major, int minor) {
-        this(new byte[] { (byte) major, (byte) minor });
+    	this.bytes = new byte[] { (byte) major, (byte) minor };
     }
 
     public ProtocolVersion(RTPSByteBuffer bb) {
