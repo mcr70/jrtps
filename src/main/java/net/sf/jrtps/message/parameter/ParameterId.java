@@ -90,9 +90,14 @@ public enum ParameterId {
     PID_PERMISSIONS_TOKEN(0x1002),
     PID_DATA_TAGS(0x1003),
     
-    PID_VENDOR_SPECIFIC(0x8000), // 0x8000 is just invented, @see 9.6.2.2.1
+    // ----  JRTPS specific parameters  -----------------
+    // PID_UNKNOWN_PARAMETER, PID_VENDOR_SPECIFIC are never sent by jRTPS
+    // On reception, 
+    PID_UNKNOWN_PARAMETER(0x8000), // 0x8000 is just invented, @see 9.6.2.2.1
+    PID_VENDOR_SPECIFIC(0x8000),   // 0x8000 is just invented, @see 9.6.2.2.1
+    PID_X509CERT(0x8001);
+    
     // ParameterId space
-    PID_UNKNOWN_PARAMETER(0x8001); // 0x8001 is just invented, @see 9.6.2.2.1
     // ParameterId space
 
     private short kind;
