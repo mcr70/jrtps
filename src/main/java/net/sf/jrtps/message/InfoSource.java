@@ -1,8 +1,8 @@
 package net.sf.jrtps.message;
 
+import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.GuidPrefix;
-import net.sf.jrtps.types.ProtocolVersion_t;
 import net.sf.jrtps.types.VendorId_t;
 
 /**
@@ -16,14 +16,14 @@ import net.sf.jrtps.types.VendorId_t;
 public class InfoSource extends SubMessage {
     public static final int KIND = 0x0c;
 
-    private ProtocolVersion_t protocolVersion;
+    private ProtocolVersion protocolVersion;
     private VendorId_t vendorId;
     private GuidPrefix guidPrefix;    
     
     public InfoSource(GuidPrefix guidPrefix) {
         super(new SubMessageHeader(KIND));
 
-        this.protocolVersion = ProtocolVersion_t.PROTOCOLVERSION_2_1;
+        this.protocolVersion = ProtocolVersion.PROTOCOLVERSION_2_1;
         this.vendorId = VendorId_t.VENDORID_JRTPS;
         this.guidPrefix = guidPrefix;
     }
@@ -37,7 +37,7 @@ public class InfoSource extends SubMessage {
     /**
      * Indicates the protocol used to encapsulate subsequent Submessages.
      */
-    public ProtocolVersion_t getProtocolVersion() {
+    public ProtocolVersion getProtocolVersion() {
         return protocolVersion;
     }
 
@@ -60,7 +60,7 @@ public class InfoSource extends SubMessage {
     private void readMessage(RTPSByteBuffer bb) {
         bb.read_long(); // unused
 
-        protocolVersion = new ProtocolVersion_t(bb);
+        protocolVersion = new ProtocolVersion(bb);
         vendorId = new VendorId_t(bb);
         guidPrefix = new GuidPrefix(bb);
     }

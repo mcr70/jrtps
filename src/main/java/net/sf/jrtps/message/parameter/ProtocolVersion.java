@@ -1,7 +1,6 @@
 package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.ProtocolVersion_t;
 
 /**
  * ProtocolVersion parameter.
@@ -10,36 +9,71 @@ import net.sf.jrtps.types.ProtocolVersion_t;
  *
  */
 public class ProtocolVersion extends Parameter {
-    private ProtocolVersion_t version;
+    public static final ProtocolVersion PROTOCOLVERSION_1_0 = new ProtocolVersion(1, 0);
+    public static final ProtocolVersion PROTOCOLVERSION_1_1 = new ProtocolVersion(1, 1);
+    public static final ProtocolVersion PROTOCOLVERSION_2_0 = new ProtocolVersion(2, 0);
+    public static final ProtocolVersion PROTOCOLVERSION_2_1 = new ProtocolVersion(2, 1);
 
-    public ProtocolVersion(ProtocolVersion_t version) {
-        this();
-        this.version = version;
+    private byte[] bytes;
+	
+    public ProtocolVersion(byte[] bytes) {
+    	super(ParameterId.PID_PROTOCOL_VERSION);
+    	this.bytes = bytes;
+        
+    	if (bytes.length != 2) {
+    		throw new IllegalArgumentException("ProtocolVersion length must be 2");
+    	}
     }
 
+    public ProtocolVersion(int major, int minor) {
+        this(new byte[] { (byte) major, (byte) minor });
+    }
+
+    public ProtocolVersion(RTPSByteBuffer bb) {
+    	super(ParameterId.PID_PROTOCOL_VERSION);
+    	read(bb, 2);
+    }
+    
     ProtocolVersion() {
         super(ParameterId.PID_PROTOCOL_VERSION);
     }
 
     /**
-     * Gets the ProtocolVersion_t.
-     * @return ProtocolVersion_t
+     * Gets the major version number
+     * @return major
      */
-    public ProtocolVersion_t getProtocolVersion() {
-        return version;
+    public byte getMajor() {
+        return bytes[0];
+    }
+    
+    /**
+     * Gets the minor version number
+     * @return minor
+     */
+    public byte getMinor() {
+        return bytes[1];
     }
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        this.version = new ProtocolVersion_t(bb);
+        this.bytes = new byte[2];
+        bb.read(bytes);
     }
 
     @Override
     public void writeTo(RTPSByteBuffer buffer) {
-        version.writeTo(buffer);
+        buffer.write(bytes);
     }
 
     public String toString() {
-        return super.toString() + ": " + getProtocolVersion();
+        StringBuffer sb = new StringBuffer(super.toString());
+        sb.append("(");
+        sb.append(bytes[0]);
+        sb.append('.');
+        sb.append(bytes[1]);
+        sb.append(")");
+        
+        return sb.toString();
+
     }
 }

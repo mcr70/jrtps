@@ -83,6 +83,10 @@ public class KeyStoreAuthenticationService {
         logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
     }
 
+    
+    public X509Certificate getCertificate() {
+    	return identity.getIdentityCreadential().getPrincipal();
+    }
 
     public Guid getOriginalGuid() {
         return identity.getOriginalGuid();
