@@ -50,7 +50,7 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
     public DataEncapsulation marshall(ParticipantData pd) {
         ParameterList payloadParams = new ParameterList();
 
-        payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
+        payloadParams.add(pd.getProtocolVersion());
         payloadParams.add(new ParticipantGuid(pd.getGuid()));
         payloadParams.add(new VendorId(pd.getVendorId()));
 

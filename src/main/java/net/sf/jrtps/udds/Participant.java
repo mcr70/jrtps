@@ -1,8 +1,16 @@
 package net.sf.jrtps.udds;
 
 import java.io.Externalizable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,6 +50,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.udds.security.KeyStoreAuthenticationService;
 import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
@@ -105,6 +114,8 @@ public class Participant {
 	
     private QualityOfService participantQos;
 	private boolean isSecure = false; // By default, DDS security is disabled
+	
+	private KeyStoreAuthenticationService authenticationService;
 
     {
         spdpQoS = QualityOfService.getSPDPQualityOfService(); 
@@ -200,6 +211,17 @@ public class Participant {
 
         this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
 
+
+//        try {
+//			authenticationService = new KeyStoreAuthenticationService(this, cfg, guid);
+//		} 
+//        catch (InvalidKeyException | UnrecoverableKeyException
+//				| KeyStoreException | NoSuchAlgorithmException
+//				| CertificateException | NoSuchProviderException
+//				| SignatureException | IOException e) {
+//        	logger.warn("Failed to create AuthenticationService", e);
+//        }
+        
         rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
                 discoveredParticipants, config);
 
@@ -668,6 +690,10 @@ public class Participant {
         ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
                 discoveryLocators, userdataLocators, participantQos);
 
+        if (authenticationService != null) {
+        	
+        }
+        
         return pd;
     }
 
