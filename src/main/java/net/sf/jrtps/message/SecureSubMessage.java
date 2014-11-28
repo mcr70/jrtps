@@ -12,7 +12,14 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class SecureSubMessage extends SubMessage {
     public static final int KIND = 0x30;
     
-    private int transformationKind; // long
+    // See 9.5.2.2 DDS:Crypto:AES-CTR-HMAC-RSA/DSA-DH CryptoTransformIdentifier
+    // for predefined transformation_kind_id values: 
+    public static final int HMAC_SHA1 = 0x00000100;
+    public static final int HMAC_SHA256 = 0x00000101;
+    public static final int AES128_HMAC_SHA1 = 0x00000200;
+    public static final int AES256_HMAC_SHA256 = 0x00000201;
+    
+    private int transformationKind; // long, one of predefined integers above
     private byte[] trasformationId; // octet[8]
     private byte[] cipherText;      // octet[*]
     

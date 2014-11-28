@@ -210,11 +210,6 @@ class RTPSMessageReceiver implements Runnable {
     }
 
 
-    private void handleSecureSubMessage(SecureSubMessage subMsg) {
-    	// TODO: implement SecureSubMessage handling
-    	logger.warn("SecureSubMessage is not implemented. Ignoring it.");
-    }
-
 	private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
         RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), sourceGuidPrefix, ackNack.getReaderId());
 
@@ -239,6 +234,31 @@ class RTPSMessageReceiver implements Runnable {
             logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
         }
     }
+
+    private void handleSecureSubMessage(SecureSubMessage subMsg) {
+    	// TODO: implement SecureSubMessage handling
+    	if (subMsg.singleSubMessageFlag()) { // contains one submessage
+    		SubMessage sm = extractSubMessage(subMsg);
+    		// TODO: handleSubMessage(sm);
+    	}
+    	else { // contains an RTPS Message
+    		Message m = extractMessage(subMsg);
+    		handleMessage(m);
+    	}
+    	
+    	logger.warn("SecureSubMessage is not implemented. Ignoring it.");
+    }
+
+	private SubMessage extractSubMessage(SecureSubMessage subMsg) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private Message extractMessage(SecureSubMessage subMsg) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
     void ignoreParticipant(GuidPrefix prefix) {
         ignoredParticipants.add(prefix);
