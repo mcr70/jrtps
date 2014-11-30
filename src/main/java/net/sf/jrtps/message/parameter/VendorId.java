@@ -8,7 +8,8 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  */
 public class VendorId extends Parameter {
-    public static final VendorId VENDORID_INVALID = new VendorId(new byte[] { 0, 0 });
+    public static final VendorId VENDORID_INVALID = new VendorId(new byte[] { 0x00, 0x00 });
+    public static final VendorId VENDORID_SECURED = new VendorId(new byte[] { 0x00, 0x01 }); // 8.5.1.9.4 Operation: encode_rtps_message
     public static final VendorId VENDORID_JRTPS = new VendorId(new byte[] { (byte) 0xca, (byte) 0xfe });
     public static final VendorId PRISMTECH = new VendorId(new byte[] { (byte) 0x1, (byte) 0x2 });
 
