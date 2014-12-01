@@ -20,7 +20,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.builtin.ParticipantStatelessMessage;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.udds.DataWriter;
@@ -104,21 +103,21 @@ public class KeyStoreAuthenticationService {
      * @throws NoSuchAlgorithmException 
      * @throws CertificateEncodingException 
      */
-    public void validateRemoteIdentity(IdentityToken remoteIdentity) throws CertificateEncodingException, NoSuchAlgorithmException {
+    public void validateRemoteIdentity(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException, NoSuchAlgorithmException {
         int comparison = identity.getIdentityToken().getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
         if (comparison < 0) { // Remote is lexicographically greater
             // VALIDATION_PENDING_HANDSHAKE_REQUEST
-            beginHandshakeRequest(remoteIdentity);
+            beginHandshakeRequest(remoteIdentity, remoteGuid);
         }
         else if (comparison > 0) { // Remote is lexicographically smaller
             // VALIDATION_PENDING_HANDSHAKE_MESSAGE
-            // Wait for remote entity to send handshae message
+            // Wait for remote entity to send handshake message
             CountDownLatch latch = handshakeLatches.remove(remoteIdentity);
             try {
                 boolean await = latch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
                 handshakeLatches.remove(remoteIdentity);
                 if (await) {
-                    // TODO: then what
+                    beginHandshakeReply();
                 }
                 else {
                     logger.warn("Failed to get handshake message from remote entity on time");
@@ -134,15 +133,27 @@ public class KeyStoreAuthenticationService {
         }
     }
 
-    void beginHandshakeRequest(IdentityToken remoteIdentity) {
-        ParticipantStatelessMessage psm = 
-        		new ParticipantStatelessMessage(new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-        				null); // TODO: remote guid
+	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException {
+    	HandshakeRequestMessageToken hrmt = 
+    			new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
+    					getLocalIdentity().getIdentityCreadential(), 
+    					null /* permission credential */);
+    	
+    	ParticipantStatelessMessage psm = 
+        		new ParticipantStatelessMessage(
+        				new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+        				hrmt);
         
         statelessWriter.write(psm);
         
     	// TODO Auto-generated method stub
     }
+
+
+    void beginHandshakeReply() {
+		// TODO Auto-generated method stub
+		
+	}
 
 
 	LocalIdentity getLocalIdentity() {
