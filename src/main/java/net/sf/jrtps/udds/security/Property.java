@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds.security;
 
+import net.sf.jrtps.transport.RTPSByteBuffer;
+
 public class Property {
     private String name;
     private String value;
@@ -9,7 +11,12 @@ public class Property {
         this.value = value;
     }
     
-    public String getName() {
+    public Property(RTPSByteBuffer bb) {
+    	this.name = bb.read_string();
+    	this.value = bb.read_string();
+    }
+
+	public String getName() {
         return name;
     }
     

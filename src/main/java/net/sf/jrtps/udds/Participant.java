@@ -30,7 +30,6 @@ import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.ParticipantMessageMarshaller;
-import net.sf.jrtps.builtin.ParticipantStatelessMessage;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.PublicationDataMarshaller;
 import net.sf.jrtps.builtin.SubscriptionData;
@@ -51,6 +50,7 @@ import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.udds.security.KeyStoreAuthenticationService;
+import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;

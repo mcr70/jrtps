@@ -6,18 +6,12 @@ package net.sf.jrtps.udds.security;
  * 
  * @author mcr70
  */
-public abstract class DataHolder {
-    
-    /**
-     * Gets the class_id of this DataHolder
-     * @return class_id
-     */
-    public abstract String getClassId();
-    
-    private Property[] string_properties;
-    private BinaryProperty[] binary_properties;
-    private String[] string_values;
-    private byte[] binary_value1;
-    private byte[] binary_value2;
-    private long longlongs_value;
+class DataHolder {
+    String class_id;
+    Property[] string_properties;
+    BinaryProperty[] binary_properties;
+    String[] string_values;
+    byte[] binary_value1;
+    byte[] binary_value2;
+    long longlongs_value;
 }

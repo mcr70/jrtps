@@ -3,7 +3,7 @@ package net.sf.jrtps.udds.security;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 
-public class ParticipantGenericMessage {
+abstract class ParticipantGenericMessage {
     MessageIdentity message_identity;
     MessageIdentity related_message_identity;
     Guid /*BuiltinTopicKey*/ destination_participant_key;
@@ -13,8 +13,19 @@ public class ParticipantGenericMessage {
     protected String message_class_id;
     DataHolder[] message_data;
     
+    public ParticipantGenericMessage(MessageIdentity mi, MessageIdentity related_mi,
+    		Guid destParticipantKey, Guid destEndpointKey, Guid sourceEndpointKey,
+    		String mClassId, DataHolder[] message_data) {
+				message_identity = mi;
+				related_message_identity = related_mi;
+				destination_participant_key = destParticipantKey;
+				destination_endpoint_key = destEndpointKey;
+				source_endpoint_key = sourceEndpointKey;
+				message_class_id = mClassId;
+				this.message_data = message_data;  	
+    }
     
-    public void readFrom(RTPSByteBuffer bb) {
+    public ParticipantGenericMessage(RTPSByteBuffer bb) {
         message_identity = new MessageIdentity(bb);
         related_message_identity = new MessageIdentity(bb);
         destination_participant_key = new Guid(bb);
@@ -25,7 +36,10 @@ public class ParticipantGenericMessage {
         int count = bb.read_long();
         message_data = new DataHolder[count];
         for (int i = 0; i < count; i++) {
-            // TODO: ....
+        	message_data[i] = readMessageData(bb);
         }
-    }
+	}
+
+
+	abstract DataHolder readMessageData(RTPSByteBuffer bb);
 }

@@ -6,7 +6,7 @@ import net.sf.jrtps.types.Guid;
 /**
  * MessageIndetity is used as part of ParticipantStatelessMessage.
  * 
- * @see net.sf.jrtps.builtin.ParticipantStatelessMessage
+ * @see net.sf.jrtps.udds.security.ParticipantStatelessMessage
  * @author mcr70
  */
 public class MessageIdentity {
