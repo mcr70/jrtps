@@ -134,7 +134,9 @@ public class KeyStoreAuthenticationService {
     }
 
 	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException {
-    	HandshakeRequestMessageToken hrmt = 
+    	logger.debug("[dds.sec.auth] beginHandshakeRequest()");
+    	
+		HandshakeRequestMessageToken hrmt = 
     			new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
     					getLocalIdentity().getIdentityCreadential(), 
     					null /* permission credential */);
@@ -151,7 +153,8 @@ public class KeyStoreAuthenticationService {
 
 
     void beginHandshakeReply() {
-		// TODO Auto-generated method stub
+    	logger.debug("[dds.sec.auth] beginHandshakeReply()");
+    	// TODO Auto-generated method stub
 		
 	}
 
