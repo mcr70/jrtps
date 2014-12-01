@@ -2,10 +2,15 @@ package net.sf.jrtps.udds.security;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
+import java.security.Key;
+import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
+import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
@@ -39,5 +44,26 @@ public class AuthenticationTest extends AbstractQosTest {
 		System.out.println("Got certificate from PEM: " + certificate.getSubjectDN());
 		
 		//ks.beginHandshakeRequest(null);
+	}
+	
+	@Test
+	public void testSigning() throws Exception {
+		byte[] bytes = new byte[] {0x01, 0x02, 0x03,0x04};
+		
+        KeyStore ks = KeyStore.getInstance("JKS");
+        InputStream is = getClass().getResourceAsStream("/jrtps.jks");
+        ks.load(is, "changeit".toCharArray());
+
+        X509Certificate cert = (X509Certificate) ks.getCertificate("jrtps01");
+        Key privateKey = ks.getKey("jrtps01", "jrtps01".toCharArray());
+        
+		Signature signature = Signature.getInstance("SHA1withDSA");
+		signature.initSign((PrivateKey)privateKey);
+		
+		signature.update(bytes);
+		byte[] signatureBytes = signature.sign();
+		
+		signature.initVerify(cert.getPublicKey());
+		signature.verify(signatureBytes);
 	}
 }
