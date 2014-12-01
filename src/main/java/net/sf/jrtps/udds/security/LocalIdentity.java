@@ -33,7 +33,7 @@ class LocalIdentity {
     }
     
     
-    IdentityCredential getIdentityCreadential() {
+    IdentityCredential getIdentityCredential() {
         return identityCreadential; 
     }
     

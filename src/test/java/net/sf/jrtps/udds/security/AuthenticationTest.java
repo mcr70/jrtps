@@ -29,10 +29,10 @@ public class AuthenticationTest extends AbstractQosTest {
 		System.out.println(ks.getLocalIdentity().getOriginalGuid());
 		System.out.println(ks.getLocalIdentity().getAdjustedGuid());
 		System.out.println(ks.getLocalIdentity().getIdentityToken());
-		System.out.println(ks.getLocalIdentity().getIdentityCreadential());
+		System.out.println(ks.getLocalIdentity().getIdentityCredential());
 		
 		CertificateFactory cf = CertificateFactory.getInstance("X.509");
-		String pem = ks.getLocalIdentity().getIdentityCreadential().getPEMEncodedCertificate();
+		String pem = ks.getLocalIdentity().getIdentityCredential().getPEMEncodedCertificate();
 		byte[] bytes = DatatypeConverter.parseBase64Binary(pem);
 		
 		X509Certificate certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(bytes));

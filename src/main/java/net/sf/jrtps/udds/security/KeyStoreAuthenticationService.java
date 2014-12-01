@@ -84,7 +84,7 @@ public class KeyStoreAuthenticationService {
 
     
     public X509Certificate getCertificate() {
-    	return identity.getIdentityCreadential().getPrincipal();
+    	return identity.getIdentityCredential().getPrincipal();
     }
 
     public Guid getOriginalGuid() {
@@ -138,7 +138,7 @@ public class KeyStoreAuthenticationService {
     	
 		HandshakeRequestMessageToken hrmt = 
     			new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
-    					getLocalIdentity().getIdentityCreadential(), 
+    					getLocalIdentity().getIdentityCredential(), 
     					null /* permission credential */);
     	
     	ParticipantStatelessMessage psm = 
