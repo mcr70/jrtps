@@ -13,17 +13,18 @@ import javax.xml.bind.DatatypeConverter;
  * @author mcr70
  */
 class IdentityCredential /* extends DataHolder */ {
-    private final transient X509Certificate principal;
+    private final transient X509Certificate certificate;
     private final transient Key privateKey;
 
     private final String class_id = "DDS:Auth:X.509-PEM";
     private byte[] binary_value1;
     private byte[] binary_value2;
     
-    IdentityCredential(X509Certificate principal, Key key) throws CertificateEncodingException {
-        this.principal = principal;
+    IdentityCredential(X509Certificate certificate, Key key) throws CertificateEncodingException {
+        this.certificate = certificate;
         this.privateKey = key;
-        this.binary_value1 = principal.getEncoded();
+        this.binary_value1 = certificate.getEncoded();
+        this.binary_value2 = key.getEncoded();
     }
     
     /**
@@ -31,16 +32,14 @@ class IdentityCredential /* extends DataHolder */ {
      * @return PEM encoded certificate
      */
     String getPEMEncodedCertificate() {
-    	//StringBuffer sb = new StringBuffer("-----BEGIN CERTIFICATE-----\n");
     	StringBuffer sb = new StringBuffer();
         sb.append(DatatypeConverter.printBase64Binary(binary_value1));
-    	//sb.append("\n-----END CERTIFICATE-----");
     	
         return sb.toString();
     }
     
-    X509Certificate getPrincipal() {
-        return principal;
+    X509Certificate getCertificate() {
+        return certificate;
     }
 
     Key getPrivateKey() {

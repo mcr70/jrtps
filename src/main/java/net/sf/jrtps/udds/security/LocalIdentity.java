@@ -56,7 +56,7 @@ class LocalIdentity {
             //        - The remaining 32 bits (bits 97 to 127) shall be set identical to
             //          the corresponding bits in the candidate_participant_key
 
-            String subjectName = identityCreadential.getPrincipal().getSubjectX500Principal().getName();
+            String subjectName = identityCreadential.getCertificate().getSubjectX500Principal().getName();
             byte[] subjectNameBytes;
             synchronized (sha256) {
                 subjectNameBytes = sha256.digest(subjectName.getBytes());  // TODO: character encoding

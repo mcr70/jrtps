@@ -84,7 +84,7 @@ public class KeyStoreAuthenticationService {
 
     
     public X509Certificate getCertificate() {
-    	return identity.getIdentityCredential().getPrincipal();
+    	return identity.getIdentityCredential().getCertificate();
     }
 
     public Guid getOriginalGuid() {
