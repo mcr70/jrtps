@@ -14,6 +14,7 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -21,9 +22,13 @@ import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.parameter.IdentityToken;
+import net.sf.jrtps.rtps.Sample;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
+import net.sf.jrtps.udds.SampleListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +40,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class KeyStoreAuthenticationService {
+public class KeyStoreAuthenticationService implements SampleListener<ParticipantStatelessMessage> {
     private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthenticationService.class);
     private static Random random = new Random(System.currentTimeMillis()); 
 
@@ -46,13 +51,22 @@ public class KeyStoreAuthenticationService {
 
     private final Configuration conf;
     private final DataWriter<ParticipantStatelessMessage> statelessWriter;
+    private final DataReader<ParticipantStatelessMessage> statelessReader;
 
     private final LocalIdentity identity;
+	private final Participant participant;
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
     
     public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
-		this.statelessWriter = null;
-        this.conf = conf;
+		this.participant = p1;
+		this.statelessWriter = 
+				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
+        this.statelessReader = 
+        		(DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
+		this.statelessReader.addSampleListener(this);
+        
+        
+		this.conf = conf;
 
         ks = KeyStore.getInstance("JKS");
 
@@ -161,5 +175,23 @@ public class KeyStoreAuthenticationService {
 
 	LocalIdentity getLocalIdentity() {
 		return identity;
+	}
+
+
+	// ----  SampleListener  ------------------------
+	@Override
+	public void onSamples(List<Sample<ParticipantStatelessMessage>> samples) {
+		for (Sample<ParticipantStatelessMessage> sample : samples) {
+			ParticipantStatelessMessage psm = sample.getData();
+			
+			if (!psm.destination_participant_key.equals(participant.getGuid()) ||
+					!psm.destination_participant_key.equals(Guid.GUID_UNKNOWN)) {
+				logger.debug("ParticipantStatelessMessage {} is not destined to this participant({})",
+						psm.destination_participant_key, participant.getGuid());
+				continue;
+			}
+			
+			logger.debug("Got ParticipantStatelessMessage from {}", psm.source_endpoint_key);
+		}
 	}
 }
