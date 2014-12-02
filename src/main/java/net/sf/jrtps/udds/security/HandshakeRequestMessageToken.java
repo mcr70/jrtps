@@ -21,28 +21,16 @@ class HandshakeRequestMessageToken extends DataHolder {
     static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeReq:DSA‐DH";
     static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeReq:PKI‐RSA";
     
-	public enum ChallengeReq {
-        DDS_AUTH_CHALLENGEREQ_DSA_DH("DDS:Auth:ChallengeReq:DSA‐DH"),
-        DDS_AUTH_CHALLENGEREQ_PKI_RSA("DDS:Auth:ChallengeReq:PKI‐RSA");
-        
-        private String value;
-
-        ChallengeReq(String value) {
-            this.value = value;
-        }
-    }
-
-    
     public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
     		IdentityCredential iCred, PermissionsCredential pCred) throws CertificateEncodingException {
-        this(myGuid, destGuid, ChallengeReq.DDS_AUTH_CHALLENGEREQ_DSA_DH, iCred, pCred);
+        this(myGuid, destGuid, DDS_AUTH_CHALLENGEREQ_DSA_DH, iCred, pCred);
     }
     
     HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
-    		ChallengeReq cr, IdentityCredential iCred, 
+    		String classId, IdentityCredential iCred, 
     		PermissionsCredential pCred) throws CertificateEncodingException {
 
-    	super.class_id = cr.value;
+    	super.class_id = classId;
         super.string_properties = new Property[2];
         super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
         

@@ -191,6 +191,12 @@ public class KeyStoreAuthenticationService implements SampleListener<Participant
 				continue;
 			}
 			
+			if (!psm.destination_endpoint_key.equals(statelessReader.getGuid())) {
+				logger.debug("ParticipantStatelessMessage {} is not destined to local StatelessMessageRader({})",
+						psm.destination_endpoint_key, statelessReader.getGuid());
+				continue;
+			}
+			
 			logger.debug("Got ParticipantStatelessMessage from {}", psm.source_endpoint_key);
 		}
 	}

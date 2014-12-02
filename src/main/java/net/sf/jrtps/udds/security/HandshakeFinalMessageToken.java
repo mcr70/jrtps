@@ -18,31 +18,19 @@ class HandshakeFinalMessageToken extends DataHolder {
 	private static final Logger logger = LoggerFactory.getLogger(HandshakeFinalMessageToken.class);
 	private static volatile long seqNum = 0;
 	
-    static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeFin:DSA‐DH";
-    static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeFin:PKI‐RSA";
-    
-	public enum ChallengeFin {
-        DDS_AUTH_CHALLENGEFIN_DSA_DH("DDS:Auth:ChallengeFin:DSA‐DH"),
-        DDS_AUTH_CHALLENGEFIN_PKI_RSA("DDS:Auth:ChallengeFin:PKI‐RSA");
-        
-        private String value;
-
-        ChallengeFin(String value) {
-            this.value = value;
-        }
-    }
-
+    static final String DDS_AUTH_CHALLENGEFIN_DSA_DH = "DDS:Auth:ChallengeFin:DSA‐DH";
+    static final String DDS_AUTH_CHALLENGEFIN_PKI_RSA = "DDS:Auth:ChallengeFin:PKI‐RSA";
     
     public HandshakeFinalMessageToken(Guid myGuid, Guid destGuid,
     		IdentityCredential iCred, PermissionsCredential pCred) throws CertificateEncodingException {
-        this(myGuid, destGuid, ChallengeFin.DDS_AUTH_CHALLENGEFIN_DSA_DH, iCred, pCred);
+        this(myGuid, destGuid, DDS_AUTH_CHALLENGEFIN_DSA_DH, iCred, pCred);
     }
     
     HandshakeFinalMessageToken(Guid myGuid, Guid destGuid,
-    		ChallengeFin cr, IdentityCredential iCred, 
+    		String classId, IdentityCredential iCred, 
     		PermissionsCredential pCred) throws CertificateEncodingException {
 
-    	super.class_id = cr.value;
+    	super.class_id = classId;
         super.string_properties = new Property[2];
         super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
         

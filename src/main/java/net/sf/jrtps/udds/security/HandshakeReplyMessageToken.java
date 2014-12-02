@@ -5,7 +5,6 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
@@ -25,36 +24,25 @@ class HandshakeReplyMessageToken extends DataHolder {
 	private static final Logger logger = LoggerFactory.getLogger(HandshakeReplyMessageToken.class);
 	private static volatile long seqNum = 0;
 	
-    static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeRep:DSA‐DH";
-    static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeRep:PKI‐RSA";
+    static final String DDS_AUTH_CHALLENGEREP_DSA_DH = "DDS:Auth:ChallengeRep:DSA‐DH";
+    static final String DDS_AUTH_CHALLENGEREP_PKI_RSA = "DDS:Auth:ChallengeRep:PKI‐RSA";
 	
     private transient IdentityCredential iCred;
     
-	public enum ChallengeRep {
-        DDS_AUTH_CHALLENGEREP_DSA_DH("DDS:Auth:ChallengeRep:DSA‐DH"),
-        DDS_AUTH_CHALLENGEREP_PKI_RSA("DDS:Auth:ChallengeRep:PKI‐RSA");
-        
-        private String value;
-
-        ChallengeRep(String value) {
-            this.value = value;
-        }
-    }
-
-    
+   
     public HandshakeReplyMessageToken(HandshakeRequestMessageToken reqToken,
     		Guid myGuid, Guid destGuid,
     		IdentityCredential iCred, PermissionsCredential pCred) throws CertificateEncodingException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
-        this(reqToken, myGuid, destGuid, ChallengeRep.DDS_AUTH_CHALLENGEREP_DSA_DH, iCred, pCred);
+        this(reqToken, myGuid, destGuid, DDS_AUTH_CHALLENGEREP_DSA_DH, iCred, pCred);
     }
     
     HandshakeReplyMessageToken(HandshakeRequestMessageToken reqToken,
     		Guid myGuid, Guid destGuid,
-    		ChallengeRep cr, IdentityCredential iCred, 
+    		String classId, IdentityCredential iCred, 
     		PermissionsCredential pCred) throws CertificateEncodingException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
 
     	this.iCred = iCred;
-		super.class_id = cr.value;
+		super.class_id = classId;
         super.string_properties = new Property[2];
         super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
         
