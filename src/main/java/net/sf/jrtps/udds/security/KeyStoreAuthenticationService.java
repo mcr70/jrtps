@@ -143,7 +143,7 @@ public class KeyStoreAuthenticationService {
 		}
 	}
 
-	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException {
+	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
 		logger.debug("[dds.sec.auth] beginHandshakeRequest()");
 
 		HandshakeRequestMessageToken hrmt = 
@@ -171,5 +171,32 @@ public class KeyStoreAuthenticationService {
 
 	LocalIdentity getLocalIdentity() {
 		return identity;
+	}
+
+
+	public CountDownLatch doHandshake(IdentityToken iToken, Guid builtinTopicKey) {
+		CountDownLatch latch = null;
+		synchronized (handshakeLatches) {
+			if (handshakeLatches.containsKey(iToken)) {
+				return null;
+			}
+			
+			latch = new CountDownLatch(1);
+			handshakeLatches.put(iToken, latch);
+		}
+
+		int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
+		if (comparison < 0) { // Remote is lexicographically greater
+			// VALIDATION_PENDING_HANDSHAKE_REQUEST
+			beginHandshakeRequest(iToken, builtinTopicKey);
+		}
+		
+		return latch;
+	}
+
+
+	public void cancelHandshake(IdentityToken iToken) {
+		CountDownLatch latch = handshakeLatches.remove(iToken);
+		latch.countDown(); // TODO: Is this correct way of canceling handshake
 	}
 }

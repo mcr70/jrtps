@@ -16,11 +16,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class IdentityToken extends Parameter /* extends DataHolder */ {
     public static final String CLASS_ID_DDS_AUTH_X509_PEM_SHA256 = "DDS:Auth:X.509‐PEM‐SHA256";
     
-	private static MessageDigest sha256;
-
 	private String class_id;
     private byte[] binary_value1;
-
+    
     /**
      * Constructs IdentityToken.
      * @param pem PEM encoded certificate
@@ -28,23 +26,19 @@ public class IdentityToken extends Parameter /* extends DataHolder */ {
      */
     public IdentityToken(String pem) throws NoSuchAlgorithmException {
         super(ParameterId.PID_IDENTITY_TOKEN);
-        sha256 = MessageDigest.getInstance("SHA-256");
 	
         this.class_id = CLASS_ID_DDS_AUTH_X509_PEM_SHA256;
-
-        synchronized (sha256) { // Create SHA256 of cert PEM
-            binary_value1 = sha256.digest(pem.getBytes());
-            sha256.reset();     
-        }
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        binary_value1 = sha256.digest(pem.getBytes());
        
         if (binary_value1.length != 32) {
             throw new IllegalArgumentException("the length of encoded SHA256 hash must be 32: " + binary_value1.length);
         }
     }
 
-    IdentityToken() throws NoSuchAlgorithmException {
+    IdentityToken() {
         super(ParameterId.PID_IDENTITY_TOKEN);
-        sha256 = MessageDigest.getInstance("SHA-256");
+
     }
 
     /**

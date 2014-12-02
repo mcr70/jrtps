@@ -3,7 +3,6 @@ package net.sf.jrtps.udds.security;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -29,13 +28,13 @@ class HandshakeRequestMessageToken extends DataHolder {
 	static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeReq:PKI‐RSA";
 
 	public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
-			IdentityCredential iCred, PermissionsCredential pCred) throws CertificateEncodingException {
+			IdentityCredential iCred, PermissionsCredential pCred) {
 		this(myGuid, destGuid, DDS_AUTH_CHALLENGEREQ_DSA_DH, iCred, pCred);
 	}
 
 	HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
 			String classId, IdentityCredential iCred, 
-			PermissionsCredential pCred) throws CertificateEncodingException {
+			PermissionsCredential pCred) {
 
 		super.class_id = classId;
 		super.string_properties = new Property[2];

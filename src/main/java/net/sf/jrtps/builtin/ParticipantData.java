@@ -77,6 +77,7 @@ public class ParticipantData extends DiscoveredData {
     private long leaseExpirationTime;
 	private IdentityToken identityToken;
 	private PermissionsToken permissionsToken;
+	private boolean isAuthenticated = false;
 
     public ParticipantData(GuidPrefix prefix, int endpoints, List<Locator> discoveryLocators,
             List<Locator> userdataLocators, QualityOfService participantQos) {
@@ -314,4 +315,12 @@ public class ParticipantData extends DiscoveredData {
     public QosUserData getUserData() {
         return qos.getUserData();
     }
+
+	public void setAuthenticated(boolean b) {
+		this.isAuthenticated = b;
+	}
+	
+	public boolean isAuthenticated() {
+		return isAuthenticated;
+	}
 }
