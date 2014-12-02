@@ -101,16 +101,17 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
     }
 
     private void authenticate(ParticipantData pd) {
+    	log.debug("authenticate({})", pd.getGuidPrefix());
     	IdentityToken iToken = (IdentityToken) pd.getParameter(ParameterId.PID_IDENTITY_TOKEN);
     	if (iToken != null) {
     		PermissionsToken pToken = (PermissionsToken) pd.getParameter(ParameterId.PID_PERMISSIONS_TOKEN);
     		try {
     			CountDownLatch latch = null;
     			while((latch = authPlugin.doHandshake(iToken, pd.getBuiltinTopicKey())) != null) {
-    				boolean await = latch.await(2000, TimeUnit.MILLISECONDS);
-    				if (!await) {
-    					authPlugin.cancelHandshake(iToken);    					
-    				}
+//    				boolean await = latch.await(2000, TimeUnit.MILLISECONDS);
+//    				if (!await) {
+//    					authPlugin.cancelHandshake(iToken);    					
+//    				}
     			}
     		}
     		catch(Exception e) {

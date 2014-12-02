@@ -169,7 +169,7 @@ public class KeyStoreAuthenticationService {
 	}
 
 
-	LocalIdentity getLocalIdentity() {
+	public LocalIdentity getLocalIdentity() {
 		return identity;
 	}
 
@@ -198,5 +198,10 @@ public class KeyStoreAuthenticationService {
 	public void cancelHandshake(IdentityToken iToken) {
 		CountDownLatch latch = handshakeLatches.remove(iToken);
 		latch.countDown(); // TODO: Is this correct way of canceling handshake
+	}
+
+
+	public IdentityToken getIdentityToken() {
+		return getLocalIdentity().getIdentityToken();
 	}
 }

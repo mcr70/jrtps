@@ -8,6 +8,7 @@ import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.DefaultMulticastLocator;
 import net.sf.jrtps.message.parameter.DefaultUnicastLocator;
+import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.MetatrafficMulticastLocator;
 import net.sf.jrtps.message.parameter.MetatrafficUnicastLocator;
 import net.sf.jrtps.message.parameter.ParameterList;
@@ -82,9 +83,16 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
             }
         }
 
-        payloadParams.add(pd.getUserData());
-        
+        payloadParams.add(pd.getUserData());        
         payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
+        
+        if (pd.getIdentityToken() != null) {
+        	payloadParams.add(pd.getIdentityToken());
+        }
+        if (pd.getPermissionsToken() != null) {
+        	payloadParams.add(pd.getPermissionsToken());
+        }
+        
         payloadParams.add(new Sentinel());
 
         return new ParameterListEncapsulation(payloadParams);
