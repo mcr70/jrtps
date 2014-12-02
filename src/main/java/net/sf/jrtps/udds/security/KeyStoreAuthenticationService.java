@@ -14,7 +14,6 @@ import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.CountDownLatch;
@@ -22,13 +21,11 @@ import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.parameter.IdentityToken;
-import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
-import net.sf.jrtps.udds.SampleListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,164 +37,139 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class KeyStoreAuthenticationService implements SampleListener<ParticipantStatelessMessage> {
-    private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthenticationService.class);
-    private static Random random = new Random(System.currentTimeMillis()); 
+public class KeyStoreAuthenticationService {
+	private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthenticationService.class);
+	private static Random random = new Random(System.currentTimeMillis()); 
 
-    // Latches used to wait for remote participants
-    private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
-    
-    private final KeyStore ks;
+	// Latches used to wait for remote participants
+	private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
 
-    private final Configuration conf;
-    private final DataWriter<ParticipantStatelessMessage> statelessWriter;
-    private final DataReader<ParticipantStatelessMessage> statelessReader;
+	private final KeyStore ks;
 
-    private final LocalIdentity identity;
+	private final Configuration conf;
+	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
+	private final DataReader<ParticipantStatelessMessage> statelessReader;
+
+	private final LocalIdentity identity;
 	private final Participant participant;
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
-    
-    public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
+
+	public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
 		this.participant = p1;
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
-        this.statelessReader = 
-        		(DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
-		this.statelessReader.addSampleListener(this);
-        
-        
+		this.statelessReader = 
+				(DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
+		this.statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant));
+
 		this.conf = conf;
 
-        ks = KeyStore.getInstance("JKS");
+		ks = KeyStore.getInstance("JKS");
 
-        InputStream is = getClass().getResourceAsStream("/jrtps.jks");
-        String pwd = conf.getKeystorePassword();
+		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
+		String pwd = conf.getKeystorePassword();
 
-        ks.load(is, pwd.toCharArray());
+		ks.load(is, pwd.toCharArray());
 
-        Certificate ca = ks.getCertificate(conf.getSecurityCA());
-        if (ca == null) {
-            throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
-        }
-        
-        String alias = conf.getSecurityPrincipal();
+		Certificate ca = ks.getCertificate(conf.getSecurityCA());
+		if (ca == null) {
+			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
+		}
 
-        X509Certificate principal = (X509Certificate) ks.getCertificate(alias);
-        if (principal == null) {
-            throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
-        }
+		String alias = conf.getSecurityPrincipal();
 
-        principal.verify(ca.getPublicKey());
+		X509Certificate principal = (X509Certificate) ks.getCertificate(alias);
+		if (principal == null) {
+			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
+		}
 
-        IdentityCredential identityCreadential = new IdentityCredential(principal, ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray()));
-        
-        identity = new LocalIdentity(originalGuid, identityCreadential);
-        
-        logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
-    }
+		principal.verify(ca.getPublicKey());
 
-    
-    public X509Certificate getCertificate() {
-    	return identity.getIdentityCredential().getCertificate();
-    }
+		IdentityCredential identityCreadential = new IdentityCredential(principal, ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray()));
 
-    public Guid getOriginalGuid() {
-        return identity.getOriginalGuid();
-    }
+		identity = new LocalIdentity(originalGuid, identityCreadential);
+
+		logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
+	}
 
 
-    /**
-     * This method is called when a remote participant has been detected and it has 
-     * DDS security capabilities by providing IdentityToken with ParticipantBuiltinTopicData.
-     * 
-     * See ch. 7.4.1.3 of DDS Security specification: Extension to RTPS Standard DCPSParticipants 
-     * Builtin Topic, and ch. 9.3.3 DDS:Auth:PKI-RSA/DSA-DH plugin behavior
-     * 
-     * @param remoteIdentity IdentityToken of remote participant
-     * @throws NoSuchAlgorithmException 
-     * @throws CertificateEncodingException 
-     */
-    public void validateRemoteIdentity(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException, NoSuchAlgorithmException {
-        int comparison = identity.getIdentityToken().getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
-        if (comparison < 0) { // Remote is lexicographically greater
-            // VALIDATION_PENDING_HANDSHAKE_REQUEST
-            beginHandshakeRequest(remoteIdentity, remoteGuid);
-        }
-        else if (comparison > 0) { // Remote is lexicographically smaller
-            // VALIDATION_PENDING_HANDSHAKE_MESSAGE
-            // Wait for remote entity to send handshake message
-            CountDownLatch latch = handshakeLatches.remove(remoteIdentity);
-            try {
-                boolean await = latch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
-                handshakeLatches.remove(remoteIdentity);
-                if (await) {
-                    beginHandshakeReply();
-                }
-                else {
-                    logger.warn("Failed to get handshake message from remote entity on time");
-                }
-            } catch (InterruptedException e) {
-                handshakeLatches.remove(remoteIdentity);
-                logger.warn("Interrupted. Returning from validateRemoteIdentity()");
-                return;
-            }
-        }
-        else { // Remote has the same identity as local
-            // ???
-        }
-    }
+	public X509Certificate getCertificate() {
+		return identity.getIdentityCredential().getCertificate();
+	}
+
+	public Guid getOriginalGuid() {
+		return identity.getOriginalGuid();
+	}
+
+
+	/**
+	 * This method is called when a remote participant has been detected and it has 
+	 * DDS security capabilities by providing IdentityToken with ParticipantBuiltinTopicData.
+	 * 
+	 * See ch. 7.4.1.3 of DDS Security specification: Extension to RTPS Standard DCPSParticipants 
+	 * Builtin Topic, and ch. 9.3.3 DDS:Auth:PKI-RSA/DSA-DH plugin behavior
+	 * 
+	 * @param remoteIdentity IdentityToken of remote participant
+	 * @throws NoSuchAlgorithmException 
+	 * @throws CertificateEncodingException 
+	 */
+	public void validateRemoteIdentity(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException, NoSuchAlgorithmException {
+		int comparison = identity.getIdentityToken().getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
+		if (comparison < 0) { // Remote is lexicographically greater
+			// VALIDATION_PENDING_HANDSHAKE_REQUEST
+			beginHandshakeRequest(remoteIdentity, remoteGuid);
+		}
+		else if (comparison > 0) { // Remote is lexicographically smaller
+			// VALIDATION_PENDING_HANDSHAKE_MESSAGE
+			// Wait for remote entity to send handshake message
+			CountDownLatch latch = handshakeLatches.remove(remoteIdentity);
+			try {
+				boolean await = latch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
+				handshakeLatches.remove(remoteIdentity);
+				if (await) {
+					beginHandshakeReply();
+				}
+				else {
+					logger.warn("Failed to get handshake message from remote entity on time");
+				}
+			} catch (InterruptedException e) {
+				handshakeLatches.remove(remoteIdentity);
+				logger.warn("Interrupted. Returning from validateRemoteIdentity()");
+				return;
+			}
+		}
+		else { // Remote has the same identity as local
+			// ???
+		}
+	}
 
 	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException {
-    	logger.debug("[dds.sec.auth] beginHandshakeRequest()");
-    	
+		logger.debug("[dds.sec.auth] beginHandshakeRequest()");
+
 		HandshakeRequestMessageToken hrmt = 
-    			new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
-    					getLocalIdentity().getIdentityCredential(), 
-    					null /* permission credential */);
-    	
-    	ParticipantStatelessMessage psm = 
-        		new ParticipantStatelessMessage(
-        				new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-        				hrmt);
-        
-        statelessWriter.write(psm);
-        
-    	// TODO Auto-generated method stub
-    }
+				new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
+						getLocalIdentity().getIdentityCredential(), 
+						null /* permission credential */);
+
+		ParticipantStatelessMessage psm = 
+				new ParticipantStatelessMessage(
+						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+						hrmt);
+
+		statelessWriter.write(psm);
+
+		// TODO Auto-generated method stub
+	}
 
 
-    void beginHandshakeReply() {
-    	logger.debug("[dds.sec.auth] beginHandshakeReply()");
-    	// TODO Auto-generated method stub
-		
+	void beginHandshakeReply() {
+		logger.debug("[dds.sec.auth] beginHandshakeReply()");
+		// TODO Auto-generated method stub
+
 	}
 
 
 	LocalIdentity getLocalIdentity() {
 		return identity;
-	}
-
-
-	// ----  SampleListener  ------------------------
-	@Override
-	public void onSamples(List<Sample<ParticipantStatelessMessage>> samples) {
-		for (Sample<ParticipantStatelessMessage> sample : samples) {
-			ParticipantStatelessMessage psm = sample.getData();
-			
-			if (!psm.destination_participant_key.equals(participant.getGuid()) ||
-					!psm.destination_participant_key.equals(Guid.GUID_UNKNOWN)) {
-				logger.debug("ParticipantStatelessMessage {} is not destined to this participant({})",
-						psm.destination_participant_key, participant.getGuid());
-				continue;
-			}
-			
-			if (!psm.destination_endpoint_key.equals(statelessReader.getGuid())) {
-				logger.debug("ParticipantStatelessMessage {} is not destined to local StatelessMessageRader({})",
-						psm.destination_endpoint_key, statelessReader.getGuid());
-				continue;
-			}
-			
-			logger.debug("Got ParticipantStatelessMessage from {}", psm.source_endpoint_key);
-		}
 	}
 }
