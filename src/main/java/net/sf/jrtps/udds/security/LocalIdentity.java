@@ -2,13 +2,6 @@ package net.sf.jrtps.udds.security;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.security.Signer;
-import java.security.cert.CertificateEncodingException;
-import java.security.spec.PKCS8EncodedKeySpec;
-
-import javax.xml.crypto.dsig.XMLSignContext;
-import javax.xml.crypto.dsig.XMLSignature;
-import javax.xml.crypto.dsig.XMLSignature.SignatureValue;
 
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
@@ -26,6 +19,9 @@ class LocalIdentity {
         this.originalGuid = originalGuid;
         this.identityCreadential = identityCreadential;
         sha256 = MessageDigest.getInstance("SHA-256");
+        
+        String pem = identityCreadential.getPEMEncodedCertificate();
+        this.identityToken = new IdentityToken(pem);
     }
     
     Guid getOriginalGuid() {
@@ -89,12 +85,11 @@ class LocalIdentity {
         return adjustedGuid;
     }
 
-    IdentityToken getIdentityToken() throws CertificateEncodingException, NoSuchAlgorithmException {
-        if (identityToken == null) {
-            String pem = identityCreadential.getPEMEncodedCertificate();
-            this.identityToken = new IdentityToken(pem);
-        }
-
+    /**
+     * Gets the IdentityToken of this LocalIdentity.
+     * @return IdentityToken
+     */
+    IdentityToken getIdentityToken() {
         return identityToken;
     }
 }

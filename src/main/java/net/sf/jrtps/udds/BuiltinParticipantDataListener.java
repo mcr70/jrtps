@@ -3,6 +3,8 @@ package net.sf.jrtps.udds;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -10,10 +12,14 @@ import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
+import net.sf.jrtps.message.parameter.IdentityToken;
+import net.sf.jrtps.message.parameter.ParameterId;
+import net.sf.jrtps.message.parameter.PermissionsToken;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
+import net.sf.jrtps.udds.security.KeyStoreAuthenticationService;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,13 +34,14 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
     private static final Logger log = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
 
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
-
+    private final KeyStoreAuthenticationService authPlugin;
 	private boolean securityEnabled;
 
     BuiltinParticipantDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
         super(p);
         this.securityEnabled = p.getConfiguration().isSecurityEnabled();
         this.discoveredParticipants = discoveredParticipants;
+        authPlugin = p.getAuthenticationService();
     }
 
     @Override
@@ -50,6 +57,11 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                         log.trace("Ignoring self");
                     } else {
                         log.debug("A new Participant detected: {}, parameters received: {}", pd.getGuidPrefix(), pd.getParameters());
+                        
+                        if (authPlugin != null) {
+                        	authenticate(pd);
+                        }
+                        
                         discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
                         fireParticipantDetected(pd);
@@ -88,7 +100,32 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
         }
     }
 
-    /**
+    private void authenticate(ParticipantData pd) {
+    	IdentityToken iToken = (IdentityToken) pd.getParameter(ParameterId.PID_IDENTITY_TOKEN);
+    	if (iToken != null) {
+    		PermissionsToken pToken = (PermissionsToken) pd.getParameter(ParameterId.PID_PERMISSIONS_TOKEN);
+    		try {
+    			CountDownLatch latch = null;
+    			while((latch = authPlugin.doHandshake(iToken, pd.getBuiltinTopicKey())) != null) {
+    				boolean await = latch.await(2000, TimeUnit.MILLISECONDS);
+    				if (!await) {
+    					authPlugin.cancelHandshake(iToken);    					
+    				}
+    			}
+    		}
+    		catch(Exception e) {
+    			log.debug("Failed to validate remote Participant", pd.getGuidPrefix());
+        		pd.setAuthenticated(false);
+    		}
+    	}
+    	else {
+    		log.debug("Remote participant {} did not send IdentityToken, mark it as unauthenticated",
+    				pd.getGuidPrefix());
+    		pd.setAuthenticated(false);
+    	}
+	}
+
+	/**
      * Handle builtin endpoints for discovered participant. If participant has a
      * builtin reader for publications or subscriptions, send history cache to
      * them.
