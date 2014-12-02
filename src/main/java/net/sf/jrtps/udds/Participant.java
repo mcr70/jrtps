@@ -28,9 +28,11 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
+import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
+import net.sf.jrtps.message.parameter.QosReliability.Kind;
 import net.sf.jrtps.rtps.RTPSParticipant;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.RTPSWriter;
@@ -43,6 +45,7 @@ import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.udds.security.KeyStoreAuthenticationService;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
+import net.sf.jrtps.udds.security.ParticipantStatelessMessageMarshaller;
 import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
@@ -105,7 +108,6 @@ public class Participant {
 	private final QualityOfService pvmQoS;  // ParticipantVolatileMessage
 
 	private QualityOfService participantQos;
-	private boolean isSecure = false; // By default, DDS security is disabled
 
 	private KeyStoreAuthenticationService authenticationService = null;
 
@@ -203,14 +205,6 @@ public class Participant {
 
 		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
 
-		if (config.isSecurityEnabled()) {
-			try {
-				authenticationService = new KeyStoreAuthenticationService(this, cfg, guid);
-			} 
-			catch (Exception e) {
-				logger.warn("Failed to create AuthenticationService", e);
-			}
-		}
 
 		rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
 				discoveredParticipants, config);
@@ -219,15 +213,24 @@ public class Participant {
 
 		registerBuiltinMarshallers();
 		createSPDPEntities();
-
-		if (isSecure) {
+		
+		if (config.isSecurityEnabled()) {
 			createSecurityEndpoints();
+			try {
+				authenticationService = new KeyStoreAuthenticationService(this, config, guid);
+				logger.debug("Created authePlugin");
+			} 
+			catch (Exception e) {
+				logger.warn("Failed to create AuthenticationService", e);
+			}
 		}
 
 		discoveryLocators = rtps_participant.getDiscoveryLocators();
 		userdataLocators = rtps_participant.getUserdataLocators();
 
+		logger.debug("Starting RTPS participant");
 		rtps_participant.start();
+
 		createSEDPEntities();
 		DataReader<ParticipantData> pdReader = (DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
@@ -244,11 +247,21 @@ public class Participant {
 
 	private void createSecurityEndpoints() {
 		registerSecureBuiltinMarshallers();
-		// TODO Auto-generated method stub
+		QualityOfService statelessQos = new QualityOfService();
+		statelessQos.setPolicy(new QosReliability(Kind.BEST_EFFORT, new Duration(0, 0)));
+
+		DataWriter<ParticipantStatelessMessage> sWriter = 
+				createDataWriter(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
+						ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
+						statelessQos);
+		DataReader<ParticipantStatelessMessage> sReader = 
+				createDataReader(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
+						ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
+						statelessQos);
 	}
 
 	private void registerSecureBuiltinMarshallers() {
-		// TODO Auto-generated method stub
+		setMarshaller(ParticipantStatelessMessage.class, new ParticipantStatelessMessageMarshaller());
 	}
 
 	private void registerBuiltinMarshallers() {
@@ -378,10 +391,10 @@ public class Participant {
 			eId = EntityId.SEDP_BUILTIN_PUBLICATIONS_READER;
 		} else if (ParticipantData.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			eId = EntityId.SPDP_BUILTIN_PARTICIPANT_READER;
-		} else if (ParticipantStatelessMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
-			eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER;
 		} else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_READER;
+		} else if (ParticipantStatelessMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			eId = EntityId.BUILTIN_PARTICIPANT_STATELESS_READER;
 		} else {
 			int myIdx = userEntityIdx++;
 			byte[] myKey = new byte[3];
@@ -498,6 +511,8 @@ public class Participant {
 			eId = EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER;
 		} else if (ParticipantMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
 			eId = EntityId.BUILTIN_PARTICIPANT_MESSAGE_WRITER;
+		} else if (ParticipantStatelessMessage.BUILTIN_TOPIC_NAME.equals(topicName)) {
+			eId = EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER;
 		} else {
 			int myIdx = userEntityIdx++;
 			byte[] myKey = new byte[3];
@@ -677,14 +692,16 @@ public class Participant {
 	private ParticipantData createSPDPParticipantData() {
 		int epSet = createEndpointSet();
 
-		ParticipantData pd = new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet, 
-				discoveryLocators, userdataLocators, participantQos);
-
 		if (authenticationService != null) {
-
+			IdentityToken iToken = authenticationService.getIdentityToken();
+			return new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet,
+					discoveryLocators, userdataLocators, 
+					iToken, null, participantQos); // TODO: PermissionsToken						
 		}
-
-		return pd;
+		else {
+			return new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet,
+					discoveryLocators, userdataLocators, participantQos);			
+		}
 	}
 
 	private int createEndpointSet() {

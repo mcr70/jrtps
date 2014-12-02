@@ -257,7 +257,13 @@ public class ParameterFactory {
         case 0x0019:
             param = new ReliabilityOffered();
             break;
-
+        case 0x1001:
+            param = new IdentityToken();
+            break;
+//        case 0x1002:
+//            param = new PermissionsToken();
+//            break;
+            
         // jRTPS specific parameters
         case (short) 0x8001:
             param = new X509Cert();
@@ -276,7 +282,7 @@ public class ParameterFactory {
             else {
                 // Ignore
                 param = new UnknownParameter(paramId);
-                log.error("Ignoring unknown Parameter {}", param);
+                log.error("Ignoring unknown Parameter {}({})", paramId, Integer.toHexString(paramId));
             }
         }
 

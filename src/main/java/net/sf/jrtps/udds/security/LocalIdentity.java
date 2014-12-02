@@ -7,7 +7,7 @@ import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 
-class LocalIdentity {
+public class LocalIdentity {
     private static MessageDigest sha256 = null;
 
     private Guid originalGuid;
@@ -89,7 +89,7 @@ class LocalIdentity {
      * Gets the IdentityToken of this LocalIdentity.
      * @return IdentityToken
      */
-    IdentityToken getIdentityToken() {
+    public IdentityToken getIdentityToken() {
         return identityToken;
     }
 }
