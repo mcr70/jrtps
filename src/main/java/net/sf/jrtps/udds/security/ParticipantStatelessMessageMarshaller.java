@@ -25,6 +25,7 @@ public class ParticipantStatelessMessageMarshaller implements Marshaller<Partici
         CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;
         RTPSByteBuffer bb = cdrEnc.getBuffer();
         
+        // TODO: Implement me
         
 		return null;
 	}
@@ -32,7 +33,11 @@ public class ParticipantStatelessMessageMarshaller implements Marshaller<Partici
 	@Override
 	public DataEncapsulation marshall(ParticipantStatelessMessage data)
 			throws IOException {
-		// TODO Auto-generated method stub
-		return null;
+        CDREncapsulation cdrEnc = new CDREncapsulation(1024);
+        RTPSByteBuffer bb = cdrEnc.getBuffer();
+
+        // TODO: Implement me
+        
+        return null;
 	}
 }

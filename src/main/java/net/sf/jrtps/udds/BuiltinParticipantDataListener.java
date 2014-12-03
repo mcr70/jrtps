@@ -15,6 +15,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.udds.security.KeyStoreAuthenticationService;
+import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,8 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                         pw.addMatchedReader(rd);
 
                         if (authPlugin != null) {
+                        	addMatchedEntitiesForAuth(pd);
+                        	
                         	authPlugin.beginHandshake(pd);
                         }
                                                
@@ -92,6 +95,22 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
     }
 
 
+
+	private void addMatchedEntitiesForAuth(ParticipantData pd) {
+    	if (pd.getIdentityToken() != null) {
+            SubscriptionData rd = new SubscriptionData(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME,
+                    ParticipantStatelessMessage.class.getName(), 
+                    new Guid(pd.getGuidPrefix(), EntityId.BUILTIN_PARTICIPANT_STATELESS_READER), 
+                    pd.getQualityOfService());                        
+            participant.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER).addMatchedReader(rd);
+
+            PublicationData wd = new PublicationData(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME,
+                    ParticipantStatelessMessage.class.getName(), 
+                    new Guid(pd.getGuidPrefix(), EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER), 
+                    pd.getQualityOfService());
+            participant.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER).addMatchedWriter(wd);
+    	}
+	}
 
 	/**
      * Handle builtin endpoints for discovered participant. If participant has a
