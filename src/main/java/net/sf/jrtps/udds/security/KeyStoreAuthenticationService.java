@@ -38,7 +38,9 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class KeyStoreAuthenticationService {
-	private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthenticationService.class);
+	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
+	
+	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
 
 	// Latches used to wait for remote participants
 	private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
