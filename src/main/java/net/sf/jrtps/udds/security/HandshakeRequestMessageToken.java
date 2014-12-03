@@ -35,13 +35,19 @@ class HandshakeRequestMessageToken extends DataHolder {
 	HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
 			String classId, IdentityCredential iCred, 
 			PermissionsCredential pCred) {
-
+		
 		super.class_id = classId;
 		super.string_properties = new Property[2];
 		super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
 
+		String permissions = "";
+		if (pCred != null) {
+			// TODO: This is not the proper way of handling this.			
+			permissions = new String(pCred.getBinaryValue1());
+		}
+		
 		// TODO: dds.sec.permissions is not implemented
-		super.string_properties[1] = new Property("dds.sec.permissions", new String(pCred.getBinaryValue1()));
+		super.string_properties[1] = new Property("dds.sec.permissions", permissions);
 		try {
 			super.binary_value1 = "CHALLENGE:".getBytes("ISO-8859-1");
 		} catch (UnsupportedEncodingException e) {
