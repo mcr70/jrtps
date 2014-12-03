@@ -20,6 +20,8 @@ import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.ParticipantData;
+import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -187,7 +189,7 @@ public class KeyStoreAuthenticationService {
 		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
 		
 		IdentityToken iToken = pd.getIdentityToken();
-		if (iToken != null) {
+		if (iToken != null) {            
 			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
 			if (comparison < 0) { // Remote is lexicographically greater
 				// VALIDATION_PENDING_HANDSHAKE_REQUEST
@@ -209,16 +211,19 @@ public class KeyStoreAuthenticationService {
 
 
 	public void doHandshake(MessageIdentity messageIdentity, HandshakeRequestMessageToken hReq) {
+		logger.debug("doHandshake(request)");
 		// TODO Auto-generated method stub
 	}
 
 
 	public void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
+		logger.debug("doHandshake(reply)");
 		// TODO Auto-generated method stub
 	}
 
 
 	public void doHandshake(HandshakeFinalMessageToken hFin) {
+		logger.debug("doHandshake(final)");
 		// TODO Auto-generated method stub
 	}
 }
