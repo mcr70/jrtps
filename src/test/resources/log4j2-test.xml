@@ -11,7 +11,7 @@
             <AppenderRef ref="STDOUT" />
         </Root>
         
-        <Logger name="dds.sec.auth" level="DEBUG" >
+        <Logger name="dds.sec.auth" level="DEBUG" additivity="false">
             <AppenderRef ref="STDOUT" />
         </Logger>
     </Loggers>

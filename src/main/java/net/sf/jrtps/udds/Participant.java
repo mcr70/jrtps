@@ -107,7 +107,7 @@ public class Participant {
 	private final QualityOfService pmQoS;   // ParticipantMessage
 	private final QualityOfService pvmQoS;  // ParticipantVolatileMessage
 
-	private QualityOfService participantQos;
+	//private QualityOfService participantQos;
 
 	private KeyStoreAuthenticationService authenticationService = null;
 
@@ -131,7 +131,7 @@ public class Participant {
 	 * Create a Participant with domainId 0 and participantId -1.
 	 */
 	public Participant() {
-		this(0, -1, QualityOfService.getSPDPQualityOfService(), null, null);
+		this(0, -1);
 	}
 
 	/**
@@ -140,7 +140,7 @@ public class Participant {
 	 * @param domainId domainId
 	 */
 	public Participant(int domainId) {
-		this(domainId, -1, QualityOfService.getSPDPQualityOfService(), null, null);
+		this(domainId, -1);
 	}
 
 	/**
@@ -150,7 +150,7 @@ public class Participant {
 	 * @param participantId
 	 */
 	public Participant(int domainId, int participantId) {
-		this(domainId, participantId, QualityOfService.getSPDPQualityOfService(), null, null);
+		this(domainId, participantId, null, null);
 	}
 
 	/**
@@ -168,13 +168,10 @@ public class Participant {
 	 * 
 	 * @param domainId domainId of this participant.
 	 * @param participantId participantId of this participant.
-	 * @param participantQos Quality of service for participant
 	 * @param ef EntityFactory to be used. If ef is null, a default EntityFactory will be used.
 	 * @param cfg Configuration used. If config is null, default Configuration is used.
 	 */
-	public Participant(int domainId, int participantId, QualityOfService participantQos, EntityFactory ef, Configuration cfg) {
-		this.participantQos = participantQos;
-
+	public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
 		this.entityFactory = ef != null ? ef : new EntityFactory();;
@@ -696,11 +693,11 @@ public class Participant {
 			IdentityToken iToken = authenticationService.getIdentityToken();
 			return new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet,
 					discoveryLocators, userdataLocators, 
-					iToken, null, participantQos); // TODO: PermissionsToken						
+					iToken, null, spdpQoS); // TODO: PermissionsToken						
 		}
 		else {
 			return new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet,
-					discoveryLocators, userdataLocators, participantQos);			
+					discoveryLocators, userdataLocators, spdpQoS);			
 		}
 	}
 

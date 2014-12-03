@@ -145,7 +145,7 @@ public class KeyStoreAuthenticationService {
 	}
 
 	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
-		logger.debug("[dds.sec.auth] beginHandshakeRequest()");
+		logger.debug("beginHandshakeRequest()");
 
 		HandshakeRequestMessageToken hrmt = 
 				new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
@@ -158,13 +158,11 @@ public class KeyStoreAuthenticationService {
 						hrmt);
 
 		statelessWriter.write(psm);
-
-		// TODO Auto-generated method stub
 	}
 
 
 	void beginHandshakeReply() {
-		logger.debug("[dds.sec.auth] beginHandshakeReply()");
+		logger.debug("beginHandshakeReply()");
 		// TODO Auto-generated method stub
 
 	}
@@ -174,29 +172,7 @@ public class KeyStoreAuthenticationService {
 		return identity;
 	}
 
-
-	public CountDownLatch doHandshake(IdentityToken iToken, Guid builtinTopicKey) {
-		CountDownLatch latch = null;
-		synchronized (handshakeLatches) {
-			if (handshakeLatches.containsKey(iToken)) {
-				return null;
-			}
-
-			latch = new CountDownLatch(1);
-			handshakeLatches.put(iToken, latch);
-		}
-
-		int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
-		if (comparison < 0) { // Remote is lexicographically greater
-			// VALIDATION_PENDING_HANDSHAKE_REQUEST
-			beginHandshakeRequest(iToken, builtinTopicKey);
-		}
-
-		return latch;
-	}
-
-
-	public void cancelHandshake(IdentityToken iToken) {
+	void cancelHandshake(IdentityToken iToken) {
 		CountDownLatch latch = handshakeLatches.remove(iToken);
 		latch.countDown(); // TODO: Is this correct way of canceling handshake
 	}
@@ -216,6 +192,12 @@ public class KeyStoreAuthenticationService {
 			if (comparison < 0) { // Remote is lexicographically greater
 				// VALIDATION_PENDING_HANDSHAKE_REQUEST
 				beginHandshakeRequest(iToken, pd.getGuid());
+			}
+			else if (comparison > 0) {
+				logger.debug("Starting to wait for HandshakeRequestMessage");
+			}
+			else {
+				logger.debug("Remote identity is the same as we are");
 			}
 		}
 		else {
