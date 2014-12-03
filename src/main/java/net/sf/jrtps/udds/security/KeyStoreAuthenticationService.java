@@ -15,11 +15,11 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
  */
 public class KeyStoreAuthenticationService {
 	private static Logger logger = LoggerFactory.getLogger(KeyStoreAuthenticationService.class);
-	private static Random random = new Random(System.currentTimeMillis()); 
 
 	// Latches used to wait for remote participants
 	private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
@@ -60,7 +59,7 @@ public class KeyStoreAuthenticationService {
 				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
 		this.statelessReader = 
 				(DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
-		this.statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant));
+		this.statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant, this));
 
 		this.conf = conf;
 
@@ -180,7 +179,7 @@ public class KeyStoreAuthenticationService {
 			if (handshakeLatches.containsKey(iToken)) {
 				return null;
 			}
-			
+
 			latch = new CountDownLatch(1);
 			handshakeLatches.put(iToken, latch);
 		}
@@ -190,7 +189,7 @@ public class KeyStoreAuthenticationService {
 			// VALIDATION_PENDING_HANDSHAKE_REQUEST
 			beginHandshakeRequest(iToken, builtinTopicKey);
 		}
-		
+
 		return latch;
 	}
 
@@ -203,5 +202,39 @@ public class KeyStoreAuthenticationService {
 
 	public IdentityToken getIdentityToken() {
 		return getLocalIdentity().getIdentityToken();
+	}
+
+
+	public boolean beginHandshake(ParticipantData pd) {
+		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
+		
+		IdentityToken iToken = pd.getIdentityToken();
+		if (iToken != null) {
+			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
+			if (comparison < 0) { // Remote is lexicographically greater
+				// VALIDATION_PENDING_HANDSHAKE_REQUEST
+				beginHandshakeRequest(iToken, pd.getGuid());
+			}
+		}
+		else {
+			logger.debug("Failed to authenticate; No IdentityToken provided by {}", pd.getGuidPrefix());
+		}
+		
+		return false;
+	}
+
+
+	public void doHandshake(MessageIdentity messageIdentity, HandshakeRequestMessageToken hReq) {
+		// TODO Auto-generated method stub
+	}
+
+
+	public void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
+		// TODO Auto-generated method stub
+	}
+
+
+	public void doHandshake(HandshakeFinalMessageToken hFin) {
+		// TODO Auto-generated method stub
 	}
 }

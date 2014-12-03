@@ -1,7 +1,5 @@
 package net.sf.jrtps.udds.security;
 
-import java.security.cert.CertificateException;
-import java.security.cert.X509Certificate;
 import java.util.List;
 
 import net.sf.jrtps.rtps.Sample;
@@ -24,8 +22,10 @@ class ParticipantStatelessMessageListener implements SampleListener<ParticipantS
 	private static final Logger logger = LoggerFactory.getLogger(ParticipantStatelessMessageListener.class);
 	private final Guid participantGuid;
 	private final Guid statelessReaderGuid;
+	private final KeyStoreAuthenticationService authPlugin;
 
-	ParticipantStatelessMessageListener(Participant p) {
+	ParticipantStatelessMessageListener(Participant p, KeyStoreAuthenticationService authPlugin) {
+		this.authPlugin = authPlugin;
 		this.participantGuid = p.getGuid();
 		this.statelessReaderGuid = new Guid(participantGuid.getPrefix(), EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
 	}
@@ -38,13 +38,13 @@ class ParticipantStatelessMessageListener implements SampleListener<ParticipantS
 
 			if (!psm.destination_participant_key.equals(participantGuid) ||
 					!psm.destination_participant_key.equals(Guid.GUID_UNKNOWN)) {
-				logger.debug("ParticipantStatelessMessage {} is not destined to this participant({})",
+				logger.debug("ParticipantStatelessMessage participant_key({}) is not destined to this participant({})",
 						psm.destination_participant_key, participantGuid);
 				continue;
 			}
 
 			if (!psm.destination_endpoint_key.equals(statelessReaderGuid)) {
-				logger.debug("ParticipantStatelessMessage {} is not destined to local StatelessMessageRader({})",
+				logger.debug("ParticipantStatelessMessage endpoint_key({}) is not destined to local StatelessMessageRader({})",
 						psm.destination_endpoint_key, statelessReaderGuid);
 				continue;
 			}
@@ -54,14 +54,16 @@ class ParticipantStatelessMessageListener implements SampleListener<ParticipantS
 				String classId = psm.message_data[0].class_id;
 				
 				if (HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_DSA_DH.equals(classId)) {			
-					handleHandshakeRequest((HandshakeRequestMessageToken) psm.message_data[0]);
+					authPlugin.doHandshake(psm.message_identity, 
+							(HandshakeRequestMessageToken) psm.message_data[0]);
 				}
 				else if (HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH.equals(classId)) {
-					handleHandshakeReply((HandshakeReplyMessageToken) psm.message_data[0]);
+					authPlugin.doHandshake(psm.related_message_identity, 
+							(HandshakeReplyMessageToken) psm.message_data[0]);
 					
 				}
 				else if (HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_DSA_DH.equals(classId)) {
-					handleHandshakeFinal((HandshakeFinalMessageToken) psm.message_data[0]);					
+					authPlugin.doHandshake((HandshakeFinalMessageToken) psm.message_data[0]);					
 				}
 				else {
 					logger.warn("HandshakeMessageToken with class_id '{}' not handled", classId);
@@ -71,27 +73,5 @@ class ParticipantStatelessMessageListener implements SampleListener<ParticipantS
 				logger.warn("Missing message_data from {}", psm.source_endpoint_key);
 			}
 		}
-	}
-
-
-	private void handleHandshakeRequest(HandshakeRequestMessageToken req) {
-		logger.debug("Got HandshakeRequestMessageToken");
-		try {
-			X509Certificate certificate = req.getCertificate();
-		} catch (CertificateException e) {
-			logger.error("Could not get certificate from HandshakeRequestMessageToken", e);
-			// TODO: provide some cleanup
-		}
-		// TODO: implement me
-	}
-
-	private void handleHandshakeReply(HandshakeReplyMessageToken handshakeReplyMessageToken) {
-		logger.debug("Got HandshakeReplyMessageToken");
-		// TODO Auto-generated method stub		
-	}
-
-	private void handleHandshakeFinal(HandshakeFinalMessageToken handshakeFinalMessageToken) {
-		logger.debug("Got HandshakeFinalMessageToken");
-		// TODO Auto-generated method stub		
 	}
 }

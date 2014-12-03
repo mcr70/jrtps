@@ -3,8 +3,6 @@ package net.sf.jrtps.udds;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -12,9 +10,6 @@ import net.sf.jrtps.builtin.ParticipantMessage;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
-import net.sf.jrtps.message.parameter.IdentityToken;
-import net.sf.jrtps.message.parameter.ParameterId;
-import net.sf.jrtps.message.parameter.PermissionsToken;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -58,10 +53,6 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                     } else {
                         log.debug("A new Participant detected: {}, parameters received: {}", pd.getGuidPrefix(), pd.getParameters());
                         
-                        if (authPlugin != null) {
-                        	authenticate(pd);
-                        }
-                        
                         discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
                         fireParticipantDetected(pd);
@@ -73,13 +64,13 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
                         DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
                         SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
                                 ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
-                                        EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());
-                        if (pw == null) {
-                            log.error("No SPDP writer in {}", participant.getWriters());
-                        }
-                        
+                                        EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());                        
                         pw.addMatchedReader(rd);
 
+                        if (authPlugin != null) {
+                        	authPlugin.beginHandshake(pd);
+                        }
+                                               
                         participant.waitFor(participant.getConfiguration().getSEDPDelay());
                         
                         // Then, add matched readers for builtin writers, 
@@ -100,31 +91,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
         }
     }
 
-    private void authenticate(ParticipantData pd) {
-    	log.debug("authenticate({})", pd.getGuidPrefix());
-    	IdentityToken iToken = (IdentityToken) pd.getParameter(ParameterId.PID_IDENTITY_TOKEN);
-    	if (iToken != null) {
-    		PermissionsToken pToken = (PermissionsToken) pd.getParameter(ParameterId.PID_PERMISSIONS_TOKEN);
-    		try {
-    			CountDownLatch latch = null;
-    			while((latch = authPlugin.doHandshake(iToken, pd.getBuiltinTopicKey())) != null) {
-//    				boolean await = latch.await(2000, TimeUnit.MILLISECONDS);
-//    				if (!await) {
-//    					authPlugin.cancelHandshake(iToken);    					
-//    				}
-    			}
-    		}
-    		catch(Exception e) {
-    			log.debug("Failed to validate remote Participant", pd.getGuidPrefix());
-        		pd.setAuthenticated(false);
-    		}
-    	}
-    	else {
-    		log.debug("Remote participant {} did not send IdentityToken, mark it as unauthenticated",
-    				pd.getGuidPrefix());
-    		pd.setAuthenticated(false);
-    	}
-	}
+
 
 	/**
      * Handle builtin endpoints for discovered participant. If participant has a

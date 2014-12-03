@@ -9,11 +9,11 @@ import net.sf.jrtps.types.Guid;
  * @see net.sf.jrtps.udds.security.ParticipantStatelessMessage
  * @author mcr70
  */
-public class MessageIdentity {
+class MessageIdentity {
     private Guid/*BuiltinTopicKey*/ source_guid;
     private long sequence_number; 
 
-    public MessageIdentity(Guid source_guid, long seqNum) {
+    MessageIdentity(Guid source_guid, long seqNum) {
 		this.source_guid = source_guid;
 		sequence_number = seqNum;
     }
@@ -23,11 +23,19 @@ public class MessageIdentity {
         sequence_number = bb.read_longlong();
     }
     
-    public Guid getSourceGuid() {
+    /**
+     * Gets the source Guid
+     * @return Guid
+     */
+    Guid getSourceGuid() {
         return source_guid;
     }
     
-    public long getSequenceNumber() {
+    /**
+     * Gets the sequence number of this MessageIdentity
+     * @return sequence number
+     */
+    long getSequenceNumber() {
         return sequence_number;
     }
     
