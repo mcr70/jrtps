@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 class BuiltinParticipantDataListener extends BuiltinListener implements SampleListener<ParticipantData> {
     private static final Logger log = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
-
+    
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
     private final KeyStoreAuthenticationService authPlugin;
 	private boolean securityEnabled;
