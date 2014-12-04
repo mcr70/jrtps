@@ -25,16 +25,16 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 	}
 
 	ParticipantStatelessMessage(Guid guid, MessageIdentity messageIdentity, 
-			HandshakeRequestMessageToken hrmt) {
-		this(messageIdentity, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, guid, hrmt);
+			DataHolder dHolder) {
+		this(messageIdentity, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, guid, dHolder);
 	}
 	
 	ParticipantStatelessMessage(MessageIdentity messageIdentity, 
 			Guid remoteParticipant, Guid destEndpoint, Guid sourceEndpoint,
-			HandshakeRequestMessageToken hrmt) {
+			DataHolder dHolder) {
 		super(messageIdentity, new MessageIdentity(Guid.GUID_UNKNOWN, 0), 
 				remoteParticipant, destEndpoint, sourceEndpoint, 
-				GMCLASSID_SECURITY_AUTH_HANDSHAKE, new DataHolder[] {hrmt});
+				GMCLASSID_SECURITY_AUTH_HANDSHAKE, new DataHolder[] {dHolder});
 	}
 
 	@Override
