@@ -20,8 +20,6 @@ import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.ParticipantData;
-import net.sf.jrtps.builtin.PublicationData;
-import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
@@ -155,7 +153,7 @@ public class KeyStoreAuthenticationService {
 						null /* permission credential */);
 
 		ParticipantStatelessMessage psm = 
-				new ParticipantStatelessMessage(
+				new ParticipantStatelessMessage(statelessWriter.getGuid(),
 						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
 						hrmt);
 

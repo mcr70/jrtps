@@ -31,11 +31,11 @@ public class ParticipantStatelessMessageMarshaller implements Marshaller<Partici
 	@Override
 	public DataEncapsulation marshall(ParticipantStatelessMessage data)
 			throws IOException {
-        CDREncapsulation cdrEnc = new CDREncapsulation(1024);
+        CDREncapsulation cdrEnc = new CDREncapsulation(16384);
         RTPSByteBuffer bb = cdrEnc.getBuffer();
 
-        // TODO: Implement me
+        data.writeTo(bb);
         
-        return null;
+        return cdrEnc;
 	}
 }

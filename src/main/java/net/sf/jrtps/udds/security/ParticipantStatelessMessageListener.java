@@ -36,14 +36,15 @@ class ParticipantStatelessMessageListener implements SampleListener<ParticipantS
 		for (Sample<ParticipantStatelessMessage> sample : samples) {
 			ParticipantStatelessMessage psm = sample.getData();
 
-			if (!psm.destination_participant_key.equals(participantGuid) ||
-					!psm.destination_participant_key.equals(Guid.GUID_UNKNOWN)) {
+			if (!(psm.destination_participant_key.equals(participantGuid) ||
+					psm.destination_participant_key.equals(Guid.GUID_UNKNOWN))) {
 				logger.debug("ParticipantStatelessMessage participant_key({}) is not destined to this participant({})",
 						psm.destination_participant_key, participantGuid);
 				continue;
 			}
 
-			if (!psm.destination_endpoint_key.equals(statelessReaderGuid)) {
+			if (!(psm.destination_endpoint_key.equals(statelessReaderGuid) ||
+					psm.destination_endpoint_key.equals(Guid.GUID_UNKNOWN))) {
 				logger.debug("ParticipantStatelessMessage endpoint_key({}) is not destined to local StatelessMessageRader({})",
 						psm.destination_endpoint_key, statelessReaderGuid);
 				continue;

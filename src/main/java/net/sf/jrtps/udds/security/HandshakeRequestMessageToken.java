@@ -22,10 +22,9 @@ import org.slf4j.LoggerFactory;
  */
 class HandshakeRequestMessageToken extends DataHolder {
 	private static final Logger logger = LoggerFactory.getLogger(HandshakeRequestMessageToken.class);
-	private static volatile long seqNum = 0;
 
-	static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeReq:DSA‐DH";
-	static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeReq:PKI‐RSA";
+	static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeReq:DSA-DH";
+	static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeReq:PKI-RSA";
 
 	public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
 			IdentityCredential iCred, PermissionsCredential pCred) {
