@@ -25,9 +25,7 @@ public class ParticipantStatelessMessageMarshaller implements Marshaller<Partici
         CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;
         RTPSByteBuffer bb = cdrEnc.getBuffer();
         
-        // TODO: Implement me
-        
-		return null;
+		return new ParticipantStatelessMessage(bb);
 	}
 
 	@Override
