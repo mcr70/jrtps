@@ -46,7 +46,8 @@ public class KeyStoreAuthenticationService {
 	private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
 
 	private final KeyStore ks;
-
+	private final Certificate ca;
+	
 	private final Configuration conf;
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
 	private final DataReader<ParticipantStatelessMessage> statelessReader;
@@ -65,28 +66,29 @@ public class KeyStoreAuthenticationService {
 
 		this.conf = conf;
 
-		ks = KeyStore.getInstance("JKS");
+		this.ks = KeyStore.getInstance("JKS");
 
 		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
 		String pwd = conf.getKeystorePassword();
 
 		ks.load(is, pwd.toCharArray());
-
-		Certificate ca = ks.getCertificate(conf.getSecurityCA());
+		
+		this.ca = ks.getCertificate(conf.getSecurityCA());
 		if (ca == null) {
 			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
 		}
 
 		String alias = conf.getSecurityPrincipal();
 
-		X509Certificate principal = (X509Certificate) ks.getCertificate(alias);
-		if (principal == null) {
+		X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+		if (cert == null) {
 			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
 		}
 
-		principal.verify(ca.getPublicKey());
+		verify(cert);
+		
 
-		IdentityCredential identityCreadential = new IdentityCredential(principal, ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray()));
+		IdentityCredential identityCreadential = new IdentityCredential(cert, ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray()));
 
 		identity = new LocalIdentity(originalGuid, identityCreadential);
 
@@ -182,7 +184,13 @@ public class KeyStoreAuthenticationService {
 		return getLocalIdentity().getIdentityToken();
 	}
 
-
+	/**
+	 * Begins a handshake protocol.
+	 * See 9.3.4.2 Protocol description
+	 * 
+	 * @param pd
+	 * @return
+	 */
 	public boolean beginHandshake(ParticipantData pd) {
 		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
 		
@@ -210,7 +218,16 @@ public class KeyStoreAuthenticationService {
 
 	public void doHandshake(MessageIdentity messageIdentity, HandshakeRequestMessageToken hReq) {
 		logger.debug("doHandshake(request)");
-		// TODO Auto-generated method stub
+		X509Certificate certificate = hReq.getCertificate();
+		try {
+			verify(certificate);
+		} catch (CertificateException e) {
+			logger.warn("Failed to verify certificate", e);
+			// TODO: cancel handshake
+		}
+		logger.debug("Certificate({}) verified succesfully", certificate.getSubjectDN());
+
+		// TODO implement rest
 	}
 
 
@@ -223,5 +240,16 @@ public class KeyStoreAuthenticationService {
 	public void doHandshake(HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
 		// TODO Auto-generated method stub
+	}
+
+	private void verify(X509Certificate certificate) throws CertificateException {
+		try {
+			certificate.verify(ca.getPublicKey());
+		} catch (InvalidKeyException /* | CertificateException */ 
+				| NoSuchAlgorithmException | NoSuchProviderException
+				| SignatureException e) {
+			// TODO: what should we throw here
+			throw new CertificateException(e);
+		}
 	}
 }

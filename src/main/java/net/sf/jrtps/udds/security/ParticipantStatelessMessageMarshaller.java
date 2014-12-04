@@ -20,12 +20,18 @@ public class ParticipantStatelessMessageMarshaller implements Marshaller<Partici
 	}
 
 	@Override
-	public ParticipantStatelessMessage unmarshall(DataEncapsulation dEnc)
-			throws IOException {
+	public ParticipantStatelessMessage unmarshall(DataEncapsulation dEnc) throws IOException {
         CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;
         RTPSByteBuffer bb = cdrEnc.getBuffer();
         
-		return new ParticipantStatelessMessage(bb);
+        ParticipantStatelessMessage psm = null;
+		try {
+			psm = new ParticipantStatelessMessage(bb);
+		} catch (Exception e) {
+			throw new IOException(e);
+		}
+        
+		return psm;
 	}
 
 	@Override

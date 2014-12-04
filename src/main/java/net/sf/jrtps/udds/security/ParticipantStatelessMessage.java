@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds.security;
 
+import java.security.cert.CertificateException;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 
@@ -18,7 +20,7 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 	public static final String GMCLASSID_SECURITY_AUTH_HANDSHAKE = "dds.sec.auth";    
     public static final String BUILTIN_TOPIC_NAME = "DCPSParticipantStatelessMessage";
 
-	ParticipantStatelessMessage(RTPSByteBuffer bb) {
+	ParticipantStatelessMessage(RTPSByteBuffer bb) throws Exception {
 		super(bb);
 	}
 
@@ -36,11 +38,12 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 	}
 
 	@Override
-	DataHolder readMessageData(RTPSByteBuffer bb) {
+	DataHolder readMessageData(RTPSByteBuffer bb) throws CertificateException  {
 		String class_id = bb.read_string();
 		
 		if (class_id.equals(HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_DSA_DH) ||
 				class_id.equals(HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_PKI_RSA)	) {
+				
 			return new HandshakeRequestMessageToken(class_id, bb);
 		}
 
