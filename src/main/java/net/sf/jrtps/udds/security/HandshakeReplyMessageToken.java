@@ -57,7 +57,30 @@ class HandshakeReplyMessageToken extends DataHolder {
         super.binary_value2 = sign(reqToken.binary_value1);
     }
 
-    /**
+
+	HandshakeReplyMessageToken(String class_id, RTPSByteBuffer bb) {
+		super.class_id = class_id;
+		super.string_properties = new Property[bb.read_long()];
+		for (int i = 0; i < string_properties.length; i++) {
+			string_properties[i] = new Property(bb);
+		}
+		
+		super.binary_value1 = new byte[bb.read_long()];
+		bb.read(binary_value1);
+	}
+
+	@Override
+	void writeTo(RTPSByteBuffer bb) {
+		bb.write_long(string_properties.length);
+		for (Property p : string_properties) {
+			p.writeTo(bb);
+		}
+		
+		bb.write_long(binary_value1.length);
+		bb.write(binary_value1);
+	}
+
+	/**
      * Signs binary_value1 of remote participants challenge with local private key.
      * 
      * @param binary_value1
@@ -79,14 +102,4 @@ class HandshakeReplyMessageToken extends DataHolder {
 	}
 
 	
-	public HandshakeReplyMessageToken(String class_id, RTPSByteBuffer bb) {
-		super.class_id = class_id;
-		super.string_properties = new Property[bb.read_long()];
-		for (int i = 0; i < string_properties.length; i++) {
-			string_properties[i] = new Property(bb);
-		}
-		
-		super.binary_value1 = new byte[10];
-		bb.read(binary_value1);
-	}
 }
