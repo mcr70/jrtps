@@ -1,6 +1,7 @@
 package net.sf.jrtps.udds.security;
 
 import java.security.Key;
+import java.security.PrivateKey;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
 
@@ -14,7 +15,7 @@ import javax.xml.bind.DatatypeConverter;
  */
 class IdentityCredential /* extends DataHolder */ {
     private final transient X509Certificate certificate;
-    private final transient Key privateKey;
+    private final transient PrivateKey privateKey;
 
     private final String class_id = "DDS:Auth:X.509-PEM";
     private byte[] binary_value1;
@@ -22,7 +23,7 @@ class IdentityCredential /* extends DataHolder */ {
     
     IdentityCredential(X509Certificate certificate, Key key) throws CertificateEncodingException {
         this.certificate = certificate;
-        this.privateKey = key;
+        this.privateKey = (PrivateKey) key;
         this.binary_value1 = certificate.getEncoded();
         this.binary_value2 = key.getEncoded();
     }
@@ -42,7 +43,7 @@ class IdentityCredential /* extends DataHolder */ {
         return certificate;
     }
 
-    Key getPrivateKey() {
+    PrivateKey getPrivateKey() {
         return privateKey;
     }
 

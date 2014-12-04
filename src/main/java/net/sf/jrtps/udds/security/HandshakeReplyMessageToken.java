@@ -5,6 +5,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.security.PublicKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.cert.CertificateEncodingException;
@@ -35,6 +36,7 @@ class HandshakeReplyMessageToken extends DataHolder {
     		IdentityCredential iCred, PermissionsCredential pCred) throws CertificateEncodingException, InvalidKeyException, SignatureException, NoSuchAlgorithmException {
         this(reqToken, myGuid, destGuid, DDS_AUTH_CHALLENGEREP_DSA_DH, iCred, pCred);
     }
+	
     
     HandshakeReplyMessageToken(HandshakeRequestMessageToken reqToken,
     		Guid myGuid, Guid destGuid,
@@ -68,6 +70,7 @@ class HandshakeReplyMessageToken extends DataHolder {
 		super.binary_value1 = new byte[bb.read_long()];
 		bb.read(binary_value1);
 	}
+
 
 	@Override
 	void writeTo(RTPSByteBuffer bb) {
