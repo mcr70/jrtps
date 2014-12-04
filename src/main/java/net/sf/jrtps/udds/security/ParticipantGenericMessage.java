@@ -25,7 +25,7 @@ abstract class ParticipantGenericMessage {
 				this.message_data = message_data;  	
     }
     
-    public ParticipantGenericMessage(RTPSByteBuffer bb) {
+    public ParticipantGenericMessage(RTPSByteBuffer bb) throws Exception {
         message_identity = new MessageIdentity(bb);
         related_message_identity = new MessageIdentity(bb);
         destination_participant_key = new Guid(bb);
@@ -55,5 +55,5 @@ abstract class ParticipantGenericMessage {
 
 	abstract void writeMessageData(DataHolder dh, RTPSByteBuffer bb);
 
-	abstract DataHolder readMessageData(RTPSByteBuffer bb);
+	abstract DataHolder readMessageData(RTPSByteBuffer bb) throws Exception;
 }

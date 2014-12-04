@@ -2,7 +2,6 @@ package net.sf.jrtps.udds.security;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -25,6 +24,8 @@ class HandshakeRequestMessageToken extends DataHolder {
 
 	static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeReq:DSA-DH";
 	static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeReq:PKI-RSA";
+
+	private X509Certificate certificate;
 
 	public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
 			IdentityCredential iCred, PermissionsCredential pCred) {
@@ -54,13 +55,24 @@ class HandshakeRequestMessageToken extends DataHolder {
 		}
 	}
 
-	public HandshakeRequestMessageToken(String class_id, RTPSByteBuffer bb) {
+	public HandshakeRequestMessageToken(String class_id, RTPSByteBuffer bb) throws CertificateException {
 		super.class_id = class_id;
 		super.string_properties = new Property[bb.read_long()];
 		for (int i = 0; i < string_properties.length; i++) {
-			string_properties[i] = new Property(bb);
+			Property p = new Property(bb);
+			string_properties[i] = p; 
+			if ("dds.sec.identity".equals(p.getName())) {
+				byte[] binary = DatatypeConverter.parseBase64Binary(p.getValue());
+
+				CertificateFactory cf = CertificateFactory.getInstance("X.509");
+				this.certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(binary));
+			}
 		}
 
+		if (certificate == null) {
+			throw new CertificateException("Missing string_property with name 'dds.sec.identity'");
+		}
+		
 		super.binary_value1 = new byte[bb.read_long()];
 		bb.read(binary_value1);
 	}
@@ -82,18 +94,8 @@ class HandshakeRequestMessageToken extends DataHolder {
 	 * @return X509Certificate
 	 * @throws CertificateException if certificate could not be retrieved for some reason.
 	 */
-	public X509Certificate getCertificate() throws CertificateException {
-		for (Property p : string_properties) {
-			if ("dds.sec.identity".equals(p.getName())) {
-				byte[] binary = DatatypeConverter.parseBase64Binary(p.getValue());
-
-				CertificateFactory cf = CertificateFactory.getInstance("X.509");
-				Certificate cert = cf.generateCertificate(new ByteArrayInputStream(binary));
-				return (X509Certificate) cert;
-			}
-		}
-
-		throw new CertificateException("Missing string_property with name 'dds.sec.identity'");
+	public X509Certificate getCertificate() {
+		return certificate;
 	}
 
 	/**
