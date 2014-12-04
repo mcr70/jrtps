@@ -45,12 +45,20 @@ class HandshakeFinalMessageToken extends DataHolder {
 
 	public HandshakeFinalMessageToken(String class_id, RTPSByteBuffer bb) {
 		super.class_id = class_id;
-		super.string_properties = new Property[bb.read_long()];
-		for (int i = 0; i < string_properties.length; i++) {
-			string_properties[i] = new Property(bb);
-		}
-		
-		super.binary_value1 = new byte[10];
+
+		super.binary_value1 = new byte[bb.read_long()];
 		bb.read(binary_value1);
+		
+		super.binary_value2 = new byte[bb.read_long()];
+		bb.read(binary_value2);
 	}
+	
+	@Override
+	void writeTo(RTPSByteBuffer bb) {
+		bb.write_long(binary_value1.length);
+		bb.write(binary_value1);
+
+		bb.write_long(binary_value2.length);
+		bb.write(binary_value2);
+	}	
 }

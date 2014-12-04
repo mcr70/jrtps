@@ -11,11 +11,16 @@ public class Property {
         this.value = value;
     }
     
-    public Property(RTPSByteBuffer bb) {
+    Property(RTPSByteBuffer bb) {
     	this.name = bb.read_string();
     	this.value = bb.read_string();
     }
 
+    void writeTo(RTPSByteBuffer bb) {
+    	bb.write_string(name);
+    	bb.write_string(value);
+    }
+    
 	public String getName() {
         return name;
     }

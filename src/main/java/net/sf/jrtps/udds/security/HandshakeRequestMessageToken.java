@@ -62,8 +62,20 @@ class HandshakeRequestMessageToken extends DataHolder {
 			string_properties[i] = new Property(bb);
 		}
 
-		super.binary_value1 = new byte[10];
+		super.binary_value1 = new byte[bb.read_long()];
 		bb.read(binary_value1);
+	}
+
+
+	@Override
+	void writeTo(RTPSByteBuffer bb) {
+		bb.write_long(string_properties.length);
+		for (Property p : string_properties) {
+			p.writeTo(bb);
+		}
+		
+		bb.write_long(binary_value1.length);
+		bb.write(binary_value1);
 	}
 
 	/**
