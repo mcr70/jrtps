@@ -22,9 +22,9 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 		super(bb);
 	}
 
-	ParticipantStatelessMessage(MessageIdentity messageIdentity, 
+	ParticipantStatelessMessage(Guid guid, MessageIdentity messageIdentity, 
 			HandshakeRequestMessageToken hrmt) {
-		this(messageIdentity, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, hrmt);
+		this(messageIdentity, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, guid, hrmt);
 	}
 	
 	ParticipantStatelessMessage(MessageIdentity messageIdentity, 
@@ -44,6 +44,8 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 			return new HandshakeRequestMessageToken(class_id, bb);
 		}
 
+		// TODO: implement rest of message tokens
+		
 		logger.warn("Unknown class_id {}", class_id);
 		return null;
 	}
@@ -51,8 +53,7 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 	@Override
 	void writeMessageData(DataHolder dh, RTPSByteBuffer bb) {
 		bb.write_string(dh.class_id);
-		
-		// TODO: writeTo for messageToken
+		dh.writeTo(bb);
 	}
 	
 }
