@@ -47,5 +47,12 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 		logger.warn("Unknown class_id {}", class_id);
 		return null;
 	}
+
+	@Override
+	void writeMessageData(DataHolder dh, RTPSByteBuffer bb) {
+		bb.write_string(dh.class_id);
+		
+		// TODO: writeTo for messageToken
+	}
 	
 }

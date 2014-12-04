@@ -40,6 +40,20 @@ abstract class ParticipantGenericMessage {
         }
 	}
 
+    public void writeTo(RTPSByteBuffer bb) {
+    	message_identity.writeTo(bb);
+    	related_message_identity.writeTo(bb);
+    	destination_participant_key.writeTo(bb);
+    	destination_endpoint_key.writeTo(bb);
+    	source_endpoint_key.writeTo(bb);
+    	bb.write_string(message_class_id);
+    	bb.write_long(message_data.length);
+    	for (DataHolder dh : message_data) {
+    		writeMessageData(dh, bb);
+    	}
+    }
+
+	abstract void writeMessageData(DataHolder dh, RTPSByteBuffer bb);
 
 	abstract DataHolder readMessageData(RTPSByteBuffer bb);
 }
