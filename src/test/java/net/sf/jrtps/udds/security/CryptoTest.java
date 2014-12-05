@@ -2,10 +2,13 @@ package net.sf.jrtps.udds.security;
 
 import java.io.InputStream;
 import java.security.InvalidKeyException;
+import java.security.Key;
 import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
+import java.security.PrivateKey;
 import java.security.Provider;
 import java.security.Security;
+import java.security.Signature;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
@@ -21,6 +24,9 @@ import org.junit.Test;
 public class CryptoTest {
 	byte[] bytes = new byte[] {0x00, 0x01, 0x02, 0x03, 0x04, 0x04};
 	final int COUNT = 1000;
+	KeyStore ks;
+	
+	
 	@Test
 	public void testHmac() throws InvalidKeyException, NoSuchAlgorithmException {
 
@@ -48,14 +54,30 @@ public class CryptoTest {
 	}
 
 	@Test
-	public void testRSACipher() throws Exception {
-		//Security.getProvider("").get
-		for (Provider provider: Security.getProviders()) {
-			System.out.println(provider.getName());
-			for (String key: provider.stringPropertyNames())
-				System.out.println("\t" + key + "\t" + provider.getProperty(key));
-		}
+	public void testSigning() throws Exception {
+		byte[] bytes = new byte[] {0x01, 0x02, 0x03,0x04};
+		
+        KeyStore ks = KeyStore.getInstance("JKS");
+        InputStream is = getClass().getResourceAsStream("/jrtps.jks");
+        ks.load(is, "changeit".toCharArray());
 
+        String alias = "jrtps01";
+        X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
+        Key privateKey = ks.getKey(alias, alias.toCharArray());
+        
+		Signature signature = Signature.getInstance("SHA1withRSA");
+		signature.initSign((PrivateKey)privateKey);
+		
+		signature.update(bytes);
+		byte[] signatureBytes = signature.sign();
+		
+		signature.initVerify(cert.getPublicKey());
+		signature.verify(signatureBytes);
+	}
+	
+	
+	@Test
+	public void testRSACipher() throws Exception {
 		KeyStore ks = KeyStore.getInstance("JKS");
 		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
 		ks.load(is, "changeit".toCharArray());
