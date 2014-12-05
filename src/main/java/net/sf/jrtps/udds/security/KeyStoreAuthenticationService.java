@@ -2,6 +2,7 @@ package net.sf.jrtps.udds.security;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
@@ -10,6 +11,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
@@ -20,7 +22,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
@@ -48,7 +49,7 @@ public class KeyStoreAuthenticationService {
 	
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
 
-	private final Random random = new Random(System.currentTimeMillis());
+	SecureRandom random = new SecureRandom();
 	// Latches used to wait for remote participants
 	private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
 
@@ -249,26 +250,19 @@ public class KeyStoreAuthenticationService {
 		
 		logger.debug("Challenge was signed succesfully");
 		
-		byte[] cBytes1 = "Challenge:".getBytes();
-		byte[] cBytes2 = new byte[10];
-		random.nextBytes(cBytes2);
 		
-		byte[] challengeBytes = new byte[cBytes1.length + cBytes2.length];
-//		System.arraycopy(cBytes1, 0, challengeBytes, 0, cBytes1.length);
-//		System.arraycopy(cBytes2, cBytes1.length, challengeBytes, cBytes1.length, cBytes2.length);
+		byte[] challengeBytes = createChallenge();
 
-//		HandshakeReplyMessageToken hrmt = 
-//				new HandshakeReplyMessageToken(certificate,
-//						signedChallenge, challengeBytes);
-//
-//		ParticipantStatelessMessage psm = 
-//				new ParticipantStatelessMessage(statelessWriter.getGuid(),
-//						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-//						hrmt);
-//
-//		statelessWriter.write(psm);
-		
-		
+		HandshakeReplyMessageToken hrmt = 
+				new HandshakeReplyMessageToken(identity.getIdentityCredential(),
+						signedChallenge, challengeBytes);
+
+		ParticipantStatelessMessage psm = 
+				new ParticipantStatelessMessage(statelessWriter.getGuid(),
+						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+						hrmt);
+
+		//statelessWriter.write(psm);
 	}
 
 
@@ -309,5 +303,10 @@ public class KeyStoreAuthenticationService {
 			// TODO: what should we throw here
 			throw new CertificateException(e);
 		}
+	}
+
+	private byte[] createChallenge() {
+		String s = "CHALLENGE:" + new BigInteger(96, random);
+		return s.getBytes();
 	}
 }

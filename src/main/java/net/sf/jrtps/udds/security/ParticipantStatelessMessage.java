@@ -46,6 +46,11 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 				
 			return new HandshakeRequestMessageToken(class_id, bb);
 		}
+		else if (class_id.equals(HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH) ||
+				class_id.equals(HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_PKI_RSA)	) {
+				
+			return new HandshakeReplyMessageToken(class_id, bb);
+		}
 
 		// TODO: implement rest of message tokens
 		
