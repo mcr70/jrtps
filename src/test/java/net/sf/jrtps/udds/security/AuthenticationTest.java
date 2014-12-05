@@ -57,7 +57,7 @@ public class AuthenticationTest extends AbstractQosTest {
         X509Certificate cert = (X509Certificate) ks.getCertificate("jrtps01");
         Key privateKey = ks.getKey("jrtps01", "jrtps01".toCharArray());
         
-		Signature signature = Signature.getInstance("SHA1withDSA");
+		Signature signature = Signature.getInstance("SHA1withRSA");
 		signature.initSign((PrivateKey)privateKey);
 		
 		signature.update(bytes);

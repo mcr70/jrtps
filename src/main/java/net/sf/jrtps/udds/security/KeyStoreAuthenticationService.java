@@ -53,7 +53,7 @@ public class KeyStoreAuthenticationService {
 
 	private final KeyStore ks;
 	private final Certificate ca;
-	private final Signature signature = Signature.getInstance("SHA1withDSA"); // TODO: hardcoded
+	private final Signature signature = Signature.getInstance("SHA1withRSA"); // TODO: hardcoded
 	
 	private final Configuration conf;
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
