@@ -50,29 +50,12 @@ class ParticipantStatelessMessageListener implements SampleListener<ParticipantS
 				continue;
 			}
 
-			logger.debug("Got ParticipantStatelessMessage from {}", psm.source_endpoint_key);
-			if (psm.message_data != null && psm.message_data.length > 0) {
-				String classId = psm.message_data[0].class_id;
-				
-				if (HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_DSA_DH.equals(classId)) {			
-					authPlugin.doHandshake(psm.message_identity, 
-							(HandshakeRequestMessageToken) psm.message_data[0]);
-				}
-				else if (HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH.equals(classId)) {
-					authPlugin.doHandshake(psm.related_message_identity, 
-							(HandshakeReplyMessageToken) psm.message_data[0]);
-					
-				}
-				else if (HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_DSA_DH.equals(classId)) {
-					authPlugin.doHandshake((HandshakeFinalMessageToken) psm.message_data[0]);					
-				}
-				else {
-					logger.warn("HandshakeMessageToken with class_id '{}' not handled", classId);
-				}
+			if (psm.message_data == null || psm.message_data.length == 0) {
+				logger.warn("ParticipantStatelessMessage does not contain any message_data");
 			}
-			else {
-				logger.warn("Missing message_data from {}", psm.source_endpoint_key);
-			}
+			
+			logger.debug("Got ParticipantStatelessMessage from {}", psm.source_endpoint_key.getPrefix());
+			authPlugin.doHandshake(psm);
 		}
 	}
 }

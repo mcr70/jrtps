@@ -9,7 +9,6 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
@@ -19,7 +18,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -158,7 +156,6 @@ public class KeyStoreAuthenticationService {
 	}
 
 	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
-		logger.debug("beginHandshakeRequest()");
 
 		HandshakeRequestMessageToken hrmt = 
 				new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
@@ -170,6 +167,7 @@ public class KeyStoreAuthenticationService {
 						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
 						hrmt);
 
+		logger.debug("Sending handshake request to {}", remoteGuid.getPrefix());
 		statelessWriter.write(psm);
 	}
 
@@ -227,57 +225,6 @@ public class KeyStoreAuthenticationService {
 	}
 
 
-	public void doHandshake(MessageIdentity messageIdentity, HandshakeRequestMessageToken hReq) {
-		logger.debug("doHandshake(request)");
-		X509Certificate certificate = hReq.getCertificate();
-		try {
-			verify(certificate);
-		} catch (CertificateException e) {
-			logger.warn("Failed to verify certificate", e);
-			// TODO: cancel handshake
-		}
-		
-		logger.debug("Certificate({}) verified succesfully", certificate.getSubjectDN());
-
-		byte[] challenge = hReq.getChallenge();
-		byte[] signedChallenge = null;
-		try {
-			signedChallenge = sign(challenge);
-		} catch (InvalidKeyException | SignatureException e) {
-			logger.warn("Failed to sign challenge", e);
-			// TODO: cancel handshake
-		}
-		
-		logger.debug("Challenge was signed succesfully");
-		
-		
-		byte[] challengeBytes = createChallenge();
-
-		HandshakeReplyMessageToken hrmt = 
-				new HandshakeReplyMessageToken(identity.getIdentityCredential(),
-						signedChallenge, challengeBytes);
-
-		ParticipantStatelessMessage psm = 
-				new ParticipantStatelessMessage(statelessWriter.getGuid(),
-						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-						hrmt);
-
-		//statelessWriter.write(psm);
-	}
-
-
-	
-	public void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
-		logger.debug("doHandshake(reply)");
-		// TODO Auto-generated method stub
-	}
-
-
-	public void doHandshake(HandshakeFinalMessageToken hFin) {
-		logger.debug("doHandshake(final)");
-		// TODO Auto-generated method stub
-	}
-
 	private byte[] sign(byte[] challenge) throws InvalidKeyException, SignatureException {
 		byte[] signatureBytes = null;
 		
@@ -287,7 +234,7 @@ public class KeyStoreAuthenticationService {
 			signatureBytes = signature.sign();
 		}
 		
-		return null;
+		return signatureBytes;
 	}
 
 	private boolean verify(byte[] signedBytes, PublicKey privateKey) {
@@ -308,5 +255,77 @@ public class KeyStoreAuthenticationService {
 	private byte[] createChallenge() {
 		String s = "CHALLENGE:" + new BigInteger(96, random);
 		return s.getBytes();
+	}
+
+
+	void doHandshake(ParticipantStatelessMessage psm) {
+		if (psm.message_data != null && psm.message_data.length > 0) {
+			String classId = psm.message_data[0].class_id;
+			
+			if (HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_DSA_DH.equals(classId)) {			
+				doHandshake(psm.message_identity, (HandshakeRequestMessageToken) psm.message_data[0],
+						psm.source_endpoint_key);
+			}
+			else if (HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH.equals(classId)) {
+				doHandshake(psm.related_message_identity, 
+						(HandshakeReplyMessageToken) psm.message_data[0]);
+				
+			}
+			else if (HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_DSA_DH.equals(classId)) {
+				doHandshake((HandshakeFinalMessageToken) psm.message_data[0]);					
+			}
+			else {
+				logger.warn("HandshakeMessageToken with class_id '{}' not handled", classId);
+			}
+		}
+		else {
+			logger.warn("Missing message_data from {}", psm.source_endpoint_key);
+		}
+	}
+
+
+	private void doHandshake(MessageIdentity messageIdentity, HandshakeRequestMessageToken hReq,
+			Guid remoteTarget) {
+		logger.debug("doHandshake(request)");
+		X509Certificate certificate = hReq.getCertificate();
+		try {
+			verify(certificate);
+		} catch (CertificateException e) {
+			logger.warn("Failed to verify certificate", e);
+			// TODO: cancel handshake
+		}
+		
+		byte[] challenge = hReq.getChallenge();
+		byte[] signedChallenge = null;
+		try {
+			signedChallenge = sign(challenge);
+		} catch (InvalidKeyException | SignatureException e) {
+			logger.warn("Failed to sign challenge", e);
+			// TODO: cancel handshake
+		}
+		
+		byte[] challengeBytes = createChallenge();
+		
+		HandshakeReplyMessageToken hrmt = 
+				new HandshakeReplyMessageToken(identity.getIdentityCredential(),
+						signedChallenge, challengeBytes);
+
+		ParticipantStatelessMessage psm = 
+				new ParticipantStatelessMessage(statelessWriter.getGuid(),
+						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+						hrmt);
+
+		logger.debug("Sending handshake reply to {}", remoteTarget.getPrefix());
+		statelessWriter.write(psm);
+	}
+
+	private void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
+		logger.debug("doHandshake(reply)");
+		// TODO Auto-generated method stub
+	}
+
+	private void doHandshake(HandshakeFinalMessageToken hFin) {
+		logger.debug("doHandshake(final)");
+		// TODO Auto-generated method stub
 	}
 }

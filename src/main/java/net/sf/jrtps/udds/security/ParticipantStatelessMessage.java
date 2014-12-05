@@ -51,9 +51,12 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 				
 			return new HandshakeReplyMessageToken(class_id, bb);
 		}
+		else if (class_id.equals(HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_DSA_DH) ||
+				class_id.equals(HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_PKI_RSA)	) {
+				
+			return new HandshakeFinalMessageToken(class_id, bb);
+		}
 
-		// TODO: implement rest of message tokens
-		
 		logger.warn("Unknown class_id {}", class_id);
 		return null;
 	}
@@ -63,5 +66,4 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 		bb.write_string(dh.class_id);
 		dh.writeTo(bb);
 	}
-	
 }

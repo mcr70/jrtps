@@ -8,8 +8,8 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * @author mcr70
  */
 class HandshakeReplyMessageToken extends DataHolder {	
-    static final String DDS_AUTH_CHALLENGEREP_DSA_DH = "DDS:Auth:ChallengeRep:DSA‐DH";
-    static final String DDS_AUTH_CHALLENGEREP_PKI_RSA = "DDS:Auth:ChallengeRep:PKI‐RSA";
+	static final String DDS_AUTH_CHALLENGEREP_DSA_DH = "DDS:Auth:ChallengeRep:DSA-DH";
+    static final String DDS_AUTH_CHALLENGEREP_PKI_RSA = "DDS:Auth:ChallengeRep:PKI-RSA";
 	
     
 	public HandshakeReplyMessageToken(IdentityCredential localCredentials,
@@ -22,8 +22,13 @@ class HandshakeReplyMessageToken extends DataHolder {
 		// TODO: dds.sec.permissions is not implemented
 		//super.string_properties[1] = new Property("dds.sec.permissions", permissions);
 		
-		binary_value1 = challengeBytes;
-		binary_value2 = signedChallenge;
+		super.binary_value1 = challengeBytes;
+		super.binary_value2 = signedChallenge;
+		
+		if (binary_value1 == null || binary_value2 == null) {
+			throw new IllegalArgumentException("binary_value1: " + binary_value1 + " and binary_value2: " +
+					binary_value2 + " cannot be null");
+		}
 	}
 
 
@@ -36,7 +41,7 @@ class HandshakeReplyMessageToken extends DataHolder {
 		
 		super.binary_value1 = new byte[bb.read_long()];
 		bb.read(binary_value1);
-
+		
 		super.binary_value2 = new byte[bb.read_long()];
 		bb.read(binary_value2);
 	}
@@ -66,5 +71,8 @@ class HandshakeReplyMessageToken extends DataHolder {
 		
 		bb.write_long(binary_value1.length);
 		bb.write(binary_value1);
+
+		bb.write_long(binary_value2.length);
+		bb.write(binary_value2);
 	}
 }
