@@ -1,14 +1,18 @@
 package net.sf.jrtps.udds.security;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
-import java.security.Provider;
-import java.security.Security;
 import java.security.Signature;
+import java.security.SignatureException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
@@ -17,8 +21,9 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
-import net.sf.jrtps.qos.AbstractQosTest;
+import junit.framework.Assert;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class CryptoTest {
@@ -26,6 +31,32 @@ public class CryptoTest {
 	final int COUNT = 1000;
 	KeyStore ks;
 	
+	@Before
+	public void init() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		ks = KeyStore.getInstance("JKS");
+		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
+		ks.load(is, "changeit".toCharArray());
+	}
+	
+	@Test
+	public void testCertificate() throws KeyStoreException, InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException { 
+		Certificate cert1 = ks.getCertificate("jrtps01");
+		Certificate cert2 = ks.getCertificate("jrtps02");
+		Certificate cert3 = ks.getCertificate("jrtps03");
+		Certificate ca = ks.getCertificate("jrtpsCA");
+		
+		cert1.verify(ca.getPublicKey());
+		cert2.verify(ca.getPublicKey());
+		
+		try {
+			cert3.verify(ca.getPublicKey());
+			Assert.fail("cert03 was signed by CA");
+		} catch (InvalidKeyException | CertificateException
+				| NoSuchAlgorithmException | NoSuchProviderException
+				| SignatureException e) {
+			
+		}
+	}
 	
 	@Test
 	public void testHmac() throws InvalidKeyException, NoSuchAlgorithmException {
@@ -55,11 +86,7 @@ public class CryptoTest {
 
 	@Test
 	public void testSigning() throws Exception {
-		byte[] bytes = new byte[] {0x01, 0x02, 0x03,0x04};
-		
-        KeyStore ks = KeyStore.getInstance("JKS");
-        InputStream is = getClass().getResourceAsStream("/jrtps.jks");
-        ks.load(is, "changeit".toCharArray());
+		byte[] bytes = new byte[] {0x01, 0x02, 0x03, 0x04};
 
         String alias = "jrtps01";
         X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
@@ -78,9 +105,6 @@ public class CryptoTest {
 	
 	@Test
 	public void testRSACipher() throws Exception {
-		KeyStore ks = KeyStore.getInstance("JKS");
-		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
-		ks.load(is, "changeit".toCharArray());
 
 		String alias = "jrtps01";
 		
