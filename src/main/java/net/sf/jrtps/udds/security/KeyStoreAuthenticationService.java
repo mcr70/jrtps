@@ -188,7 +188,7 @@ public class KeyStoreAuthenticationService {
 	private byte[] sign(byte[] bytesToSign) throws InvalidKeyException, SignatureException {
 		byte[] signatureBytes = null;
 		
-		synchronized (signature) {
+		synchronized(signature) {
 			signature.initSign(identity.getIdentityCredential().getPrivateKey());
 			signature.update(bytesToSign);
 			signatureBytes = signature.sign();
@@ -197,9 +197,11 @@ public class KeyStoreAuthenticationService {
 		return signatureBytes;
 	}
 
-	private boolean verify(byte[] signedBytes, PublicKey privateKey) {
-		// TODO: verify
-		return false;
+	private boolean verify(byte[] signedBytes, PublicKey publicKey) throws InvalidKeyException, SignatureException {
+		synchronized(signature) {
+			signature.initVerify(publicKey);
+			return signature.verify(signedBytes);
+		}
 	}
 
 	private void verify(X509Certificate certificate) throws CertificateException {
@@ -298,7 +300,12 @@ public class KeyStoreAuthenticationService {
 		}
 		
 		byte[] signedChallenge = hRep.getSignedChallenge();
-		verify(signedChallenge, certificate.getPublicKey());
+		try {
+			verify(signedChallenge, certificate.getPublicKey());
+		} catch (InvalidKeyException | SignatureException e1) {
+			logger.warn("Failed to verify signature of challenge", e1);
+			// TODO: cancel handshake
+		}
 		
 		byte[] sharedSecret = createSharedSecret();
 		byte[] encryptedSharedSecret = null;
