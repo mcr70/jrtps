@@ -15,13 +15,16 @@ import java.security.Signature;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -53,7 +56,7 @@ public class KeyStoreAuthenticationService {
 
 	private final KeyStore ks;
 	private final Certificate ca;
-	private final Signature signature = Signature.getInstance("SHA1withRSA"); // TODO: hardcoded
+	private final Signature signature = Signature.getInstance("SHA256withRSA"); // TODO: hardcoded
 	
 	private final Configuration conf;
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
@@ -61,11 +64,12 @@ public class KeyStoreAuthenticationService {
 
 	private final LocalIdentity identity;
 	private final Participant participant;
-
+	private final Cipher cipher;
+	
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
 
 	
-	public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException {
+	public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
 		this.participant = p1;
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
@@ -81,6 +85,8 @@ public class KeyStoreAuthenticationService {
 		String pwd = conf.getKeystorePassword();
 
 		ks.load(is, pwd.toCharArray());
+		
+		cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // TODO: hardcoded
 		
 		this.ca = ks.getCertificate(conf.getSecurityCA());
 		if (ca == null) {
@@ -114,68 +120,7 @@ public class KeyStoreAuthenticationService {
 	}
 
 
-	/**
-	 * This method is called when a remote participant has been detected and it has 
-	 * DDS security capabilities by providing IdentityToken with ParticipantBuiltinTopicData.
-	 * 
-	 * See ch. 7.4.1.3 of DDS Security specification: Extension to RTPS Standard DCPSParticipants 
-	 * Builtin Topic, and ch. 9.3.3 DDS:Auth:PKI-RSA/DSA-DH plugin behavior
-	 * 
-	 * @param remoteIdentity IdentityToken of remote participant
-	 * @throws NoSuchAlgorithmException 
-	 * @throws CertificateEncodingException 
-	 */
-	public void validateRemoteIdentity(IdentityToken remoteIdentity, Guid remoteGuid) throws CertificateEncodingException, NoSuchAlgorithmException {
-		int comparison = identity.getIdentityToken().getEncodedHash().compareTo(remoteIdentity.getEncodedHash());
-		if (comparison < 0) { // Remote is lexicographically greater
-			// VALIDATION_PENDING_HANDSHAKE_REQUEST
-			beginHandshakeRequest(remoteIdentity, remoteGuid);
-		}
-		else if (comparison > 0) { // Remote is lexicographically smaller
-			// VALIDATION_PENDING_HANDSHAKE_MESSAGE
-			// Wait for remote entity to send handshake message
-			CountDownLatch latch = handshakeLatches.remove(remoteIdentity);
-			try {
-				boolean await = latch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
-				handshakeLatches.remove(remoteIdentity);
-				if (await) {
-					beginHandshakeReply();
-				}
-				else {
-					logger.warn("Failed to get handshake message from remote entity on time");
-				}
-			} catch (InterruptedException e) {
-				handshakeLatches.remove(remoteIdentity);
-				logger.warn("Interrupted. Returning from validateRemoteIdentity()");
-				return;
-			}
-		}
-		else { // Remote has the same identity as local
-			// ???
-		}
-	}
 
-	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
-
-		HandshakeRequestMessageToken hrmt = 
-				new HandshakeRequestMessageToken(getLocalIdentity().getIdentityCredential(),
-						createChallenge()); 
-
-		ParticipantStatelessMessage psm = 
-				new ParticipantStatelessMessage(statelessWriter.getGuid(),
-						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-						hrmt);
-
-		logger.debug("Sending handshake request to {}", remoteGuid.getPrefix());
-		statelessWriter.write(psm);
-	}
-
-
-	void beginHandshakeReply() {
-		logger.debug("beginHandshakeReply()");
-		// TODO Auto-generated method stub
-
-	}
 
 
 	public LocalIdentity getLocalIdentity() {
@@ -223,13 +168,29 @@ public class KeyStoreAuthenticationService {
 		return false;
 	}
 
+	
+	private void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
+		HandshakeRequestMessageToken hrmt = 
+				new HandshakeRequestMessageToken(getLocalIdentity().getIdentityCredential(),
+						createChallenge()); 
 
-	private byte[] sign(byte[] challenge) throws InvalidKeyException, SignatureException {
+		ParticipantStatelessMessage psm = 
+				new ParticipantStatelessMessage(statelessWriter.getGuid(),
+						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+						hrmt);
+
+		logger.debug("Sending handshake request to {}", remoteGuid.getPrefix());
+		statelessWriter.write(psm);
+	}
+
+
+
+	private byte[] sign(byte[] bytesToSign) throws InvalidKeyException, SignatureException {
 		byte[] signatureBytes = null;
 		
 		synchronized (signature) {
 			signature.initSign(identity.getIdentityCredential().getPrivateKey());
-			signature.update(challenge);
+			signature.update(bytesToSign);
 			signatureBytes = signature.sign();
 		}
 		
@@ -237,6 +198,7 @@ public class KeyStoreAuthenticationService {
 	}
 
 	private boolean verify(byte[] signedBytes, PublicKey privateKey) {
+		// TODO: verify
 		return false;
 	}
 
@@ -339,17 +301,49 @@ public class KeyStoreAuthenticationService {
 		verify(signedChallenge, certificate.getPublicKey());
 		
 		byte[] sharedSecret = createSharedSecret();
-		byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
+		byte[] encryptedSharedSecret = null;
+		try {
+			encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
+		} catch (InvalidKeyException | IllegalBlockSizeException
+				| BadPaddingException e) {
+			logger.warn("Failed to encrypt shared secret", e);
+			// TODO: cancel handshake
+		}
+		
+		byte[] challenge = hRep.getChallenge();
+		
+		HandshakeFinalMessageToken hfmt = 
+				new HandshakeFinalMessageToken(identity.getIdentityCredential(),
+						encryptedSharedSecret, concatenate(challenge, encryptedSharedSecret));
+
+		ParticipantStatelessMessage psm = 
+				new ParticipantStatelessMessage(statelessWriter.getGuid(),
+						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+						hfmt);
+		
+		logger.debug("Sending handshake final message");
+		statelessWriter.write(psm);
 	}
 
-	private byte[] encrypt(PublicKey publicKey, byte[] sharedSecret) {
-		// TODO Auto-generated method stub
-		return null;
+	private byte[] encrypt(PublicKey publicKey, byte[] bytesToEncrypt) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		synchronized (cipher) {
+			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
+			return cipher.doFinal(bytesToEncrypt);
+		}
 	}
 
 
 	private void doHandshake(HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
 		// TODO Auto-generated method stub
+	}
+	
+	private byte[] concatenate(byte[] bytes1, byte[] bytes2) {
+		byte[] newBytes = new byte[bytes1.length + bytes2.length];
+		
+		System.arraycopy(bytes1, 0, newBytes, 0, bytes1.length);
+		System.arraycopy(bytes2, 0, newBytes, bytes1.length, bytes2.length);
+		
+		return newBytes;
 	}
 }
