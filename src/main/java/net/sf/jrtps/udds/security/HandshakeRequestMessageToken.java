@@ -1,7 +1,6 @@
 package net.sf.jrtps.udds.security;
 
 import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -9,7 +8,6 @@ import java.security.cert.X509Certificate;
 import javax.xml.bind.DatatypeConverter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,32 +25,27 @@ class HandshakeRequestMessageToken extends DataHolder {
 
 	private X509Certificate certificate;
 
-	public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
-			IdentityCredential iCred, PermissionsCredential pCred) {
-		this(myGuid, destGuid, DDS_AUTH_CHALLENGEREQ_DSA_DH, iCred, pCred);
-	}
+//	public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
+//			IdentityCredential iCred, PermissionsCredential pCred) {
+//		this(myGuid, destGuid, DDS_AUTH_CHALLENGEREQ_DSA_DH, iCred, pCred);
+//	}
 
-	HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
-			String classId, IdentityCredential iCred, 
-			PermissionsCredential pCred) {
+	HandshakeRequestMessageToken(IdentityCredential iCred, byte[] challenge) {
 		
-		super.class_id = classId;
-		super.string_properties = new Property[2];
+		super.class_id = DDS_AUTH_CHALLENGEREQ_DSA_DH;
+		super.string_properties = new Property[1];
 		super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
 
-		String permissions = "";
-		if (pCred != null) {
-			// TODO: This is not the proper way of handling this.			
-			permissions = new String(pCred.getBinaryValue1());
-		}
+//		String permissions = "";
+//		if (pCred != null) {
+//			// TODO: This is not the proper way of handling this.			
+//			permissions = new String(pCred.getBinaryValue1());
+//		}
 		
 		// TODO: dds.sec.permissions is not implemented
-		super.string_properties[1] = new Property("dds.sec.permissions", permissions);
-		try {
-			super.binary_value1 = "CHALLENGE:".getBytes("ISO-8859-1");
-		} catch (UnsupportedEncodingException e) {
-			logger.warn("", e); // Should not happen
-		}
+		//super.string_properties[1] = new Property("dds.sec.permissions", permissions);
+		
+		super.binary_value1 = challenge;
 	}
 
 	public HandshakeRequestMessageToken(String class_id, RTPSByteBuffer bb) throws CertificateException {
@@ -92,7 +85,6 @@ class HandshakeRequestMessageToken extends DataHolder {
 	/**
 	 * Gets the X509Certificate from this HandshakeRequestMessageToken.
 	 * @return X509Certificate
-	 * @throws CertificateException if certificate could not be retrieved for some reason.
 	 */
 	public X509Certificate getCertificate() {
 		return certificate;

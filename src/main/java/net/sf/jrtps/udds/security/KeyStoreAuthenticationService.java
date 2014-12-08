@@ -158,9 +158,8 @@ public class KeyStoreAuthenticationService {
 	void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
 
 		HandshakeRequestMessageToken hrmt = 
-				new HandshakeRequestMessageToken(getOriginalGuid(), remoteGuid, 
-						getLocalIdentity().getIdentityCredential(), 
-						null /* permission credential */);
+				new HandshakeRequestMessageToken(getLocalIdentity().getIdentityCredential(),
+						createChallenge()); 
 
 		ParticipantStatelessMessage psm = 
 				new ParticipantStatelessMessage(statelessWriter.getGuid(),
@@ -257,6 +256,12 @@ public class KeyStoreAuthenticationService {
 		return s.getBytes();
 	}
 
+	private byte[] createSharedSecret() {
+		byte[] sharedSecret = new byte[20]; // TODO: hardcoded
+		random.nextBytes(sharedSecret);
+		
+		return sharedSecret;
+	}
 
 	void doHandshake(ParticipantStatelessMessage psm) {
 		if (psm.message_data != null && psm.message_data.length > 0) {
@@ -321,8 +326,27 @@ public class KeyStoreAuthenticationService {
 
 	private void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
 		logger.debug("doHandshake(reply)");
-		// TODO Auto-generated method stub
+		
+		X509Certificate certificate = hRep.getCertificate();
+		try {
+			verify(certificate);
+		} catch (CertificateException e) {
+			logger.warn("Failed to verify certificate", e);
+			// TODO: cancel handshake
+		}
+		
+		byte[] signedChallenge = hRep.getSignedChallenge();
+		verify(signedChallenge, certificate.getPublicKey());
+		
+		byte[] sharedSecret = createSharedSecret();
+		byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
 	}
+
+	private byte[] encrypt(PublicKey publicKey, byte[] sharedSecret) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
 	private void doHandshake(HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
