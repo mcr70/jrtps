@@ -37,6 +37,10 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 				GMCLASSID_SECURITY_AUTH_HANDSHAKE, new DataHolder[] {dHolder});
 	}
 
+	Guid getSourceGuid() {
+		return message_identity.getSourceGuid();
+	}
+	
 	@Override
 	DataHolder readMessageData(RTPSByteBuffer bb) throws CertificateException  {
 		String class_id = bb.read_string();

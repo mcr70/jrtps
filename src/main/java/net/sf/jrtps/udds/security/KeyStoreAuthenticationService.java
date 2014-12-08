@@ -7,6 +7,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PublicKey;
@@ -47,8 +48,10 @@ import org.slf4j.LoggerFactory;
  */
 public class KeyStoreAuthenticationService {
 	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
-	
+
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
+
+	private HashMap<Guid, AuthenticationData> authDataMap = new HashMap<>();
 
 	SecureRandom random = new SecureRandom();
 	// Latches used to wait for remote participants
@@ -57,7 +60,7 @@ public class KeyStoreAuthenticationService {
 	private final KeyStore ks;
 	private final Certificate ca;
 	private final Signature signature = Signature.getInstance("SHA256withRSA"); // TODO: hardcoded
-	
+
 	private final Configuration conf;
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
 	private final DataReader<ParticipantStatelessMessage> statelessReader;
@@ -65,10 +68,10 @@ public class KeyStoreAuthenticationService {
 	private final LocalIdentity identity;
 	private final Participant participant;
 	private final Cipher cipher;
-	
+
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
 
-	
+
 	public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
 		this.participant = p1;
 		this.statelessWriter = 
@@ -85,9 +88,9 @@ public class KeyStoreAuthenticationService {
 		String pwd = conf.getKeystorePassword();
 
 		ks.load(is, pwd.toCharArray());
-		
+
 		cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // TODO: hardcoded
-		
+
 		this.ca = ks.getCertificate(conf.getSecurityCA());
 		if (ca == null) {
 			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
@@ -101,7 +104,7 @@ public class KeyStoreAuthenticationService {
 		}
 
 		verify(cert);
-		
+
 		Key privateKey = ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray());
 		IdentityCredential identityCreadential = new IdentityCredential(cert, privateKey);
 
@@ -109,18 +112,6 @@ public class KeyStoreAuthenticationService {
 
 		logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
 	}
-
-
-	public X509Certificate getCertificate() {
-		return identity.getIdentityCredential().getCertificate();
-	}
-
-	public Guid getOriginalGuid() {
-		return identity.getOriginalGuid();
-	}
-
-
-
 
 
 	public LocalIdentity getLocalIdentity() {
@@ -131,7 +122,6 @@ public class KeyStoreAuthenticationService {
 		CountDownLatch latch = handshakeLatches.remove(iToken);
 		latch.countDown(); // TODO: Is this correct way of canceling handshake
 	}
-
 
 	public IdentityToken getIdentityToken() {
 		return getLocalIdentity().getIdentityToken();
@@ -148,7 +138,9 @@ public class KeyStoreAuthenticationService {
 		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
 		
 		IdentityToken iToken = pd.getIdentityToken();
-		if (iToken != null) {            
+		if (iToken != null) {
+			AuthenticationData authData = new AuthenticationData(pd);
+			
 			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
 			if (comparison < 0) { // Remote is lexicographically greater
 				// VALIDATION_PENDING_HANDSHAKE_REQUEST
@@ -164,11 +156,11 @@ public class KeyStoreAuthenticationService {
 		else {
 			logger.debug("Failed to authenticate; No IdentityToken provided by {}", pd.getGuidPrefix());
 		}
-		
+
 		return false;
 	}
 
-	
+
 	private void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
 		HandshakeRequestMessageToken hrmt = 
 				new HandshakeRequestMessageToken(getLocalIdentity().getIdentityCredential(),
@@ -185,52 +177,10 @@ public class KeyStoreAuthenticationService {
 
 
 
-	private byte[] sign(byte[] bytesToSign) throws InvalidKeyException, SignatureException {
-		byte[] signatureBytes = null;
-		
-		synchronized(signature) {
-			signature.initSign(identity.getIdentityCredential().getPrivateKey());
-			signature.update(bytesToSign);
-			signatureBytes = signature.sign();
-		}
-		
-		return signatureBytes;
-	}
-
-	private boolean verify(byte[] signedBytes, PublicKey publicKey) throws InvalidKeyException, SignatureException {
-		synchronized(signature) {
-			signature.initVerify(publicKey);
-			return signature.verify(signedBytes);
-		}
-	}
-
-	private void verify(X509Certificate certificate) throws CertificateException {
-		try {
-			certificate.verify(ca.getPublicKey());
-		} catch (InvalidKeyException /* | CertificateException */ 
-				| NoSuchAlgorithmException | NoSuchProviderException
-				| SignatureException e) {
-			// TODO: what should we throw here
-			throw new CertificateException(e);
-		}
-	}
-
-	private byte[] createChallenge() {
-		String s = "CHALLENGE:" + new BigInteger(96, random);
-		return s.getBytes();
-	}
-
-	private byte[] createSharedSecret() {
-		byte[] sharedSecret = new byte[20]; // TODO: hardcoded
-		random.nextBytes(sharedSecret);
-		
-		return sharedSecret;
-	}
-
 	void doHandshake(ParticipantStatelessMessage psm) {
 		if (psm.message_data != null && psm.message_data.length > 0) {
 			String classId = psm.message_data[0].class_id;
-			
+
 			if (HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_DSA_DH.equals(classId)) {			
 				doHandshake(psm.message_identity, (HandshakeRequestMessageToken) psm.message_data[0],
 						psm.source_endpoint_key);
@@ -238,10 +188,10 @@ public class KeyStoreAuthenticationService {
 			else if (HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH.equals(classId)) {
 				doHandshake(psm.related_message_identity, 
 						(HandshakeReplyMessageToken) psm.message_data[0]);
-				
+
 			}
 			else if (HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_DSA_DH.equals(classId)) {
-				doHandshake((HandshakeFinalMessageToken) psm.message_data[0]);					
+				doHandshake(psm.message_identity, (HandshakeFinalMessageToken) psm.message_data[0]);					
 			}
 			else {
 				logger.warn("HandshakeMessageToken with class_id '{}' not handled", classId);
@@ -257,79 +207,122 @@ public class KeyStoreAuthenticationService {
 			Guid remoteTarget) {
 		logger.debug("doHandshake(request)");
 		X509Certificate certificate = hReq.getCertificate();
+		
 		try {
 			verify(certificate);
-		} catch (CertificateException e) {
-			logger.warn("Failed to verify certificate", e);
+			
+			AuthenticationData authData = new AuthenticationData(messageIdentity.getSourceGuid());
+			authData.setCertificate(certificate);
+			authDataMap.put(messageIdentity.getSourceGuid(), authData);
+			
+			byte[] challenge = hReq.getChallenge();
+			byte[] signedChallenge = sign(challenge);
+
+			byte[] challengeBytes = createChallenge();
+
+			HandshakeReplyMessageToken hrmt = 
+					new HandshakeReplyMessageToken(identity.getIdentityCredential(),
+							signedChallenge, challengeBytes);
+
+			ParticipantStatelessMessage psm = 
+					new ParticipantStatelessMessage(statelessWriter.getGuid(),
+							new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+							hrmt);
+
+			logger.debug("Sending handshake reply to {}", remoteTarget.getPrefix());
+			statelessWriter.write(psm);
+		}
+		catch(CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException 
+				| NoSuchProviderException e) {
+			logger.warn("Failed to process handshake request message token");
 			// TODO: cancel handshake
 		}
-		
-		byte[] challenge = hReq.getChallenge();
-		byte[] signedChallenge = null;
-		try {
-			signedChallenge = sign(challenge);
-		} catch (InvalidKeyException | SignatureException e) {
-			logger.warn("Failed to sign challenge", e);
-			// TODO: cancel handshake
-		}
-		
-		byte[] challengeBytes = createChallenge();
-		
-		HandshakeReplyMessageToken hrmt = 
-				new HandshakeReplyMessageToken(identity.getIdentityCredential(),
-						signedChallenge, challengeBytes);
-
-		ParticipantStatelessMessage psm = 
-				new ParticipantStatelessMessage(statelessWriter.getGuid(),
-						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-						hrmt);
-
-		logger.debug("Sending handshake reply to {}", remoteTarget.getPrefix());
-		statelessWriter.write(psm);
 	}
 
 	private void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
 		logger.debug("doHandshake(reply)");
-		
+
 		X509Certificate certificate = hRep.getCertificate();
 		try {
 			verify(certificate);
-		} catch (CertificateException e) {
-			logger.warn("Failed to verify certificate", e);
-			// TODO: cancel handshake
-		}
-		
-		byte[] signedChallenge = hRep.getSignedChallenge();
-		try {
-			verify(signedChallenge, certificate.getPublicKey());
-		} catch (InvalidKeyException | SignatureException e1) {
-			logger.warn("Failed to verify signature of challenge", e1);
-			// TODO: cancel handshake
-		}
-		
-		byte[] sharedSecret = createSharedSecret();
-		byte[] encryptedSharedSecret = null;
-		try {
-			encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
-		} catch (InvalidKeyException | IllegalBlockSizeException
-				| BadPaddingException e) {
-			logger.warn("Failed to encrypt shared secret", e);
-			// TODO: cancel handshake
-		}
-		
-		byte[] challenge = hRep.getChallenge();
-		
-		HandshakeFinalMessageToken hfmt = 
-				new HandshakeFinalMessageToken(identity.getIdentityCredential(),
-						encryptedSharedSecret, concatenate(challenge, encryptedSharedSecret));
 
-		ParticipantStatelessMessage psm = 
-				new ParticipantStatelessMessage(statelessWriter.getGuid(),
-						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
-						hfmt);
-		
-		logger.debug("Sending handshake final message");
-		statelessWriter.write(psm);
+			byte[] signedChallenge = hRep.getSignedChallenge();
+			verify(signedChallenge, certificate.getPublicKey());
+
+			byte[] sharedSecret = createSharedSecret();
+			byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
+			byte[] challenge = hRep.getChallenge();
+			byte[] hashedData = hash(concatenate(challenge, encryptedSharedSecret));
+			byte[] signedData = sign(hashedData);
+
+			HandshakeFinalMessageToken hfmt = 
+					new HandshakeFinalMessageToken(identity.getIdentityCredential(),
+							encryptedSharedSecret, signedData);
+
+			ParticipantStatelessMessage psm = 
+					new ParticipantStatelessMessage(statelessWriter.getGuid(),
+							new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+							hfmt);
+
+			logger.debug("Sending handshake final message");
+			statelessWriter.write(psm);
+		} catch (InvalidKeyException | IllegalBlockSizeException
+				| BadPaddingException | NoSuchAlgorithmException | SignatureException 
+				| CertificateException | NoSuchProviderException e) {
+			logger.warn("Failed to process handshake reply message token", e);
+			// TODO: cancel handshake
+		}
+	}
+
+
+	private void doHandshake(MessageIdentity mi, HandshakeFinalMessageToken hFin) {
+		logger.debug("doHandshake(final)");
+
+		AuthenticationData authData = authDataMap.get(mi.getSourceGuid());
+		X509Certificate cert = authData.getCertificate();
+		if (cert == null) {
+			logger.warn("Could not find certificate for {}", mi.getSourceGuid());
+			// TODO: cancel handshake
+		}
+
+		byte[] signedData = hFin.getSignedData();
+		try {
+			verify(signedData, cert.getPublicKey());
+			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();
+			byte[] sharedSecret = decrypt(encryptedSharedSecret);
+		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
+			logger.warn("Failed to process handshake final message token", e);
+			// TODO: cancel handshake
+		}
+	}
+
+
+	private byte[] sign(byte[] bytesToSign) throws InvalidKeyException, SignatureException {
+		byte[] signatureBytes = null;
+
+		synchronized(signature) {
+			signature.initSign(identity.getIdentityCredential().getPrivateKey());
+			signature.update(bytesToSign);
+			signatureBytes = signature.sign();
+		}
+
+		return signatureBytes;
+	}
+
+	private boolean verify(byte[] signedBytes, PublicKey publicKey) throws InvalidKeyException, SignatureException {
+		synchronized(signature) {
+			signature.initVerify(publicKey);
+			return signature.verify(signedBytes);
+		}
+	}
+
+	private void verify(X509Certificate certificate) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
+		certificate.verify(ca.getPublicKey());
+	}
+
+	private byte[] hash(byte[] bytesToHash) throws NoSuchAlgorithmException {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		return md.digest(bytesToHash);
 	}
 
 	private byte[] encrypt(PublicKey publicKey, byte[] bytesToEncrypt) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -339,18 +332,33 @@ public class KeyStoreAuthenticationService {
 		}
 	}
 
-
-	private void doHandshake(HandshakeFinalMessageToken hFin) {
-		logger.debug("doHandshake(final)");
-		// TODO Auto-generated method stub
+	private byte[] decrypt(byte[] bytesToDecrypt) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		synchronized (cipher) {
+			cipher.init(Cipher.DECRYPT_MODE, identity.getIdentityCredential().getPrivateKey());
+			return cipher.doFinal(bytesToDecrypt);
+		}
 	}
-	
+
+
 	private byte[] concatenate(byte[] bytes1, byte[] bytes2) {
 		byte[] newBytes = new byte[bytes1.length + bytes2.length];
-		
+
 		System.arraycopy(bytes1, 0, newBytes, 0, bytes1.length);
 		System.arraycopy(bytes2, 0, newBytes, bytes1.length, bytes2.length);
-		
+
 		return newBytes;
+	}
+	
+
+	private byte[] createChallenge() {
+		String s = "CHALLENGE:" + new BigInteger(96, random);
+		return s.getBytes();
+	}
+
+	private byte[] createSharedSecret() {
+		byte[] sharedSecret = new byte[20]; // TODO: hardcoded
+		random.nextBytes(sharedSecret);
+
+		return sharedSecret;
 	}
 }
