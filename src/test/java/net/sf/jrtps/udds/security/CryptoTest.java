@@ -1,11 +1,20 @@
 package net.sf.jrtps.udds.security;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.InvalidKeyException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
+import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
 import net.sf.jrtps.qos.AbstractQosTest;
@@ -42,7 +51,16 @@ public class CryptoTest extends AbstractQosTest {
 	}
 	
 	@Test
-	public void testCipher() {
-		
+	public void testCipher() throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, NoSuchPaddingException, InvalidKeyException  {
+        KeyStore ks = KeyStore.getInstance("JKS");
+        InputStream is = getClass().getResourceAsStream("/jrtps.jks");
+        ks.load(is, "changeit".toCharArray());
+
+        X509Certificate cert = (X509Certificate) ks.getCertificate("jrtps01");
+        PublicKey pk = cert.getPublicKey();
+        
+        //Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1PADDING");
+        Cipher cipher = Cipher.getInstance("DSA");
+        cipher.init(Cipher.ENCRYPT_MODE, pk);
 	}
 }

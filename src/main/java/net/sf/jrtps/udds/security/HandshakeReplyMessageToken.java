@@ -1,5 +1,12 @@
 package net.sf.jrtps.udds.security;
 
+import java.io.ByteArrayInputStream;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+
+import javax.xml.bind.DatatypeConverter;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
@@ -10,6 +17,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 class HandshakeReplyMessageToken extends DataHolder {	
 	static final String DDS_AUTH_CHALLENGEREP_DSA_DH = "DDS:Auth:ChallengeRep:DSA-DH";
     static final String DDS_AUTH_CHALLENGEREP_PKI_RSA = "DDS:Auth:ChallengeRep:PKI-RSA";
+	private X509Certificate certificate;
 	
     
 	public HandshakeReplyMessageToken(IdentityCredential localCredentials,
@@ -32,11 +40,18 @@ class HandshakeReplyMessageToken extends DataHolder {
 	}
 
 
-	HandshakeReplyMessageToken(String class_id, RTPSByteBuffer bb) {
+	HandshakeReplyMessageToken(String class_id, RTPSByteBuffer bb) throws CertificateException {
 		super.class_id = class_id;
 		super.string_properties = new Property[bb.read_long()];
 		for (int i = 0; i < string_properties.length; i++) {
-			string_properties[i] = new Property(bb);
+			Property p = new Property(bb);
+			string_properties[i] = p;
+			if ("dds.sec.identity".equals(p.getName())) {
+				byte[] binary = DatatypeConverter.parseBase64Binary(p.getValue());
+
+				CertificateFactory cf = CertificateFactory.getInstance("X.509");
+				this.certificate = (X509Certificate) cf.generateCertificate(new ByteArrayInputStream(binary));
+			}			
 		}
 		
 		super.binary_value1 = new byte[bb.read_long()];
@@ -46,6 +61,14 @@ class HandshakeReplyMessageToken extends DataHolder {
 		bb.read(binary_value2);
 	}
 
+	/**
+	 * Gets the X509Certificate from this HandshakeRequestMessageToken.
+	 * @return X509Certificate
+	 */
+	public X509Certificate getCertificate() {
+		return certificate;
+	}
+	
 	/**
 	 * Gets the challenge offered by remote entity.
 	 * @return challenge bytes
