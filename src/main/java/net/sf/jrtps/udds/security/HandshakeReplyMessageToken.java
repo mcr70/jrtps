@@ -70,7 +70,7 @@ class HandshakeReplyMessageToken extends DataHolder {
 	}
 	
 	/**
-	 * Gets the challenge offered by remote entity.
+	 * Gets the challenge offered by remote entity(binary_value1).
 	 * @return challenge bytes
 	 */
 	public byte[] getChallenge() {
@@ -78,7 +78,7 @@ class HandshakeReplyMessageToken extends DataHolder {
 	}
 
 	/**
-	 * Gets the signed challenge. Remote entity has signed local challenge.
+	 * Gets the signed challenge(binary_value2). Remote entity has signed local challenge.
 	 * @return signed challenge
 	 */
 	public byte[] getSignedChallenge() {

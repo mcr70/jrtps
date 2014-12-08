@@ -1,10 +1,6 @@
 package net.sf.jrtps.udds.security;
 
-import java.io.UnsupportedEncodingException;
-import java.security.cert.CertificateEncodingException;
-
 import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,29 +17,14 @@ class HandshakeFinalMessageToken extends DataHolder {
     static final String DDS_AUTH_CHALLENGEFIN_DSA_DH = "DDS:Auth:ChallengeFin:DSA-DH";
     static final String DDS_AUTH_CHALLENGEFIN_PKI_RSA = "DDS:Auth:ChallengeFin:PKI-RSA";
     
-    public HandshakeFinalMessageToken(Guid myGuid, Guid destGuid,
-    		IdentityCredential iCred, PermissionsCredential pCred) throws CertificateEncodingException {
-        this(myGuid, destGuid, DDS_AUTH_CHALLENGEFIN_DSA_DH, iCred, pCred);
-    }
-    
-    HandshakeFinalMessageToken(Guid myGuid, Guid destGuid,
-    		String classId, IdentityCredential iCred, 
-    		PermissionsCredential pCred) throws CertificateEncodingException {
+	public HandshakeFinalMessageToken(IdentityCredential identityCredential,
+			byte[] encryptedSharedSecret, byte[] signedData) {
+		super.class_id = DDS_AUTH_CHALLENGEFIN_DSA_DH;
+		super.binary_value1 = encryptedSharedSecret;
+		super.binary_value2 = signedData;
+	}
 
-    	super.class_id = classId;
-        super.string_properties = new Property[2];
-        super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
-        
-        // TODO: dds.sec.permissions is not implemented
-        super.string_properties[1] = new Property("dds.sec.permissions", new String(pCred.getBinaryValue1()));
-        try {
-			super.binary_value1 = "CHALLENGE:".getBytes("ISO-8859-1");
-		} catch (UnsupportedEncodingException e) {
-			logger.warn("", e); // Should not happen
-		}
-    }
-
-	public HandshakeFinalMessageToken(String class_id, RTPSByteBuffer bb) {
+	HandshakeFinalMessageToken(String class_id, RTPSByteBuffer bb) {
 		super.class_id = class_id;
 
 		super.binary_value1 = new byte[bb.read_long()];
@@ -51,6 +32,23 @@ class HandshakeFinalMessageToken extends DataHolder {
 		
 		super.binary_value2 = new byte[bb.read_long()];
 		bb.read(binary_value2);
+	}
+
+	/**
+	 * Gets the signed data. Data that is signed, is concatenation of challenge from 
+	 * handshake reply(binary_value1) and encrypted shared secret of this final
+	 * handhsake message(binary_value1) 
+	 */
+	public byte[] getSignedData() {
+		return binary_value2;
+	}
+	
+	/**
+	 * Gets the encrypted shared secret 
+	 * @return encrypted shared secret
+	 */
+	public byte[] getEncryptedSharedSicret() {
+		return binary_value1;
 	}
 	
 	@Override
