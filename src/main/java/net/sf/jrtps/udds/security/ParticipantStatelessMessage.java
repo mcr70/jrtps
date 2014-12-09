@@ -24,12 +24,12 @@ public class ParticipantStatelessMessage extends ParticipantGenericMessage {
 		super(bb);
 	}
 
-	ParticipantStatelessMessage(Guid guid, MessageIdentity messageIdentity, 
+	ParticipantStatelessMessage(MessageIdentity messageIdentity, 
 			DataHolder dHolder) {
-		this(messageIdentity, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, guid, dHolder);
+		this(messageIdentity, Guid.GUID_UNKNOWN, Guid.GUID_UNKNOWN, messageIdentity.getSourceGuid(), dHolder);
 	}
 	
-	ParticipantStatelessMessage(MessageIdentity messageIdentity, 
+	private ParticipantStatelessMessage(MessageIdentity messageIdentity, 
 			Guid remoteParticipant, Guid destEndpoint, Guid sourceEndpoint,
 			DataHolder dHolder) {
 		super(messageIdentity, new MessageIdentity(Guid.GUID_UNKNOWN, 0), 
