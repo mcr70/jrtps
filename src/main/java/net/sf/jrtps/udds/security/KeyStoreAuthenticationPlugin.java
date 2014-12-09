@@ -18,6 +18,7 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -186,7 +187,7 @@ public class KeyStoreAuthenticationPlugin {
 						psm.source_endpoint_key);
 			}
 			else if (HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH.equals(classId)) {
-				doHandshake(psm.related_message_identity, 
+				doHandshake(psm.getSourceGuid(), psm.related_message_identity, 
 						(HandshakeReplyMessageToken) psm.message_data[0]);
 
 			}
@@ -239,7 +240,7 @@ public class KeyStoreAuthenticationPlugin {
 		}
 	}
 
-	private void doHandshake(MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
+	private void doHandshake(Guid sourceGuid, MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
 		logger.debug("doHandshake(reply)");
 
 		X509Certificate certificate = hRep.getCertificate();
@@ -264,6 +265,10 @@ public class KeyStoreAuthenticationPlugin {
 							new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
 							hfmt);
 
+			AuthenticationData authenticationData = authDataMap.get(sourceGuid);
+			logger.debug("** F1: MyGuid: {}, remote Guid: {}, shared secret: {}", getLocalIdentity().getOriginalGuid(), 
+					sourceGuid, Arrays.toString(sharedSecret));
+			
 			logger.debug("Sending handshake final message");
 			statelessWriter.write(psm);
 		} catch (InvalidKeyException | IllegalBlockSizeException
@@ -290,6 +295,10 @@ public class KeyStoreAuthenticationPlugin {
 			verify(signedData, cert.getPublicKey());
 			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
+			
+			logger.debug("** F2: My Guid: {}, remote Guid: {}, shared secret: {}", getLocalIdentity().getOriginalGuid(),
+					mi.getSourceGuid(), Arrays.toString(sharedSecret));
+			
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
 			// TODO: cancel handshake
