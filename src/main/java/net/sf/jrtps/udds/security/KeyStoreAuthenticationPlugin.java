@@ -40,13 +40,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * KeyStoreAuthentication is an Authentication plugin as discussed in
+ * KeyStoreAuthenticationPlugin is an Authentication plugin as discussed in
  * DDS Security specification. Chapter 9.3.3 <i>DDS:Auth:PKI-RSA/DSA-DH plugin behavior</i>
  * describes the plugin behavior.
  * 
  * @author mcr70
  */
-public class KeyStoreAuthenticationService {
+public class KeyStoreAuthenticationPlugin {
 	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
 
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
@@ -72,7 +72,7 @@ public class KeyStoreAuthenticationService {
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
 
 
-	public KeyStoreAuthenticationService(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
+	public KeyStoreAuthenticationPlugin(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
 		this.participant = p1;
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
@@ -114,7 +114,7 @@ public class KeyStoreAuthenticationService {
 	}
 
 
-	public LocalIdentity getLocalIdentity() {
+	LocalIdentity getLocalIdentity() {
 		return identity;
 	}
 
