@@ -14,7 +14,7 @@ import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
-import net.sf.jrtps.udds.security.KeyStoreAuthenticationService;
+import net.sf.jrtps.udds.security.KeyStoreAuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 
 import org.slf4j.Logger;
@@ -30,7 +30,7 @@ class BuiltinParticipantDataListener extends BuiltinListener implements SampleLi
     private static final Logger log = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
     
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
-    private final KeyStoreAuthenticationService authPlugin;
+    private final KeyStoreAuthenticationPlugin authPlugin;
 	private boolean securityEnabled;
 
     BuiltinParticipantDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
