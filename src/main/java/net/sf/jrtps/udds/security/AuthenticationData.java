@@ -1,6 +1,7 @@
 package net.sf.jrtps.udds.security;
 
 import java.security.cert.X509Certificate;
+import java.util.concurrent.CountDownLatch;
 
 import net.sf.jrtps.builtin.ParticipantData;
 
@@ -13,24 +14,18 @@ class AuthenticationData {
 	private byte[] sharedSecret;
 	private byte[] challenge;
 	private X509Certificate certificate;
-//	private Guid sourceGuid;
 	private byte[] challengeB;
 	private byte[] challengeA;
+	private final CountDownLatch timeOutLatch;
 	
-//	AuthenticationData(ParticipantData pd) {
-//		this.participantData = pd;
-//	}
-//	
-//	public AuthenticationData(Guid sourceGuid) {
-//		this.sourceGuid = sourceGuid;
-//	}
 
 	public AuthenticationData(X509Certificate certificate) {
 		this.certificate = certificate;
+		timeOutLatch = new CountDownLatch(1);
 	}
 
 	public AuthenticationData() {
-		// TODO Auto-generated constructor stub
+		timeOutLatch = new CountDownLatch(1);
 	}
 
 	ParticipantData getParticipantData() {
@@ -87,5 +82,9 @@ class AuthenticationData {
 
 	public String toString() {
 		return certificate.getSubjectDN().toString();
+	}
+
+	public CountDownLatch getTimeoutLatch() {
+		return timeOutLatch;
 	}
 }

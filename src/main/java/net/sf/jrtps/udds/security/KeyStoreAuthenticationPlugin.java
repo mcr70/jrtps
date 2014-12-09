@@ -21,6 +21,7 @@ import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -143,13 +144,17 @@ public class KeyStoreAuthenticationPlugin {
 			AuthenticationData authData = new AuthenticationData();
 			authDataMap.put(pd.getGuidPrefix(), authData);
 			
+			CountDownLatch timeoutLatch = authData.getTimeoutLatch();
+			
 			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
 			if (comparison < 0) { // Remote is lexicographically greater
 				// VALIDATION_PENDING_HANDSHAKE_REQUEST
 				beginHandshakeRequest(iToken, pd.getGuid());
+				//return waitForAuthentication(timeoutLatch, pd.getGuidPrefix());				
 			}
 			else if (comparison > 0) {
 				logger.debug("Starting to wait for HandshakeRequestMessage");
+				//return waitForAuthentication(timeoutLatch, pd.getGuidPrefix());
 			}
 			else {
 				logger.debug("Remote identity is the same as we are");
@@ -160,6 +165,21 @@ public class KeyStoreAuthenticationPlugin {
 		}
 
 		return false;
+	}
+
+
+	private boolean waitForAuthentication(CountDownLatch timeoutLatch, GuidPrefix prefix) {
+		try {
+			boolean await = timeoutLatch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
+			if (!await) {
+				logger.warn("Failed to authenticate {} within timeout of {}", prefix, conf.getHandshakeTimeout());
+			}
+			
+			return await;
+		} catch (InterruptedException e) {
+			logger.warn("Got interrupted while authenticating");
+			return false;
+		}
 	}
 
 
@@ -215,10 +235,8 @@ public class KeyStoreAuthenticationPlugin {
 		X509Certificate certificate = hReq.getCertificate();
 		
 		try {
-			verify(certificate);
-			
+			verify(certificate);			
 			AuthenticationData authData = new AuthenticationData(certificate);
-			//authData.setCertificate(certificate);
 			authDataMap.put(mi.getSourceGuid().getPrefix(), authData);
 			
 			byte[] challenge = hReq.getChallenge();
