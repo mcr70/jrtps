@@ -19,7 +19,7 @@ class MessageIdentity {
     }
     
     MessageIdentity(RTPSByteBuffer bb) {
-        Guid guid = new Guid(bb);
+        source_guid = new Guid(bb);
         sequence_number = bb.read_longlong();
     }
     
@@ -42,5 +42,9 @@ class MessageIdentity {
     void writeTo(RTPSByteBuffer bb) {
         source_guid.writeTo(bb);
         bb.write_longlong(sequence_number);
+    }
+
+    public String toString() {
+    	return source_guid + ":" + sequence_number;
     }
 }
