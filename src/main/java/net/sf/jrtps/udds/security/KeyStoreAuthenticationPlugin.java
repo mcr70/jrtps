@@ -18,7 +18,6 @@ import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -33,6 +32,7 @@ import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
@@ -52,7 +52,7 @@ public class KeyStoreAuthenticationPlugin {
 
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
 
-	private HashMap<Guid, AuthenticationData> authDataMap = new HashMap<>();
+	private HashMap<GuidPrefix, AuthenticationData> authDataMap = new HashMap<>();
 
 	SecureRandom random = new SecureRandom();
 	// Latches used to wait for remote participants
@@ -140,7 +140,8 @@ public class KeyStoreAuthenticationPlugin {
 		
 		IdentityToken iToken = pd.getIdentityToken();
 		if (iToken != null) {
-			AuthenticationData authData = new AuthenticationData(pd);
+			AuthenticationData authData = new AuthenticationData();
+			authDataMap.put(pd.getGuidPrefix(), authData);
 			
 			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
 			if (comparison < 0) { // Remote is lexicographically greater
@@ -163,13 +164,17 @@ public class KeyStoreAuthenticationPlugin {
 
 
 	private void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
+		byte[] challenge = createChallenge();
+		
+		AuthenticationData authData = authDataMap.get(remoteGuid.getPrefix());
+		authData.setRequestChallenge(challenge);
+		
 		HandshakeRequestMessageToken hrmt = 
 				new HandshakeRequestMessageToken(getLocalIdentity().getIdentityCredential(),
-						createChallenge()); 
+						challenge); 
 
 		ParticipantStatelessMessage psm = 
-				new ParticipantStatelessMessage(statelessWriter.getGuid(),
-						new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+				new ParticipantStatelessMessage(new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
 						hrmt);
 
 		logger.debug("Sending handshake request to {}", remoteGuid.getPrefix());
@@ -204,7 +209,7 @@ public class KeyStoreAuthenticationPlugin {
 	}
 
 
-	private void doHandshake(MessageIdentity messageIdentity, HandshakeRequestMessageToken hReq,
+	private void doHandshake(MessageIdentity mi, HandshakeRequestMessageToken hReq,
 			Guid remoteTarget) {
 		logger.debug("doHandshake(request)");
 		X509Certificate certificate = hReq.getCertificate();
@@ -212,22 +217,24 @@ public class KeyStoreAuthenticationPlugin {
 		try {
 			verify(certificate);
 			
-			AuthenticationData authData = new AuthenticationData(messageIdentity.getSourceGuid());
-			authData.setCertificate(certificate);
-			authDataMap.put(messageIdentity.getSourceGuid(), authData);
+			AuthenticationData authData = new AuthenticationData(certificate);
+			//authData.setCertificate(certificate);
+			authDataMap.put(mi.getSourceGuid().getPrefix(), authData);
 			
 			byte[] challenge = hReq.getChallenge();
+			authData.setRequestChallenge(challenge);
+			
 			byte[] signedChallenge = sign(challenge);
 
 			byte[] challengeBytes = createChallenge();
-
+			authData.setReplyChallenge(challengeBytes);
+			
 			HandshakeReplyMessageToken hrmt = 
 					new HandshakeReplyMessageToken(identity.getIdentityCredential(),
 							signedChallenge, challengeBytes);
 
 			ParticipantStatelessMessage psm = 
-					new ParticipantStatelessMessage(statelessWriter.getGuid(),
-							new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+					new ParticipantStatelessMessage(new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
 							hrmt);
 
 			logger.debug("Sending handshake reply to {}", remoteTarget.getPrefix());
@@ -245,14 +252,18 @@ public class KeyStoreAuthenticationPlugin {
 
 		X509Certificate certificate = hRep.getCertificate();
 		try {
+			AuthenticationData authData = authDataMap.get(sourceGuid.getPrefix());
 			verify(certificate);
-
+			authData.setCertificate(certificate);
+			
 			byte[] signedChallenge = hRep.getSignedChallenge();
 			verify(signedChallenge, certificate.getPublicKey());
 
 			byte[] sharedSecret = createSharedSecret();
 			byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
 			byte[] challenge = hRep.getChallenge();
+			authData.setReplyChallenge(challenge);
+
 			byte[] hashedData = hash(concatenate(challenge, encryptedSharedSecret));
 			byte[] signedData = sign(hashedData);
 
@@ -261,13 +272,12 @@ public class KeyStoreAuthenticationPlugin {
 							encryptedSharedSecret, signedData);
 
 			ParticipantStatelessMessage psm = 
-					new ParticipantStatelessMessage(statelessWriter.getGuid(),
-							new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
+					new ParticipantStatelessMessage(new MessageIdentity(statelessWriter.getGuid(), psmSequenceNumber++), 
 							hfmt);
 
-			AuthenticationData authenticationData = authDataMap.get(sourceGuid);
-			logger.debug("** F1: MyGuid: {}, remote Guid: {}, shared secret: {}", getLocalIdentity().getOriginalGuid(), 
-					sourceGuid, Arrays.toString(sharedSecret));
+			authData.setSharedSecret(sharedSecret);
+			
+			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
 			
 			logger.debug("Sending handshake final message");
 			statelessWriter.write(psm);
@@ -283,7 +293,7 @@ public class KeyStoreAuthenticationPlugin {
 	private void doHandshake(MessageIdentity mi, HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
 
-		AuthenticationData authData = authDataMap.get(mi.getSourceGuid());
+		AuthenticationData authData = authDataMap.get(mi.getSourceGuid().getPrefix());
 		X509Certificate cert = authData.getCertificate();
 		if (cert == null) {
 			logger.warn("Could not find certificate for {}", mi.getSourceGuid());
@@ -296,9 +306,8 @@ public class KeyStoreAuthenticationPlugin {
 			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
 			
-			logger.debug("** F2: My Guid: {}, remote Guid: {}, shared secret: {}", getLocalIdentity().getOriginalGuid(),
-					mi.getSourceGuid(), Arrays.toString(sharedSecret));
-			
+			authData.setSharedSecret(sharedSecret);
+			logger.info("Authenticated {} succesfully", authData.getCertificate().getSubjectDN());
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
 			// TODO: cancel handshake
