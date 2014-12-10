@@ -6,7 +6,7 @@ package net.sf.jrtps.udds.security;
  * 
  * @author mcr70
  */
-public class EndpointSecurityAttributes {
+class EndpointSecurityAttributes {
     private boolean isAccessProtected = false;
     private boolean isDiscoveryProtected = false;
     private boolean isSubmessageProtected = false;

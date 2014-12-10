@@ -1,6 +1,6 @@
 package net.sf.jrtps.udds.security;
 
-public class BinaryProperty {
+class BinaryProperty {
     private String name;
     private byte[] value;
 

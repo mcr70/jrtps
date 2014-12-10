@@ -6,7 +6,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * DataTag, as specified in DDS Security Sepcification
  * @author mcr70
  */
-public class DataTag {
+class DataTag {
 
     private String name;
     private String value;

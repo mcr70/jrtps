@@ -1,6 +1,6 @@
 package net.sf.jrtps.udds.security;
 
-public class XmlAccessControlService {
+class XmlAccessControlService {
 	private ParticipantSecurityAttributes pSecAttrs;
     private EndpointSecurityAttributes eSecAttrs;
 

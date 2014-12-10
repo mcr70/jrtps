@@ -4,7 +4,7 @@ import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class DataTags extends Parameter {
+class DataTags extends Parameter {
 
     private DataTag[] data_tags;
 

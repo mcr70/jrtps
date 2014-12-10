@@ -16,7 +16,7 @@ rtps.reader.heartbeat-response-delay = 500
 rtps.reader.heartbeat-suppression-duration = 0
 rtps.spdp.resend-data-period = 30000
 
-# ---  jRTPS configuration parameters  ------------------
+# ---  jRTPS configuration parameters  -----------------
 jrtps.thread-pool.core-size = 10
 jrtps.message-queue.size = 10
 jrtps.buffer-size = 16384
@@ -29,6 +29,14 @@ jrtps.discovery.announce-uris = udp://239.255.0.1
 # ---  uDDS configuration parameters  ------------------
 udds.collections.coherent=false
 udds.sedp-delay = 0
+
+# ---  uDDS security configuration  --------------------
+udds.security.enabled = false
+udds.security.keystore = <NO_DEFAULT>
+udds.security.keystore.password = <NO_DEFAULT>
+udds.security.ca = <NO_DEFAULT>
+udds.security.principal = <NO_DEFAULT>
+udds.security.principal.password = <NO_DEFAULT>
 +---
  
 * RTPS specific configuration
@@ -110,3 +118,32 @@ udds.sedp-delay = 0
   During discovery, when a ParticipantMessage (SPDP) is received, local participant will first send
   a ParticipantMessage (SPDP) to remote participant to make sure it knows about us, then waits
   <udds.sedp-delay> before starting to announce local endpoints (SEDP).
+  
+* uDDS security configuration
+  
+  * <<{udds.security.enabled}>>
+  This parameter either enables or disables security features of uDDS. By enabling security,
+  remote participant is authenticated and communication towards remote can be started.
+  Note, that if remote participant fails to authenticate, it can still <send> data to local
+  Participant. 
+
+  * <<{udds.security.keystore}>>
+  Name of the keystore, that holds certificates of the CA and principal that is used to
+  authenticate with remote participant.
+  
+  * <<{udds.security.keystore.password}>>
+  Password used to open keystore
+
+  * <<{udds.security.ca}>>
+  Alias of the certificate authority, that has signed both local and remote principals 
+  certificates.
+   
+  * <<{udds.security.principal}>>
+  Alias of the local principal, that is used in authentication.
+
+  * <<{udds.security.principal.password}>>
+  Password of the private key of local principal. This is used to encrypt shared
+  secret that is exchanged with remote participant during authentication.
+  
+  
+  

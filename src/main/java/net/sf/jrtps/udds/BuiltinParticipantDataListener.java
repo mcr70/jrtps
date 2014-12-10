@@ -15,7 +15,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.udds.security.AuthenticationListener;
-import net.sf.jrtps.udds.security.KeyStoreAuthenticationPlugin;
+import net.sf.jrtps.udds.security.KeystoreAuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 
 import org.slf4j.Logger;
@@ -33,7 +33,7 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
     private static final Logger logger = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
     
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
-    private final KeyStoreAuthenticationPlugin authPlugin;
+    private final KeystoreAuthenticationPlugin authPlugin;
 
     BuiltinParticipantDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
         super(p);

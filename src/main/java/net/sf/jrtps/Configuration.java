@@ -378,7 +378,7 @@ public class Configuration {
     }
 
     public String getSecurityCA() {
-        return props.getProperty("udds.security.ca", "jrtpsCA"); 
+        return props.getProperty("udds.security.ca"); 
     }
 
     public String getSecurityPrincipal() {
