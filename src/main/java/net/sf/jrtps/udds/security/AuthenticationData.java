@@ -24,7 +24,8 @@ class AuthenticationData {
 		timeOutLatch = new CountDownLatch(1);
 	}
 
-	public AuthenticationData() {
+	public AuthenticationData(ParticipantData pd) {
+		participantData = pd;
 		timeOutLatch = new CountDownLatch(1);
 	}
 
@@ -80,9 +81,9 @@ class AuthenticationData {
 		return challengeA;
 	}
 
-	public String toString() {
-		return certificate.getSubjectDN().toString();
-	}
+//	public String toString() {
+//		return certificate.getSubjectDN().toString();
+//	}
 
 	public CountDownLatch getTimeoutLatch() {
 		return timeOutLatch;
