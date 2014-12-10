@@ -20,8 +20,9 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -52,7 +53,8 @@ public class KeyStoreAuthenticationPlugin {
 	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
 
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
-
+	
+	private final Set<AuthenticationListener> authListeners = new CopyOnWriteArraySet<>();
 	private HashMap<GuidPrefix, AuthenticationData> authDataMap = new HashMap<>();
 
 	SecureRandom random = new SecureRandom();
@@ -65,7 +67,7 @@ public class KeyStoreAuthenticationPlugin {
 
 	private final Configuration conf;
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
-	private final DataReader<ParticipantStatelessMessage> statelessReader;
+//	private final DataReader<ParticipantStatelessMessage> statelessReader;
 
 	private final LocalIdentity identity;
 	private final Participant participant;
@@ -78,17 +80,15 @@ public class KeyStoreAuthenticationPlugin {
 		this.participant = p1;
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
-		this.statelessReader = 
-				(DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
-		this.statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant, this));
-
+		
+		DataReader<ParticipantStatelessMessage> statelessReader = (DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
+		statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant, this));
+		
 		this.conf = conf;
-
 		this.ks = KeyStore.getInstance("JKS");
 
 		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
 		String pwd = conf.getKeystorePassword();
-
 		ks.load(is, pwd.toCharArray());
 
 		cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // TODO: hardcoded
@@ -109,8 +109,7 @@ public class KeyStoreAuthenticationPlugin {
 
 		Key privateKey = ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray());
 		IdentityCredential identityCreadential = new IdentityCredential(cert, privateKey);
-
-		identity = new LocalIdentity(originalGuid, identityCreadential);
+		this.identity = new LocalIdentity(originalGuid, identityCreadential);
 
 		logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
 	}
@@ -120,9 +119,10 @@ public class KeyStoreAuthenticationPlugin {
 		return identity;
 	}
 
-	void cancelHandshake(IdentityToken iToken) {
-		CountDownLatch latch = handshakeLatches.remove(iToken);
-		latch.countDown(); // TODO: Is this correct way of canceling handshake
+	private void cancelHandshake(ParticipantData participantData) {
+		logger.debug("Canceling authentication handshake protocol for {}", participantData.getGuidPrefix());
+		authDataMap.remove(participantData.getGuidPrefix());
+		notifyListenersOfFailure(participantData);
 	}
 
 	public IdentityToken getIdentityToken() {
@@ -133,56 +133,35 @@ public class KeyStoreAuthenticationPlugin {
 	 * Begins a handshake protocol.
 	 * See 9.3.4.2 Protocol description
 	 * 
-	 * @param pd
-	 * @return
+	 * @param pd ParticipantData to authenticate
 	 */
-	public boolean beginHandshake(ParticipantData pd) {
+	public void beginHandshake(ParticipantData pd) {
 		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
 		
 		IdentityToken iToken = pd.getIdentityToken();
 		if (iToken != null) {
-			AuthenticationData authData = new AuthenticationData();
+			AuthenticationData authData = new AuthenticationData(pd);
 			authDataMap.put(pd.getGuidPrefix(), authData);
-			
-			CountDownLatch timeoutLatch = authData.getTimeoutLatch();
 			
 			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
 			if (comparison < 0) { // Remote is lexicographically greater
 				// VALIDATION_PENDING_HANDSHAKE_REQUEST
 				beginHandshakeRequest(iToken, pd.getGuid());
-				//return waitForAuthentication(timeoutLatch, pd.getGuidPrefix());				
 			}
 			else if (comparison > 0) {
-				logger.debug("Starting to wait for HandshakeRequestMessage");
-				//return waitForAuthentication(timeoutLatch, pd.getGuidPrefix());
+				logger.debug("Starting to wait for HandshakeRequestMessage from {}", pd.getGuidPrefix());
 			}
 			else {
 				logger.debug("Remote identity is the same as we are");
+				// TODO: how do we handle this. Who initiates the protocol?
 			}
 		}
 		else {
 			logger.debug("Failed to authenticate; No IdentityToken provided by {}", pd.getGuidPrefix());
 		}
-
-		return false;
 	}
 
-
-	private boolean waitForAuthentication(CountDownLatch timeoutLatch, GuidPrefix prefix) {
-		try {
-			boolean await = timeoutLatch.await(conf.getHandshakeTimeout(), TimeUnit.MILLISECONDS);
-			if (!await) {
-				logger.warn("Failed to authenticate {} within timeout of {}", prefix, conf.getHandshakeTimeout());
-			}
-			
-			return await;
-		} catch (InterruptedException e) {
-			logger.warn("Got interrupted while authenticating");
-			return false;
-		}
-	}
-
-
+	
 	private void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
 		byte[] challenge = createChallenge();
 		
@@ -231,13 +210,14 @@ public class KeyStoreAuthenticationPlugin {
 
 	private void doHandshake(MessageIdentity mi, HandshakeRequestMessageToken hReq,
 			Guid remoteTarget) {
-		logger.debug("doHandshake(request)");
+		logger.debug("doHandshake(request) from {}", mi.getSourceGuid());
 		X509Certificate certificate = hReq.getCertificate();
+		AuthenticationData authData = authDataMap.get(mi.getSourceGuid().getPrefix());
 		
 		try {
-			verify(certificate);			
-			AuthenticationData authData = new AuthenticationData(certificate);
-			authDataMap.put(mi.getSourceGuid().getPrefix(), authData);
+			verify(certificate);
+
+			authData.setCertificate(certificate);
 			
 			byte[] challenge = hReq.getChallenge();
 			authData.setRequestChallenge(challenge);
@@ -261,7 +241,8 @@ public class KeyStoreAuthenticationPlugin {
 		catch(CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException 
 				| NoSuchProviderException e) {
 			logger.warn("Failed to process handshake request message token");
-			// TODO: cancel handshake
+			
+			cancelHandshake(authData.getParticipantData());
 		}
 	}
 
@@ -269,8 +250,9 @@ public class KeyStoreAuthenticationPlugin {
 		logger.debug("doHandshake(reply)");
 
 		X509Certificate certificate = hRep.getCertificate();
+		AuthenticationData authData = authDataMap.get(sourceGuid.getPrefix());
+
 		try {
-			AuthenticationData authData = authDataMap.get(sourceGuid.getPrefix());
 			verify(certificate);
 			authData.setCertificate(certificate);
 			
@@ -279,6 +261,9 @@ public class KeyStoreAuthenticationPlugin {
 
 			byte[] sharedSecret = createSharedSecret();
 			byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
+
+			//encryptedSharedSecret[0] = 0x1b; // Causes handshake to fail (for testing purposes)
+			
 			byte[] challenge = hRep.getChallenge();
 			authData.setReplyChallenge(challenge);
 
@@ -295,40 +280,43 @@ public class KeyStoreAuthenticationPlugin {
 
 			authData.setSharedSecret(sharedSecret);
 			
-			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
-			
 			logger.debug("Sending handshake final message");
 			statelessWriter.write(psm);
+
+			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
+			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException | NoSuchAlgorithmException | SignatureException 
 				| CertificateException | NoSuchProviderException e) {
 			logger.warn("Failed to process handshake reply message token", e);
-			// TODO: cancel handshake
+
+			cancelHandshake(authData.getParticipantData());
 		}
 	}
 
-
+	
 	private void doHandshake(MessageIdentity mi, HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
 
 		AuthenticationData authData = authDataMap.get(mi.getSourceGuid().getPrefix());
 		X509Certificate cert = authData.getCertificate();
-		if (cert == null) {
-			logger.warn("Could not find certificate for {}", mi.getSourceGuid());
-			// TODO: cancel handshake
-		}
 
 		byte[] signedData = hFin.getSignedData();
 		try {
 			verify(signedData, cert.getPublicKey());
-			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();
+			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();			
+
+			//encryptedSharedSecret[0] = 0x1b; // Causes handshake to fail (for testing purposes)
+			
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
 			
 			authData.setSharedSecret(sharedSecret);
 			logger.info("Authenticated {} succesfully", authData.getCertificate().getSubjectDN());
+			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
-			// TODO: cancel handshake
+			
+			cancelHandshake(authData.getParticipantData());
 		}
 	}
 
@@ -353,11 +341,12 @@ public class KeyStoreAuthenticationPlugin {
 	}
 
 	private void verify(X509Certificate certificate) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
+		logger.debug("Verifying {} is signed by {}", certificate.getSubjectDN(), conf.getSecurityCA());
 		certificate.verify(ca.getPublicKey());
 	}
 
 	private byte[] hash(byte[] bytesToHash) throws NoSuchAlgorithmException {
-		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		MessageDigest md = MessageDigest.getInstance("SHA-256"); // TODO: hardcoded
 		return md.digest(bytesToHash);
 	}
 
@@ -387,7 +376,7 @@ public class KeyStoreAuthenticationPlugin {
 	
 
 	private byte[] createChallenge() {
-		String s = "CHALLENGE:" + new BigInteger(96, random);
+		String s = "CHALLENGE:" + new BigInteger(96, random); // TODO: hardcoded
 		return s.getBytes();
 	}
 
@@ -396,5 +385,24 @@ public class KeyStoreAuthenticationPlugin {
 		random.nextBytes(sharedSecret);
 
 		return sharedSecret;
+	}
+
+
+
+	private void notifyListenersOfSuccess(AuthenticationData authData) {
+		for (AuthenticationListener al : authListeners) {
+			al.authenticationSucceded(authData.getParticipantData());
+		}
+	}
+
+	private void notifyListenersOfFailure(ParticipantData participantData) {
+		for (AuthenticationListener al : authListeners) {
+			al.authenticationFailed(participantData);
+		}
+	}
+
+
+	public void addAuthenticationListener(AuthenticationListener aListener) {
+		authListeners.add(aListener);
 	}
 }

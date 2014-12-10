@@ -219,6 +219,7 @@ public class Participant {
 			} 
 			catch (Exception e) {
 				logger.warn("Failed to create AuthenticationService", e);
+				throw new SecurityException("Failed to verify local principal", e);
 			}
 		}
 
