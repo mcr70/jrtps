@@ -2,7 +2,7 @@ Security
 
  As of version 1.1, jRTPS provides basic support for 
  {{{http://www.omg.org/spec/DDS-SECURITY/}DDS security}} specification.
- Currently, only authentication part of the specification is supported.
+ Currently, only authentication part of the specification is implemented.
  
  If security is enabled, creation of Participant loads a certificate 
  from keystore to be used in authenticating with remote participants.
@@ -10,9 +10,12 @@ Security
  This allows the two participants to exchange encrypted messages with
  each other. Note, that jRTPS will not do encryption. Key exchange is 
  present only for the purposes of future development. If the authentication
- fails for any reason, udds Participant will not do any further communication
- with failing participant.
+ fails for any reason, udds Participant will not publish local entities
+ with failing participant. I.e. local participant will not send any data to
+ failing participant, but may receive data, if remote participant chooses
+ to do so. <NOTE: This behavior might change in the future>
  
- DDS Security specification defines also some other security related
- operations, like signing messages and permissions. None of these are
- implemented currently.
+ DDS security relies on both authenticating parties having signed by 
+ the same certificate authority. DDS Security specification defines also some 
+ other security related operations, like signing messages and permissions. 
+ None of these are implemented currently.

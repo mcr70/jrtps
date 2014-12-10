@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class KeyStoreAuthenticationPlugin {
+public class KeystoreAuthenticationPlugin {
 	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
 
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
@@ -76,7 +76,7 @@ public class KeyStoreAuthenticationPlugin {
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
 
 
-	public KeyStoreAuthenticationPlugin(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
+	public KeystoreAuthenticationPlugin(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
 		this.participant = p1;
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);

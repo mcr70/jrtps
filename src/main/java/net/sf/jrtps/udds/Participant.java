@@ -43,7 +43,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
-import net.sf.jrtps.udds.security.KeyStoreAuthenticationPlugin;
+import net.sf.jrtps.udds.security.KeystoreAuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessageMarshaller;
 import net.sf.jrtps.util.Watchdog;
@@ -109,7 +109,7 @@ public class Participant {
 
 	//private QualityOfService participantQos;
 
-	private KeyStoreAuthenticationPlugin authenticationService = null;
+	private KeystoreAuthenticationPlugin authenticationService = null;
 
 	{
 		spdpQoS = QualityOfService.getSPDPQualityOfService(); 
@@ -214,7 +214,7 @@ public class Participant {
 		if (config.isSecurityEnabled()) {
 			createSecurityEndpoints();
 			try {
-				authenticationService = new KeyStoreAuthenticationPlugin(this, config, guid);
+				authenticationService = new KeystoreAuthenticationPlugin(this, config, guid);
 				logger.debug("Created authePlugin");
 			} 
 			catch (Exception e) {
@@ -979,7 +979,7 @@ public class Participant {
 	}
 
 
-	KeyStoreAuthenticationPlugin getAuthenticationService() {
+	KeystoreAuthenticationPlugin getAuthenticationService() {
 		return authenticationService;
 	}
 }

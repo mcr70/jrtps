@@ -7,6 +7,12 @@ import net.sf.jrtps.message.CDREncapsulation;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * ParticipantStatelessMessageMarshaller is used during authentication to marshall/unmarshall
+ * <i>ParticipantStatelessMessage</i>s
+ * 
+ * @author mcr70
+ */
 public class ParticipantStatelessMessageMarshaller implements Marshaller<ParticipantStatelessMessage> {
 
 	@Override

@@ -2,7 +2,7 @@ package net.sf.jrtps.udds.security;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class Property {
+class Property {
     private String name;
     private String value;
 

@@ -11,7 +11,7 @@
 
     <groupId>net.sf.jrtps</groupId>
     <artifactId>jrtps</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>jRTPS</name>
@@ -30,12 +30,13 @@
             <version>${slf4j-version}</version>
         </dependency>
 
+<!-- This dependency has precompiled JAXB classes for security XML files of DDS security spec. 
         <dependency>
             <groupId>org.omg.dds.security</groupId>
             <artifactId>dds-security-xml</artifactId>
             <version>${org.omg.dds.security.version}</version>
         </dependency>
-
+ -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>

@@ -5,7 +5,7 @@ package net.sf.jrtps.udds.security;
  *
  * @author mcr70
  */
-public class ParticipantSecurityAttributes {
+class ParticipantSecurityAttributes {
     private boolean allowUnauthenticatedParticipants = true;
     private boolean isAccessProtected = false;
     private boolean isRtpsProtected = false;
