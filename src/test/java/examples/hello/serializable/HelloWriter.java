@@ -1,16 +1,14 @@
 package examples.hello.serializable;
 
-import java.net.SocketException;
-
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosPartition;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
 
 public class HelloWriter {
-    public static void main(String[] args) throws InstantiationException, IllegalAccessException, SocketException,
-            InterruptedException {
-        Participant p = new Participant(0); // domain 0, participant 2
+    public static void main(String[] args) throws Exception {
+        Participant p = new Participant(0, -1, null, new Configuration("/jrtps2.properties")); // domain 0, participant 2
         
         QualityOfService qos = new QualityOfService();
         qos.setPolicy(new QosPartition(new String[]{"partition-1"}));

@@ -1,0 +1,22 @@
+# Create CA
+keytool -alias jrtpsCA -dname CN=jrtpsCA -genkeypair -keystore jrtps.jks
+keytool -alias jrtpsCA -dname CN=jrtpsCA -genkey -keyalg rsa -keystore jrtps.jks
+
+# Create test01
+keytool -alias jrtps01 -dname CN=jrtps01 -genkeypair -keystore jrtps.jks
+keytool -alias jrtps01 -dname CN=jrtps01 -genkey -keyalg rsa -keystore jrtps.jks
+
+# Create certificate request
+keytool -alias jrtps01 -certreq -keystore jrtps.jks > jrtps01.csr
+
+# Sign CSR with CA
+keytool -alias jrtpsCA -gencert -ext san=dns:jrtps01 -infile jrtps01.csr -keystore jrtps.jks > jrtps01.cert
+
+# import signed certificate back to keystore
+keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
+
+
+# List certificate in keystore
+keytool -list -keystore jrtps.jks
+keytool -list -keystore jrtps.jks -alias jrtps-test01 -v
+

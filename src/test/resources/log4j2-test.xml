@@ -7,9 +7,21 @@
     </Appenders>
 
     <Loggers>
-        <Root level="WARN">
+        <Root level="INFO">
             <AppenderRef ref="STDOUT" />
         </Root>
+        
+        <Logger name="net.sf.jrtps.rtps" level="INFO" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
+
+        <Logger name="net.sf.jrtps.udds.UDDSReaderCache" level="INFO" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
+
+        <Logger name="dds.sec.auth" level="DEBUG" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
     </Loggers>
 
 </Configuration>
