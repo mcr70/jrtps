@@ -364,4 +364,33 @@ public class Configuration {
         return uriList;
     }
 
+
+    public boolean isSecurityEnabled() {
+        return getBooleanProperty("udds.security.enabled", false);
+    }
+
+    public String getKeystore() {
+        return props.getProperty("udds.security.keystore");
+    }
+
+    public String getKeystorePassword() {
+        return props.getProperty("udds.security.keystore.password");
+    }
+
+    public String getSecurityCA() {
+        return props.getProperty("udds.security.ca", "jrtpsCA"); 
+    }
+
+    public String getSecurityPrincipal() {
+        return props.getProperty("udds.security.principal"); 
+    }
+
+    public String getSecurityPrincipalPassword() {
+        return props.getProperty("udds.security.principal.password"); 
+    }
+
+    public long getHandshakeTimeout() {
+        return getIntProperty("udds.security.handshake.timeout", 2000);
+    }
+
 }

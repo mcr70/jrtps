@@ -11,7 +11,10 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  */
 public class Guid implements Comparable<Guid> {
-    private final GuidPrefix prefix;
+    public static final Guid GUID_UNKNOWN = 
+    		new Guid(GuidPrefix.GUIDPREFIX_UNKNOWN, EntityId.UNKNOWN_ENTITY);
+    
+	private final GuidPrefix prefix;
     private final EntityId entityId;
 
     public Guid(GuidPrefix prefix, EntityId entityId) {

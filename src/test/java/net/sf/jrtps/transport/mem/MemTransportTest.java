@@ -15,14 +15,14 @@ public class MemTransportTest {
         TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
         
         // Create a participant for reader
-        Participant p1 = new Participant(0, 0, null, null, cfg);
+        Participant p1 = new Participant(0, 0, null, cfg);
 
         DataReader<HelloMessage> dr = p1.createDataReader(HelloMessage.class);
         HelloListener hl = new HelloListener(); // implements DataListener
         dr.addSampleListener(hl);
         
         // Create a participant for writer
-        Participant p2 = new Participant(0, 0, null, null, new Configuration("/mem-test-2.properties"));
+        Participant p2 = new Participant(0, 0, null, new Configuration("/mem-test-2.properties"));
         DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class);
         
         int i = 0;
