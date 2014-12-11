@@ -1,11 +1,14 @@
-Security
+DDS Security
 
  As of version 1.1, jRTPS provides basic support for 
  {{{http://www.omg.org/spec/DDS-SECURITY/}DDS security}} specification.
  Currently, only authentication part of the specification is implemented.
+
+* Authentication
  
- If security is enabled, creation of Participant loads a certificate 
- from keystore to be used in authenticating with remote participants.
+ If security is {{{./configuration.html#udds.security.enabled}enabled}}, 
+ creation of Participant loads a certificate from keystore to be used in 
+ authenticating with remote participants.
  During authentication, a shared secret is exchanged with the participants.
  This allows the two participants to exchange encrypted messages with
  each other. Note, that jRTPS will not do encryption. Key exchange is 
@@ -19,3 +22,24 @@ Security
  the same certificate authority. DDS Security specification defines also some 
  other security related operations, like signing messages and permissions. 
  None of these are implemented currently.
+ 
+ Here is an example how one can create a self signed certificate authority (jrtpsCA),
+ and one test user (jrtps01), whose certificate is signed by CA.
+ 
++----
+# Create CA
+keytool -alias jrtpsCA -dname CN=jrtpsCA -genkey -keyalg rsa -keystore jrtps.jks
+
+# Create jrtps01
+keytool -alias jrtps01 -dname CN=jrtps01 -genkey -keyalg rsa -keystore jrtps.jks
+
+# Create certificate request
+keytool -alias jrtps01 -certreq -keystore jrtps.jks > jrtps01.csr
+
+# Sign CSR with CA
+keytool -alias jrtpsCA -gencert -ext san=dns:jrtps01 -infile jrtps01.csr -keystore jrtps.jks > jrtps01.cert
+
+# Import signed certificate back to keystore
+keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
++----
+
