@@ -19,10 +19,8 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.CountDownLatch;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -43,7 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * KeyStoreAuthenticationPlugin is an Authentication plugin as discussed in
+ * KeystoreAuthenticationPlugin is an Authentication plugin as discussed in
  * DDS Security specification. Chapter 9.3.3 <i>DDS:Auth:PKI-RSA/DSA-DH plugin behavior</i>
  * describes the plugin behavior.
  * 
@@ -51,15 +49,12 @@ import org.slf4j.LoggerFactory;
  */
 public class KeystoreAuthenticationPlugin {
 	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
-
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
 	
 	private final Set<AuthenticationListener> authListeners = new CopyOnWriteArraySet<>();
 	private HashMap<GuidPrefix, AuthenticationData> authDataMap = new HashMap<>();
 
 	SecureRandom random = new SecureRandom();
-	// Latches used to wait for remote participants
-	private final Map<IdentityToken, CountDownLatch> handshakeLatches = new HashMap<>();
 
 	private final KeyStore ks;
 	private final Certificate ca;
@@ -67,7 +62,6 @@ public class KeystoreAuthenticationPlugin {
 
 	private final Configuration conf;
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
-//	private final DataReader<ParticipantStatelessMessage> statelessReader;
 
 	private final LocalIdentity identity;
 	private final Participant participant;
@@ -76,12 +70,12 @@ public class KeystoreAuthenticationPlugin {
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
 
 
-	public KeystoreAuthenticationPlugin(Participant p1, Configuration conf, Guid originalGuid) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
-		this.participant = p1;
+	public KeystoreAuthenticationPlugin(Participant participant, Configuration conf) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
+		this.participant = participant;
 		this.statelessWriter = 
-				(DataWriter<ParticipantStatelessMessage>) p1.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
+				(DataWriter<ParticipantStatelessMessage>) participant.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
 		
-		DataReader<ParticipantStatelessMessage> statelessReader = (DataReader<ParticipantStatelessMessage>) p1.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
+		DataReader<ParticipantStatelessMessage> statelessReader = (DataReader<ParticipantStatelessMessage>) participant.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
 		statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant, this));
 		
 		this.conf = conf;
@@ -109,22 +103,23 @@ public class KeystoreAuthenticationPlugin {
 
 		Key privateKey = ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray());
 		IdentityCredential identityCreadential = new IdentityCredential(cert, privateKey);
-		this.identity = new LocalIdentity(originalGuid, identityCreadential);
+		this.identity = new LocalIdentity(participant.getGuid(), identityCreadential);
 
 		logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
 	}
 
-
-	LocalIdentity getLocalIdentity() {
-		return identity;
+	/**
+	 * Adds an AuthenticationListener.
+	 * @param aListener
+	 */
+	public void addAuthenticationListener(AuthenticationListener aListener) {
+		authListeners.add(aListener);
 	}
 
-	private void cancelHandshake(ParticipantData participantData) {
-		logger.debug("Canceling authentication handshake protocol for {}", participantData.getGuidPrefix());
-		authDataMap.remove(participantData.getGuidPrefix());
-		notifyListenersOfFailure(participantData);
-	}
-
+	/**
+	 * Gets IdentityToken
+	 * @return identityToken
+	 */
 	public IdentityToken getIdentityToken() {
 		return getLocalIdentity().getIdentityToken();
 	}
@@ -134,6 +129,7 @@ public class KeystoreAuthenticationPlugin {
 	 * See 9.3.4.2 Protocol description
 	 * 
 	 * @param pd ParticipantData to authenticate
+	 * @see net.sf.jrtps.udds.BuiltinParticipantDataListener#onSamples(java.util.List)
 	 */
 	public void beginHandshake(ParticipantData pd) {
 		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
@@ -161,7 +157,12 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
-	
+	/**
+	 * Creates and sends HandshakeRequestMessage to remote participant
+	 * 
+	 * @param remoteIdentity
+	 * @param remoteGuid
+	 */
 	private void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
 		byte[] challenge = createChallenge();
 		
@@ -181,7 +182,13 @@ public class KeystoreAuthenticationPlugin {
 	}
 
 
-
+	/**
+	 * Called by ParticipantStatelessMessageListener on reception of
+	 * ParticipantStatelessMessage
+	 * 
+	 * @param psm
+	 * @see ParticipantStatelessMessageListener#onSamples(java.util.List)
+	 */
 	void doHandshake(ParticipantStatelessMessage psm) {
 		if (psm.message_data != null && psm.message_data.length > 0) {
 			String classId = psm.message_data[0].class_id;
@@ -207,7 +214,9 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
-
+	/**
+	 * Called on the reception of handshake request message.
+	 */
 	private void doHandshake(MessageIdentity mi, HandshakeRequestMessageToken hReq,
 			Guid remoteTarget) {
 		logger.debug("doHandshake(request) from {}", mi.getSourceGuid());
@@ -246,6 +255,9 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
+	/**
+	 * Called on reception of handshake reply message
+	 */
 	private void doHandshake(Guid sourceGuid, MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
 		logger.debug("doHandshake(reply)");
 
@@ -294,7 +306,9 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
-	
+	/**
+	 * Called on reception of handshake final message
+	 */
 	private void doHandshake(MessageIdentity mi, HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
 
@@ -320,7 +334,9 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
-
+	/**
+	 * Signs given byte array with private key of local identity.
+	 */
 	private byte[] sign(byte[] bytesToSign) throws InvalidKeyException, SignatureException {
 		byte[] signatureBytes = null;
 
@@ -333,6 +349,9 @@ public class KeystoreAuthenticationPlugin {
 		return signatureBytes;
 	}
 
+	/**
+	 * Verifies that given byte array is signed by given public key.
+	 */
 	private boolean verify(byte[] signedBytes, PublicKey publicKey) throws InvalidKeyException, SignatureException {
 		synchronized(signature) {
 			signature.initVerify(publicKey);
@@ -340,16 +359,25 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
+	/**
+	 * Verifies that given certificate is signed by CA used.
+	 */
 	private void verify(X509Certificate certificate) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
 		logger.debug("Verifying {} is signed by {}", certificate.getSubjectDN(), conf.getSecurityCA());
 		certificate.verify(ca.getPublicKey());
 	}
 
+	/**
+	 * returns SHA-256 hash of the input bytes.  
+	 */
 	private byte[] hash(byte[] bytesToHash) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance("SHA-256"); // TODO: hardcoded
 		return md.digest(bytesToHash);
 	}
 
+	/**
+	 * encrypts given bytes with given public key.
+	 */
 	private byte[] encrypt(PublicKey publicKey, byte[] bytesToEncrypt) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		synchronized (cipher) {
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
@@ -357,6 +385,9 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
+	/**
+	 * decrypts given bytes with private key of local identity.
+	 */
 	private byte[] decrypt(byte[] bytesToDecrypt) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
 		synchronized (cipher) {
 			cipher.init(Cipher.DECRYPT_MODE, identity.getIdentityCredential().getPrivateKey());
@@ -401,8 +432,13 @@ public class KeystoreAuthenticationPlugin {
 		}
 	}
 
+	private LocalIdentity getLocalIdentity() {
+		return identity;
+	}
 
-	public void addAuthenticationListener(AuthenticationListener aListener) {
-		authListeners.add(aListener);
+	private void cancelHandshake(ParticipantData participantData) {
+		logger.debug("Canceling authentication handshake protocol for {}", participantData.getGuidPrefix());
+		authDataMap.remove(participantData.getGuidPrefix());
+		notifyListenersOfFailure(participantData);
 	}
 }

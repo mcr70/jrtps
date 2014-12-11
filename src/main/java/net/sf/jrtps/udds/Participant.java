@@ -214,7 +214,7 @@ public class Participant {
 		if (config.isSecurityEnabled()) {
 			createSecurityEndpoints();
 			try {
-				authenticationService = new KeystoreAuthenticationPlugin(this, config, guid);
+				authenticationService = new KeystoreAuthenticationPlugin(this, config);
 				logger.debug("Created authePlugin");
 			} 
 			catch (Exception e) {
