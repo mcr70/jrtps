@@ -9,26 +9,16 @@ import javax.xml.bind.DatatypeConverter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * See 9.3.2.3.1 HandshakeRequestMessageToken objects
  * 
  * @author mcr70
  */
 class HandshakeRequestMessageToken extends DataHolder {
-	private static final Logger logger = LoggerFactory.getLogger(HandshakeRequestMessageToken.class);
-
 	static final String DDS_AUTH_CHALLENGEREQ_DSA_DH = "DDS:Auth:ChallengeReq:DSA-DH";
 	static final String DDS_AUTH_CHALLENGEREQ_PKI_RSA = "DDS:Auth:ChallengeReq:PKI-RSA";
 
 	private X509Certificate certificate;
-
-//	public HandshakeRequestMessageToken(Guid myGuid, Guid destGuid,
-//			IdentityCredential iCred, PermissionsCredential pCred) {
-//		this(myGuid, destGuid, DDS_AUTH_CHALLENGEREQ_DSA_DH, iCred, pCred);
-//	}
 
 	HandshakeRequestMessageToken(IdentityCredential iCred, byte[] challenge) {
 		
@@ -36,12 +26,6 @@ class HandshakeRequestMessageToken extends DataHolder {
 		super.string_properties = new Property[1];
 		super.string_properties[0] = new Property("dds.sec.identity", iCred.getPEMEncodedCertificate());
 
-//		String permissions = "";
-//		if (pCred != null) {
-//			// TODO: This is not the proper way of handling this.			
-//			permissions = new String(pCred.getBinaryValue1());
-//		}
-		
 		// TODO: dds.sec.permissions is not implemented
 		//super.string_properties[1] = new Property("dds.sec.permissions", permissions);
 		
