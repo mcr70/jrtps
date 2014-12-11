@@ -2,18 +2,12 @@ package net.sf.jrtps.udds.security;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * See 9.3.2.3.3 HandshakeFinalMessageToken objects
  * 
  * @author mcr70
  */
-class HandshakeFinalMessageToken extends DataHolder {
-	private static final Logger logger = LoggerFactory.getLogger(HandshakeFinalMessageToken.class);
-	private static volatile long seqNum = 0;
-	
+class HandshakeFinalMessageToken extends DataHolder {	
     static final String DDS_AUTH_CHALLENGEFIN_DSA_DH = "DDS:Auth:ChallengeFin:DSA-DH";
     static final String DDS_AUTH_CHALLENGEFIN_PKI_RSA = "DDS:Auth:ChallengeFin:PKI-RSA";
     
