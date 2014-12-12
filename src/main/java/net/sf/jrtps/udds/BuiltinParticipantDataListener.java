@@ -15,7 +15,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.udds.security.AuthenticationListener;
-import net.sf.jrtps.udds.security.KeystoreAuthenticationPlugin;
+import net.sf.jrtps.udds.security.AuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 
 import org.slf4j.Logger;
@@ -33,12 +33,12 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
     private static final Logger logger = LoggerFactory.getLogger(BuiltinParticipantDataListener.class);
     
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
-    private final KeystoreAuthenticationPlugin authPlugin;
+    private final AuthenticationPlugin authPlugin;
 
     BuiltinParticipantDataListener(Participant p, Map<GuidPrefix, ParticipantData> discoveredParticipants) {
         super(p);
         this.discoveredParticipants = discoveredParticipants;
-        authPlugin = p.getAuthenticationService();
+        authPlugin = p.getAuthenticationPlugin();
         authPlugin.addAuthenticationListener(this);
     }
 
@@ -65,7 +65,7 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
                         //       to authenticationListener, if security is enabled.
 
                         // First, add matched writers for builtin readers
-                        handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
+                        //handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
                         
                         // Then, make sure remote participant knows about us.
                         DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
@@ -81,6 +81,7 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
                         else {    // No authentication            
                         	participant.waitFor(participant.getConfiguration().getSEDPDelay());
                         
+                        	handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
                         	// Then, add matched readers for builtin writers, 
                         	// and announce our builtin endpoints
                         	handleBuiltinWriters(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
@@ -202,9 +203,10 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
 
 	@Override
 	public void authenticationSucceded(ParticipantData pd) {
-		logger.debug("Authentication of {} succeeded", pd);
+		logger.debug("Authentication of {} succeeded", pd.getGuidPrefix());
 		participant.waitFor(participant.getConfiguration().getSEDPDelay());
     	
+		handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
 		// Once we are authenticated, match our builtin writers with remote
 		// counterparts. This also announces our custom entities to remote
 		// participant.

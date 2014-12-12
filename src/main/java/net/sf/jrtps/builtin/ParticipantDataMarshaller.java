@@ -8,16 +8,13 @@ import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.BuiltinEndpointSet;
 import net.sf.jrtps.message.parameter.DefaultMulticastLocator;
 import net.sf.jrtps.message.parameter.DefaultUnicastLocator;
-import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.MetatrafficMulticastLocator;
 import net.sf.jrtps.message.parameter.MetatrafficUnicastLocator;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantBuiltinEndpoints;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
-import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.Sentinel;
-import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Locator;
 
 /**
