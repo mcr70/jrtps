@@ -60,32 +60,15 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
 
                         fireParticipantDetected(pd);
 
-                        // TODO: Having matching here allows remote writers to match
-                        //       without authentication. Consider moving following line
-                        //       to authenticationListener, if security is enabled.
-
-                        // First, add matched writers for builtin readers
-                        //handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
-                        
-                        // Then, make sure remote participant knows about us.
+                        // First, make sure remote participant knows about us.
                         DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
                         SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
                                 ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
                                         EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());                        
                         pw.addMatchedReader(rd);
 
-                        if (authPlugin != null) {
-                        	addMatchedEntitiesForAuth(pd);                        	
-                        	authPlugin.beginHandshake(pd);
-                        }
-                        else {    // No authentication            
-                        	participant.waitFor(participant.getConfiguration().getSEDPDelay());
-                        
-                        	handleBuiltinReaders(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
-                        	// Then, add matched readers for builtin writers, 
-                        	// and announce our builtin endpoints
-                        	handleBuiltinWriters(pd.getGuidPrefix(), pd.getBuiltinEndpoints());
-                        }
+                        addMatchedEntitiesForAuth(pd);                        	
+                        authPlugin.beginHandshake(pd);
                     }
                 }
                 else {
