@@ -75,20 +75,20 @@ public class CustomDataWriter<T> extends DataWriter<T> {
  this purpose, one needs to register one. This is how it is done with <MemProvider>,
  which extends a <TransportProvider>
  
-+----------- 
- Configuration cfg = new Configuration("/mem-test-1.properties");
- MemProvider mp = new MemProvider(cfg);
- TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
-+----------- 
++---
+   Configuration cfg = new Configuration("/mem-test-1.properties");
+   MemProvider mp = new MemProvider(cfg);
+   TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
++---
  
  Note, that UDP Transport provider is automatically registered the same way,
  so it is always accessible for Participant(and for configuration files).
  The code above would allow to use these configuration options in configuration file:
  
 +----------- 
- jrtps.listener-uris = mem://10.10.10.11:1234
- jrtps.discovery.listener-uris = mem://10.10.10.11:1024
- jrtps.discovery.announce-uris = mem://10.10.10.12:1024
+jrtps.listener-uris = mem://10.10.10.11:1234
+jrtps.discovery.listener-uris = mem://10.10.10.11:1024
+jrtps.discovery.announce-uris = mem://10.10.10.12:1024
 +----------- 
 
  
@@ -96,3 +96,28 @@ public class CustomDataWriter<T> extends DataWriter<T> {
   methods might need some fine tuning. There is some conceptual overlapping between
   creation of communication objects and creation of URIs for the same things.>
 
+
+* PluginFactory
+
+ {{{./apidocs/net/sf/jrtps/udds/security/PluginFactory.html}PluginFactory}}
+ is used to provide different authentication mechanisms. jRTPS has two predefined
+ PluginFactorys available, <no-op> and <jks>, which are automatically registered 
+ during startup.
+ 
+ Configuration parameter {{{./configuration.html#udds.security.plugin-factory}udds.security.plugin-factory}} 
+ is used to indicate which plugin factory to use.
+ 
+ Currently, plugin factory is used to create authentication plugins. To create
+ a custom AuthenticationPlugin, for example password based, one needs to register
+ a new PluginFactory before instantiating Participant:
+ 
++---
+   PluginFactory.registerAuthenticationPlugin("custom", new CustomPluginFactory());
++---
+ 
+ The code above would allow this configuration to be used in jrtps.properties:
+ 
++---
+udds.security.plugin-factory = custom
++--- 
+ 

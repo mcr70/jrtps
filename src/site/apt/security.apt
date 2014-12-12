@@ -6,7 +6,7 @@ DDS Security
 
 * Authentication
  
- If security is {{{./configuration.html#udds.security.enabled}enabled}}, 
+ If security is enabled with {{{./configuration.html#udds.security.plugin-factory}jks plugin factory}}, 
  creation of Participant loads a certificate from keystore to be used in 
  authenticating with remote participants.
  During authentication, a shared secret is exchanged with the participants.
