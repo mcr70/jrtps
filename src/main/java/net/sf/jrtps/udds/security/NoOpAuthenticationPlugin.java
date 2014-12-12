@@ -8,7 +8,7 @@ import net.sf.jrtps.message.parameter.IdentityToken;
  * 
  * @author mcr70
  */
-class NoOpAuthenticationPlugin extends AuthenticationPlugin {
+public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 
 	@Override
 	public void beginHandshake(ParticipantData pd) {
