@@ -16,6 +16,7 @@ import net.sf.jrtps.message.InfoReplyIp4;
 import net.sf.jrtps.message.InfoSource;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
+import net.sf.jrtps.message.SecureSubMessage;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
@@ -190,6 +191,13 @@ class RTPSMessageReceiver implements Runnable {
 
                 handleGap(sourceGuidPrefix, (Gap) subMsg);
                 break;
+            case SECURESUBMSG:
+                if (!destinationThisParticipant) {
+                    continue;
+                }
+
+                handleSecureSubMessage((SecureSubMessage)subMsg);
+                break;
             default:
                 logger.warn("SubMessage not handled: {}", subMsg);
             }
@@ -202,7 +210,7 @@ class RTPSMessageReceiver implements Runnable {
     }
 
 
-    private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
+	private void handleAckNack(GuidPrefix sourceGuidPrefix, AckNack ackNack) {
         RTPSWriter<?> writer = participant.getWriter(ackNack.getWriterId(), sourceGuidPrefix, ackNack.getReaderId());
 
         if (writer != null) {
@@ -226,6 +234,31 @@ class RTPSMessageReceiver implements Runnable {
             logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
         }
     }
+
+    private void handleSecureSubMessage(SecureSubMessage subMsg) {
+    	// TODO: implement SecureSubMessage handling
+    	if (subMsg.singleSubMessageFlag()) { // contains one submessage
+    		SubMessage sm = extractSubMessage(subMsg);
+    		// TODO: handleSubMessage(sm);
+    	}
+    	else { // contains an RTPS Message
+    		Message m = extractMessage(subMsg);
+    		handleMessage(m);
+    	}
+    	
+    	logger.warn("SecureSubMessage is not implemented. Ignoring it.");
+    }
+
+	private SubMessage extractSubMessage(SecureSubMessage subMsg) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	private Message extractMessage(SecureSubMessage subMsg) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 
     void ignoreParticipant(GuidPrefix prefix) {
         ignoredParticipants.add(prefix);

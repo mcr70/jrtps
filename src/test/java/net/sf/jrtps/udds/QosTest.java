@@ -23,6 +23,7 @@ import net.sf.jrtps.util.Watchdog;
 
 import org.junit.Test;
 
+@SuppressWarnings({ "unchecked", "rawtypes" })
 public class QosTest {
     @Test
     public void testQosPartition() {
@@ -51,6 +52,7 @@ public class QosTest {
         assertTrue(p1.isCompatible(p2));
         assertTrue(p2.isCompatible(p1));
     }
+    
     @Test
     public void testTimeBasedFilter() {
         final int DURATION = 100;

@@ -7,9 +7,13 @@
     </Appenders>
 
     <Loggers>
-        <Root level="WARN">
+        <Root level="INFO">
             <AppenderRef ref="STDOUT" />
         </Root>
+        
+        <Logger name="dds.sec.auth" level="INFO" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
     </Loggers>
 
 </Configuration>

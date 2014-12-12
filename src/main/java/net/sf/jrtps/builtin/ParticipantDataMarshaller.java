@@ -14,9 +14,7 @@ import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.ParticipantBuiltinEndpoints;
 import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.ParticipantLeaseDuration;
-import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.Sentinel;
-import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.types.Locator;
 
 /**
@@ -50,9 +48,9 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
     public DataEncapsulation marshall(ParticipantData pd) {
         ParameterList payloadParams = new ParameterList();
 
-        payloadParams.add(new ProtocolVersion(pd.getProtocolVersion()));
+        payloadParams.add(pd.getProtocolVersion());
         payloadParams.add(new ParticipantGuid(pd.getGuid()));
-        payloadParams.add(new VendorId(pd.getVendorId()));
+        payloadParams.add(pd.getVendorId());
 
         payloadParams.add(new ParticipantBuiltinEndpoints(pd.getBuiltinEndpoints()));
         payloadParams.add(new BuiltinEndpointSet(pd.getBuiltinEndpoints()));
@@ -82,9 +80,16 @@ public class ParticipantDataMarshaller implements Marshaller<ParticipantData> {
             }
         }
 
-        payloadParams.add(pd.getUserData());
-        
+        payloadParams.add(pd.getUserData());        
         payloadParams.add(new ParticipantLeaseDuration(pd.getLeaseDuration()));
+        
+        if (pd.getIdentityToken() != null) {
+        	payloadParams.add(pd.getIdentityToken());
+        }
+        if (pd.getPermissionsToken() != null) {
+        	payloadParams.add(pd.getPermissionsToken());
+        }
+        
         payloadParams.add(new Sentinel());
 
         return new ParameterListEncapsulation(payloadParams);
