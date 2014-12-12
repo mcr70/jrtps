@@ -18,6 +18,12 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 public class GuidPrefix {
     public static final GuidPrefix GUIDPREFIX_UNKNOWN = new GuidPrefix(
             new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 });
+    /**
+     * GuidPrefix used with SecureSubMessage
+     */
+    public static final GuidPrefix GUIDPREFIX_SECURED = new GuidPrefix(
+            new byte[] { (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, 
+            		(byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff, (byte)0xff });
 
     /**
      * bytes must be of length 12

@@ -25,23 +25,23 @@ import examples.hello.serializable.HelloMessage;
 public class AbstractQosTest {
     static final long LATCH_WAIT_MILLIS = 2000;
     
-    static Configuration cfg1 = new Configuration("/mem-test-1.properties");
-    static Configuration cfg2 = new Configuration("/mem-test-2.properties");
+    protected static Configuration cfg1 = new Configuration("/mem-test-1.properties");
+    protected static Configuration cfg2 = new Configuration("/mem-test-2.properties");
 
     static {
         MemProvider mp = new MemProvider(cfg1);
         TransportProvider.registerTransportProvider("mem", mp, MemProvider.LOCATOR_KIND_MEM);
     }
 
-    Participant p1;
-    Participant p2;
+    protected Participant p1;
+    protected Participant p2;
 
     @Before
     public void init() {
         EntityFactory ef = new TEntityFactory();
         // Create two participants; one reader, one for writer
-        p1 = new Participant(0,0, null, ef, cfg1);
-        p2 = new Participant(0,0, null, ef, cfg2);
+        p1 = new Participant(0,0, ef, cfg1);
+        p2 = new Participant(0,0, ef, cfg2);
     }
 
     @After 
@@ -103,7 +103,7 @@ public class AbstractQosTest {
     
     void waitFor(long millis) {
         try {
-            Thread.currentThread().sleep(millis);
+            Thread.sleep(millis);
         } catch (InterruptedException e) {
             Assert.fail("interrupted");
         }

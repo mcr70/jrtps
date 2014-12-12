@@ -177,6 +177,27 @@ public class Configuration {
     }
 
     /**
+     * Gets a property with given key.
+     * 
+     * @param key key of the property
+     * @param deflt default value used
+     * @return value with given key, or default value given if key did not exist.
+     */
+    public String getProperty(String key, String deflt) {
+    	return props.getProperty(key, deflt);
+    }
+    
+    /**
+     * Gets a property with given key.
+     * 
+     * @param key key of the property
+     * @return value with given key, or null if key did not exist.
+     */
+    public String getProperty(String key) {
+    	return props.getProperty(key);
+    }
+
+    /**
      * Gets a named boolean property from configuration.
      * 
      * @param key Key of the property
@@ -363,5 +384,10 @@ public class Configuration {
         
         return uriList;
     }
+
+
+	public String getPluginFactoryName() {
+        return props.getProperty("udds.security.plugin-factory", "no-op"); 
+	}
 
 }

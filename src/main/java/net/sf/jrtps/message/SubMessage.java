@@ -15,7 +15,10 @@ public abstract class SubMessage {
      * Different kinds of SubMessages
      */
     public enum Kind {
-        PAD, ACKNACK, HEARTBEAT, GAP, INFOTIMESTAMP, INFOSOURCE, INFOREPLYIP4, INFODESTINATION, INFOREPLY, NACKFRAG, HEARTBEATFRAG, DATA, DATAFRAG, UNKNOWN
+        PAD, ACKNACK, HEARTBEAT, GAP, 
+        INFOTIMESTAMP, INFOSOURCE, INFOREPLYIP4, INFODESTINATION, INFOREPLY, 
+        NACKFRAG, HEARTBEATFRAG, DATA, DATAFRAG, 
+        SECURESUBMSG, UNKNOWN
     }
 
     /**
@@ -69,6 +72,8 @@ public abstract class SubMessage {
             return Kind.DATA;
         case 0x16:
             return Kind.DATAFRAG;
+        case 0x30:
+            return Kind.SECURESUBMSG;
         default:
             return Kind.UNKNOWN;
         }

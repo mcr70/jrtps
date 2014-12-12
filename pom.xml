@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -10,7 +11,7 @@
 
     <groupId>net.sf.jrtps</groupId>
     <artifactId>jrtps</artifactId>
-    <version>1.0.2-SNAPSHOT</version>
+    <version>1.1-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>jRTPS</name>
@@ -18,6 +19,8 @@
 
     <properties>
         <slf4j-version>1.7.6</slf4j-version>
+        <log4j-version>2.1</log4j-version>
+        <org.omg.dds.security.version>1.0-Beta1</org.omg.dds.security.version>
     </properties>
 
     <dependencies>
@@ -27,24 +30,27 @@
             <version>${slf4j-version}</version>
         </dependency>
 
+<!-- This dependency has precompiled JAXB classes for security XML files of DDS security spec. 
+        <dependency>
+            <groupId>org.omg.dds.security</groupId>
+            <artifactId>dds-security-xml</artifactId>
+            <version>${org.omg.dds.security.version}</version>
+        </dependency>
+ -->
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-core</artifactId>
-            <version>2.0.2</version>
+            <version>${log4j-version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.logging.log4j</groupId>
             <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.0.2</version>
+            <version>${log4j-version}</version>
             <scope>test</scope>
         </dependency>
-<!--         <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.0.9</version>
-            <scope>test</scope>
-        </dependency> -->
+		<!-- <dependency> <groupId>ch.qos.logback</groupId> <artifactId>logback-classic</artifactId> 
+			<version>1.0.9</version> <scope>test</scope> </dependency> -->
 
         <dependency>
             <groupId>junit</groupId>
@@ -73,7 +79,7 @@
             <activation>
                 <activeByDefault>false</activeByDefault>
             </activation>
-            <!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
+			<!-- see http://maven.apache.org/plugins/maven-site-plugin/examples/site-deploy-to-sourceforge.net.html -->
             <distributionManagement>
                 <site>
                     <id>jrtps.site.sf</id>

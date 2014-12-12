@@ -16,7 +16,7 @@ rtps.reader.heartbeat-response-delay = 500
 rtps.reader.heartbeat-suppression-duration = 0
 rtps.spdp.resend-data-period = 30000
 
-# ---  jRTPS configuration parameters  ------------------
+# ---  jRTPS configuration parameters  -----------------
 jrtps.thread-pool.core-size = 10
 jrtps.message-queue.size = 10
 jrtps.buffer-size = 16384
@@ -29,6 +29,15 @@ jrtps.discovery.announce-uris = udp://239.255.0.1
 # ---  uDDS configuration parameters  ------------------
 udds.collections.coherent=false
 udds.sedp-delay = 0
+
+# ---  uDDS security configuration  --------------------
+udds.security.plugin-factory = no-op
+
+udds.security.jks.keystore = <NO_DEFAULT>
+udds.security.jks.keystore.password = <NO_DEFAULT>
+udds.security.jks.ca = <NO_DEFAULT>
+udds.security.jks.principal = <NO_DEFAULT>
+udds.security.jks.principal.password = <NO_DEFAULT>
 +---
  
 * RTPS specific configuration
@@ -110,3 +119,35 @@ udds.sedp-delay = 0
   During discovery, when a ParticipantMessage (SPDP) is received, local participant will first send
   a ParticipantMessage (SPDP) to remote participant to make sure it knows about us, then waits
   <udds.sedp-delay> before starting to announce local endpoints (SEDP).
+  
+* uDDS security configuration
+  
+  * <<{udds.security.plugin-factory}>>
+  This parameter selects which plugin factory is used when creating participants.
+  jRTPS comes with two predefined plugin factories: <no-op> and <jks>. <no-op>
+  plugin factory effectively disables DDS security. <jks> plugin factory is used 
+  to create an AuthenticationPlugin that loads its configuration from JKS keystore.
+
+  Following configuration parameters, that start with <udds.security.jks> prefix, are
+  used to configure jks plugin-factory.
+  
+  * <<{udds.security.jks.keystore}>>
+  Name of the keystore, that holds certificates of the CA and principal that is used to
+  authenticate with remote participant.
+  
+  * <<{udds.security.jks.keystore.password}>>
+  Password used to open keystore
+
+  * <<{udds.security.jks.ca}>>
+  Alias of the certificate authority, that has signed both local and remote principals 
+  certificates.
+   
+  * <<{udds.security.jks.principal}>>
+  Alias of the local principal, that is used in authentication.
+
+  * <<{udds.security.jks.principal.password}>>
+  Password of the private key of local principal. This is used to encrypt shared
+  secret that is exchanged with remote participant during authentication.
+  
+  
+  
