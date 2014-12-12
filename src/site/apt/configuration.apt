@@ -31,12 +31,13 @@ udds.collections.coherent=false
 udds.sedp-delay = 0
 
 # ---  uDDS security configuration  --------------------
-udds.security.enabled = false
-udds.security.keystore = <NO_DEFAULT>
-udds.security.keystore.password = <NO_DEFAULT>
-udds.security.ca = <NO_DEFAULT>
-udds.security.principal = <NO_DEFAULT>
-udds.security.principal.password = <NO_DEFAULT>
+udds.security.plugin-factory = no-op
+
+udds.security.jks.keystore = <NO_DEFAULT>
+udds.security.jks.keystore.password = <NO_DEFAULT>
+udds.security.jks.ca = <NO_DEFAULT>
+udds.security.jks.principal = <NO_DEFAULT>
+udds.security.jks.principal.password = <NO_DEFAULT>
 +---
  
 * RTPS specific configuration
@@ -121,27 +122,30 @@ udds.security.principal.password = <NO_DEFAULT>
   
 * uDDS security configuration
   
-  * <<{udds.security.enabled}>>
-  This parameter either enables or disables security features of uDDS. By enabling security,
-  remote participant is authenticated and communication towards remote can be started.
-  Note, that if remote participant fails to authenticate, it can still <send> data to local
-  Participant. 
+  * <<{udds.security.plugin-factory}>>
+  This parameter selects which plugin factory is used when creating participants.
+  jRTPS comes with two predefined plugin factories: <no-op> and <jks>. <no-op>
+  plugin factory effectively disables DDS security. <jks> plugin factory is used 
+  to create an AuthenticationPlugin that loads its configuration from JKS keystore.
 
-  * <<{udds.security.keystore}>>
+  Following configuration parameters, that start with <udds.security.jks> prefix, are
+  used to configure jks plugin-factory.
+  
+  * <<{udds.security.jks.keystore}>>
   Name of the keystore, that holds certificates of the CA and principal that is used to
   authenticate with remote participant.
   
-  * <<{udds.security.keystore.password}>>
+  * <<{udds.security.jks.keystore.password}>>
   Password used to open keystore
 
-  * <<{udds.security.ca}>>
+  * <<{udds.security.jks.ca}>>
   Alias of the certificate authority, that has signed both local and remote principals 
   certificates.
    
-  * <<{udds.security.principal}>>
+  * <<{udds.security.jks.principal}>>
   Alias of the local principal, that is used in authentication.
 
-  * <<{udds.security.principal.password}>>
+  * <<{udds.security.jks.principal.password}>>
   Password of the private key of local principal. This is used to encrypt shared
   secret that is exchanged with remote participant during authentication.
   
