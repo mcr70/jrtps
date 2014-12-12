@@ -8,7 +8,7 @@ import net.sf.jrtps.udds.Participant;
 
 public class HelloWriter {
     public static void main(String[] args) throws Exception {
-        Participant p = new Participant(0, -1, null, new Configuration("/jrtps2.properties"));
+        Participant p = new Participant(0, -1, null, new Configuration("/jrtps1.properties"));
         
         QualityOfService qos = new QualityOfService();
         qos.setPolicy(new QosPartition(new String[]{"partition-1"}));

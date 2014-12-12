@@ -13,10 +13,8 @@ DDS Security
  This allows the two participants to exchange encrypted messages with
  each other. Note, that jRTPS will not do encryption. Key exchange is 
  present only for the purposes of future development. If the authentication
- fails for any reason, udds Participant will not publish local entities
- with failing participant. I.e. local participant will not send any data to
- failing participant, but may receive data, if remote participant chooses
- to do so. <NOTE: This behavior might change in the future>
+ fails for any reason, udds Participant will not exchange other than discovery 
+ data with failing participant. 
  
  DDS security relies on both authenticating parties having signed by 
  the same certificate authority. DDS Security specification defines also some 
@@ -43,3 +41,5 @@ keytool -alias jrtpsCA -gencert -ext san=dns:jrtps01 -infile jrtps01.csr -keysto
 keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
 +----
 
+ See {{{./configuration.html#udds.security.plugin-factory}configuration}} section
+ on how to enable DDS security with keystore created above.

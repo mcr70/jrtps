@@ -146,8 +146,8 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 				logger.debug("Starting to wait for HandshakeRequestMessage from {}", pd.getGuidPrefix());
 			}
 			else {
-				logger.debug("Remote identity is the same as we are");
-				// TODO: how do we handle this. Who initiates the protocol?
+				logger.info("Remote identity is the same as we are; authentication succeeded");
+				notifyListenersOfSuccess(pd);
 			}
 		}
 		else {
