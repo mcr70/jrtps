@@ -177,6 +177,27 @@ public class Configuration {
     }
 
     /**
+     * Gets a property with given key.
+     * 
+     * @param key key of the property
+     * @param deflt default value used
+     * @return value with given key, or default value given if key did not exist.
+     */
+    public String getProperty(String key, String deflt) {
+    	return props.getProperty(key, deflt);
+    }
+    
+    /**
+     * Gets a property with given key.
+     * 
+     * @param key key of the property
+     * @return value with given key, or null if key did not exist.
+     */
+    public String getProperty(String key) {
+    	return props.getProperty(key);
+    }
+
+    /**
      * Gets a named boolean property from configuration.
      * 
      * @param key Key of the property
@@ -365,32 +386,8 @@ public class Configuration {
     }
 
 
-    public boolean isSecurityEnabled() {
-        return getBooleanProperty("udds.security.enabled", false);
-    }
-
-    public String getKeystore() {
-        return props.getProperty("udds.security.keystore");
-    }
-
-    public String getKeystorePassword() {
-        return props.getProperty("udds.security.keystore.password");
-    }
-
-    public String getSecurityCA() {
-        return props.getProperty("udds.security.ca"); 
-    }
-
-    public String getSecurityPrincipal() {
-        return props.getProperty("udds.security.principal"); 
-    }
-
-    public String getSecurityPrincipalPassword() {
-        return props.getProperty("udds.security.principal.password"); 
-    }
-
-    public long getHandshakeTimeout() {
-        return getIntProperty("udds.security.handshake.timeout", 2000);
-    }
+	public String getPluginFactoryName() {
+        return props.getProperty("udds.security.plugin-factory", "no-op"); 
+	}
 
 }

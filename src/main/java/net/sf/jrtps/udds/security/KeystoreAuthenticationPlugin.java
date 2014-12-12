@@ -19,8 +19,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -47,11 +45,17 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-public class KeystoreAuthenticationPlugin {
+public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
+	
+	public static final String JKS_KEYSTORE_KEY = "udds.security.jks.keystore";
+	public static final String JKS_KEYSTORE_PASSWORD_KEY = "udds.security.jks.keystore.password";
+	public static final String JKS_CA_KEY = "udds.security.jks.ca";
+	public static final String JKS_PRINCIPAL_KEY = "udds.security.jks.principal";
+	public static final String JKS_PRINCIPAL_PASSWORD_KEY = "udds.security.jks.principal.password";
+	
 	private static Logger logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
 	
-	private final Set<AuthenticationListener> authListeners = new CopyOnWriteArraySet<>();
 	private HashMap<GuidPrefix, AuthenticationData> authDataMap = new HashMap<>();
 
 	SecureRandom random = new SecureRandom();
@@ -64,14 +68,15 @@ public class KeystoreAuthenticationPlugin {
 	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
 
 	private final LocalIdentity identity;
-	private final Participant participant;
 	private final Cipher cipher;
 
 	private volatile long psmSequenceNumber = 1; // ParticipantStatelessMessage sequence number
 
+	private String caName;
 
+
+	@SuppressWarnings("unchecked")
 	public KeystoreAuthenticationPlugin(Participant participant, Configuration conf) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
-		this.participant = participant;
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) participant.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
 		
@@ -81,39 +86,32 @@ public class KeystoreAuthenticationPlugin {
 		this.conf = conf;
 		this.ks = KeyStore.getInstance("JKS");
 
-		InputStream is = getClass().getResourceAsStream("/jrtps.jks");
-		String pwd = conf.getKeystorePassword();
+		InputStream is = getClass().getResourceAsStream(conf.getProperty(JKS_KEYSTORE_KEY));
+		String pwd = conf.getProperty(JKS_KEYSTORE_PASSWORD_KEY);
 		ks.load(is, pwd.toCharArray());
 
 		cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // TODO: hardcoded
 
-		this.ca = ks.getCertificate(conf.getSecurityCA());
+		this.caName = conf.getProperty(JKS_CA_KEY);
+		this.ca = ks.getCertificate(caName);
 		if (ca == null) {
-			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityCA() + "'");
+			throw new KeyStoreException("Failed to get a certificate for alias '" + caName + "'");
 		}
 
-		String alias = conf.getSecurityPrincipal();
+		String alias = conf.getProperty(JKS_PRINCIPAL_KEY);
 
 		X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
 		if (cert == null) {
-			throw new KeyStoreException("Failed to get a certificate for alias '" + conf.getSecurityPrincipal() + "'");
+			throw new KeyStoreException("Failed to get a certificate for alias '" + alias + "'");
 		}
 
 		verify(cert);
 
-		Key privateKey = ks.getKey(alias, conf.getSecurityPrincipalPassword().toCharArray());
+		Key privateKey = ks.getKey(alias, conf.getProperty(JKS_PRINCIPAL_PASSWORD_KEY).toCharArray());
 		IdentityCredential identityCreadential = new IdentityCredential(cert, privateKey);
 		this.identity = new LocalIdentity(participant.getGuid(), identityCreadential);
 
-		logger.debug("Succesfully locally authenticated {}", conf.getSecurityPrincipal());
-	}
-
-	/**
-	 * Adds an AuthenticationListener.
-	 * @param aListener
-	 */
-	public void addAuthenticationListener(AuthenticationListener aListener) {
-		authListeners.add(aListener);
+		logger.debug("Succesfully locally authenticated {}", alias);
 	}
 
 	/**
@@ -296,7 +294,7 @@ public class KeystoreAuthenticationPlugin {
 			statelessWriter.write(psm);
 
 			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
-			notifyListenersOfSuccess(authData);
+			notifyListenersOfSuccess(authData.getParticipantData());
 		} catch (InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException | NoSuchAlgorithmException | SignatureException 
 				| CertificateException | NoSuchProviderException e) {
@@ -326,7 +324,7 @@ public class KeystoreAuthenticationPlugin {
 			
 			authData.setSharedSecret(sharedSecret);
 			logger.info("Authenticated {} succesfully", authData.getCertificate().getSubjectDN());
-			notifyListenersOfSuccess(authData);
+			notifyListenersOfSuccess(authData.getParticipantData());
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
 			
@@ -363,7 +361,7 @@ public class KeystoreAuthenticationPlugin {
 	 * Verifies that given certificate is signed by CA used.
 	 */
 	private void verify(X509Certificate certificate) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
-		logger.debug("Verifying {} is signed by {}", certificate.getSubjectDN(), conf.getSecurityCA());
+		logger.debug("Verifying {} is signed by {}", certificate.getSubjectDN(), caName);
 		certificate.verify(ca.getPublicKey());
 	}
 
@@ -420,17 +418,6 @@ public class KeystoreAuthenticationPlugin {
 
 
 
-	private void notifyListenersOfSuccess(AuthenticationData authData) {
-		for (AuthenticationListener al : authListeners) {
-			al.authenticationSucceded(authData.getParticipantData());
-		}
-	}
-
-	private void notifyListenersOfFailure(ParticipantData participantData) {
-		for (AuthenticationListener al : authListeners) {
-			al.authenticationFailed(participantData);
-		}
-	}
 
 	private LocalIdentity getLocalIdentity() {
 		return identity;

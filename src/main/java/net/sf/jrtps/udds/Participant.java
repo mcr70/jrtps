@@ -43,9 +43,11 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
-import net.sf.jrtps.udds.security.KeystoreAuthenticationPlugin;
+import net.sf.jrtps.udds.security.AuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessageMarshaller;
+import net.sf.jrtps.udds.security.PluginException;
+import net.sf.jrtps.udds.security.PluginFactory;
 import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
@@ -109,7 +111,7 @@ public class Participant {
 
 	//private QualityOfService participantQos;
 
-	private KeystoreAuthenticationPlugin authenticationService = null;
+	private AuthenticationPlugin authPlugin = null;
 
 	{
 		spdpQoS = QualityOfService.getSPDPQualityOfService(); 
@@ -207,20 +209,18 @@ public class Participant {
 				discoveredParticipants, config);
 
 		this.livelinessManager = new WriterLivelinessManager(this);
-
+		
 		registerBuiltinMarshallers();
 		createSPDPEntities();
-		
-		if (config.isSecurityEnabled()) {
-			createSecurityEndpoints();
-			try {
-				authenticationService = new KeystoreAuthenticationPlugin(this, config);
-				logger.debug("Created authePlugin");
-			} 
-			catch (Exception e) {
-				logger.warn("Failed to create AuthenticationService", e);
-				throw new SecurityException("Failed to verify local principal", e);
-			}
+
+		createSecurityEndpoints();
+		try {
+			PluginFactory pluginFactory = PluginFactory.getInstance(config.getPluginFactoryName());
+			authPlugin = pluginFactory.createAuthenticationPlugin(this, config);
+			logger.debug("Created AuthenticationPlugin with name {}", config.getPluginFactoryName());
+		} 
+		catch (PluginException e) {
+			throw new SecurityException("Failed to create AuthenticationPlugin", e);
 		}
 
 		discoveryLocators = rtps_participant.getDiscoveryLocators();
@@ -690,8 +690,8 @@ public class Participant {
 	private ParticipantData createSPDPParticipantData() {
 		int epSet = createEndpointSet();
 
-		if (authenticationService != null) {
-			IdentityToken iToken = authenticationService.getIdentityToken();
+		if (authPlugin != null) {
+			IdentityToken iToken = authPlugin.getIdentityToken();
 			return new ParticipantData(rtps_participant.getGuid().getPrefix(), epSet,
 					discoveryLocators, userdataLocators, 
 					iToken, null, spdpQoS); // TODO: PermissionsToken						
@@ -979,7 +979,7 @@ public class Participant {
 	}
 
 
-	KeystoreAuthenticationPlugin getAuthenticationService() {
-		return authenticationService;
+	AuthenticationPlugin getAuthenticationPlugin() {
+		return authPlugin;
 	}
 }
