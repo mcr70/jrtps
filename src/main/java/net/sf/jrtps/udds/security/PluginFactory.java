@@ -22,16 +22,16 @@ public abstract class PluginFactory {
 	private static final HashMap<String,PluginFactory> pluginFactories = new HashMap<>();
 	
 	static {
-		registerAuthenticationPlugin(KEYSTORE_PLUGIN_NAME, new KeystorePluginFactory());
-		registerAuthenticationPlugin(NO_OP_PLUGIN_NAME, new NoOpPluginFactory());
+		registerPluginFactory(KEYSTORE_PLUGIN_NAME, new KeystorePluginFactory());
+		registerPluginFactory(NO_OP_PLUGIN_NAME, new NoOpPluginFactory());
 	}
 	
 	/**
-	 * Registers an AuthenticationPlugin. 
+	 * Registers a PluginFactory. 
 	 * @param name Name of the plugin 
-	 * @param authPlugin implementation of the plugin
+	 * @param factory implementation of the PluginFactory
 	 */
-	public static void registerAuthenticationPlugin(String name, PluginFactory factory) {
+	public static void registerPluginFactory(String name, PluginFactory factory) {
 		synchronized (pluginFactories) {
 			pluginFactories.put(name, factory);
 		}
