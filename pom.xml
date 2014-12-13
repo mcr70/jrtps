@@ -10,7 +10,7 @@
 
     <groupId>net.sf.jrtps</groupId>
     <artifactId>jrtps</artifactId>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>jar</packaging>
 
     <name>jRTPS</name>
@@ -211,7 +211,8 @@
         <connection>scm:hg:http://hg.code.sf.net/p/jrtps/code</connection>
         <developerConnection>scm:hg:https://hg.code.sf.net/p/jrtps/code</developerConnection>
         <url>https://sourceforge.net/p/jrtps/code/ci/default/tree/</url>
-    </scm>
+      <tag>jrtps-1.1</tag>
+  </scm>
 
     <developers>
         <developer>
