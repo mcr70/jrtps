@@ -198,30 +198,33 @@ public class Participant {
 
 		createUnknownParticipantData(domainId);
 
-		int vmid = random.nextInt();
-		byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
-				(byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
+//		int vmid = random.nextInt();
+//		byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
+//				(byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
+//
+//		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
 
-		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+		try {
+			PluginFactory pluginFactory = PluginFactory.getInstance(config.getPluginFactoryName());
+			authPlugin = pluginFactory.createAuthenticationPlugin(config);
+			this.guid = authPlugin.getGuid();
+			//this.guid = authPlugin.getGuid();
+			logger.debug("Created AuthenticationPlugin with name {}", config.getPluginFactoryName());
+		} 
+		catch (PluginException e) {
+			throw new SecurityException("Failed to create AuthenticationPlugin", e);
+		}
 
 
 		rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
 				discoveredParticipants, config);
 
 		this.livelinessManager = new WriterLivelinessManager(this);
+		createSecurityEndpoints();
+		authPlugin.init(this);		
 		
 		registerBuiltinMarshallers();
 		createSPDPEntities();
-
-		createSecurityEndpoints();
-		try {
-			PluginFactory pluginFactory = PluginFactory.getInstance(config.getPluginFactoryName());
-			authPlugin = pluginFactory.createAuthenticationPlugin(this, config);
-			logger.debug("Created AuthenticationPlugin with name {}", config.getPluginFactoryName());
-		} 
-		catch (PluginException e) {
-			throw new SecurityException("Failed to create AuthenticationPlugin", e);
-		}
 
 		discoveryLocators = rtps_participant.getDiscoveryLocators();
 		userdataLocators = rtps_participant.getUserdataLocators();
@@ -230,7 +233,10 @@ public class Participant {
 		rtps_participant.start();
 
 		createSEDPEntities();
-		DataReader<ParticipantData> pdReader = (DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+		
+		@SuppressWarnings("unchecked")
+		DataReader<ParticipantData> pdReader = 
+				(DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 		createSPDPResender();

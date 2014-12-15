@@ -12,14 +12,13 @@ import java.security.cert.CertificateException;
 import javax.crypto.NoSuchPaddingException;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.udds.Participant;
 
 class KeystorePluginFactory extends PluginFactory {
 
 	@Override
-	public AuthenticationPlugin createAuthenticationPlugin(Participant p, Configuration conf) throws PluginException {
+	public AuthenticationPlugin createAuthenticationPlugin(Configuration conf) throws PluginException {
 		try {
-			return new KeystoreAuthenticationPlugin(p, conf);
+			return new KeystoreAuthenticationPlugin(conf);
 		} catch (InvalidKeyException | UnrecoverableKeyException
 				| KeyStoreException | NoSuchAlgorithmException
 				| CertificateException | NoSuchProviderException
