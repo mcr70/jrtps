@@ -65,7 +65,7 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 	private final Signature signature = Signature.getInstance("SHA256withRSA"); // TODO: hardcoded
 
 	private final Configuration conf;
-	private final DataWriter<ParticipantStatelessMessage> statelessWriter;
+	private DataWriter<ParticipantStatelessMessage> statelessWriter;
 
 	private final LocalIdentity identity;
 	private final Cipher cipher;
@@ -76,13 +76,7 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 
 
 	@SuppressWarnings("unchecked")
-	public KeystoreAuthenticationPlugin(Participant participant, Configuration conf) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
-		this.statelessWriter = 
-				(DataWriter<ParticipantStatelessMessage>) participant.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
-		
-		DataReader<ParticipantStatelessMessage> statelessReader = (DataReader<ParticipantStatelessMessage>) participant.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
-		statelessReader.addSampleListener(new ParticipantStatelessMessageListener(participant, this));
-		
+	public KeystoreAuthenticationPlugin(Configuration conf) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
 		this.conf = conf;
 		this.ks = KeyStore.getInstance("JKS");
 
@@ -109,11 +103,23 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 
 		Key privateKey = ks.getKey(alias, conf.getProperty(JKS_PRINCIPAL_PASSWORD_KEY).toCharArray());
 		IdentityCredential identityCreadential = new IdentityCredential(cert, privateKey);
-		this.identity = new LocalIdentity(participant.getGuid(), identityCreadential);
+		this.identity = new LocalIdentity(identityCreadential);
 
 		logger.debug("Succesfully locally authenticated {}", alias);
 	}
 
+	
+	@SuppressWarnings("unchecked")
+	public void init(Participant p) {
+		this.statelessWriter = 
+				(DataWriter<ParticipantStatelessMessage>) p.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
+		
+		DataReader<ParticipantStatelessMessage> statelessReader = 
+				(DataReader<ParticipantStatelessMessage>) p.getReader(EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);
+		
+		statelessReader.addSampleListener(new ParticipantStatelessMessageListener(p, this));		
+	}
+	
 	/**
 	 * Gets IdentityToken
 	 * @return identityToken
@@ -427,5 +433,11 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 		logger.debug("Canceling authentication handshake protocol for {}", participantData.getGuidPrefix());
 		authDataMap.remove(participantData.getGuidPrefix());
 		notifyListenersOfFailure(participantData);
+	}
+
+
+	@Override
+	public Guid getGuid() {
+		return identity.getGuid();
 	}
 }

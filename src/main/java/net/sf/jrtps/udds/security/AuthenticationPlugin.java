@@ -5,6 +5,8 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.IdentityToken;
+import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.udds.Participant;
 
 /**
  * An abstract class for authentication plugin. udds Participant (BuiltinParticipantDataListener)
@@ -17,6 +19,10 @@ import net.sf.jrtps.message.parameter.IdentityToken;
 public abstract class AuthenticationPlugin {		
 	private final Set<AuthenticationListener> authListeners = new CopyOnWriteArraySet<>();
 
+	
+	public abstract void init(Participant p);
+
+	
 	/**
 	 * Begins a handshake protocol with given ParticipantData.
 	 * @param pd
@@ -68,4 +74,7 @@ public abstract class AuthenticationPlugin {
 			al.authenticationFailed(pd);
 		}
 	}
+
+
+	public abstract Guid getGuid();
 }

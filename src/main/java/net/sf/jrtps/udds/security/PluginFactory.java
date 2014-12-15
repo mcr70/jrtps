@@ -3,7 +3,6 @@ package net.sf.jrtps.udds.security;
 import java.util.HashMap;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.udds.Participant;
 
 /**
  * PluginFactory is used to instantiate different security plugin implementations.
@@ -59,5 +58,5 @@ public abstract class PluginFactory {
 	 * @return AuthenticationPlugin
 	 * @throws PluginException 
 	 */
-	public abstract AuthenticationPlugin createAuthenticationPlugin(Participant p, Configuration conf) throws PluginException;
+	public abstract AuthenticationPlugin createAuthenticationPlugin(Configuration conf) throws PluginException;
 }
