@@ -1,3 +1,6 @@
+1.1.1
+    - Guid is created by AuthenticationPlugin.
+
 1.1
     - security: authentication & shared secret exchange
     
