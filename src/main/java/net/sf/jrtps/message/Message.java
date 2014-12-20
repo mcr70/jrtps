@@ -30,7 +30,16 @@ public class Message {
      * @param prefix
      */
     public Message(GuidPrefix prefix) {
-        header = new Header(prefix);
+        this(new Header(prefix));
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param Header
+     */
+    public Message(Header header) {
+		this.header = header;
     }
 
     /**

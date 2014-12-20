@@ -17,6 +17,8 @@ import net.sf.jrtps.udds.Participant;
  * @author mcr70
  */
 public abstract class AuthenticationPlugin {		
+	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
+
 	private final Set<AuthenticationListener> authListeners = new CopyOnWriteArraySet<>();
 
 	
