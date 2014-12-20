@@ -9,7 +9,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -61,7 +60,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Participant {
 	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
-	private static final Random random = new Random(System.currentTimeMillis());
 
 	private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
@@ -198,17 +196,11 @@ public class Participant {
 
 		createUnknownParticipantData(domainId);
 
-//		int vmid = random.nextInt();
-//		byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
-//				(byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
-//
-//		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
-
 		try {
 			PluginFactory pluginFactory = PluginFactory.getInstance(config.getPluginFactoryName());
 			authPlugin = pluginFactory.createAuthenticationPlugin(config);
 			this.guid = authPlugin.getGuid();
-			//this.guid = authPlugin.getGuid();
+
 			logger.debug("Created AuthenticationPlugin with name {}", config.getPluginFactoryName());
 		} 
 		catch (PluginException e) {
