@@ -6,6 +6,7 @@ import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
@@ -20,6 +21,7 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 
 import junit.framework.Assert;
 
@@ -63,6 +65,7 @@ public class CryptoTest {
 
 		KeyGenerator keyGenerator = KeyGenerator.getInstance("AES");
 		keyGenerator.init(128);
+
 		SecretKey sKey = keyGenerator.generateKey();
 
 		testHmac(sKey, Mac.getInstance("HmacSHA1"));
@@ -121,4 +124,31 @@ public class CryptoTest {
 		
 		System.out.println(Arrays.toString(decrypted) + " <- " + Arrays.toString(doFinal));
 	}
+
+	@Test
+	public void testAESCipher() throws Exception {
+		byte[] sharedSecret = new byte[] {0x11, 0x12, 0x13, 0x14};
+		
+		String hashName = "MD5"; // MD5(128), SHA-1(160), SHA-256(256)
+		byte[] key = hash(hashName , sharedSecret); 
+		System.out.println("* " + key.length + ", " + key.length * 8);
+		Cipher cipher = Cipher.getInstance("AES");
+		SecretKeySpec k = new SecretKeySpec(key, "AES");
+		cipher.init(Cipher.ENCRYPT_MODE, k);
+		
+		byte[] doFinal = cipher.doFinal(bytes);
+		
+		System.out.println(Arrays.toString(bytes) + " -> " + Arrays.toString(doFinal));
+		
+		cipher.init(Cipher.DECRYPT_MODE, k);
+		byte[] decrypted = cipher.doFinal(doFinal);
+		
+		System.out.println(Arrays.toString(decrypted) + " <- " + Arrays.toString(doFinal));
+	}
+
+	public byte[] hash(String hashName, byte[] convertme) throws NoSuchAlgorithmException {
+	    MessageDigest md = MessageDigest.getInstance(hashName);
+	        
+	    return md.digest(convertme);
+	}	
 }
