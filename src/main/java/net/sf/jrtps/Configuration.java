@@ -390,4 +390,11 @@ public class Configuration {
         return props.getProperty("udds.security.plugin-factory", "no-op"); 
 	}
 
+	/**
+	 * Gets the protection kind used with RTPS messages,
+	 * @return protection kind
+	 */
+	public String getRTPSProtection() {
+		return props.getProperty("udds.security.rtps-protection", "none");
+	}
 }

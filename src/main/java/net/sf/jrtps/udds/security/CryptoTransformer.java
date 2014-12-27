@@ -9,6 +9,23 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  */
 public interface CryptoTransformer {
 	/**
+	 * Gets the id of this transformer. Id of the transformer is 
+	 * transferred to remote entity, so that remote entity can 
+	 * associate a correct CryptoTranformer to decode incoming message
+	 *  
+	 * @return id
+	 */
+	int getTransformationKind();
+	
+	/**
+	 * Gets the name of this transformer. Name of the transformer 
+	 * may be used in configuration file.
+	 *  
+	 * @return Name of the transformer
+	 */
+	String getName();
+	
+	/**
 	 * Encodes RTPSByteBuffer into SecurePayload.
 	 * @param bb RTPSByteBuffer 
 	 * @return SecurePayload
