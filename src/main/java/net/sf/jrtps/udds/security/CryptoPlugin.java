@@ -1,5 +1,6 @@
 package net.sf.jrtps.udds.security;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -16,27 +17,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 class CryptoPlugin {
-	public static final String CRYPTO_LOG_CATEGORY = "dds.sec.crypto";
-
-    // See 9.5.2.2 DDS:Crypto:AES-CTR-HMAC-RSA/DSA-DH CryptoTransformIdentifier
-    // for predefined transformation_kind_id values: 
-    public static final int HMAC_SHA1 = 0x00000100;
-    public static final int HMAC_SHA256 = 0x00000101;
-    public static final int AES128_HMAC_SHA1 = 0x00000200;
-    public static final int AES256_HMAC_SHA256 = 0x00000201;
-    
+	static final String CRYPTO_LOG_CATEGORY = "dds.sec.crypto";
 	private static final Logger logger = LoggerFactory.getLogger(CRYPTO_LOG_CATEGORY);
-	private static final Map<Integer,CryptoTransformer> transformers = new ConcurrentHashMap<>();
 
+	private static final Map<Integer,CryptoTransformer> transformersById = new ConcurrentHashMap<>();
+	private static final Map<String,CryptoTransformer> transformersByName = new ConcurrentHashMap<>();
+
+	static {
+		try {
+			HMACTransformer hmac = new HMACTransformer(HMACTransformer.HMAC_SHA1_NAME, HMACTransformer.HMAC_SHA1);
+			registerTransformer(hmac);
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Failed to register HMACTransformer with algorithm {}", HMACTransformer.HMAC_SHA1_NAME);
+		}
+
+		try {
+			HMACTransformer hmac = new HMACTransformer(HMACTransformer.HMAC_SHA256_NAME, HMACTransformer.HMAC_SHA256);
+			registerTransformer(hmac);
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Failed to register HMACTransformer with algorithm {}", HMACTransformer.HMAC_SHA1_NAME);
+		}
+	}
+	
 	private Configuration conf;
 	
 	CryptoPlugin(Configuration conf) {
 		this.conf = conf;
 	}
 	
-	public static void registerTransformer(int transformationKind, CryptoTransformer t) {
-		logger.debug("Registering CryptoTransformer {} with kind {}", t.getClass(), transformationKind);
-		transformers.put(transformationKind, t);
+	/**
+	 * Registers a CryptoTransformer with given name and kind
+	 * @param ct
+	 */
+	public static void registerTransformer(CryptoTransformer ct) {
+		logger.debug("Registering CryptoTransformer {}({}) with kind {}", ct.getName(), ct.getClass(), 
+				ct.getTransformationKind());
+		transformersById.put(ct.getTransformationKind(), ct);
+		transformersByName.put(ct.getName(), ct);
 	}
 	
 	public Message encodeMessage(int transformationKind, Message message) {
@@ -91,7 +108,7 @@ class CryptoPlugin {
 	}
 
 	private CryptoTransformer getTransformer(int kind) {
-		CryptoTransformer cryptoTransformer = transformers.get(kind);
+		CryptoTransformer cryptoTransformer = transformersById.get(kind);
 		if (cryptoTransformer == null) {
 			throw new SecurityException("Could not find CryptoTransformer with transformationKind " + kind);
 		}
