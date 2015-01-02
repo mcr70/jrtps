@@ -18,6 +18,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.udds.security.CryptoPlugin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,7 @@ public class Endpoint {
     private final Guid guid;
     private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
+    private final CryptoPlugin cryptoPlugin;
     private final Configuration configuration;
 
     private QualityOfService qos;
@@ -55,6 +57,7 @@ public class Endpoint {
         this.topicName = topicName;
         this.qos = qos;
         this.configuration = configuration;
+        this.cryptoPlugin = new CryptoPlugin(configuration);
     }
 
     /**
@@ -113,7 +116,9 @@ public class Endpoint {
      * @return true, if an overflow occurred during send.
      */
     protected boolean sendMessage(Message m, RemoteProxy proxy) {
-        boolean overFlowed = false;
+        m = cryptoPlugin.encodeMessage(m);
+    	
+    	boolean overFlowed = false;
         List<Locator> locators = new LinkedList<>();
 
         if (GuidPrefix.GUIDPREFIX_UNKNOWN.equals(proxy.getGuid().getPrefix())) {

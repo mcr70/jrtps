@@ -102,6 +102,9 @@ public class Message {
                 case DataFrag.KIND:
                     sm = new DataFrag(smh, bb);
                     break;
+                case SecureSubMessage.KIND:
+                    sm = new SecureSubMessage(smh, bb);
+                    break;
 
                 default:
                     sm = new UnknownSubMessage(smh, bb);
