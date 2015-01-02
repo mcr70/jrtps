@@ -44,6 +44,7 @@ class HMACTransformer implements CryptoTransformer {
 		
 		try {
 			hmac.init(createKey("MD5", "sharedsecret".getBytes()));
+			// TODO: handle key creation
 		} catch (InvalidKeyException e) {
 			throw new RuntimeException(e);
 		}
