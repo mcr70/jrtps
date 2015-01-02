@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Gap;
@@ -24,6 +25,7 @@ import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.LocatorUDPv4_t;
 import net.sf.jrtps.types.Time;
+import net.sf.jrtps.udds.security.CryptoPlugin;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +47,15 @@ class RTPSMessageReceiver implements Runnable {
 
     private final RTPSParticipant participant;
     private final BlockingQueue<byte[]> queue;
+	private final CryptoPlugin cryptoPlugin;
 
     private Set<GuidPrefix> ignoredParticipants = new HashSet<>();
-
     private boolean running = true;
 
-    RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue) {
+    RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue, Configuration config) {
         this.participant = p;
         this.queue = queue;
+        this.cryptoPlugin = new CryptoPlugin(config);
     }
 
     @Override
@@ -235,30 +238,20 @@ class RTPSMessageReceiver implements Runnable {
         }
     }
 
-    private void handleSecureSubMessage(SecureSubMessage subMsg) {
-    	// TODO: implement SecureSubMessage handling
-    	if (subMsg.singleSubMessageFlag()) { // contains one submessage
-    		SubMessage sm = extractSubMessage(subMsg);
+    private void handleSecureSubMessage(SecureSubMessage secureSubMsg) {
+    	if (secureSubMsg.singleSubMessageFlag()) { // contains one submessage
+    		SubMessage sm = extractSubMessage(secureSubMsg);
     		// TODO: handleSubMessage(sm);
     	}
     	else { // contains an RTPS Message
-    		Message m = extractMessage(subMsg);
-    		handleMessage(m);
+    		handleMessage(cryptoPlugin.decodeMessage(secureSubMsg));
     	}
-    	
-    	logger.warn("SecureSubMessage is not implemented. Ignoring it.");
     }
 
 	private SubMessage extractSubMessage(SecureSubMessage subMsg) {
-		// TODO Auto-generated method stub
+    	logger.warn("Secure subMessage -> SubMessage not handled");
 		return null;
 	}
-
-	private Message extractMessage(SecureSubMessage subMsg) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
     void ignoreParticipant(GuidPrefix prefix) {
         ignoredParticipants.add(prefix);

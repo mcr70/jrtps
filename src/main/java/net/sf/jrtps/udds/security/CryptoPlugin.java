@@ -16,7 +16,7 @@ import net.sf.jrtps.types.GuidPrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class CryptoPlugin {
+public class CryptoPlugin {
 	static final String CRYPTO_LOG_CATEGORY = "dds.sec.crypto";
 	private static final Logger logger = LoggerFactory.getLogger(CRYPTO_LOG_CATEGORY);
 
@@ -24,6 +24,9 @@ class CryptoPlugin {
 	private static final Map<String,CryptoTransformer> transformersByName = new ConcurrentHashMap<>();
 
 	static {
+		NoOpTransformer noop = new NoOpTransformer();
+		registerTransformer(noop);
+		
 		try {
 			HMACTransformer hmac = new HMACTransformer(HMACTransformer.HMAC_SHA1_NAME, HMACTransformer.HMAC_SHA1);
 			registerTransformer(hmac);
@@ -39,29 +42,41 @@ class CryptoPlugin {
 		}
 	}
 	
-	private Configuration conf;
+	private final Configuration conf;
+	private final int transformationKind;
 	
-	CryptoPlugin(Configuration conf) {
+	public CryptoPlugin(Configuration conf) {
 		this.conf = conf;
+		String rtpsProtection = conf.getRTPSProtection();
+		CryptoTransformer transformerByName = getTransformerByName(rtpsProtection);
+		transformationKind = transformerByName.getTransformationKind();
 	}
 	
+
 	/**
 	 * Registers a CryptoTransformer with given name and kind
 	 * @param ct
 	 */
 	public static void registerTransformer(CryptoTransformer ct) {
-		logger.debug("Registering CryptoTransformer {}({}) with kind {}", ct.getName(), ct.getClass(), 
-				ct.getTransformationKind());
+		logger.debug("Registering CryptoTransformer {}({}) with kind {}", ct.getName(), 
+				ct.getClass().getName(), ct.getTransformationKind());
 		transformersById.put(ct.getTransformationKind(), ct);
 		transformersByName.put(ct.getName(), ct);
 	}
 	
-	public Message encodeMessage(int transformationKind, Message message) {
+	public Message encodeMessage(Message message) {
+		if (transformationKind == 0) {
+			return message;
+		}
+		
 		CryptoTransformer ctr = getTransformer(transformationKind);
+		logger.trace("encoding message with {}", ctr.getName());
 
+		// Write message as is to buffer
 		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[conf.getBufferSize()]);
 		message.writeTo(bb);
 		
+		// then encode it, and create new Message
 		SecurePayload payload = ctr.encode(bb); // TODO: shared secret
 		SecureSubMessage ssm = new SecureSubMessage(payload);
 		ssm.singleSubMessageFlag(false);
@@ -91,6 +106,9 @@ class CryptoPlugin {
 
 	public Message decodeMessage(SecureSubMessage msg) {
 		CryptoTransformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
+
+		logger.trace("decoding message with {}", ctr.getName());
+
 		
 		RTPSByteBuffer bb = ctr.decode(msg.getSecurePayload());
 		Message message = new Message(bb);
@@ -110,7 +128,18 @@ class CryptoPlugin {
 	private CryptoTransformer getTransformer(int kind) {
 		CryptoTransformer cryptoTransformer = transformersById.get(kind);
 		if (cryptoTransformer == null) {
-			throw new SecurityException("Could not find CryptoTransformer with transformationKind " + kind);
+			throw new SecurityException("Could not find CryptoTransformer with transformationKind " + 
+					kind + ": " + transformersById.keySet());
+		}
+		
+		return cryptoTransformer;
+	}
+
+	private CryptoTransformer getTransformerByName(String trName) {
+		CryptoTransformer cryptoTransformer = transformersByName.get(trName);
+		if (cryptoTransformer == null) {
+			throw new SecurityException("Could not find CryptoTransformer with name " + trName + 
+					": " + transformersByName.keySet());
 		}
 		
 		return cryptoTransformer;

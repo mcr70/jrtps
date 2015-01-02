@@ -3,10 +3,14 @@ package net.sf.jrtps.udds.security;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class SecurePayload {
-	private int transformationKind; // long, one of predefined integers above
-	private byte[] transformationId; // octet[8]
-	private byte[] cipherText;      // octet[*]
+	private final int transformationKind;  // long, one of predefined integers above
+	private final byte[] transformationId; // octet[8]
+	private final byte[] cipherText;       // octet[*]
 
+	public SecurePayload(int transformationKind, byte[] cipherText) {
+		this(transformationKind, new byte[8], cipherText);
+	}
+	
 	public SecurePayload(int transformationKind, byte[] transformationId, byte[] cipherText) {
 		this.transformationKind = transformationKind;
 		this.transformationId = transformationId;
