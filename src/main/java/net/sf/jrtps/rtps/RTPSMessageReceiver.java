@@ -19,6 +19,7 @@ import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SecureSubMessage;
 import net.sf.jrtps.message.SubMessage;
+import net.sf.jrtps.message.SubMessage.Kind;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -106,7 +107,18 @@ class RTPSMessageReceiver implements Runnable {
         List<SubMessage> subMessages = msg.getSubMessages();
 
         for (SubMessage subMsg : subMessages) {
-            switch (subMsg.getKind()) {
+        	if (subMsg.getKind() == Kind.SECURESUBMSG) {
+        		SecureSubMessage ssm = (SecureSubMessage) subMsg;
+        		if (ssm.singleSubMessageFlag()) {
+        			subMsg = cryptoPlugin.decodeSubMessage(ssm);
+        		}
+        		else {
+            		handleMessage(cryptoPlugin.decodeMessage(ssm));
+            		continue;
+        		}
+        	}
+        	
+        	switch (subMsg.getKind()) {
             case ACKNACK:
                 if (!destinationThisParticipant) {
                     continue;
@@ -194,13 +206,7 @@ class RTPSMessageReceiver implements Runnable {
 
                 handleGap(sourceGuidPrefix, (Gap) subMsg);
                 break;
-            case SECURESUBMSG:
-                if (!destinationThisParticipant) {
-                    continue;
-                }
 
-                handleSecureSubMessage((SecureSubMessage)subMsg);
-                break;
             default:
                 logger.warn("SubMessage not handled: {}", subMsg);
             }
@@ -236,16 +242,6 @@ class RTPSMessageReceiver implements Runnable {
         } else {
             logger.debug("No Reader({}) to handle Heartbeat from {}", hb.getReaderId(), hb.getWriterId());
         }
-    }
-
-    private void handleSecureSubMessage(SecureSubMessage secureSubMsg) {
-    	if (secureSubMsg.singleSubMessageFlag()) { // contains one submessage
-    		SubMessage sm = extractSubMessage(secureSubMsg);
-    		// TODO: handleSubMessage(sm);
-    	}
-    	else { // contains an RTPS Message
-    		handleMessage(cryptoPlugin.decodeMessage(secureSubMsg));
-    	}
     }
 
 	private SubMessage extractSubMessage(SecureSubMessage subMsg) {
