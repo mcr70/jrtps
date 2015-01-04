@@ -55,11 +55,14 @@ class HMACTransformer implements CryptoTransformer {
 		ByteBuffer buffer = bb.getBuffer();
 		int position = buffer.position();
 
-		hmac.reset();
-		hmac.update(buffer);
-		buffer.position(position);
+		byte[] hmacBytes;
+		synchronized (hmac) {
+			hmac.reset();
+			hmac.update(buffer);
+			buffer.position(position);
 
-		byte[] hmacBytes = hmac.doFinal();		
+			hmacBytes = hmac.doFinal();					
+		}
 		buffer.put(hmacBytes);
 
 		byte[] array = buffer.array();
