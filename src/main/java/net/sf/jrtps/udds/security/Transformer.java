@@ -7,7 +7,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-public interface CryptoTransformer {
+public interface Transformer {
 	/**
 	 * Gets the id of this transformer. Id of the transformer is 
 	 * transferred to remote entity, so that remote entity can 

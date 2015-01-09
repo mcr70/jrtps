@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-class HMACTransformer implements CryptoTransformer {
+class MACTransformer implements Transformer {
 	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
 
 	// See 9.5.2.2 DDS:Crypto:AES-CTR-HMAC-RSA/DSA-DH CryptoTransformIdentifier
@@ -36,12 +36,12 @@ class HMACTransformer implements CryptoTransformer {
 	private final int hmacLength;
 
 
-	HMACTransformer(String hmacName, int kind) throws NoSuchAlgorithmException {
+	MACTransformer(String hmacName, int kind) throws NoSuchAlgorithmException {
 		this.hmacName = hmacName;
 		this.kind = kind;
 		this.hmac = Mac.getInstance(hmacName);
 		this.hmacLength = hmac.getMacLength();
-		
+
 		try {
 			hmac.init(createKey("MD5", "sharedsecret".getBytes()));
 			// TODO: handle key creation
@@ -123,6 +123,7 @@ class HMACTransformer implements CryptoTransformer {
 	    MessageDigest md = MessageDigest.getInstance(hashName);
 	    byte[] digest = md.digest(convertme);
 
-		return new SecretKeySpec(digest, "AES");
+		SecretKeySpec secretKeySpec = new SecretKeySpec(digest, "AES");
+		return secretKeySpec;
 	}	
 }

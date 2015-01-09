@@ -9,7 +9,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  *  
  * @author mcr70
  */
-class NoOpTransformer implements CryptoTransformer {
+class NoOpTransformer implements Transformer {
 	@Override
 	public int getTransformationKind() {
 		return 0;
