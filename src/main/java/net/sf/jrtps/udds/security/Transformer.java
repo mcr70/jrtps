@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds.security;
 
+import java.security.Key;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
@@ -30,12 +32,12 @@ public interface Transformer {
 	 * @param bb RTPSByteBuffer 
 	 * @return SecurePayload
 	 */
-	SecurePayload encode(RTPSByteBuffer bb);
+	SecurePayload encode(Key key, RTPSByteBuffer bb);
 	
 	/**
 	 * Decodes a given SecurePayload
 	 * @param payload Payload to decode
 	 * @return RTPSByteBuffer
 	 */
-	RTPSByteBuffer decode(SecurePayload payload);
+	RTPSByteBuffer decode(Key key, SecurePayload payload);
 }
