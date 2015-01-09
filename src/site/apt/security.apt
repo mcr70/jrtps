@@ -4,6 +4,7 @@ DDS Security
  {{{http://www.omg.org/spec/DDS-SECURITY/}DDS security}} specification.
  Currently, only authentication part of the specification is implemented.
 
+
 * Authentication
  
  If security is enabled with {{{./configuration.html#udds.security.plugin-factory}jks plugin factory}}, 
@@ -43,3 +44,8 @@ keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
 
  See {{{./configuration.html#udds.security.plugin-factory}configuration}} section
  on how to enable DDS security with keystore created above.
+ 
+
+* Securing traffic
+
+ 

@@ -21,6 +21,11 @@ import net.sf.jrtps.types.GuidPrefix;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * CryptoPlugin.
+ * 
+ * @author mcr70
+ */
 public class CryptoPlugin {
 	static final String CRYPTO_LOG_CATEGORY = "dds.sec.crypto";
 	private static final Logger logger = LoggerFactory.getLogger(CRYPTO_LOG_CATEGORY);
@@ -66,7 +71,7 @@ public class CryptoPlugin {
 	
 
 	/**
-	 * Registers a CryptoTransformer with given name and kind
+	 * Registers a Transformer to this CryptoPlugin
 	 * @param ct
 	 */
 	public static void registerTransformer(Transformer ct) {
@@ -76,6 +81,11 @@ public class CryptoPlugin {
 		transformersByName.put(ct.getName(), ct);
 	}
 	
+	/**
+	 * This method is called by jRTPS when a message is being sent.
+	 * @param message Message to be sent.
+	 * @return An encoded message
+	 */
 	public Message encodeMessage(Message message) {
 		if (transformationKind == 0) {
 			return message;
@@ -103,8 +113,28 @@ public class CryptoPlugin {
 		return securedMessage;
 	}
 
+	/**
+	 * Decodes a SecureSubMessage into Message. This method is called by message
+	 * receiver to decode secured message.
+	 * 
+	 * @param msg SecureSubMessage to decode
+	 * @return decoded Message
+	 */
+	public Message decodeMessage(SecureSubMessage msg) {
+		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 
-	public SecureSubMessage encodeSubMessage(int transformationKind, SubMessage message) {
+		logger.trace("decoding message with {}", ctr.getName());
+
+		Key key = createKey(null);
+		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
+		Message message = new Message(bb);
+		
+		return message;
+	}
+	
+
+
+	SecureSubMessage encodeSubMessage(int transformationKind, SubMessage message) {
 		Transformer ctr = getTransformer(transformationKind);
 		
 		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[conf.getBufferSize()]);
@@ -118,19 +148,7 @@ public class CryptoPlugin {
 		return ssm;
 	}
 
-	public Message decodeMessage(SecureSubMessage msg) {
-		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
-
-		logger.trace("decoding message with {}", ctr.getName());
-
-		Key key = createKey(null);
-		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
-		Message message = new Message(bb);
-		
-		return message;
-	}
-	
-	public SubMessage decodeSubMessage(SecureSubMessage msg) {
+	SubMessage decodeSubMessage(SecureSubMessage msg) {
 		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 		Key key = createKey(null);
 		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
@@ -140,27 +158,26 @@ public class CryptoPlugin {
 	}
 
 	private Transformer getTransformer(int kind) {
-		Transformer cryptoTransformer = transformersById.get(kind);
-		if (cryptoTransformer == null) {
-			throw new SecurityException("Could not find CryptoTransformer with transformationKind " + 
+		Transformer transformer = transformersById.get(kind);
+		if (transformer == null) {
+			throw new SecurityException("Could not find Transformer with transformationKind " + 
 					kind + ": " + transformersById.keySet());
 		}
 		
-		return cryptoTransformer;
+		return transformer;
 	}
 
 	private Transformer getTransformerByName(String trName) {
-		Transformer cryptoTransformer = transformersByName.get(trName);
-		if (cryptoTransformer == null) {
-			throw new SecurityException("Could not find CryptoTransformer with name " + trName + 
+		Transformer transformer = transformersByName.get(trName);
+		if (transformer == null) {
+			throw new SecurityException("Could not find Transformer with name " + trName + 
 					": " + transformersByName.keySet());
 		}
 		
-		return cryptoTransformer;
+		return transformer;
 	}
 
 	private SecretKeySpec createKey(Message msg) {
-		
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");
