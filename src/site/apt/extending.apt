@@ -119,4 +119,12 @@ jrtps.discovery.announce-uris = mem://10.10.10.12:1024
 +---
 udds.security.plugin-factory = custom
 +--- 
+
+
+* CryptoPlugin
  
+ CryptoPlugin is used to encode/decode bytes that are sent on wire. 
+ One can register new tranfromations to CryptoPlugin by calling 
+ {{{./apidocs/net/sf/jrtps/udds/security/CryptoPlugin.html##registerTransformer(net.sf.jrtps.udds.security.Transformer)}CryptoPlugin.registerTransformer(Transformer)}}.
+  
+  

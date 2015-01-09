@@ -16,6 +16,12 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * CipherTransformer uses javax.crypto.Cipher to encode and decode payload. 
+ * 
+ * @see javax.crypto.Cipher
+ * @author mcr70
+ */
 class CipherTransformer implements Transformer {
 	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
 
@@ -27,10 +33,19 @@ class CipherTransformer implements Transformer {
     public static final int AES128_HMAC_SHA1 = 0x00000200;
     public static final int AES256_HMAC_SHA256 = 0x00000201;
 	
-    private String name;
-	private int kind;
-	private Cipher cipher;
+    private final String name;
+	private final int kind;
+	private final Cipher cipher;
     
+	/**
+	 * Constructor for CipherTransformer. An instance of Cipher is 
+	 * obtained by calling Cipher.getInstance(cipherName).
+	 * 
+	 * @param cipherName Name of the transformation
+	 * @param kind transformationKind
+	 * @throws NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException
+	 */
     public CipherTransformer(String cipherName, int kind) throws NoSuchAlgorithmException, NoSuchPaddingException {
 		this.name = cipherName;
 		this.kind = kind;

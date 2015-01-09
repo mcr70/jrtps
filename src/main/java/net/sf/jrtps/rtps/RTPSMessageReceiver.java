@@ -110,7 +110,9 @@ class RTPSMessageReceiver implements Runnable {
         	if (subMsg.getKind() == Kind.SECURESUBMSG) {
         		SecureSubMessage ssm = (SecureSubMessage) subMsg;
         		if (ssm.singleSubMessageFlag()) {
-        			subMsg = cryptoPlugin.decodeSubMessage(ssm);
+        			//subMsg = cryptoPlugin.decodeSubMessage(ssm);
+        			logger.warn("Decoding of submessage not implemented. Discarding it.");
+        			continue;
         		}
         		else {
             		handleMessage(cryptoPlugin.decodeMessage(ssm));

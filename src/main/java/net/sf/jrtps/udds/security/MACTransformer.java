@@ -14,8 +14,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A class that calculates and appends a HMAC to the end of payload.
+ * MacTransformer calculates and appends a HMAC to the end of payload.
  * 
+ * @see javax.crypto.Mac
  * @author mcr70
  */
 class MACTransformer implements Transformer {
@@ -34,14 +35,19 @@ class MACTransformer implements Transformer {
 	private final Mac hmac;
 	private final int hmacLength;
 
-
+	/**
+	 * Constructor for MACTransformer. An Instance of Mac is obtained by calling
+	 * Mac.getInstance(hmacName).
+	 * 
+	 * @param hmacName name of the MAC algorithm.
+	 * @param kind transformationKind
+	 * @throws NoSuchAlgorithmException
+	 */
 	MACTransformer(String hmacName, int kind) throws NoSuchAlgorithmException {
 		this.hmacName = hmacName;
 		this.kind = kind;
 		this.hmac = Mac.getInstance(hmacName);
 		this.hmacLength = hmac.getMacLength();
-
-
 	}
 	
 	@Override
@@ -71,7 +77,7 @@ class MACTransformer implements Transformer {
 			byte[] payload = new byte[position];
 			System.arraycopy(array, 0, payload, 0, payload.length);
 			
-			logger.trace("HMACTransformer: encoded {}, {}", Arrays.toString(payload), Arrays.toString(hmacBytes));
+			logger.trace("MACTransformer: encoded {}, {}", Arrays.toString(payload), Arrays.toString(hmacBytes));
 		}
 		
 		// TODO: use ByteBuffer instead of array with SecurePayload to avoid unnecessary
@@ -88,7 +94,7 @@ class MACTransformer implements Transformer {
 	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
 		byte[] cipherText = payload.getCipherText();
 		if (logger.isTraceEnabled()) {
-			logger.trace("HMACTransformer: decoding {}", Arrays.toString(cipherText));
+			logger.trace("MACTransformer: decoding {}", Arrays.toString(cipherText));
 		}
 
 		byte[] hmacReceived = new byte[hmacLength];
