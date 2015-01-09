@@ -15,7 +15,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class AESTransformer implements CryptoTransformer {
+class CipherTransformer implements Transformer {
 	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
 
 	public static final String AES128_HMAC_SHA1_NAME = "aes128_hmac_sha1";
@@ -27,10 +27,10 @@ class AESTransformer implements CryptoTransformer {
 	private int kind;
 	private Cipher instance;
     
-    public AESTransformer(String name, int kind) throws NoSuchAlgorithmException, NoSuchPaddingException {
-		this.name = name;
+    public CipherTransformer(String cipherName, int kind) throws NoSuchAlgorithmException, NoSuchPaddingException {
+		this.name = cipherName;
 		this.kind = kind;
-		instance = Cipher.getInstance("AES");
+		instance = Cipher.getInstance(cipherName);
     }
     
 	@Override
@@ -45,11 +45,11 @@ class AESTransformer implements CryptoTransformer {
 
 	@Override
 	public SecurePayload encode(RTPSByteBuffer bb) {
-		Key certificate = null;
+		Key key = null;
 		
 		try {
 			synchronized (instance) {
-				instance.init(Cipher.ENCRYPT_MODE, certificate);
+				instance.init(Cipher.ENCRYPT_MODE, key);
 				byte[] bytes = null;
 				instance.doFinal(bb.getBuffer(), null); // TODO
 			}

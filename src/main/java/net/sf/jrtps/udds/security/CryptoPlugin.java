@@ -20,25 +20,25 @@ public class CryptoPlugin {
 	static final String CRYPTO_LOG_CATEGORY = "dds.sec.crypto";
 	private static final Logger logger = LoggerFactory.getLogger(CRYPTO_LOG_CATEGORY);
 
-	private static final Map<Integer,CryptoTransformer> transformersById = new ConcurrentHashMap<>();
-	private static final Map<String,CryptoTransformer> transformersByName = new ConcurrentHashMap<>();
+	private static final Map<Integer,Transformer> transformersById = new ConcurrentHashMap<>();
+	private static final Map<String,Transformer> transformersByName = new ConcurrentHashMap<>();
 
 	static {
 		NoOpTransformer noop = new NoOpTransformer();
 		registerTransformer(noop);
 		
 		try {
-			HMACTransformer hmac = new HMACTransformer(HMACTransformer.HMAC_SHA1_NAME, HMACTransformer.HMAC_SHA1);
+			MACTransformer hmac = new MACTransformer(MACTransformer.HMAC_SHA1_NAME, MACTransformer.HMAC_SHA1);
 			registerTransformer(hmac);
 		} catch (NoSuchAlgorithmException e) {
-			logger.error("Failed to register HMACTransformer with algorithm {}", HMACTransformer.HMAC_SHA1_NAME);
+			logger.error("Failed to register HMACTransformer with algorithm {}", MACTransformer.HMAC_SHA1_NAME);
 		}
 
 		try {
-			HMACTransformer hmac = new HMACTransformer(HMACTransformer.HMAC_SHA256_NAME, HMACTransformer.HMAC_SHA256);
+			MACTransformer hmac = new MACTransformer(MACTransformer.HMAC_SHA256_NAME, MACTransformer.HMAC_SHA256);
 			registerTransformer(hmac);
 		} catch (NoSuchAlgorithmException e) {
-			logger.error("Failed to register HMACTransformer with algorithm {}", HMACTransformer.HMAC_SHA1_NAME);
+			logger.error("Failed to register HMACTransformer with algorithm {}", MACTransformer.HMAC_SHA1_NAME);
 		}
 	}
 	
@@ -48,7 +48,7 @@ public class CryptoPlugin {
 	public CryptoPlugin(Configuration conf) {
 		this.conf = conf;
 		String rtpsProtection = conf.getRTPSProtection();
-		CryptoTransformer transformerByName = getTransformerByName(rtpsProtection);
+		Transformer transformerByName = getTransformerByName(rtpsProtection);
 		transformationKind = transformerByName.getTransformationKind();
 	}
 	
@@ -57,8 +57,8 @@ public class CryptoPlugin {
 	 * Registers a CryptoTransformer with given name and kind
 	 * @param ct
 	 */
-	public static void registerTransformer(CryptoTransformer ct) {
-		logger.debug("Registering CryptoTransformer {}({}) with kind {}", ct.getName(), 
+	public static void registerTransformer(Transformer ct) {
+		logger.debug("Registering Transformer {}({}) with kind {}", ct.getName(), 
 				ct.getClass().getName(), ct.getTransformationKind());
 		transformersById.put(ct.getTransformationKind(), ct);
 		transformersByName.put(ct.getName(), ct);
@@ -69,7 +69,7 @@ public class CryptoPlugin {
 			return message;
 		}
 		
-		CryptoTransformer ctr = getTransformer(transformationKind);
+		Transformer ctr = getTransformer(transformationKind);
 		logger.trace("encoding message with {}", ctr.getName());
 
 		// Write message as is to buffer
@@ -92,7 +92,7 @@ public class CryptoPlugin {
 
 
 	public SecureSubMessage encodeSubMessage(int transformationKind, SubMessage message) {
-		CryptoTransformer ctr = getTransformer(transformationKind);
+		Transformer ctr = getTransformer(transformationKind);
 		
 		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[conf.getBufferSize()]);
 		message.writeTo(bb);
@@ -105,7 +105,7 @@ public class CryptoPlugin {
 	}
 
 	public Message decodeMessage(SecureSubMessage msg) {
-		CryptoTransformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
+		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 
 		logger.trace("decoding message with {}", ctr.getName());
 
@@ -117,7 +117,7 @@ public class CryptoPlugin {
 	}
 	
 	public SubMessage decodeSubMessage(SecureSubMessage msg) {
-		CryptoTransformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
+		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 		
 		RTPSByteBuffer bb = ctr.decode(msg.getSecurePayload());
 		// TODO: Create SubMessage out of RTPSByteBuffer
@@ -125,8 +125,8 @@ public class CryptoPlugin {
 		return null;
 	}
 
-	private CryptoTransformer getTransformer(int kind) {
-		CryptoTransformer cryptoTransformer = transformersById.get(kind);
+	private Transformer getTransformer(int kind) {
+		Transformer cryptoTransformer = transformersById.get(kind);
 		if (cryptoTransformer == null) {
 			throw new SecurityException("Could not find CryptoTransformer with transformationKind " + 
 					kind + ": " + transformersById.keySet());
@@ -135,8 +135,8 @@ public class CryptoPlugin {
 		return cryptoTransformer;
 	}
 
-	private CryptoTransformer getTransformerByName(String trName) {
-		CryptoTransformer cryptoTransformer = transformersByName.get(trName);
+	private Transformer getTransformerByName(String trName) {
+		Transformer cryptoTransformer = transformersByName.get(trName);
 		if (cryptoTransformer == null) {
 			throw new SecurityException("Could not find CryptoTransformer with name " + trName + 
 					": " + transformersByName.keySet());
