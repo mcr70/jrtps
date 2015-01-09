@@ -44,9 +44,7 @@ class CipherTransformer implements Transformer {
 	}
 
 	@Override
-	public SecurePayload encode(RTPSByteBuffer bb) {
-		Key key = null;
-		
+	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
 		try {
 			synchronized (instance) {
 				instance.init(Cipher.ENCRYPT_MODE, key);
@@ -61,7 +59,7 @@ class CipherTransformer implements Transformer {
 	}
 
 	@Override
-	public RTPSByteBuffer decode(SecurePayload payload) {
+	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
 		Key certificate = null;
 		
 		try {

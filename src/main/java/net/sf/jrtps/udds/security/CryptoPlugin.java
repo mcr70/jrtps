@@ -1,8 +1,11 @@
 package net.sf.jrtps.udds.security;
 
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import javax.crypto.spec.SecretKeySpec;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.Header;
@@ -77,7 +80,8 @@ public class CryptoPlugin {
 		message.writeTo(bb);
 		
 		// then encode it, and create new Message
-		SecurePayload payload = ctr.encode(bb); // TODO: shared secret
+		Key key = createKey(message);
+		SecurePayload payload = ctr.encode(key, bb); // TODO: shared secret
 		SecureSubMessage ssm = new SecureSubMessage(payload);
 		ssm.singleSubMessageFlag(false);
 		
@@ -97,7 +101,8 @@ public class CryptoPlugin {
 		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[conf.getBufferSize()]);
 		message.writeTo(bb);
 		
-		SecurePayload payload = ctr.encode(bb); // TODO: shared secret
+		Key key = createKey(null);
+		SecurePayload payload = ctr.encode(key, bb); // TODO: shared secret
 		SecureSubMessage ssm = new SecureSubMessage(payload);
 		ssm.singleSubMessageFlag(true);
 				
@@ -109,8 +114,8 @@ public class CryptoPlugin {
 
 		logger.trace("decoding message with {}", ctr.getName());
 
-		
-		RTPSByteBuffer bb = ctr.decode(msg.getSecurePayload());
+		Key key = createKey(null);
+		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
 		Message message = new Message(bb);
 		
 		return message;
@@ -118,8 +123,8 @@ public class CryptoPlugin {
 	
 	public SubMessage decodeSubMessage(SecureSubMessage msg) {
 		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
-		
-		RTPSByteBuffer bb = ctr.decode(msg.getSecurePayload());
+		Key key = createKey(null);
+		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
 		// TODO: Create SubMessage out of RTPSByteBuffer
 		
 		return null;
@@ -144,4 +149,14 @@ public class CryptoPlugin {
 		
 		return cryptoTransformer;
 	}
+
+	private SecretKeySpec createKey(Message msg) {
+		
+		//	    MessageDigest md = MessageDigest.getInstance(hashName);
+//	    byte[] digest = md.digest(convertme);
+
+		// TODO: key generation
+		SecretKeySpec secretKeySpec = new SecretKeySpec("sharedsecret".getBytes(), "AES");
+		return secretKeySpec;
+	}	
 }

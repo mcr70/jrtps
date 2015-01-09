@@ -2,12 +2,11 @@ package net.sf.jrtps.udds.security;
 
 import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
+import java.security.Key;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -42,22 +41,24 @@ class MACTransformer implements Transformer {
 		this.hmac = Mac.getInstance(hmacName);
 		this.hmacLength = hmac.getMacLength();
 
-		try {
-			hmac.init(createKey("MD5", "sharedsecret".getBytes()));
-			// TODO: handle key creation
-		} catch (InvalidKeyException e) {
-			throw new RuntimeException(e);
-		}
+
 	}
 	
 	@Override
-	public SecurePayload encode(RTPSByteBuffer bb) {
+	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
 		ByteBuffer buffer = bb.getBuffer();
 		int position = buffer.position();
 
 		byte[] hmacBytes;
 		synchronized (hmac) {
-			hmac.reset();
+			try {
+				hmac.init(key);
+			} catch (InvalidKeyException e) {
+				// TODO: better exception handling
+				throw new RuntimeException(e);
+			}
+			
+			//hmac.reset();
 			hmac.update(buffer);
 			buffer.position(position);
 
@@ -84,7 +85,7 @@ class MACTransformer implements Transformer {
 	}
 
 	@Override
-	public RTPSByteBuffer decode(SecurePayload payload) {
+	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
 		byte[] cipherText = payload.getCipherText();
 		if (logger.isTraceEnabled()) {
 			logger.trace("HMACTransformer: decoding {}", Arrays.toString(cipherText));
@@ -97,7 +98,13 @@ class MACTransformer implements Transformer {
 		System.arraycopy(cipherText, payloadBytes.length, hmacReceived, 0, hmacReceived.length);
 
 		synchronized (hmac) {
-			hmac.reset();
+			try {
+				hmac.init(key);
+			} catch (InvalidKeyException e) {
+				// TODO: better exception handling
+				throw new RuntimeException(e);
+			}
+
 			byte[] hmacCalculated = hmac.doFinal(payloadBytes);
 			if (Arrays.equals(hmacReceived, hmacCalculated)) {
 				throw new SecurityException("Hmac of SecurePayload different"); // TODO: DecodeException
@@ -118,12 +125,4 @@ class MACTransformer implements Transformer {
 	public String getName() {
 		return hmacName;
 	}
-
-	private SecretKeySpec createKey(String hashName, byte[] convertme) throws NoSuchAlgorithmException {
-	    MessageDigest md = MessageDigest.getInstance(hashName);
-	    byte[] digest = md.digest(convertme);
-
-		SecretKeySpec secretKeySpec = new SecretKeySpec(digest, "AES");
-		return secretKeySpec;
-	}	
 }

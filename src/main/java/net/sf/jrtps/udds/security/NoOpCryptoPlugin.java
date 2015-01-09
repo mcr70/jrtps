@@ -1,5 +1,7 @@
 package net.sf.jrtps.udds.security;
 
+import java.security.Key;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 
@@ -21,12 +23,12 @@ class NoOpTransformer implements Transformer {
 	}
 
 	@Override
-	public SecurePayload encode(RTPSByteBuffer bb) {
+	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
 		return null;
 	}
 
 	@Override
-	public RTPSByteBuffer decode(SecurePayload payload) {
+	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
 		return null;
 	}
 }
