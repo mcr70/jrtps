@@ -1,10 +1,12 @@
 package net.sf.jrtps.udds.security;
 
 import java.security.Key;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
 import net.sf.jrtps.Configuration;
@@ -42,6 +44,13 @@ public class CryptoPlugin {
 			registerTransformer(hmac);
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Failed to register HMACTransformer with algorithm {}", MACTransformer.HMAC_SHA1_NAME);
+		}
+		
+		try {
+			CipherTransformer ct = new CipherTransformer(CipherTransformer.AES128_NAME, CipherTransformer.AES128);
+			registerTransformer(ct);
+		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
+			logger.error("Failed to register CipherTransformer with name {}", CipherTransformer.AES128_NAME, e);
 		}
 	}
 	
@@ -152,11 +161,16 @@ public class CryptoPlugin {
 
 	private SecretKeySpec createKey(Message msg) {
 		
-		//	    MessageDigest md = MessageDigest.getInstance(hashName);
-//	    byte[] digest = md.digest(convertme);
+		MessageDigest md = null;
+		try {
+			md = MessageDigest.getInstance("MD5");
+		} catch (NoSuchAlgorithmException e) {
+			logger.error("Got exception", e);
+		}
+		byte[] digest = md.digest("sharedsecret".getBytes());
 
 		// TODO: key generation
-		SecretKeySpec secretKeySpec = new SecretKeySpec("sharedsecret".getBytes(), "AES");
+		SecretKeySpec secretKeySpec = new SecretKeySpec(digest, "AES");
 		return secretKeySpec;
 	}	
 }

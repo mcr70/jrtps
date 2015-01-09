@@ -108,6 +108,7 @@ public class CryptoTest {
 	
 	@Test
 	public void testRSACipher() throws Exception {
+		System.out.println("testRSACipher()");
 
 		String alias = "jrtps01";
 		
@@ -127,6 +128,7 @@ public class CryptoTest {
 
 	@Test
 	public void testAESCipher() throws Exception {
+		System.out.println("testAESCipher()");
 		byte[] sharedSecret = new byte[] {0x11, 0x12, 0x13, 0x14};
 		
 		String hashName = "MD5"; // MD5(128), SHA-1(160), SHA-256(256)
