@@ -133,7 +133,7 @@ public class CryptoTest {
 		
 		String hashName = "MD5"; // MD5(128), SHA-1(160), SHA-256(256)
 		byte[] key = hash(hashName , sharedSecret); 
-		System.out.println("* " + key.length + ", " + key.length * 8);
+
 		Cipher cipher = Cipher.getInstance("AES");
 		SecretKeySpec k = new SecretKeySpec(key, "AES");
 		cipher.init(Cipher.ENCRYPT_MODE, k);

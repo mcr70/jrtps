@@ -53,8 +53,7 @@ class MACTransformer implements Transformer {
 	@Override
 	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
 		ByteBuffer buffer = bb.getBuffer();
-		int position = buffer.position();
-
+		buffer.flip();
 		byte[] hmacBytes;
 		synchronized (hmac) {
 			try {
@@ -64,27 +63,16 @@ class MACTransformer implements Transformer {
 				throw new RuntimeException(e);
 			}
 			
-			//hmac.reset();
 			hmac.update(buffer);
-			buffer.position(position);
-
 			hmacBytes = hmac.doFinal();					
 		}
-		buffer.put(hmacBytes);
 
 		byte[] array = buffer.array();
-		if (logger.isTraceEnabled()) {
-			byte[] payload = new byte[position];
-			System.arraycopy(array, 0, payload, 0, payload.length);
-			
-			logger.trace("MACTransformer: encoded {}, {}", Arrays.toString(payload), Arrays.toString(hmacBytes));
-		}
+		byte[] securedBytes = new byte[buffer.limit() + hmacBytes.length];
 		
-		// TODO: use ByteBuffer instead of array with SecurePayload to avoid unnecessary
-		//       array copy
+		System.arraycopy(array, 0, securedBytes, 0, buffer.limit());
+		System.arraycopy(hmacBytes, 0, securedBytes, buffer.limit(), hmacBytes.length);
 		
-		byte[] securedBytes = new byte[buffer.position()];
-		System.arraycopy(array, 0, securedBytes, 0, securedBytes.length);		
 		SecurePayload sp = new SecurePayload(kind, securedBytes);
 		
 		return sp;
@@ -103,6 +91,7 @@ class MACTransformer implements Transformer {
 		System.arraycopy(cipherText, 0, payloadBytes, 0, payloadBytes.length);
 		System.arraycopy(cipherText, payloadBytes.length, hmacReceived, 0, hmacReceived.length);
 
+		byte[] hmacCalculated = null;
 		synchronized (hmac) {
 			try {
 				hmac.init(key);
@@ -111,10 +100,12 @@ class MACTransformer implements Transformer {
 				throw new RuntimeException(e);
 			}
 
-			byte[] hmacCalculated = hmac.doFinal(payloadBytes);
-			if (Arrays.equals(hmacReceived, hmacCalculated)) {
-				throw new SecurityException("Hmac of SecurePayload different"); // TODO: DecodeException
-			}
+			hmacCalculated = hmac.doFinal(payloadBytes);
+		}
+
+		if (!Arrays.equals(hmacReceived, hmacCalculated)) {
+			logger.debug("Hmacs different: {} != {}", hmacReceived, hmacCalculated);
+			throw new SecurityException("Hmac of SecurePayload different"); // TODO: DecodeException
 		}
 		
 		RTPSByteBuffer bb = new RTPSByteBuffer(payloadBytes);

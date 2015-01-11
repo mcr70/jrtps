@@ -4,6 +4,7 @@ import java.nio.ByteBuffer;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -25,8 +26,8 @@ import org.slf4j.LoggerFactory;
 class CipherTransformer implements Transformer {
 	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
 
-	public static final int AES128 = 0xff000200;
-	public static final String AES128_NAME = "AES";
+	public static final int AES_KIND = 0xff000200;
+	public static final String AES_NAME = "AES";
 
 	public static final String AES128_HMAC_SHA1_NAME = "aes128_hmac_sha1";
     public static final String AES256_HMAC_SHA256_NAME = "aes256_hmac_sha256";
@@ -69,7 +70,7 @@ class CipherTransformer implements Transformer {
 		try {
 			synchronized (cipher) {
 				cipher.init(Cipher.ENCRYPT_MODE, key);
-				cipher.doFinal(bb.getBuffer(), output); // TODO
+				cipher.doFinal(bb.getBuffer(), output);
 			}
 		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
 			logger.warn("Failed to encode message", e);
@@ -77,10 +78,15 @@ class CipherTransformer implements Transformer {
 		
 		// TODO: securepayload w/ ByteBuffer
 		byte[] array = output.array();
+		
 		byte[] cipherText = new byte[output.position()];
 		System.arraycopy(array, 0, cipherText, 0, cipherText.length);
-		
+
 		SecurePayload payload = new SecurePayload(kind, cipherText);
+		if (logger.isTraceEnabled()) {
+			logger.trace("CipherTransformer: encoded payload: {}", Arrays.toString(payload.getCipherText()));
+		}
+		
 		return payload;
 	}
 
@@ -94,7 +100,7 @@ class CipherTransformer implements Transformer {
 				decryptedBytes = cipher.doFinal(cipherText);
 			}
 		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-			logger.warn("Failed to decode message", e);
+			logger.error("Failed to decode message", e);
 		}
 		
 		return new RTPSByteBuffer(decryptedBytes);

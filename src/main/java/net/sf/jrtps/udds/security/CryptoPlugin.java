@@ -37,25 +37,40 @@ public class CryptoPlugin {
 		NoOpTransformer noop = new NoOpTransformer();
 		registerTransformer(noop);
 		
+		MACTransformer hmacSha1 = null;
 		try {
-			MACTransformer hmac = new MACTransformer(MACTransformer.HMAC_SHA1_NAME, MACTransformer.HMAC_SHA1);
-			registerTransformer(hmac);
+			hmacSha1 = new MACTransformer(MACTransformer.HMAC_SHA1_NAME, MACTransformer.HMAC_SHA1);
+			registerTransformer(hmacSha1);
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Failed to register HMACTransformer with algorithm {}", MACTransformer.HMAC_SHA1_NAME);
 		}
 
+		MACTransformer hmacSha256 = null;
 		try {
-			MACTransformer hmac = new MACTransformer(MACTransformer.HMAC_SHA256_NAME, MACTransformer.HMAC_SHA256);
-			registerTransformer(hmac);
+			hmacSha256 = new MACTransformer(MACTransformer.HMAC_SHA256_NAME, MACTransformer.HMAC_SHA256);
+			registerTransformer(hmacSha256);
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Failed to register HMACTransformer with algorithm {}", MACTransformer.HMAC_SHA1_NAME);
 		}
 		
+		CipherTransformer aesCt = null; 
 		try {
-			CipherTransformer ct = new CipherTransformer(CipherTransformer.AES128_NAME, CipherTransformer.AES128);
-			registerTransformer(ct);
+			aesCt = new CipherTransformer(CipherTransformer.AES_NAME, CipherTransformer.AES_KIND);
+			registerTransformer(aesCt);
 		} catch (NoSuchAlgorithmException | NoSuchPaddingException e) {
-			logger.error("Failed to register CipherTransformer with name {}", CipherTransformer.AES128_NAME, e);
+			logger.error("Failed to register CipherTransformer with name {}", CipherTransformer.AES_NAME, e);
+		}
+		
+		if (aesCt != null && hmacSha1 != null) {
+			CompositeTransformer ct = 
+					new CompositeTransformer(CompositeTransformer.AES_HMAC_SHA1, aesCt, hmacSha1);
+			registerTransformer(ct);
+		}
+
+		if (aesCt != null && hmacSha256 != null) {
+			CompositeTransformer ct = 
+					new CompositeTransformer(CompositeTransformer.AES_HMAC_SHA256, aesCt, hmacSha256);
+			registerTransformer(ct);
 		}
 	}
 	
@@ -100,7 +115,8 @@ public class CryptoPlugin {
 		
 		// then encode it, and create new Message
 		Key key = createKey(message);
-		SecurePayload payload = ctr.encode(key, bb); // TODO: shared secret
+		SecurePayload payload = ctr.encode(key, bb); 
+		
 		SecureSubMessage ssm = new SecureSubMessage(payload);
 		ssm.singleSubMessageFlag(false);
 		
