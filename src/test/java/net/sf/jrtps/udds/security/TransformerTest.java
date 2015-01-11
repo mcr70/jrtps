@@ -56,6 +56,28 @@ public class TransformerTest {
 		Assert.assertTrue(Arrays.equals(bytes, decoded.getBuffer().array()));
 	}
 
+	@Test
+	public void testCompositeTransformer() throws NoSuchAlgorithmException, NoSuchPaddingException {
+		CipherTransformer tr2 = new CipherTransformer("AES", 0x01);
+		MACTransformer tr1 = new MACTransformer("HmacSHA1", 0x02);
+		CompositeTransformer ct = new CompositeTransformer(0x03, tr1, tr2);
+		
+		SecretKeySpec key = createKey();
+		
+		RTPSByteBuffer bb = new RTPSByteBuffer(bytes);
+		bb.getBuffer().position(bytes.length);
+		
+		SecurePayload payload = ct.encode(key, bb);
+		logger.debug("composite encoded {} -> {}", Arrays.toString(bb.getBuffer().array()), 
+				Arrays.toString(payload.getCipherText()));
+
+		RTPSByteBuffer decoded = ct.decode(key, payload);
+		logger.debug("composite decoded {} <- {}", Arrays.toString(decoded.getBuffer().array()), 
+				Arrays.toString(payload.getCipherText()));
+
+		Assert.assertTrue(Arrays.equals(bytes, decoded.getBuffer().array()));
+	}
+
 	private SecretKeySpec createKey() {
 		try {
 			MessageDigest md = MessageDigest.getInstance("MD5");
