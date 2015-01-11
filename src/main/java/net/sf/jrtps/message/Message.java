@@ -192,8 +192,6 @@ public class Message {
                 buffer.setEndianess(hdr.endiannessFlag()); // Set the endianess
                 hdr.writeTo(buffer);
 
-                subMessageCount++;
-
                 position = buffer.position();
                 msg.writeTo(buffer);
                 int subMessageLength = buffer.position() - position;
@@ -201,6 +199,8 @@ public class Message {
                 // Position to 'submessageLength' -2 is for short (2 bytes)
                 // buffers current position is not changed
                 buffer.getBuffer().putShort(position - 2, (short) subMessageLength);
+
+                subMessageCount++;
 
                 log.trace("SubMsg out: {}", msg);
             } catch (BufferOverflowException boe) {
