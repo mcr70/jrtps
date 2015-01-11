@@ -1,7 +1,6 @@
 package net.sf.jrtps.udds.security;
 
 import java.security.Key;
-import java.util.Arrays;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -56,10 +55,11 @@ class CompositeTransformer implements Transformer {
 	@Override
 	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
 		SecurePayload sp1 = tr1.encode(key, bb);
-		SecurePayload sp2 = tr2.encode(key, new RTPSByteBuffer(sp1.getCipherText()));
 		
-		logger.debug("1 -> {}", Arrays.toString(sp1.getCipherText()));
-		logger.debug("2 -> {}", Arrays.toString(sp2.getCipherText()));
+		RTPSByteBuffer bb2 = new RTPSByteBuffer(sp1.getCipherText());
+		bb2.getBuffer().position(sp1.getCipherText().length);		
+		
+		SecurePayload sp2 = tr2.encode(key, bb2);
 		
 		return sp2;
 	}
@@ -67,7 +67,7 @@ class CompositeTransformer implements Transformer {
 	@Override
 	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
 		RTPSByteBuffer bb1 = tr2.decode(key, payload);
-		RTPSByteBuffer bb2 = tr1.decode(key, new SecurePayload(tr1.getTransformationKind(), bb1.getBuffer().array())); 
+		RTPSByteBuffer bb2 = tr1.decode(key, new SecurePayload(tr1.getTransformationKind(), bb1.getBuffer().array()));
 		
 		return bb2;
 	}
