@@ -1,5 +1,6 @@
-1.1.1
+1.2
     - Guid is created by AuthenticationPlugin.
+    - Security: Securing content with Transformers
 
 1.1
     - security: authentication & shared secret exchange

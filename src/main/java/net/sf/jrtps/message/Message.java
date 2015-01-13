@@ -36,7 +36,7 @@ public class Message {
     /**
      * Constructor.
      * 
-     * @param Header
+     * @param header
      */
     public Message(Header header) {
 		this.header = header;

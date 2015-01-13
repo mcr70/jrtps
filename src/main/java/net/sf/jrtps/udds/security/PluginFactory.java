@@ -53,7 +53,6 @@ public abstract class PluginFactory {
 	
 	/**
 	 * Creates an instance of AuthenticationPlugin
-	 * @param p
 	 * @param conf
 	 * @return AuthenticationPlugin
 	 * @throws PluginException 
