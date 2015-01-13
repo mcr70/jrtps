@@ -19,11 +19,6 @@ class AuthenticationData {
 	private final CountDownLatch timeOutLatch;
 	
 
-	public AuthenticationData(X509Certificate certificate) {
-		this.certificate = certificate;
-		timeOutLatch = new CountDownLatch(1);
-	}
-
 	public AuthenticationData(ParticipantData pd) {
 		participantData = pd;
 		timeOutLatch = new CountDownLatch(1);
@@ -77,13 +72,13 @@ class AuthenticationData {
 		challengeA = challenge;
 	}
 	
-	public byte[] getChallengeRequestChallenge() {
+	/**
+	 * Gets the challenge bytes used with handshake request message(Challenge_A)
+	 * @return Challenge_A
+	 */
+	public byte[] getRequestChallenge() {
 		return challengeA;
 	}
-
-//	public String toString() {
-//		return certificate.getSubjectDN().toString();
-//	}
 
 	public CountDownLatch getTimeoutLatch() {
 		return timeOutLatch;
