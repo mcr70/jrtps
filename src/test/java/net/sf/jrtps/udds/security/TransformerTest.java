@@ -28,12 +28,10 @@ public class TransformerTest {
 		bb.getBuffer().position(bytes.length);
 		
 		SecurePayload payload = tr.encode(key, bb);
-		logger.debug("mac encoded {} -> {}", Arrays.toString(bytes), 
-				Arrays.toString(payload.getCipherText()));
+		logger.debug("mac encoded {} -> {}", bytes, payload.getCipherText());
 		
 		RTPSByteBuffer decoded = tr.decode(key, payload);
-		logger.debug("mac decoded {} <- {}", Arrays.toString(decoded.getBuffer().array()), 
-				Arrays.toString(payload.getCipherText()));
+		logger.debug("mac decoded {} <- {}", decoded.getBuffer().array(), payload.getCipherText());
 		
 		Assert.assertTrue(Arrays.equals(bytes, decoded.getBuffer().array()));
 	}
@@ -46,12 +44,10 @@ public class TransformerTest {
 		bb.getBuffer().position(bytes.length);
 		
 		SecurePayload payload = tr.encode(key, bb);
-		logger.debug("cipher encoded {} -> {}", Arrays.toString(bb.getBuffer().array()), 
-				Arrays.toString(payload.getCipherText()));
+		logger.debug("cipher encoded {} -> {}", bb.getBuffer().array(), payload.getCipherText());
 
 		RTPSByteBuffer decoded = tr.decode(key, payload);
-		logger.debug("cipher decoded {} <- {}", Arrays.toString(decoded.getBuffer().array()), 
-				Arrays.toString(payload.getCipherText()));
+		logger.debug("cipher decoded {} <- {}", decoded.getBuffer().array(), payload.getCipherText());
 
 		Assert.assertTrue(Arrays.equals(bytes, decoded.getBuffer().array()));
 	}
@@ -68,12 +64,10 @@ public class TransformerTest {
 		bb.getBuffer().position(bytes.length);
 		
 		SecurePayload payload = ct.encode(key, bb);
-		logger.debug("composite encoded {} -> {}", Arrays.toString(bb.getBuffer().array()), 
-				Arrays.toString(payload.getCipherText()));
+		logger.debug("composite encoded {} -> {}", bb.getBuffer().array(), payload.getCipherText());
 
 		RTPSByteBuffer decoded = ct.decode(key, payload);
-		logger.debug("composite decoded {} <- {}", Arrays.toString(decoded.getBuffer().array()), 
-				Arrays.toString(payload.getCipherText()));
+		logger.debug("composite decoded {} <- {}", decoded.getBuffer().array(), payload.getCipherText());
 
 		Assert.assertTrue(Arrays.equals(bytes, decoded.getBuffer().array()));
 	}

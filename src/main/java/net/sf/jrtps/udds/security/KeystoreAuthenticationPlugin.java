@@ -110,6 +110,7 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 
 	
 	@SuppressWarnings("unchecked")
+	@Override
 	public void init(Participant p) {
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
@@ -124,6 +125,7 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 	 * Gets IdentityToken
 	 * @return identityToken
 	 */
+	@Override
 	public IdentityToken getIdentityToken() {
 		return getLocalIdentity().getIdentityToken();
 	}
@@ -135,6 +137,7 @@ public class KeystoreAuthenticationPlugin extends AuthenticationPlugin {
 	 * @param pd ParticipantData to authenticate
 	 * @see net.sf.jrtps.udds.BuiltinParticipantDataListener#onSamples(java.util.List)
 	 */
+	@Override
 	public void beginHandshake(ParticipantData pd) {
 		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
 		

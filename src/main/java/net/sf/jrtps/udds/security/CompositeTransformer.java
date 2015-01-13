@@ -54,19 +54,25 @@ class CompositeTransformer implements Transformer {
 
 	@Override
 	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
+		byte[] originalBytes = bb.toArray();
+
+		// Encode with first Transformer
 		SecurePayload sp1 = tr1.encode(key, bb);
-		
 		RTPSByteBuffer bb2 = new RTPSByteBuffer(sp1.getCipherText());
 		bb2.getBuffer().position(sp1.getCipherText().length);		
 		
+		// Encode with second Transformer
 		SecurePayload sp2 = tr2.encode(key, bb2);
 		
-		return sp2;
+		// Return SecurePayload with transformationKind of _this_ Transformer
+		return new SecurePayload(kind, sp2.getCipherText());
 	}
 
 	@Override
 	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
+		// Decode first with second Transformer
 		RTPSByteBuffer bb1 = tr2.decode(key, payload);
+		// Decode next with first Transformer
 		RTPSByteBuffer bb2 = tr1.decode(key, new SecurePayload(tr1.getTransformationKind(), bb1.getBuffer().array()));
 		
 		return bb2;

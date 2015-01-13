@@ -78,7 +78,7 @@ class CipherTransformer implements Transformer {
 		
 		// TODO: securepayload w/ ByteBuffer
 		byte[] array = output.array();
-		
+
 		byte[] cipherText = new byte[output.position()];
 		System.arraycopy(array, 0, cipherText, 0, cipherText.length);
 
