@@ -48,4 +48,30 @@ keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
 
 * Securing traffic
 
+ Currently, uDDS CryptoPlugin is not compatible with the one specified in DDS security
+ specification. Main difference is that CryptoPlugin in specification uses a concept
+ of cryptographic session, which is not implemented at this time. For this reason,
+ <transformationID>s used on wire are set to be different as specified in specification,
+ even though transformation is the same.
+ Future versions of udds will implement this feature, but we will wait for the final
+ version of the specification.
+
+ <CryptoPlugin> is used to encode/decode messages. uDDS CryptoPlugin delegates actual encoding
+ or decoding to <Transformer>s. Three predefined Transformers are available: 
+ <MacTransformer>, <CipherTransformer> and <CompositeTransformer>.
+ 
+ MacTransformer uses <javax.crypto.Mac> to append a MAC at the end of payload.
+ Two MacTransformers are registered to CryptoPlugin during startup:
+ <HmacSHA1, HmacSHA256>. 
+ 
+ CipherTransformer uses <javax.crypto.Cipher> to encrypt/decrypt messages.
+ During startup, a CipherTransformer with name <AES> is registered to CryptoPlugin.
+
+ CompositeTransformer joins two Transformers together. Payload is encoded by encoding
+ it with first Transformer, followed by encoding with second Transformer. Decoding
+ is done in reverse order. The name of the CompositeTranformer 
+ is obtained by concatenating names of the contained Transformers. Two CompositeTranformers
+ are registered on startup: <AESHmacSHA1, AESHmacSHA256>
+ 
+ 
  
