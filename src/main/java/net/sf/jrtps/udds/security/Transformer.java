@@ -31,13 +31,15 @@ public interface Transformer {
 	 * Encodes RTPSByteBuffer into SecurePayload.
 	 * @param bb RTPSByteBuffer 
 	 * @return SecurePayload
+	 * @throws SecurityException 
 	 */
-	SecurePayload encode(Key key, RTPSByteBuffer bb);
+	SecurePayload encode(Key key, RTPSByteBuffer bb) throws SecurityException;
 	
 	/**
 	 * Decodes a given SecurePayload
 	 * @param payload Payload to decode
 	 * @return RTPSByteBuffer
+	 * @throws SecurityException
 	 */
-	RTPSByteBuffer decode(Key key, SecurePayload payload);
+	RTPSByteBuffer decode(Key key, SecurePayload payload) throws SecurityException;
 }

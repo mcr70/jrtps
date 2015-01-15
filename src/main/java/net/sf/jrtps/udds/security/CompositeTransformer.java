@@ -53,7 +53,7 @@ class CompositeTransformer implements Transformer {
 	}
 
 	@Override
-	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
+	public SecurePayload encode(Key key, RTPSByteBuffer bb) throws SecurityException {
 		byte[] originalBytes = bb.toArray();
 
 		// Encode with first Transformer
@@ -69,7 +69,7 @@ class CompositeTransformer implements Transformer {
 	}
 
 	@Override
-	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
+	public RTPSByteBuffer decode(Key key, SecurePayload payload) throws SecurityException {
 		// Decode first with second Transformer
 		RTPSByteBuffer bb1 = tr2.decode(key, payload);
 		// Decode next with first Transformer

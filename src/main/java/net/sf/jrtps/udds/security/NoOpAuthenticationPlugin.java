@@ -2,6 +2,7 @@ package net.sf.jrtps.udds.security;
 
 import java.util.Random;
 
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.types.EntityId;
@@ -14,16 +15,11 @@ import net.sf.jrtps.udds.Participant;
  * 
  * @author mcr70
  */
-public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
+class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 	private static final Random random = new Random(System.currentTimeMillis());
-
-	private Guid guid;
+	static final String PLUGIN_NAME = "none";
 
 	public NoOpAuthenticationPlugin() {
-		byte[] prefix = new byte[12];
-		random.nextBytes(prefix);
-		
-		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
 	}
 	
 	@Override
@@ -37,12 +33,20 @@ public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 	}
 
 	@Override
-	public void init(Participant p) {
+	public void init(Participant p, Configuration conf) {
 		// Nothing to do
 	}
 
 	@Override
 	public Guid getGuid() {
-		return guid;
+		byte[] prefix = new byte[12];
+		random.nextBytes(prefix);
+		
+		return new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+	}
+
+	@Override
+	public String getName() {
+		return PLUGIN_NAME;
 	}
 }

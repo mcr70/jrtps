@@ -19,12 +19,12 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 class ParticipantStatelessMessageListener implements SampleListener<ParticipantStatelessMessage> {
-	private static final Logger logger = LoggerFactory.getLogger(KeystoreAuthenticationPlugin.AUTH_LOG_CATEGORY);
+	private static final Logger logger = LoggerFactory.getLogger(JKSAuthenticationPlugin.AUTH_LOG_CATEGORY);
 	private final Guid participantGuid;
 	private final Guid statelessReaderGuid;
-	private final KeystoreAuthenticationPlugin authPlugin;
+	private final JKSAuthenticationPlugin authPlugin;
 
-	ParticipantStatelessMessageListener(Participant p, KeystoreAuthenticationPlugin authPlugin) {
+	ParticipantStatelessMessageListener(Participant p, JKSAuthenticationPlugin authPlugin) {
 		this.authPlugin = authPlugin;
 		this.participantGuid = p.getGuid();
 		this.statelessReaderGuid = new Guid(participantGuid.getPrefix(), EntityId.BUILTIN_PARTICIPANT_STATELESS_READER);

@@ -27,6 +27,7 @@ import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.LocatorUDPv4_t;
 import net.sf.jrtps.types.Time;
 import net.sf.jrtps.udds.security.CryptoPlugin;
+import net.sf.jrtps.udds.security.SecurityException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -115,7 +116,12 @@ class RTPSMessageReceiver implements Runnable {
         			continue;
         		}
         		else {
-            		handleMessage(cryptoPlugin.decodeMessage(ssm));
+            		try {
+						handleMessage(cryptoPlugin.decodeMessage(ssm));
+					} catch (SecurityException e) {
+						logger.error("Failed to decode message", e);
+					}
+
             		continue;
         		}
         	}

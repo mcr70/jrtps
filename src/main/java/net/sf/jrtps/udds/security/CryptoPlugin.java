@@ -80,7 +80,12 @@ public class CryptoPlugin {
 	public CryptoPlugin(Configuration conf) {
 		this.conf = conf;
 		String rtpsProtection = conf.getRTPSProtection();
-		Transformer transformerByName = getTransformerByName(rtpsProtection);
+		Transformer transformerByName;
+		try {
+			transformerByName = getTransformerByName(rtpsProtection);
+		} catch (SecurityException e) {
+			throw new RuntimeException(e);
+		}
 		transformationKind = transformerByName.getTransformationKind();
 	}
 	
@@ -100,8 +105,9 @@ public class CryptoPlugin {
 	 * This method is called by jRTPS when a message is being sent.
 	 * @param message Message to be sent.
 	 * @return An encoded message
+	 * @throws SecurityException 
 	 */
-	public Message encodeMessage(Message message) {
+	public Message encodeMessage(Message message) throws SecurityException {
 		if (transformationKind == 0) {
 			return message;
 		}
@@ -135,8 +141,9 @@ public class CryptoPlugin {
 	 * 
 	 * @param msg SecureSubMessage to decode
 	 * @return decoded Message
+	 * @throws SecurityException 
 	 */
-	public Message decodeMessage(SecureSubMessage msg) {
+	public Message decodeMessage(SecureSubMessage msg) throws SecurityException {
 		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 
 		logger.trace("decoding message with {}", ctr.getName());
@@ -150,7 +157,7 @@ public class CryptoPlugin {
 	
 
 
-	SecureSubMessage encodeSubMessage(int transformationKind, SubMessage message) {
+	SecureSubMessage encodeSubMessage(int transformationKind, SubMessage message) throws SecurityException {
 		Transformer ctr = getTransformer(transformationKind);
 		
 		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[conf.getBufferSize()]);
@@ -164,7 +171,7 @@ public class CryptoPlugin {
 		return ssm;
 	}
 
-	SubMessage decodeSubMessage(SecureSubMessage msg) {
+	SubMessage decodeSubMessage(SecureSubMessage msg) throws SecurityException {
 		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 		Key key = createKey(null);
 		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
@@ -173,7 +180,7 @@ public class CryptoPlugin {
 		return null;
 	}
 
-	private Transformer getTransformer(int kind) {
+	private Transformer getTransformer(int kind) throws SecurityException {
 		Transformer transformer = transformersById.get(kind);
 		if (transformer == null) {
 			throw new SecurityException("Could not find Transformer with transformationKind " + 
@@ -183,7 +190,7 @@ public class CryptoPlugin {
 		return transformer;
 	}
 
-	private Transformer getTransformerByName(String trName) {
+	private Transformer getTransformerByName(String trName) throws SecurityException {
 		Transformer transformer = transformersByName.get(trName);
 		if (transformer == null) {
 			throw new SecurityException("Could not find Transformer with name " + trName + 
