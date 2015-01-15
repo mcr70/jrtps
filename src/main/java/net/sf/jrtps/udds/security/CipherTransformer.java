@@ -64,16 +64,17 @@ class CipherTransformer implements Transformer {
 	}
 
 	@Override
-	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
+	public SecurePayload encode(Key key, RTPSByteBuffer bb) throws SecurityException {
 		ByteBuffer output = ByteBuffer.wrap(new byte[4096]);// TODO: hardcoded
 		bb.getBuffer().flip();
-		try {
-			synchronized (cipher) {
+
+		synchronized (cipher) {
+			try {
 				cipher.init(Cipher.ENCRYPT_MODE, key);
 				cipher.doFinal(bb.getBuffer(), output);
+			} catch (InvalidKeyException | ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+				throw new SecurityException(e);
 			}
-		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException | ShortBufferException e) {
-			logger.warn("Failed to encode message", e);
 		}
 		
 		// TODO: securepayload w/ ByteBuffer
@@ -91,7 +92,7 @@ class CipherTransformer implements Transformer {
 	}
 
 	@Override
-	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
+	public RTPSByteBuffer decode(Key key, SecurePayload payload) throws SecurityException {
 		byte[] decryptedBytes = null;
 		try {
 			synchronized (cipher) {
@@ -100,7 +101,7 @@ class CipherTransformer implements Transformer {
 				decryptedBytes = cipher.doFinal(cipherText);
 			}
 		} catch (InvalidKeyException | IllegalBlockSizeException | BadPaddingException e) {
-			logger.error("Failed to decode message", e);
+			throw new SecurityException(e);
 		}
 		
 		return new RTPSByteBuffer(decryptedBytes);

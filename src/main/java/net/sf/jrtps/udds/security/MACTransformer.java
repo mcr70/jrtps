@@ -51,7 +51,7 @@ class MACTransformer implements Transformer {
 	}
 	
 	@Override
-	public SecurePayload encode(Key key, RTPSByteBuffer bb) {
+	public SecurePayload encode(Key key, RTPSByteBuffer bb) throws SecurityException {
 		ByteBuffer buffer = bb.getBuffer();
 		buffer.flip();
 		byte[] hmacBytes;
@@ -59,8 +59,7 @@ class MACTransformer implements Transformer {
 			try {
 				hmac.init(key);
 			} catch (InvalidKeyException e) {
-				// TODO: better exception handling
-				throw new RuntimeException(e);
+				throw new SecurityException(e);
 			}
 			
 			hmac.update(buffer);
@@ -79,7 +78,7 @@ class MACTransformer implements Transformer {
 	}
 
 	@Override
-	public RTPSByteBuffer decode(Key key, SecurePayload payload) {
+	public RTPSByteBuffer decode(Key key, SecurePayload payload) throws SecurityException {
 		byte[] cipherText = payload.getCipherText();
 		if (logger.isTraceEnabled()) {
 			logger.trace("MACTransformer: decoding {}", Arrays.toString(cipherText));

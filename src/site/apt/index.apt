@@ -31,7 +31,13 @@ Overview
  Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}
 
   
- 1.1
+ 1.2
  
-  * security: authentication & shared secret exchange
+  * Guid is created by AuthenticationPlugin. 
+    
+  * Renamed KeystoreAuthenticationPlugin to JKSAuthenticationPlugin
+    
+  * Security: Securing content with Transformers; MacTransformer, CipherTransformer
+    CompositeTransformer
+
     

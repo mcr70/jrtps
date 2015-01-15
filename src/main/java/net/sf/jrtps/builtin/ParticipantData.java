@@ -99,7 +99,7 @@ public class ParticipantData extends DiscoveredData {
 		this.permissionsToken = pToken;
 		this.guidPrefix = prefix;
 		this.availableBuiltinEndpoints = endpoints;
-		this.discoveryLocators = discoveryLocators;
+		this.discoveryLocators = discoveryLocators != null ? discoveryLocators : new LinkedList<Locator>();
 		this.userdataLocators = userdataLocators;
 
 		super.topicName = BUILTIN_TOPIC_NAME;

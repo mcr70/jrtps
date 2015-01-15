@@ -1,6 +1,5 @@
 package net.sf.jrtps.udds.security;
 
-import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
@@ -21,7 +20,7 @@ public class TransformerTest {
 	private byte[] bytes = new byte[] { 0x01, 0x02, 0x03, 0x04 };
 
 	@Test
-	public void testMacTransformer() throws NoSuchAlgorithmException, InvalidKeyException {
+	public void testMacTransformer() throws SecurityException, NoSuchAlgorithmException {
 		MACTransformer tr = new MACTransformer("HmacSHA1", 0x02);
 		SecretKeySpec key = createKey();
 		RTPSByteBuffer bb = new RTPSByteBuffer(bytes);
@@ -37,7 +36,7 @@ public class TransformerTest {
 	}
 	
 	@Test
-	public void testCipherTransformer() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	public void testCipherTransformer() throws NoSuchAlgorithmException, NoSuchPaddingException, SecurityException {
 		CipherTransformer tr = new CipherTransformer("AES", 0x01);
 		SecretKeySpec key = createKey();
 		RTPSByteBuffer bb = new RTPSByteBuffer(bytes);
@@ -53,7 +52,7 @@ public class TransformerTest {
 	}
 
 	@Test
-	public void testCompositeTransformer() throws NoSuchAlgorithmException, NoSuchPaddingException {
+	public void testCompositeTransformer() throws NoSuchAlgorithmException, NoSuchPaddingException, SecurityException {
 		CipherTransformer tr1 = new CipherTransformer("AES", 0x01);
 		MACTransformer tr2 = new MACTransformer("HmacSHA1", 0x02);
 		CompositeTransformer ct = new CompositeTransformer(0x03, tr1, tr2);

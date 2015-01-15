@@ -386,8 +386,8 @@ public class Configuration {
     }
 
 
-	public String getPluginFactoryName() {
-        return props.getProperty("udds.security.plugin-factory", "no-op"); 
+	public String getAuthenticationPluginName() {
+        return props.getProperty("udds.security.authentication-plugin", "none"); 
 	}
 
 	/**

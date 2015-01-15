@@ -97,27 +97,27 @@ jrtps.discovery.announce-uris = mem://10.10.10.12:1024
   creation of communication objects and creation of URIs for the same things.>
 
 
-* PluginFactory
+* AuthenticationPlugin
 
- {{{./apidocs/net/sf/jrtps/udds/security/PluginFactory.html}PluginFactory}}
- is used to provide different authentication mechanisms. jRTPS has two predefined
- PluginFactorys available, <no-op> and <jks>, which are automatically registered 
+ {{{./apidocs/net/sf/jrtps/udds/security/AuthenticationPlugin.html}AuthenticationPlugin}}
+ is used to provide different authentication mechanisms. jRTPS has one predefined
+ AuthenticationPlugin available: <jks>, which is automatically registered 
  during startup. 
- Configuration parameter {{{./configuration.html#udds.security.plugin-factory}udds.security.plugin-factory}} 
- is used to indicate which plugin factory to use.
+ Configuration parameter udds.security.authentication-plugin is used to indicate which 
+ plugin to use.
  
- Currently, plugin factory is used to create only authentication plugins. To create
- a custom AuthenticationPlugin, for example a password based, one needs to register
- a new PluginFactory before instantiating Participant:
- 
+ One can use a custom AuthenticationPlugin by registering  
 +---
-   PluginFactory.registerPluginFactory("custom", new CustomPluginFactory());
+   AuthenticationPlugin.registerPlugin(new CustomAuthPlugin());
 +---
  
- The code above would allow this configuration to be used in jrtps.properties:
+ The code above would allow this configuration to be used in jrtps.properties,
+ if the
+   {{{./apidocs/net/sf/jrtps/udds/security/AuthenticationPlugin.html##getName()}name}}. 
+ of the plugin is defined as 'custom' by CustomAuthPlugin:
  
 +---
-udds.security.plugin-factory = custom
+udds.security.authentication-plugin = custom
 +--- 
 
 
