@@ -103,7 +103,7 @@ jrtps.discovery.announce-uris = mem://10.10.10.12:1024
  is used to provide different authentication mechanisms. jRTPS has one predefined
  AuthenticationPlugin available: <jks>, which is automatically registered 
  during startup. 
- Configuration parameter udds.security.authentication-plugin is used to indicate which 
+ Configuration parameter <udds.security.authentication> is used to indicate which 
  plugin to use.
  
  One can use a custom AuthenticationPlugin by registering  
@@ -117,7 +117,7 @@ jrtps.discovery.announce-uris = mem://10.10.10.12:1024
  of the plugin is defined as 'custom' by CustomAuthPlugin:
  
 +---
-udds.security.authentication-plugin = custom
+udds.security.authentication = custom
 +--- 
 
 

@@ -108,7 +108,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			IdentityCredential identityCreadential = new IdentityCredential(cert, privateKey);
 			this.identity = new LocalIdentity(identityCreadential);
 
-			logger.debug("Succesfully locally authenticated {}", alias);
+			logger.debug("Successfully locally authenticated {}", alias);
 		} catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException | InvalidKeyException | NoSuchProviderException | SignatureException | UnrecoverableKeyException e) {
 			throw new RuntimeException("Failed to initialize AuthenticationPlugin", e);
 		}
@@ -333,12 +333,10 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			verify(signedData, cert.getPublicKey());
 			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();			
 
-			//encryptedSharedSecret[0] = 0x1b; // Causes handshake to fail (for testing purposes)
-
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
 
 			authData.setSharedSecret(sharedSecret);
-			logger.info("Authenticated {} succesfully", authData.getCertificate().getSubjectDN());
+			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
 			notifyListenersOfSuccess(authData.getParticipantData());
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
