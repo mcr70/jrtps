@@ -387,7 +387,7 @@ public class Configuration {
 
 
 	public String getAuthenticationPluginName() {
-        return props.getProperty("udds.security.authentication-plugin", "none"); 
+        return props.getProperty("udds.security.authentication", "none"); 
 	}
 
 	/**

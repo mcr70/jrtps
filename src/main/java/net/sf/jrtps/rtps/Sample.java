@@ -254,7 +254,7 @@ public class Sample<T> implements Cloneable {
 
     @Override
     public Object clone() throws CloneNotSupportedException {
-        Sample s = (Sample) super.clone();
+        Sample<?> s = (Sample<?>) super.clone();
         s.properties = new HashMap<>(this.properties);
         
         return s;
