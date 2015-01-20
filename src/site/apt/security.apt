@@ -5,20 +5,17 @@ DDS Security
 
 * Authentication
  
- If security is enabled with {{{./configuration.html#udds.security.plugin-factory}jks plugin factory}}, 
+ If security is enabled with {{{./configuration.html#udds.security.authentication}jks authentication}}, 
  creation of Participant loads a certificate from keystore to be used in 
  authenticating with remote participants.
  During authentication, a shared secret is exchanged with the participants.
  This allows the two participants to exchange encrypted messages with
- each other. Note, that jRTPS will not do encryption. Key exchange is 
- present only for the purposes of future development. If the authentication
- fails for any reason, udds Participant will not exchange other than discovery 
- data with failing participant. 
+ each other. If the authentication fails for any reason, udds Participant 
+ will not exchange other than discovery data with failing participant. 
  
  DDS security relies on both authenticating parties having signed by 
  the same certificate authority. DDS Security specification defines also some 
- other security related operations, like signing messages and permissions. 
- None of these are implemented currently.
+ other security related operations, like protecting messages and permissions. 
  
  Here is an example how one can create a self signed certificate authority (jrtpsCA),
  and one test user (jrtps01), whose certificate is signed by CA.
@@ -40,15 +37,15 @@ keytool -alias jrtpsCA -gencert -ext san=dns:jrtps01 -infile jrtps01.csr -keysto
 keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
 +----
 
- See {{{./configuration.html#udds.security.plugin-factory}configuration}} section
- on how to enable DDS security with keystore created above.
+ See {{{./configuration.html#udds.security.authentication}configuration}} section
+ on how to enable authentication with keystore created above.
  
 
-* Securing traffic
+* Protecting messages
 
  Currently, uDDS CryptoPlugin is not compatible with the one specified in DDS security
- specification. Main difference is that CryptoPlugin in specification uses a concept
- of cryptographic session, which is not implemented at this time. For this reason,
+ specification (1.0-Beta1). Main difference is that CryptoPlugin in specification 
+ uses a concept of cryptographic session, which is not implemented at this time. For this reason,
  <transformationID>s used on wire are set to be different as specified in specification,
  even though transformation is the same.
  Future versions of udds will implement this feature, but we will wait for the final
