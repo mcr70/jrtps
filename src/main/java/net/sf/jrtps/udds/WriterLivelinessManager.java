@@ -38,7 +38,7 @@ class WriterLivelinessManager implements Runnable {
 
     WriterLivelinessManager(Participant participant) {
         this.participant = participant;
-
+        
         // Create samples used with liveliness protocol
         manualSample = new ParticipantMessage(participant.getRTPSParticipant().getGuid().getPrefix(),
                 ParticipantMessage.MANUAL_LIVELINESS_KIND, new byte[0]);

@@ -105,7 +105,7 @@ public class RTPSParticipant {
 
         // NOTE: We can have only one MessageReceiver. pending samples concept
         // relies on it.
-        handler = new RTPSMessageReceiver(this, queue);
+        handler = new RTPSMessageReceiver(this, queue, config);
         threadPoolExecutor.execute(handler);
 
         logger.debug("Starting receivers for discovery");

@@ -31,12 +31,10 @@ public class MemTransportTest {
             dw.write(m);
             Thread.sleep(1000);
         }
-        
-                
+                        
         System.out.println("Received " + dr.getInstances().size() + " instances from writers.");
         
         p1.close();
         p2.close();
     }
-
 }

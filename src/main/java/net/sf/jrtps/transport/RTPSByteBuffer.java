@@ -468,6 +468,18 @@ public class RTPSByteBuffer {
     }
 
     /**
+     * Returns a byte array from the beginning of backing array to current position
+     * @return byte array
+     */
+    public byte[] toArray() {
+    	byte[] array = buffer.array();
+    	byte[] bytes = new byte[buffer.position()];
+    	System.arraycopy(array, 0, bytes, 0, bytes.length);
+    	
+    	return bytes;
+    }
+    
+    /**
      * Gets an OutputStream that writes to this RTPSByteBuffer. Writing starts
      * at current position.
      * 

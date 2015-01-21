@@ -1,8 +1,10 @@
 package net.sf.jrtps.udds.security;
 
+
 /**
  * ParticipantSecurityAttributes.
- *
+ * See 8.4.2.5 for description
+ * 
  * @author mcr70
  */
 class ParticipantSecurityAttributes {
@@ -10,6 +12,13 @@ class ParticipantSecurityAttributes {
     private boolean isAccessProtected = false;
     private boolean isRtpsProtected = false;
 
+    public ParticipantSecurityAttributes(boolean allowUnauthenticatedParticipants,
+    		boolean isAccessProtected, boolean isRtpsProtected) {
+				this.allowUnauthenticatedParticipants = allowUnauthenticatedParticipants;
+				this.isAccessProtected = isAccessProtected;
+				this.isRtpsProtected = isRtpsProtected;
+	}
+    
     /**
      * Checks, whether or not unauthenticated participants will be matched
      * @return true or false
@@ -19,7 +28,8 @@ class ParticipantSecurityAttributes {
     }
     
     /**
-     * Checks, if AccessControl plugin is used.
+     * Checks, if AccessControl::validate_remote_permissions is used on 
+     * remote participant before participant is matched with local one.
      * @return true or false
      */
     public boolean isAccessProtected() {

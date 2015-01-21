@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.BlockingQueue;
 
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Gap;
@@ -18,12 +19,15 @@ import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SecureSubMessage;
 import net.sf.jrtps.message.SubMessage;
+import net.sf.jrtps.message.SubMessage.Kind;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.LocatorUDPv4_t;
 import net.sf.jrtps.types.Time;
+import net.sf.jrtps.udds.security.CryptoPlugin;
+import net.sf.jrtps.udds.security.SecurityException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,14 +49,15 @@ class RTPSMessageReceiver implements Runnable {
 
     private final RTPSParticipant participant;
     private final BlockingQueue<byte[]> queue;
+	private final CryptoPlugin cryptoPlugin;
 
     private Set<GuidPrefix> ignoredParticipants = new HashSet<>();
-
     private boolean running = true;
 
-    RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue) {
+    RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue, Configuration config) {
         this.participant = p;
         this.queue = queue;
+        this.cryptoPlugin = new CryptoPlugin(config);
     }
 
     @Override
@@ -103,7 +108,25 @@ class RTPSMessageReceiver implements Runnable {
         List<SubMessage> subMessages = msg.getSubMessages();
 
         for (SubMessage subMsg : subMessages) {
-            switch (subMsg.getKind()) {
+        	if (subMsg.getKind() == Kind.SECURESUBMSG) {
+        		SecureSubMessage ssm = (SecureSubMessage) subMsg;
+        		if (ssm.singleSubMessageFlag()) {
+        			//subMsg = cryptoPlugin.decodeSubMessage(ssm);
+        			logger.warn("Decoding of submessage not implemented. Discarding it.");
+        			continue;
+        		}
+        		else {
+            		try {
+						handleMessage(cryptoPlugin.decodeMessage(ssm));
+					} catch (SecurityException e) {
+						logger.error("Failed to decode message", e);
+					}
+
+            		continue;
+        		}
+        	}
+        	
+        	switch (subMsg.getKind()) {
             case ACKNACK:
                 if (!destinationThisParticipant) {
                     continue;
@@ -191,13 +214,7 @@ class RTPSMessageReceiver implements Runnable {
 
                 handleGap(sourceGuidPrefix, (Gap) subMsg);
                 break;
-            case SECURESUBMSG:
-                if (!destinationThisParticipant) {
-                    continue;
-                }
 
-                handleSecureSubMessage((SecureSubMessage)subMsg);
-                break;
             default:
                 logger.warn("SubMessage not handled: {}", subMsg);
             }
@@ -235,30 +252,10 @@ class RTPSMessageReceiver implements Runnable {
         }
     }
 
-    private void handleSecureSubMessage(SecureSubMessage subMsg) {
-    	// TODO: implement SecureSubMessage handling
-    	if (subMsg.singleSubMessageFlag()) { // contains one submessage
-    		SubMessage sm = extractSubMessage(subMsg);
-    		// TODO: handleSubMessage(sm);
-    	}
-    	else { // contains an RTPS Message
-    		Message m = extractMessage(subMsg);
-    		handleMessage(m);
-    	}
-    	
-    	logger.warn("SecureSubMessage is not implemented. Ignoring it.");
-    }
-
 	private SubMessage extractSubMessage(SecureSubMessage subMsg) {
-		// TODO Auto-generated method stub
+    	logger.warn("Secure subMessage -> SubMessage not handled");
 		return null;
 	}
-
-	private Message extractMessage(SecureSubMessage subMsg) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
     void ignoreParticipant(GuidPrefix prefix) {
         ignoredParticipants.add(prefix);

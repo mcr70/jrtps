@@ -3,6 +3,7 @@ package net.sf.jrtps.udds.security;
 
 /**
  * EndpointSecurityAttributes.
+ * See 8.4.2.6 for description
  * 
  * @author mcr70
  */

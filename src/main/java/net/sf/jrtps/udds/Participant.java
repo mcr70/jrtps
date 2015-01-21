@@ -1,19 +1,28 @@
 package net.sf.jrtps.udds;
 
 import java.io.Externalizable;
+import java.io.IOException;
 import java.io.Serializable;
 import java.net.URI;
+import java.security.InvalidKeyException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
+import java.security.SignatureException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
+
+import javax.crypto.NoSuchPaddingException;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.Marshaller;
@@ -44,10 +53,9 @@ import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.udds.security.AuthenticationPlugin;
+import net.sf.jrtps.udds.security.JKSAuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessageMarshaller;
-import net.sf.jrtps.udds.security.PluginException;
-import net.sf.jrtps.udds.security.PluginFactory;
 import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
@@ -61,7 +69,6 @@ import org.slf4j.LoggerFactory;
  */
 public class Participant {
 	private static final Logger logger = LoggerFactory.getLogger(Participant.class);
-	private static final Random random = new Random(System.currentTimeMillis());
 
 	private final ScheduledThreadPoolExecutor threadPoolExecutor;
 
@@ -198,30 +205,33 @@ public class Participant {
 
 		createUnknownParticipantData(domainId);
 
-		int vmid = random.nextInt();
-		byte[] prefix = new byte[] { (byte) domainId, (byte) participantId, (byte) (vmid >> 8 & 0xff),
-				(byte) (vmid & 0xff), 0xc, 0xa, 0xf, 0xe, 0xb, 0xa, 0xb, 0xe };
+		try {
+			AuthenticationPlugin.registerPlugin(new JKSAuthenticationPlugin(config));
+		} catch (InvalidKeyException | UnrecoverableKeyException
+				| KeyStoreException | NoSuchAlgorithmException
+				| CertificateException | NoSuchProviderException
+				| SignatureException | NoSuchPaddingException | IOException e) {
+			logger.warn("Failed to register JKSAuthenticationPlugin", e);
+		}
+		
 
-		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+		
+		authPlugin = AuthenticationPlugin.getInstance(config.getAuthenticationPluginName());
+
+		this.guid = authPlugin.getGuid();
+
+		logger.debug("Created AuthenticationPlugin with name {}", config.getAuthenticationPluginName());
 
 
 		rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
 				discoveredParticipants, config);
 
 		this.livelinessManager = new WriterLivelinessManager(this);
+		createSecurityEndpoints();
+		authPlugin.init(this, config);		
 		
 		registerBuiltinMarshallers();
 		createSPDPEntities();
-
-		createSecurityEndpoints();
-		try {
-			PluginFactory pluginFactory = PluginFactory.getInstance(config.getPluginFactoryName());
-			authPlugin = pluginFactory.createAuthenticationPlugin(this, config);
-			logger.debug("Created AuthenticationPlugin with name {}", config.getPluginFactoryName());
-		} 
-		catch (PluginException e) {
-			throw new SecurityException("Failed to create AuthenticationPlugin", e);
-		}
 
 		discoveryLocators = rtps_participant.getDiscoveryLocators();
 		userdataLocators = rtps_participant.getUserdataLocators();
@@ -230,7 +240,10 @@ public class Participant {
 		rtps_participant.start();
 
 		createSEDPEntities();
-		DataReader<ParticipantData> pdReader = (DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+		
+		@SuppressWarnings("unchecked")
+		DataReader<ParticipantData> pdReader = 
+				(DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 		createSPDPResender();
