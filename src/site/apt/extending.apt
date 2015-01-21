@@ -107,6 +107,7 @@ jrtps.discovery.announce-uris = mem://10.10.10.12:1024
  plugin to use.
  
  One can use a custom AuthenticationPlugin by registering  
+
 +---
    AuthenticationPlugin.registerPlugin(new CustomAuthPlugin());
 +---
