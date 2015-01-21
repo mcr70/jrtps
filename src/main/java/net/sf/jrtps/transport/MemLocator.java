@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport.mem;
+package net.sf.jrtps.transport;
 
 import java.net.URI;
 import java.nio.ByteBuffer;

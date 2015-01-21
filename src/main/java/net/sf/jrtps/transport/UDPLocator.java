@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport.udp;
+package net.sf.jrtps.transport;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

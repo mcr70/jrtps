@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport.udp;
+package net.sf.jrtps.transport;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -9,7 +9,6 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 
-import net.sf.jrtps.transport.Receiver;
 import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;

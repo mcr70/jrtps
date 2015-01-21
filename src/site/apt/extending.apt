@@ -64,7 +64,7 @@ public class CustomDataWriter<T> extends DataWriter<T> {
  with scheme <mem> is provided. Actually, it is more than just a proof-of-concept. 
  It is intented to be used with automated tests, that test correct behaviour of two participants.
  
- TransportProvider server two purposes. One is to provide actual transport specific
+ TransportProvider serves two purposes. One is to provide actual transport specific
  receivers and transmitters. Other is to provide <Locator>s, that are used to 
  advertise participants communication capabilities to others.
 
