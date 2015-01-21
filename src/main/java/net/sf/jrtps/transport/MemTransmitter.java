@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport.mem;
+package net.sf.jrtps.transport;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -6,8 +6,6 @@ import java.nio.ByteOrder;
 import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.message.Message;
-import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.transport.Transmitter;
 
 /**
  * A Transmitter that writers RTPS Messages into <i>BlockingQueue</i> 

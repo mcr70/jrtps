@@ -1,4 +1,4 @@
-package net.sf.jrtps.transport.mem;
+package net.sf.jrtps.transport;
 
 import java.io.IOException;
 import java.net.URI;
@@ -8,10 +8,6 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.Configuration;
-import net.sf.jrtps.transport.PortNumberParameters;
-import net.sf.jrtps.transport.Receiver;
-import net.sf.jrtps.transport.Transmitter;
-import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;

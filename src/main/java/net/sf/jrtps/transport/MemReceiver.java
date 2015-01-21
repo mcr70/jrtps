@@ -1,8 +1,7 @@
-package net.sf.jrtps.transport.mem;
+package net.sf.jrtps.transport;
 
 import java.util.concurrent.BlockingQueue;
 
-import net.sf.jrtps.transport.Receiver;
 import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;

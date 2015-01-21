@@ -1,6 +1,7 @@
 package net.sf.jrtps.transport.mem;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.transport.MemProvider;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
