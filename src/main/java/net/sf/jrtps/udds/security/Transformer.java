@@ -11,11 +11,11 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  */
 public interface Transformer {
 	/**
-	 * Gets the id of this transformer. Id of the transformer is 
-	 * transferred to remote entity, so that remote entity can 
-	 * associate a correct CryptoTranformer to decode incoming message
+	 * Gets the transformation kind used by this transformer. Kind of the 
+	 * transformation is transferred to remote entity, so that remote entity can 
+	 * associate a correct Transformer to decode incoming message
 	 *  
-	 * @return id
+	 * @return transformationKind
 	 */
 	int getTransformationKind();
 	
@@ -29,7 +29,9 @@ public interface Transformer {
 	
 	/**
 	 * Encodes RTPSByteBuffer into SecurePayload.
-	 * @param bb RTPSByteBuffer 
+	 * 
+	 * @param bb RTPSByteBuffer RTPSByteBuffer to encode. Position should be placed at
+	 *        the end of buffer.
 	 * @return SecurePayload
 	 * @throws SecurityException 
 	 */
@@ -37,6 +39,7 @@ public interface Transformer {
 	
 	/**
 	 * Decodes a given SecurePayload
+	 * 
 	 * @param payload Payload to decode
 	 * @return RTPSByteBuffer
 	 * @throws SecurityException

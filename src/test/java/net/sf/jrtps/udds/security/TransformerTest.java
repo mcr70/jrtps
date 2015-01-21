@@ -55,7 +55,7 @@ public class TransformerTest {
 	public void testCompositeTransformer() throws NoSuchAlgorithmException, NoSuchPaddingException, SecurityException {
 		CipherTransformer tr1 = new CipherTransformer("AES", 0x01);
 		MACTransformer tr2 = new MACTransformer("HmacSHA1", 0x02);
-		CompositeTransformer ct = new CompositeTransformer(0x03, tr1, tr2);
+		CompositeTransformer ct = new CompositeTransformer(tr1, tr2, 0x03);
 		
 		SecretKeySpec key = createKey();
 		

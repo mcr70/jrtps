@@ -49,15 +49,18 @@ keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
  <transformationID>s used on wire are set to be different as specified in specification,
  even though transformation is the same.
  Future versions of udds will implement this feature, but we will wait for the final
- version of the specification.
+ version of the specification. 
+ 
+ Specification also allows protection to be applied at very fine level; At message level, 
+ at sub-message level, at data payload level. Each of these can be individually protected. 
+ uDDS implements only protection at message level. 
 
  <CryptoPlugin> is used to encode/decode messages. uDDS CryptoPlugin delegates actual encoding
  or decoding to <Transformer>s. Three predefined Transformers are available: 
  <MacTransformer>, <CipherTransformer> and <CompositeTransformer>.
  
- MacTransformer uses <javax.crypto.Mac> to append a MAC at the end of payload.
- Two MacTransformers are registered to CryptoPlugin during startup:
- <HmacSHA1, HmacSHA256>. 
+ MacTransformer uses <javax.crypto.Mac> to append a message authentication code (MAC) 
+ at the end of payload. Two MacTransformers are registered during startup: <HmacSHA1, HmacSHA256>. 
  
  CipherTransformer uses <javax.crypto.Cipher> to encrypt/decrypt messages.
  During startup, a CipherTransformer with name <AES> is registered to CryptoPlugin.

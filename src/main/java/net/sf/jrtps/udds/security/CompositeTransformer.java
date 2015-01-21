@@ -4,9 +4,6 @@ import java.security.Key;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * CompositeTransformer joins two transformations. During encoding,
  * bytes are first encoded with the first Tranformer. Result of the first transformation
@@ -14,9 +11,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  */
-class CompositeTransformer implements Transformer {
-	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
-	
+public class CompositeTransformer implements Transformer {
 	public static final int AES_HMAC_SHA1 = 0xffff0200;
     public static final int AES_HMAC_SHA256 = 0xffff0201;
 	
@@ -25,7 +20,13 @@ class CompositeTransformer implements Transformer {
 	private final String name;
 	private final Transformer tr2;
 	
-	public CompositeTransformer(int kind, Transformer tr1, Transformer tr2) {
+	/**
+	 * Constructor for CompositeTransformer. 
+	 * @param tr1 First Tranformer
+	 * @param tr2 Second Transformer
+	 * @param kind transformationKind
+	 */
+	public CompositeTransformer(Transformer tr1, Transformer tr2, int kind) {
 		this.name = tr1.getName() + tr2.getName();
 		this.kind = kind;
 		this.tr1 = tr1;

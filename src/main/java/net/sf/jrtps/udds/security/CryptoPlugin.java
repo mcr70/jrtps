@@ -63,13 +63,13 @@ public class CryptoPlugin {
 		
 		if (aesCt != null && hmacSha1 != null) {
 			CompositeTransformer ct = 
-					new CompositeTransformer(CompositeTransformer.AES_HMAC_SHA1, aesCt, hmacSha1);
+					new CompositeTransformer(aesCt, hmacSha1, CompositeTransformer.AES_HMAC_SHA1);
 			registerTransformer(ct);
 		}
 
 		if (aesCt != null && hmacSha256 != null) {
 			CompositeTransformer ct = 
-					new CompositeTransformer(CompositeTransformer.AES_HMAC_SHA256, aesCt, hmacSha256);
+					new CompositeTransformer(aesCt, hmacSha256, CompositeTransformer.AES_HMAC_SHA256);
 			registerTransformer(ct);
 		}
 	}

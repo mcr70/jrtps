@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory;
  * @see javax.crypto.Cipher
  * @author mcr70
  */
-class CipherTransformer implements Transformer {
+public class CipherTransformer implements Transformer {
 	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
 
 	public static final int AES_KIND = 0xff000200;
