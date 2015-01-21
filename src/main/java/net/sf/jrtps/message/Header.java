@@ -28,12 +28,22 @@ public class Header {
      * @param prefix
      */
     public Header(GuidPrefix prefix) {
-        hdrStart = HDR_START;
-        version = ProtocolVersion.PROTOCOLVERSION_2_1;
-        vendorId = VendorId.VENDORID_JRTPS;
-        guidPrefix = prefix;
+    	this(prefix, ProtocolVersion.PROTOCOLVERSION_2_1, VendorId.VENDORID_JRTPS);
     }
 
+    /**
+     * Constructor with given values.
+     * @param prefix GuidPrefix 
+     * @param version Version of the RTPS protocol
+     * @param vendorId VendorId
+     */
+    public Header(GuidPrefix prefix, ProtocolVersion version, VendorId vendorId) {
+		this.hdrStart = HDR_START;
+    	this.guidPrefix = prefix;
+		this.version = version;
+		this.vendorId = vendorId;
+    }
+    
     /**
      * Constructs Header from given RTPSByteBuffer.
      * 

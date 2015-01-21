@@ -386,8 +386,15 @@ public class Configuration {
     }
 
 
-	public String getPluginFactoryName() {
-        return props.getProperty("udds.security.plugin-factory", "no-op"); 
+	public String getAuthenticationPluginName() {
+        return props.getProperty("udds.security.authentication", "none"); 
 	}
 
+	/**
+	 * Gets the protection kind used with RTPS messages,
+	 * @return protection kind
+	 */
+	public String getRTPSProtection() {
+		return props.getProperty("udds.security.rtps-protection", "none");
+	}
 }

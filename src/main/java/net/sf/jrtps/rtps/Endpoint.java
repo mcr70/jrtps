@@ -18,6 +18,8 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.udds.security.CryptoPlugin;
+import net.sf.jrtps.udds.security.SecurityException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +36,7 @@ public class Endpoint {
     private final Guid guid;
     private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
+    private final CryptoPlugin cryptoPlugin;
     private final Configuration configuration;
 
     private QualityOfService qos;
@@ -55,6 +58,7 @@ public class Endpoint {
         this.topicName = topicName;
         this.qos = qos;
         this.configuration = configuration;
+        this.cryptoPlugin = new CryptoPlugin(configuration);
     }
 
     /**
@@ -113,7 +117,14 @@ public class Endpoint {
      * @return true, if an overflow occurred during send.
      */
     protected boolean sendMessage(Message m, RemoteProxy proxy) {
-        boolean overFlowed = false;
+        try {
+			m = cryptoPlugin.encodeMessage(m);
+		} catch (SecurityException e1) {
+			logger.error("Failed to encode message", e1);
+			return false;
+		}
+    	
+    	boolean overFlowed = false;
         List<Locator> locators = new LinkedList<>();
 
         if (GuidPrefix.GUIDPREFIX_UNKNOWN.equals(proxy.getGuid().getPrefix())) {
@@ -183,17 +194,18 @@ public class Endpoint {
 
         // Set the default locators from ParticipantData
         ParticipantData pd = discoveredParticipants.get(remoteGuid.getPrefix());
-        if (pd == null) {
-            logger.debug("PD was null for {}, {}", remoteGuid.getPrefix(), discoveredParticipants.keySet());
+        if (pd != null) {
+        	if (remoteGuid.getEntityId().isBuiltinEntity()) {
+        		locators.addAll(pd.getDiscoveryLocators());
+        	} 
+        	else {
+        		locators.addAll(pd.getUserdataLocators());
+        	}
         }
-
-        if (remoteGuid.getEntityId().isBuiltinEntity()) {
-            locators.addAll(pd.getDiscoveryLocators());
-        } 
         else {
-            locators.addAll(pd.getUserdataLocators());
+        	logger.warn("ParticipantData was not found for {}, cannot set default locators", remoteGuid);
         }
-
+        
         return locators;
     }
 }

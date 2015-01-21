@@ -10,7 +10,7 @@
 
     <groupId>net.sf.jrtps</groupId>
     <artifactId>jrtps</artifactId>
-    <version>1.1</version>
+    <version>1.2-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>jRTPS</name>
@@ -160,6 +160,13 @@
                         <Export-Package>{local-packages}</Export-Package>
                         <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
                     </instructions>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <configuration>
+                    <pushChanges>false</pushChanges>
                 </configuration>
             </plugin>
         </plugins>

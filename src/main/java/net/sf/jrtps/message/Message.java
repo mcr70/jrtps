@@ -30,7 +30,16 @@ public class Message {
      * @param prefix
      */
     public Message(GuidPrefix prefix) {
-        header = new Header(prefix);
+        this(new Header(prefix));
+    }
+
+    /**
+     * Constructor.
+     * 
+     * @param header
+     */
+    public Message(Header header) {
+		this.header = header;
     }
 
     /**
@@ -92,6 +101,9 @@ public class Message {
                     break;
                 case DataFrag.KIND:
                     sm = new DataFrag(smh, bb);
+                    break;
+                case SecureSubMessage.KIND:
+                    sm = new SecureSubMessage(smh, bb);
                     break;
 
                 default:
@@ -180,8 +192,6 @@ public class Message {
                 buffer.setEndianess(hdr.endiannessFlag()); // Set the endianess
                 hdr.writeTo(buffer);
 
-                subMessageCount++;
-
                 position = buffer.position();
                 msg.writeTo(buffer);
                 int subMessageLength = buffer.position() - position;
@@ -189,6 +199,8 @@ public class Message {
                 // Position to 'submessageLength' -2 is for short (2 bytes)
                 // buffers current position is not changed
                 buffer.getBuffer().putShort(position - 2, (short) subMessageLength);
+
+                subMessageCount++;
 
                 log.trace("SubMsg out: {}", msg);
             } catch (BufferOverflowException boe) {

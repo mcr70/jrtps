@@ -38,6 +38,9 @@ udds.security.jks.keystore.password = <NO_DEFAULT>
 udds.security.jks.ca = <NO_DEFAULT>
 udds.security.jks.principal = <NO_DEFAULT>
 udds.security.jks.principal.password = <NO_DEFAULT>
+
+udds.security.rtps-protection = none
+
 +---
  
 * RTPS specific configuration
@@ -122,14 +125,20 @@ udds.security.jks.principal.password = <NO_DEFAULT>
   
 * uDDS security configuration
   
-  * <<{udds.security.plugin-factory}>>
-  This parameter selects which plugin factory is used when creating participants.
-  jRTPS comes with two predefined plugin factories: <no-op> and <jks>. <no-op>
-  plugin factory effectively disables DDS security. <jks> plugin factory is used 
-  to create an AuthenticationPlugin that loads its configuration from JKS keystore.
+  * <<{udds.security.authentication}>>
+  This parameter selects which authentication plugin is used.
+  jRTPS comes with one predefined plugin: <jks>. If <none> is set as name of
+  the authentication plugin, it effectively disables DDS security.
+  <jks> authentication is used to create an AuthenticationPlugin that authenticates
+  against JKS keystore.
 
+  * <<{udds.security.rtps-protection}>>
+  This configuration parameter specifies how RTPS messages are protected on sending.
+  Following values are accepted: <none, HmacSHA1, HmacSHA256, AES, AESHmacSHA1, AESHmacSHA256>. 
+  One can also provide a custom protection by registering a proper Transformer to CryptoPlugin.
+  
   Following configuration parameters, that start with <udds.security.jks> prefix, are
-  used to configure jks plugin-factory.
+  used to configure jks authentication plugin.
   
   * <<{udds.security.jks.keystore}>>
   Name of the keystore, that holds certificates of the CA and principal that is used to
@@ -148,6 +157,5 @@ udds.security.jks.principal.password = <NO_DEFAULT>
   * <<{udds.security.jks.principal.password}>>
   Password of the private key of local principal. This is used to encrypt shared
   secret that is exchanged with remote participant during authentication.
-  
   
   

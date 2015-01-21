@@ -2,24 +2,20 @@ DDS Security
 
  As of version 1.1, jRTPS provides basic support for 
  {{{http://www.omg.org/spec/DDS-SECURITY/}DDS security}} specification.
- Currently, only authentication part of the specification is implemented.
 
 * Authentication
  
- If security is enabled with {{{./configuration.html#udds.security.plugin-factory}jks plugin factory}}, 
+ If security is enabled with {{{./configuration.html#udds.security.authentication}jks authentication}}, 
  creation of Participant loads a certificate from keystore to be used in 
  authenticating with remote participants.
  During authentication, a shared secret is exchanged with the participants.
  This allows the two participants to exchange encrypted messages with
- each other. Note, that jRTPS will not do encryption. Key exchange is 
- present only for the purposes of future development. If the authentication
- fails for any reason, udds Participant will not exchange other than discovery 
- data with failing participant. 
+ each other. If the authentication fails for any reason, udds Participant 
+ will not exchange other than discovery data with failing participant. 
  
  DDS security relies on both authenticating parties having signed by 
  the same certificate authority. DDS Security specification defines also some 
- other security related operations, like signing messages and permissions. 
- None of these are implemented currently.
+ other security related operations, like protecting messages and permissions. 
  
  Here is an example how one can create a self signed certificate authority (jrtpsCA),
  and one test user (jrtps01), whose certificate is signed by CA.
@@ -41,5 +37,39 @@ keytool -alias jrtpsCA -gencert -ext san=dns:jrtps01 -infile jrtps01.csr -keysto
 keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
 +----
 
- See {{{./configuration.html#udds.security.plugin-factory}configuration}} section
- on how to enable DDS security with keystore created above.
+ See {{{./configuration.html#udds.security.authentication}configuration}} section
+ on how to enable authentication with keystore created above.
+ 
+
+* Protecting messages
+
+ Currently, uDDS CryptoPlugin is not compatible with the one specified in DDS security
+ specification (1.0-Beta1). Main difference is that CryptoPlugin in specification 
+ uses a concept of cryptographic session, which is not implemented at this time. For this reason,
+ <transformationID>s used on wire are set to be different as specified in specification,
+ even though transformation is the same.
+ Future versions of udds will implement this feature, but we will wait for the final
+ version of the specification. 
+ 
+ Specification also allows protection to be applied at very fine level; At message level, 
+ at sub-message level, at data payload level. Each of these can be individually protected. 
+ uDDS implements only protection at message level. 
+
+ <CryptoPlugin> is used to encode/decode messages. uDDS CryptoPlugin delegates actual encoding
+ or decoding to <Transformer>s. Three predefined Transformers are available: 
+ <MacTransformer>, <CipherTransformer> and <CompositeTransformer>.
+ 
+ MacTransformer uses <javax.crypto.Mac> to append a message authentication code (MAC) 
+ at the end of payload. Two MacTransformers are registered during startup: <HmacSHA1, HmacSHA256>. 
+ 
+ CipherTransformer uses <javax.crypto.Cipher> to encrypt/decrypt messages.
+ During startup, a CipherTransformer with name <AES> is registered to CryptoPlugin.
+
+ CompositeTransformer joins two Transformers together. Payload is encoded by encoding
+ it with first Transformer, followed by encoding with second Transformer. Decoding
+ is done in reverse order. The name of the CompositeTranformer 
+ is obtained by concatenating names of the contained Transformers. Two CompositeTranformers
+ are registered on startup: <AESHmacSHA1, AESHmacSHA256>
+ 
+ 
+ 
