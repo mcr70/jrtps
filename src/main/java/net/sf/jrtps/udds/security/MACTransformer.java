@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory;
  * @see javax.crypto.Mac
  * @author mcr70
  */
-class MACTransformer implements Transformer {
+public class MACTransformer implements Transformer {
 	private static final Logger logger = LoggerFactory.getLogger(CryptoPlugin.CRYPTO_LOG_CATEGORY);
 
 	// See 9.5.2.2 DDS:Crypto:AES-CTR-HMAC-RSA/DSA-DH CryptoTransformIdentifier
