@@ -54,10 +54,10 @@ class RTPSMessageReceiver implements Runnable {
     private Set<GuidPrefix> ignoredParticipants = new HashSet<>();
     private boolean running = true;
 
-    RTPSMessageReceiver(RTPSParticipant p, BlockingQueue<byte[]> queue, Configuration config) {
+    RTPSMessageReceiver(CryptoPlugin cryptoPlugin, RTPSParticipant p, BlockingQueue<byte[]> queue, Configuration config) {
         this.participant = p;
         this.queue = queue;
-        this.cryptoPlugin = new CryptoPlugin(config);
+        this.cryptoPlugin = cryptoPlugin;
     }
 
     @Override
@@ -117,7 +117,7 @@ class RTPSMessageReceiver implements Runnable {
         		}
         		else {
             		try {
-						handleMessage(cryptoPlugin.decodeMessage(ssm));
+						handleMessage(cryptoPlugin.decodeMessage(sourceGuidPrefix, ssm));
 					} catch (SecurityException e) {
 						logger.error("Failed to decode message", e);
 					}

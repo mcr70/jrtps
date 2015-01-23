@@ -33,6 +33,10 @@ public class CryptoPlugin {
 	private static final Map<Integer,Transformer> transformersById = new ConcurrentHashMap<>();
 	private static final Map<String,Transformer> transformersByName = new ConcurrentHashMap<>();
 
+	private final Map<GuidPrefix, byte[]> participantKeyMaterials = new ConcurrentHashMap<>();
+
+	private static int count = 0;
+	
 	static {
 		NoOpTransformer noop = new NoOpTransformer();
 		registerTransformer(noop);
@@ -77,8 +81,9 @@ public class CryptoPlugin {
 	private final Configuration conf;
 	private final int transformationKind;
 	
-	public CryptoPlugin(Configuration conf) {
+	CryptoPlugin(Configuration conf) {
 		this.conf = conf;
+		
 		String rtpsProtection = conf.getRTPSProtection();
 		Transformer transformerByName;
 		try {
@@ -120,13 +125,13 @@ public class CryptoPlugin {
 		message.writeTo(bb);
 		
 		// then encode it, and create new Message
-		Key key = createKey(message);
+		Key key = createKey(message.getHeader().getGuidPrefix());
 		SecurePayload payload = ctr.encode(key, bb); 
 		
 		SecureSubMessage ssm = new SecureSubMessage(payload);
 		ssm.singleSubMessageFlag(false);
 		
-		Header hdr = new Header(GuidPrefix.GUIDPREFIX_SECURED,  
+		Header hdr = new Header(message.getHeader().getGuidPrefix(), /* GuidPrefix.GUIDPREFIX_SECURED, */  
 				message.getHeader().getVersion(), VendorId.VENDORID_SECURED);
 		
 		Message securedMessage = new Message(hdr);
@@ -138,17 +143,18 @@ public class CryptoPlugin {
 	/**
 	 * Decodes a SecureSubMessage into Message. This method is called by message
 	 * receiver to decode secured message.
-	 * 
+	 *
+	 * @param sourceGuidPrefix 
 	 * @param msg SecureSubMessage to decode
 	 * @return decoded Message
 	 * @throws SecurityException 
 	 */
-	public Message decodeMessage(SecureSubMessage msg) throws SecurityException {
+	public Message decodeMessage(GuidPrefix sourceGuidPrefix, SecureSubMessage msg) throws SecurityException {
 		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());
 
 		logger.trace("decoding message with {}", ctr.getName());
 
-		Key key = createKey(null);
+		Key key = createKey(sourceGuidPrefix);
 		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
 		Message message = new Message(bb);
 		
@@ -200,7 +206,22 @@ public class CryptoPlugin {
 		return transformer;
 	}
 
-	private SecretKeySpec createKey(Message msg) {
+	/**
+	 * Sets the key material associated with given Guid.
+	 * @param guid Guid
+	 * @param bytes key material
+	 */
+	void setParticipantKeyMaterial(GuidPrefix prefix, byte[] bytes) {
+		participantKeyMaterials.put(prefix, bytes);
+	}
+	
+	private SecretKeySpec createKey(GuidPrefix prefix) throws SecurityException {
+		byte[] keyMaterial = participantKeyMaterials.get(prefix);
+		if (keyMaterial == null) {
+			logger.warn("No key material found for {}", prefix);
+			// TODO: throw SecurityException, but not all the topics should be secured 
+		}
+		
 		MessageDigest md = null;
 		try {
 			md = MessageDigest.getInstance("MD5");

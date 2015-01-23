@@ -54,6 +54,7 @@ import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.udds.security.AuthenticationPlugin;
 import net.sf.jrtps.udds.security.JKSAuthenticationPlugin;
+import net.sf.jrtps.udds.security.NoOpAuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessageMarshaller;
 import net.sf.jrtps.util.Watchdog;
@@ -205,7 +206,8 @@ public class Participant {
 
 		createUnknownParticipantData(domainId);
 
-		try {
+		try {		
+			AuthenticationPlugin.registerPlugin(new NoOpAuthenticationPlugin(config));
 			AuthenticationPlugin.registerPlugin(new JKSAuthenticationPlugin(config));
 		} catch (InvalidKeyException | UnrecoverableKeyException
 				| KeyStoreException | NoSuchAlgorithmException
@@ -213,22 +215,19 @@ public class Participant {
 				| SignatureException | NoSuchPaddingException | IOException e) {
 			logger.warn("Failed to register JKSAuthenticationPlugin", e);
 		}
-		
-
-		
+				
 		authPlugin = AuthenticationPlugin.getInstance(config.getAuthenticationPluginName());
 
 		this.guid = authPlugin.getGuid();
 
 		logger.debug("Created AuthenticationPlugin with name {}", config.getAuthenticationPluginName());
 
-
 		rtps_participant = new RTPSParticipant(guid, domainId, participantId, threadPoolExecutor, 
-				discoveredParticipants, config);
+				discoveredParticipants, authPlugin);
 
 		this.livelinessManager = new WriterLivelinessManager(this);
 		createSecurityEndpoints();
-		authPlugin.init(this, config);		
+		authPlugin.init(this);		
 		
 		registerBuiltinMarshallers();
 		createSPDPEntities();

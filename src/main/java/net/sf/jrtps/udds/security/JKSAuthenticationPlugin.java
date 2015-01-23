@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class JKSAuthenticationPlugin extends AuthenticationPlugin {
-	public static final String AUTH_LOG_CATEGORY = "dds.sec.auth";
 	public static final String PLUGIN_NAME = "jks";
 
 	public static final String JKS_KEYSTORE_KEY = "udds.security.jks.keystore";
@@ -66,7 +65,6 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	private Certificate ca;
 	private final Signature signature = Signature.getInstance("SHA256withRSA"); // TODO: hardcoded
 
-	private Configuration conf;
 	private DataWriter<ParticipantStatelessMessage> statelessWriter;
 
 	private LocalIdentity identity;
@@ -79,10 +77,10 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 
 	@SuppressWarnings("unchecked")
 	public JKSAuthenticationPlugin(Configuration conf) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException, InvalidKeyException, NoSuchProviderException, SignatureException, UnrecoverableKeyException, NoSuchPaddingException {
+		super(conf);
 		this.ks = KeyStore.getInstance("JKS");
 		cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding"); // TODO: hardcoded
 
-		this.conf = conf;
 		InputStream is = getClass().getResourceAsStream(conf.getProperty(JKS_KEYSTORE_KEY));
 		String pwd = conf.getProperty(JKS_KEYSTORE_PASSWORD_KEY);
 
@@ -117,7 +115,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void init(Participant p, Configuration conf) {
+	public void init(Participant p) {
 		this.statelessWriter = 
 				(DataWriter<ParticipantStatelessMessage>) p.getWriter(EntityId.BUILTIN_PARTICIPANT_STATELESS_WRITER);
 
@@ -162,7 +160,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			}
 			else {
 				logger.info("Remote identity is the same as we are; authentication succeeded");
-				notifyListenersOfSuccess(pd);
+				notifyListenersOfSuccess(authData);
 			}
 		}
 		else {
@@ -285,9 +283,9 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			verify(signedChallenge, certificate.getPublicKey());
 
 			byte[] sharedSecret = createSharedSecret();
+			// Register local key material also
+			getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
 			byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
-
-			//encryptedSharedSecret[0] = 0x1b; // Causes handshake to fail (for testing purposes)
 
 			byte[] challenge = hRep.getChallenge();
 			authData.setReplyChallenge(challenge);
@@ -309,7 +307,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			statelessWriter.write(psm);
 
 			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
-			notifyListenersOfSuccess(authData.getParticipantData());
+			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException | NoSuchAlgorithmException | SignatureException 
 				| CertificateException | NoSuchProviderException e) {
@@ -334,10 +332,12 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();			
 
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
+			// Register local key material also
+			getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
 
 			authData.setSharedSecret(sharedSecret);
 			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
-			notifyListenersOfSuccess(authData.getParticipantData());
+			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
 

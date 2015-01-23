@@ -390,6 +390,10 @@ public class Configuration {
         return props.getProperty("udds.security.authentication", "none"); 
 	}
 
+	public String getNoOpSharedSecret() {
+        return props.getProperty("udds.security.no-op.shared-secret", "secret"); 
+	}
+
 	/**
 	 * Gets the protection kind used with RTPS messages,
 	 * @return protection kind

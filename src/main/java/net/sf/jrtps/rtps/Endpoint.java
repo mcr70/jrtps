@@ -58,7 +58,7 @@ public class Endpoint {
         this.topicName = topicName;
         this.qos = qos;
         this.configuration = configuration;
-        this.cryptoPlugin = new CryptoPlugin(configuration);
+        this.cryptoPlugin = participant.getAuthenticationPlugin().getCryptoPlugin();
     }
 
     /**
