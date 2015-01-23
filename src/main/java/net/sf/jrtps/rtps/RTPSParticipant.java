@@ -23,6 +23,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.udds.security.AuthenticationPlugin;
 import net.sf.jrtps.util.Watchdog;
 
 import org.slf4j.Logger;
@@ -68,6 +69,8 @@ public class RTPSParticipant {
     private int domainId;
     private int participantId;
 
+	private final AuthenticationPlugin aPlugin;
+
 
     /**
      * Creates a new participant with given domainId and participantId. Domain
@@ -85,14 +88,15 @@ public class RTPSParticipant {
      * @param config Configuration used
      */
     public RTPSParticipant(Guid guid, int domainId, int participantId, ScheduledThreadPoolExecutor tpe, 
-            Map<GuidPrefix, ParticipantData> discoveredParticipants, Configuration config) {
+            Map<GuidPrefix, ParticipantData> discoveredParticipants, AuthenticationPlugin aPlugin) {
         this.guid = guid;
         this.domainId = domainId; 
         this.participantId = participantId;
         this.threadPoolExecutor = tpe;
+		this.aPlugin = aPlugin;
         this.watchdog = new Watchdog(threadPoolExecutor);
         this.discoveredParticipants = discoveredParticipants;
-        this.config = config;
+        this.config = aPlugin.getConfiguration();
     }
 
 
@@ -105,7 +109,7 @@ public class RTPSParticipant {
 
         // NOTE: We can have only one MessageReceiver. pending samples concept
         // relies on it.
-        handler = new RTPSMessageReceiver(this, queue, config);
+        handler = new RTPSMessageReceiver(aPlugin.getCryptoPlugin(), this, queue, config);
         threadPoolExecutor.execute(handler);
 
         logger.debug("Starting receivers for discovery");
@@ -439,4 +443,8 @@ public class RTPSParticipant {
     List<RTPSWriter<?>> getWriters() {
         return writerEndpoints;
     }
+    
+    AuthenticationPlugin getAuthenticationPlugin() {
+		return aPlugin;
+	}
 }

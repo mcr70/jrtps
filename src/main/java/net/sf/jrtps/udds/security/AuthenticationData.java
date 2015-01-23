@@ -1,33 +1,40 @@
 package net.sf.jrtps.udds.security;
 
 import java.security.cert.X509Certificate;
-import java.util.concurrent.CountDownLatch;
 
 import net.sf.jrtps.builtin.ParticipantData;
 
 /**
- * 
+ * AuthenticationData
  * @author mcr70
  */
 class AuthenticationData {
 	private ParticipantData participantData;
-	private byte[] sharedSecret;
-	private byte[] challenge;
-	private X509Certificate certificate;
+	private byte[] challengeA;	
 	private byte[] challengeB;
-	private byte[] challengeA;
-	private final CountDownLatch timeOutLatch;
-	
+	private byte[] sharedSecret;
+	private X509Certificate certificate;
 
-	public AuthenticationData(ParticipantData pd) {
+	/**
+	 * Constructs AuthenticationData
+	 * @param pd ParticipantData of remote participant
+	 */
+	AuthenticationData(ParticipantData pd) {
 		participantData = pd;
-		timeOutLatch = new CountDownLatch(1);
 	}
 
+	/** 
+	 * Gets the ParticipantData of remote particiapnt
+	 * @return ParticipantData
+	 */
 	ParticipantData getParticipantData() {
 		return participantData;
 	}
 	
+	/**
+	 * Gets shared_secret
+	 * @return shared secret
+	 */
 	byte[] getSharedSecret() {
 		return sharedSecret;
 	}
@@ -36,19 +43,11 @@ class AuthenticationData {
 		this.sharedSecret = sharedSecret;
 	}
 
-	byte[] getChallenge() {
-		return challenge;
-	}
-
-	void setChallenge(byte[] challenge) {
-		this.challenge = challenge;
-	}
-
 	void setCertificate(X509Certificate certificate) {
 		this.certificate = certificate;
 	}
 	
-	public X509Certificate getCertificate() {
+	X509Certificate getCertificate() {
 		return certificate;
 	}
 
@@ -56,7 +55,7 @@ class AuthenticationData {
 	 * Sets the challenge bytes used when creating handshake reply message(Challenge_B)
 	 * @param Challenge_B
 	 */
-	public void setReplyChallenge(byte[] challengeBytes) {
+	void setReplyChallenge(byte[] challengeBytes) {
 		this.challengeB = challengeBytes;
 	}
 
@@ -64,11 +63,11 @@ class AuthenticationData {
 	 * Gets the challenge bytes used with handshake reply message(Challenge_B)
 	 * @return Challenge_B
 	 */
-	public byte[] getReplyChallengeBytes() {
+	byte[] getReplyChallengeBytes() {
 		return challengeB;
 	}
 
-	public void setRequestChallenge(byte[] challenge) {
+	void setRequestChallenge(byte[] challenge) {
 		challengeA = challenge;
 	}
 	
@@ -76,11 +75,7 @@ class AuthenticationData {
 	 * Gets the challenge bytes used with handshake request message(Challenge_A)
 	 * @return Challenge_A
 	 */
-	public byte[] getRequestChallenge() {
+	byte[] getRequestChallenge() {
 		return challengeA;
-	}
-
-	public CountDownLatch getTimeoutLatch() {
-		return timeOutLatch;
 	}
 }

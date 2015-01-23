@@ -26,15 +26,23 @@ public abstract class AuthenticationPlugin {
 	private static final Logger logger;	
 
 	private static final HashMap<String,AuthenticationPlugin> authPlugins = new HashMap<>();
-
 	private final Set<AuthenticationListener> authListeners = new CopyOnWriteArraySet<>();
+	private final CryptoPlugin cryptoPlugin;
+	private final Configuration conf;
 
 	static {
 		logger = LoggerFactory.getLogger(AUTH_LOG_CATEGORY);
-		
-		registerPlugin(new NoOpAuthenticationPlugin());
 	}
 
+	protected AuthenticationPlugin(Configuration conf) {
+		this.conf = conf;
+		this.cryptoPlugin = new CryptoPlugin(conf);
+	}
+	
+	public Configuration getConfiguration() {
+		return conf;
+	}
+	
 	/**
 	 * Gets the name of this plugin. Name of the plugin can be used in configuration files.
 	 * @return Name of the plugin.
@@ -73,11 +81,11 @@ public abstract class AuthenticationPlugin {
 	}
 	
 	/**
-	 * Initializes AuthenticationPlugin
+	 * This method is called after security endpoints have been created by participant.
 	 * @param p
-	 * @param conf
 	 */
-	public abstract void init(Participant p, Configuration conf);
+	public void init(Participant p) {
+	}
 
 	
 	/**
@@ -114,11 +122,13 @@ public abstract class AuthenticationPlugin {
 
 	/**
 	 * Notifies AuthenticationListeners of successful authentication
-	 * @param pd
+	 * @param ad
 	 */
-	protected void notifyListenersOfSuccess(ParticipantData pd) {
+	protected void notifyListenersOfSuccess(AuthenticationData ad) {
+		cryptoPlugin.setParticipantKeyMaterial(ad.getParticipantData().getGuidPrefix(), ad.getSharedSecret());
+		
 		for (AuthenticationListener al : authListeners) {
-			al.authenticationSucceded(pd);
+			al.authenticationSucceded(ad.getParticipantData());
 		}
 	}
 
@@ -137,4 +147,12 @@ public abstract class AuthenticationPlugin {
 	 * @return Guid
 	 */
 	public abstract Guid getGuid();
+
+	/**
+	 * Gets CryptoPlugin associated with this AuthenticationPlugin
+	 * @return CryptoPlugin
+	 */
+	public CryptoPlugin getCryptoPlugin() {
+		return cryptoPlugin;
+	}
 }
