@@ -24,19 +24,30 @@ public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 	public static final String PLUGIN_NAME = "none";
 	private static final Random random = new Random(System.currentTimeMillis());
 
+	private final Guid guid;
+	private final byte[] sharedSecret;
 	public NoOpAuthenticationPlugin(Configuration conf) {
 		super(conf);
+		
+		byte[] prefix = new byte[12];
+		random.nextBytes(prefix);
+		this.guid = new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+
+		String noOpSharedSecret = getConfiguration().getNoOpSharedSecret();
+		try {
+			sharedSecret = noOpSharedSecret.getBytes("UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			throw new RuntimeException(e); // Should not happen
+		}
+
+		getCryptoPlugin().setParticipantKeyMaterial(guid.getPrefix(), sharedSecret);
 	}
 	
 	@Override
 	public void beginHandshake(ParticipantData pd) {
 		AuthenticationData ad = new AuthenticationData(pd);
-		String noOpSharedSecret = getConfiguration().getNoOpSharedSecret();
-		try {
-			ad.setSharedSecret(noOpSharedSecret.getBytes("UTF-8"));
-		} catch (UnsupportedEncodingException e) {
-			logger.warn("Failed to convert string {} to UTF-8", new Object[] {noOpSharedSecret}, e);
-		}
+		ad.setSharedSecret(sharedSecret);
+		getCryptoPlugin().setParticipantKeyMaterial(pd.getGuidPrefix(), sharedSecret);
 		
 		super.notifyListenersOfSuccess(ad);
 	}
@@ -48,10 +59,7 @@ public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 
 	@Override
 	public Guid getGuid() {
-		byte[] prefix = new byte[12];
-		random.nextBytes(prefix);
-		
-		return new Guid(new GuidPrefix(prefix), EntityId.PARTICIPANT);
+		return guid;
 	}
 
 	@Override

@@ -30,182 +30,202 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class Endpoint {
-    private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
+	private static final Logger logger = LoggerFactory.getLogger(Endpoint.class);
 
-    private final String topicName;
-    private final Guid guid;
-    private Map<GuidPrefix, ParticipantData> discoveredParticipants;
+	private final String topicName;
+	private final Guid guid;
+	private Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
-    private final CryptoPlugin cryptoPlugin;
-    private final Configuration configuration;
+	private final CryptoPlugin cryptoPlugin;
+	private final Configuration configuration;
 
-    private QualityOfService qos;
+	private QualityOfService qos;
 
-    private RTPSParticipant participant;
+	private RTPSParticipant participant;
 
-    /**
-     * 
-     * @param participant
-     * @param entityId
-     * @param topicName
-     * @param qos
-     * @param configuration
-     */
-    protected Endpoint(RTPSParticipant participant, EntityId entityId, String topicName, QualityOfService qos,
-            Configuration configuration) {
-        this.participant = participant;
-        this.guid = new Guid(participant.getGuid().getPrefix(), entityId);
-        this.topicName = topicName;
-        this.qos = qos;
-        this.configuration = configuration;
-        this.cryptoPlugin = participant.getAuthenticationPlugin().getCryptoPlugin();
-    }
+	private final boolean isSecure;
 
-    /**
-     * Gets the name of the topic associated with this Endpoint.
-     * 
-     * @return name of the topic
-     */
-    public String getTopicName() {
-        return topicName;
-    }
+	/**
+	 * 
+	 * @param participant
+	 * @param entityId
+	 * @param topicName
+	 * @param qos
+	 * @param configuration
+	 */
+	protected Endpoint(RTPSParticipant participant, EntityId entityId, String topicName, QualityOfService qos,
+			Configuration configuration) {
+		this.participant = participant;
+		this.guid = new Guid(participant.getGuid().getPrefix(), entityId);
+		this.topicName = topicName;
+		this.qos = qos;
+		this.configuration = configuration;
+		this.cryptoPlugin = participant.getAuthenticationPlugin().getCryptoPlugin();
 
-    /**
-     * Gets the Guid of this Endpoint.
-     * 
-     * @return Guid
-     */
-    public Guid getGuid() {
-        return guid;
-    }
-
-    /**
-     * Gets the EntityId of this Endpoint. This is method behaves the same as calling
-     * getGuid().getEntityId().
-     * 
-     * @return EntityId
-     */
-    public EntityId getEntityId() {
-        return guid.getEntityId();
-    }
-
-    Configuration getConfiguration() {
-        return configuration;
-    }
-
-    void setDiscoveredParticipants(Map<GuidPrefix, ParticipantData> discoveredParticipants) {
-        this.discoveredParticipants = discoveredParticipants;
-    }
-
-    /**
-     * Gets the QualityOfService associated with this entity.
-     * 
-     * @return QualityOfService
-     */
-    public QualityOfService getQualityOfService() {
-        return qos;
-    }
-
-    /**
-     * Sends a message. If an overflow occurs during marshaling of Message,
-     * only submessages before the overflow will get sent.
-     * 
-     * @param m
-     *            Message to send
-     * @param proxy
-     *            proxy of the remote entity
-     * @return true, if an overflow occurred during send.
-     */
-    protected boolean sendMessage(Message m, RemoteProxy proxy) {
-        try {
-			m = cryptoPlugin.encodeMessage(m);
-		} catch (SecurityException e1) {
-			logger.error("Failed to encode message", e1);
-			return false;
+		// TODO: security should be enabled on topic basis.
+		if (entityId.isBuiltinEntity()) { 
+			isSecure = false;
 		}
-    	
-    	boolean overFlowed = false;
-        List<Locator> locators = new LinkedList<>();
+		else { 
+			isSecure = !"none".equals(configuration.getRTPSProtection());
+		}
+	}
 
-        if (GuidPrefix.GUIDPREFIX_UNKNOWN.equals(proxy.getGuid().getPrefix())) {
-            // GUIDPREFIX_UNKNOWN is used with SPDP; let's send message to every
-            // configured locator
-            locators.addAll(proxy.getLocators());
-        }
-        else {
-            locators.add(proxy.getLocator());
-        }
+	/**
+	 * Gets the name of the topic associated with this Endpoint.
+	 * 
+	 * @return name of the topic
+	 */
+	public String getTopicName() {
+		return topicName;
+	}
 
-        //Locator locator = proxy.getLocator();
-        for (Locator locator : locators) {
-            logger.debug("Sending message to {}", locator);
+	/**
+	 * Gets the Guid of this Endpoint.
+	 * 
+	 * @return Guid
+	 */
+	public Guid getGuid() {
+		return guid;
+	}
 
-            if (locator != null) {
-                try {
-                    TransportProvider provider = TransportProvider.getInstance(locator);
-                    Transmitter tr = provider.createTransmitter(locator, configuration.getBufferSize());
-                    // TODO: No need to create and close all the time
+	/**
+	 * Gets the EntityId of this Endpoint. This is method behaves the same as calling
+	 * getGuid().getEntityId().
+	 * 
+	 * @return EntityId
+	 */
+	public EntityId getEntityId() {
+		return guid.getEntityId();
+	}
 
-                    overFlowed = tr.sendMessage(m);
-                    tr.close();
-                } catch (IOException e) {
-                    logger.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
-                }
-            } else {
-                logger.debug("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
-                // participant.ignoreParticipant(targetPrefix);
-            }
-        }
+	Configuration getConfiguration() {
+		return configuration;
+	}
 
-        return overFlowed;
-    }
+	void setDiscoveredParticipants(Map<GuidPrefix, ParticipantData> discoveredParticipants) {
+		this.discoveredParticipants = discoveredParticipants;
+	}
 
-    /**
-     * Get the RTPSParticipant, that created this entity.
-     * 
-     * @return RTPSParticipant
-     */
-    protected RTPSParticipant getParticipant() {
-        return participant;
-    }
+	/**
+	 * Gets the QualityOfService associated with this entity.
+	 * 
+	 * @return QualityOfService
+	 */
+	public QualityOfService getQualityOfService() {
+		return qos;
+	}
 
-    /**
-     * Gets locators for given remote Guid
-     * 
-     * @param dd
-     * @return unicast and multicast locator
-     */
-    List<Locator> getLocators(DiscoveredData dd) {
-        List<Locator> locators = new LinkedList<>();
+	/**
+	 * Sends a message. If an overflow occurs during marshaling of Message,
+	 * only submessages before the overflow will get sent.
+	 * 
+	 * @param m Message to send
+	 * @param proxy proxy of the remote entity
+	 * @return true, if an overflow occurred during send.
+	 */
+	protected boolean sendMessage(Message m, RemoteProxy proxy) {
+		if (isSecure) {
+			try {
+				m = cryptoPlugin.encodeMessage(m);
+			} catch (SecurityException e1) {
+				logger.error("Failed to encode message", e1);
+				return false;
+			}
+		}
 
-        // check if proxys discovery data contains locator info
-        if (!(dd instanceof ParticipantData)) {
-            List<Parameter> params = dd.getParameters();
-            for (Parameter p : params) {
-                if (p instanceof LocatorParameter) {
-                    LocatorParameter locParam = (LocatorParameter) p;
-                    locators.add(locParam.getLocator());
-                } 
-            }
-        }
+		boolean overFlowed = false;
+		List<Locator> locators = new LinkedList<>();
 
-        
-        Guid remoteGuid = dd.getBuiltinTopicKey();
+		if (GuidPrefix.GUIDPREFIX_UNKNOWN.equals(proxy.getGuid().getPrefix())) {
+			// GUIDPREFIX_UNKNOWN is used with SPDP; let's send message to every
+			// configured locator
+			locators.addAll(proxy.getLocators());
+		}
+		else {
+			locators.add(proxy.getLocator());
+		}
 
-        // Set the default locators from ParticipantData
-        ParticipantData pd = discoveredParticipants.get(remoteGuid.getPrefix());
-        if (pd != null) {
-        	if (remoteGuid.getEntityId().isBuiltinEntity()) {
-        		locators.addAll(pd.getDiscoveryLocators());
-        	} 
-        	else {
-        		locators.addAll(pd.getUserdataLocators());
-        	}
-        }
-        else {
-        	logger.warn("ParticipantData was not found for {}, cannot set default locators", remoteGuid);
-        }
-        
-        return locators;
-    }
+		//Locator locator = proxy.getLocator();
+		for (Locator locator : locators) {
+			logger.debug("Sending message to {}", locator);
+
+			if (locator != null) {
+				try {
+					TransportProvider provider = TransportProvider.getInstance(locator);
+					Transmitter tr = provider.createTransmitter(locator, configuration.getBufferSize());
+					// TODO: No need to create and close all the time
+
+					overFlowed = tr.sendMessage(m);
+					tr.close();
+				} catch (IOException e) {
+					logger.warn("[{}] Failed to send message to {}", getGuid().getEntityId(), locator, e);
+				}
+			} else {
+				logger.debug("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
+				// participant.ignoreParticipant(targetPrefix);
+			}
+		}
+
+		return overFlowed;
+	}
+
+	/**
+	 * Get the RTPSParticipant, that created this entity.
+	 * 
+	 * @return RTPSParticipant
+	 */
+	protected RTPSParticipant getParticipant() {
+		return participant;
+	}
+
+	/**
+	 * Checks, if this endpoint is secure or not. If an endpoint is secure,
+	 * every message that is being sent, will be encoded by Transformer.
+	 * 
+	 * @return true or false
+	 */
+	public boolean isSecure() {
+		return isSecure;
+	}
+
+	/**
+	 * Gets locators for given remote Guid
+	 * 
+	 * @param dd
+	 * @return unicast and multicast locator
+	 */
+	List<Locator> getLocators(DiscoveredData dd) {
+		List<Locator> locators = new LinkedList<>();
+
+		// check if proxys discovery data contains locator info
+		if (!(dd instanceof ParticipantData)) {
+			List<Parameter> params = dd.getParameters();
+			for (Parameter p : params) {
+				if (p instanceof LocatorParameter) {
+					LocatorParameter locParam = (LocatorParameter) p;
+					locators.add(locParam.getLocator());
+				} 
+			}
+		}
+
+
+		Guid remoteGuid = dd.getBuiltinTopicKey();
+
+		// Set the default locators from ParticipantData
+		ParticipantData pd = discoveredParticipants.get(remoteGuid.getPrefix());
+		if (pd != null) {
+			if (remoteGuid.getEntityId().isBuiltinEntity()) {
+				locators.addAll(pd.getDiscoveryLocators());
+			} 
+			else {
+				locators.addAll(pd.getUserdataLocators());
+			}
+		}
+		else {
+			logger.warn("ParticipantData was not found for {}, cannot set default locators", remoteGuid);
+		}
+
+		return locators;
+	}
 }
