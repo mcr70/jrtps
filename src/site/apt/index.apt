@@ -31,13 +31,12 @@ Overview
  Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}
 
   
- 1.2
+ 1.2.1
  
-  * Guid is created by AuthenticationPlugin. 
+  * FIX: shared secret was not used :|
     
-  * Renamed KeystoreAuthenticationPlugin to JKSAuthenticationPlugin
-    
-  * Security: Securing content with Transformers; MacTransformer, CipherTransformer
-    CompositeTransformer
+  * Config: udds.security.no-op.shared-secret This configuration is used 
+	if authentication is set to none, and rtps-protection is set to 
+	something other than none.
 
     
