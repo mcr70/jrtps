@@ -545,7 +545,7 @@ public class Participant {
 		}
 
 		UDDSWriterCache<T> wCache = new UDDSWriterCache<>(eId, m, qos, watchdog);
-		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);
+		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);				
 		DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
 
 		wCache.setCommunicationListeners(writer.communicationListeners);

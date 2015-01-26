@@ -218,8 +218,7 @@ public class CryptoPlugin {
 	private SecretKeySpec createKey(GuidPrefix prefix) throws SecurityException {
 		byte[] keyMaterial = participantKeyMaterials.get(prefix);
 		if (keyMaterial == null) {
-			logger.warn("No key material found for {}", prefix);
-			// TODO: throw SecurityException, but not all the topics should be secured 
+			throw new SecurityException("No key material found for " + prefix);
 		}
 		
 		MessageDigest md = null;
@@ -228,9 +227,8 @@ public class CryptoPlugin {
 		} catch (NoSuchAlgorithmException e) {
 			logger.error("Got exception", e);
 		}
-		byte[] digest = md.digest("sharedsecret".getBytes());
+		byte[] digest = md.digest(keyMaterial);
 
-		// TODO: key generation
 		SecretKeySpec secretKeySpec = new SecretKeySpec(digest, "AES");
 		return secretKeySpec;
 	}	

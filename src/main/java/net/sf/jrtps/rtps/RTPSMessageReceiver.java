@@ -117,7 +117,7 @@ class RTPSMessageReceiver implements Runnable {
         		}
         		else {
             		try {
-						handleMessage(cryptoPlugin.decodeMessage(sourceGuidPrefix, ssm));
+            			handleMessage(cryptoPlugin.decodeMessage(sourceGuidPrefix, ssm));
 					} catch (SecurityException e) {
 						logger.error("Failed to decode message", e);
 					}
