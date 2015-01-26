@@ -391,7 +391,7 @@ public class Configuration {
 	}
 
 	public String getNoOpSharedSecret() {
-        return props.getProperty("udds.security.no-op.shared-secret", "secret"); 
+        return props.getProperty("udds.security.no-op.shared-secret"); 
 	}
 
 	/**
