@@ -53,7 +53,9 @@ keytool -importcert -alias jrtps01 -file jrtps01.cert -keystore jrtps.jks
  
  Specification also allows protection to be applied at very fine level; At message level, 
  at sub-message level, at data payload level. Each of these can be individually protected. 
- uDDS implements only protection at message level. 
+ uDDS implements only protection at message level. Currently, each of the builtin
+ entities are marked as not being secure. User defined entities are marked as being secure,
+ if rtps-protection is something other than <none>. 
 
  <CryptoPlugin> is used to encode/decode messages. uDDS CryptoPlugin delegates actual encoding
  or decoding to <Transformer>s. Three predefined Transformers are available: 

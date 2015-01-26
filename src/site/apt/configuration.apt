@@ -31,15 +31,15 @@ udds.collections.coherent=false
 udds.sedp-delay = 0
 
 # ---  uDDS security configuration  --------------------
-udds.security.plugin-factory = no-op
+udds.security.authentication = none
+udds.security.no-op.shared-secret = <NO_DEFAULT>
+udds.security.rtps-protection = none
 
 udds.security.jks.keystore = <NO_DEFAULT>
 udds.security.jks.keystore.password = <NO_DEFAULT>
 udds.security.jks.ca = <NO_DEFAULT>
 udds.security.jks.principal = <NO_DEFAULT>
 udds.security.jks.principal.password = <NO_DEFAULT>
-
-udds.security.rtps-protection = none
 
 +---
  
@@ -132,6 +132,11 @@ udds.security.rtps-protection = none
   <jks> authentication is used to create an AuthenticationPlugin that authenticates
   against JKS keystore.
 
+  * <<{udds.security.no-op.shared-secret}>>
+  This parameter is used if authentication is set to <none>, and rtps-protection is 
+  something other than <none>. I.e. this parameter provides a way to use rtps protection
+  without authentication.
+  
   * <<{udds.security.rtps-protection}>>
   This configuration parameter specifies how RTPS messages are protected on sending.
   Following values are accepted: <none, HmacSHA1, HmacSHA256, AES, AESHmacSHA1, AESHmacSHA256>. 
