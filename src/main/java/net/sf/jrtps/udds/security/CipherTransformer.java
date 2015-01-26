@@ -29,10 +29,10 @@ public class CipherTransformer implements Transformer {
 	public static final int AES_KIND = 0xff000200;
 	public static final String AES_NAME = "AES";
 
-	public static final String AES128_HMAC_SHA1_NAME = "aes128_hmac_sha1";
-    public static final String AES256_HMAC_SHA256_NAME = "aes256_hmac_sha256";
-    public static final int AES128_HMAC_SHA1 = 0x00000200;
-    public static final int AES256_HMAC_SHA256 = 0x00000201;
+//	public static final String AES128_HMAC_SHA1_NAME = "aes128_hmac_sha1";
+//    public static final String AES256_HMAC_SHA256_NAME = "aes256_hmac_sha256";
+//    public static final int AES128_HMAC_SHA1 = 0x00000200;
+//    public static final int AES256_HMAC_SHA256 = 0x00000201;
 	
     private final String name;
 	private final int kind;

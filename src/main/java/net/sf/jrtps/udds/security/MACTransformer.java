@@ -14,7 +14,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * MacTransformer calculates and appends a HMAC to the end of payload.
+ * MacTransformer calculates and appends a HMAC to the end of payload
+ * by using javax.crypto.Mac
  * 
  * @see javax.crypto.Mac
  * @author mcr70
