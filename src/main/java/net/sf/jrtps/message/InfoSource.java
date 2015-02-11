@@ -24,7 +24,7 @@ public class InfoSource extends SubMessage {
         super(new SubMessageHeader(KIND));
 
         this.protocolVersion = ProtocolVersion.PROTOCOLVERSION_2_1;
-        this.vendorId = VendorId.VENDORID_JRTPS;
+        this.vendorId = VendorId.JRTPS;
         this.guidPrefix = guidPrefix;
     }
 

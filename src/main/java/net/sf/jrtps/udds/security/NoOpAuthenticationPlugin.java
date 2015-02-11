@@ -35,7 +35,12 @@ public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 
 		String noOpSharedSecret = getConfiguration().getNoOpSharedSecret();
 		try {
-			sharedSecret = noOpSharedSecret.getBytes("UTF-8");
+			if (noOpSharedSecret != null) {
+				sharedSecret = noOpSharedSecret.getBytes("UTF-8");
+			}
+			else {
+				sharedSecret = new byte[0];
+			}
 		} catch (UnsupportedEncodingException e) {
 			throw new RuntimeException(e); // Should not happen
 		}

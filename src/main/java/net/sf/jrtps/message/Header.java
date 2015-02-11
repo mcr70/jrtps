@@ -28,7 +28,7 @@ public class Header {
      * @param prefix
      */
     public Header(GuidPrefix prefix) {
-    	this(prefix, ProtocolVersion.PROTOCOLVERSION_2_1, VendorId.VENDORID_JRTPS);
+    	this(prefix, ProtocolVersion.PROTOCOLVERSION_2_1, VendorId.JRTPS);
     }
 
     /**

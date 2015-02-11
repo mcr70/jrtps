@@ -53,7 +53,7 @@ public class ParticipantData extends DiscoveredData {
 	private static final org.slf4j.Logger log = LoggerFactory.getLogger(ParticipantData.class);
 
 	private ProtocolVersion protocolVersion = ProtocolVersion.PROTOCOLVERSION_2_1;
-	private VendorId vendorId = VendorId.VENDORID_JRTPS;
+	private VendorId vendorId = VendorId.JRTPS;
 	private GuidPrefix guidPrefix;
 	private boolean expectsInlineQos = false;
 
