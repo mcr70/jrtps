@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.ExpectsInlineQos;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
@@ -11,7 +12,6 @@ import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
-import net.sf.jrtps.types.ContentFilterProperty_t;
 import net.sf.jrtps.types.Guid;
 
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class SubscriptionData extends DiscoveredData {
     private Guid participantGuid;
     private boolean expectsInlineQos = false;
 
-    private ContentFilterProperty_t contentFilter;
+    private ContentFilterProperty contentFilter;
 
     public SubscriptionData(ParameterList parameterList) throws InconsistentPolicy {
         Iterator<Parameter> iter = parameterList.getParameters().iterator();
@@ -98,7 +98,11 @@ public class SubscriptionData extends DiscoveredData {
         return expectsInlineQos;
     }
 
-    public ContentFilterProperty_t getContentFilter() {
+    /**
+     * Gets the ContentFilterProperty associated with this SubscriptionData.
+     * @return ContentFilterProperty, or null if there is no ContentFilterProperty available.
+     */
+    public ContentFilterProperty getContentFilter() {
         return contentFilter;
     }
 }

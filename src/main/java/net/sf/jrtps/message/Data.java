@@ -2,6 +2,7 @@ package net.sf.jrtps.message;
 
 import java.nio.ByteBuffer;
 
+import net.sf.jrtps.message.parameter.ContentFilterInfo;
 import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.ParameterList;
 import net.sf.jrtps.message.parameter.StatusInfo;
@@ -239,7 +240,7 @@ public class Data extends SubMessage {
     }
 
     /**
-     * Get the StatusInfo inline QoS parameter if it is present. If inline Qos
+     * Get the StatusInfo (PID 0x0071) inline QoS parameter if it is present. If inline Qos
      * is not present, an empty(default) StatusInfo is returned
      * 
      * @return StatusInfo
@@ -257,6 +258,19 @@ public class Data extends SubMessage {
         return sInfo;
     }
 
+    /**
+     * Gets the ContentFilterInfo (PID 0x0055) inline qos parameter if present.
+     * @return ContentFilterInfo, or null if one was not present
+     */
+    public ContentFilterInfo getContentFilterInfo() {
+    	ContentFilterInfo cfi = null;
+    	if (inlineQosFlag()) {
+    		cfi = (ContentFilterInfo) inlineQosParams.getParameter(ParameterId.PID_CONTENT_FILTER_INFO);
+    	}
+    	
+    	return cfi;
+    }
+    
     public String toString() {
         StringBuffer sb = new StringBuffer(super.toString());
         sb.append(", readerId: ").append(getReaderId());
