@@ -1,17 +1,36 @@
 package net.sf.jrtps.message.parameter;
 
+import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.udds.Participant;
 
 /**
- * ContentFilterProperty parameter
+ * ContentFilterProperty parameter is sent by reader to writer, so that writer side
+ * filtering is possible.
+ * 
  * @author mcr70
  */
 public class ContentFilterProperty extends Parameter {
+	private static final Logger logger = LoggerFactory.getLogger(ContentFilterProperty.class);
+	
+	/**
+	 * Filter class name defined by DDS specification.
+	 */
+	public static final String DDSSQL = "DDSSQL";
+	
     private String contentFilteredTopicName; // length 256
     private String relatedTopicName; // length 256
     private String filterClassName; // length 256
     private String filterExpression;
     private String[] expressionParameters;
+
+	private byte[] signature; // filter signature
     
 	public ContentFilterProperty(String cfTopicName, String relatedTopicName,
 			String filterClassName, String filterExpression) {
@@ -21,6 +40,7 @@ public class ContentFilterProperty extends Parameter {
 	public ContentFilterProperty(String cfTopicName, String relatedTopicName,
 			String filterClassName, String filterExpression, String[] expressionParameters) {
 		super(ParameterId.PID_CONTENT_FILTER_PROPERTY);
+		
 		this.contentFilteredTopicName = cfTopicName;
 		this.relatedTopicName = relatedTopicName;
 		this.filterClassName = filterClassName;
@@ -37,27 +57,77 @@ public class ContentFilterProperty extends Parameter {
         super(ParameterId.PID_CONTENT_FILTER_PROPERTY);
     }
 	
+    /**
+     * Gets name of the content filtered topic.
+     * @return name of the content filtered topic
+     */
 	public String getContentFilteredTopicName() {
 		return contentFilteredTopicName;
 	}
 	
+	/**
+	 * Gets the name of the related topic.
+	 * @return name of the related topic
+	 */
 	public String getRelatedTopicName() {
 		return relatedTopicName;
 	}
 	
+	/**
+	 * Name of filter class
+	 * @return name of the filter class
+	 */
 	public String getFilterClassName() {
 		return filterClassName;
 	}
 	
+	/**
+	 * Gets the filter expression. 
+	 * @return filter expression
+	 */
 	public String getFilterExpression() {
 		return filterExpression;
 	}
 	
+	/**
+	 * Expression parameters used by filter expression
+	 * @return expression parameters
+	 */
 	public String[] getExpressionParameters() {
 		return expressionParameters;
 	}
 	
-
+	/**
+	 * Gets the filter signature. Filter signature is calculated as MD5 checksum of the
+	 * fields of this ContentFilterProperty. If MD5 algorithm is not available on platform
+	 * where application is being run, a null will be returned. In that case writer side
+	 * content filtering is not possible.
+	 * 
+	 * @return filter signature, or null if filter signature could not be calculated
+	 */
+	public byte[] getFilterSignature() {
+		if (signature == null) {
+	        try {
+				MessageDigest md5 = MessageDigest.getInstance("MD5");
+				md5.update(contentFilteredTopicName.getBytes("UTF-8"));
+				md5.update(relatedTopicName.getBytes("UTF-8"));
+				md5.update(filterClassName.getBytes("UTF-8"));
+				md5.update(filterExpression.getBytes("UTF-8"));
+				for (int i = 0; i < expressionParameters.length; i++) {
+					md5.update(expressionParameters[i].getBytes("UTF-8"));
+				}
+				
+				signature = md5.digest();
+			} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
+				logger.warn("Writer side content filtering is not possible, as signature cannot be calculated due {}: {}", 
+						e.getClass(), e.getMessage());
+			}
+		}
+		
+		return signature;
+	}
+	
+	
     @Override
     public void read(RTPSByteBuffer bb, int length) {
     	this.contentFilteredTopicName = bb.read_string();

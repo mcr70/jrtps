@@ -2,6 +2,15 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * ContentFilterInfo is transmitted with Data submessage as an inline-qos parameter.
+ * Writer to informs reader which filters was applied to Data and whether  
+ * corresponding filter passed given filter or not.
+ * Each bit in bitmaps (filterResult) represents one FilterSignature. First bit is 
+ * reserved for FilterSignature[0] etc.
+ * 
+ * @author mcr70
+ */
 public class ContentFilterInfo extends Parameter implements InlineQoS {
 	private int[] bitmaps;
 	private FilterSignature[] signatures;
