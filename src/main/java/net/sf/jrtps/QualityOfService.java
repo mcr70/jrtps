@@ -44,7 +44,9 @@ import org.slf4j.LoggerFactory;
  */
 @SuppressWarnings("rawtypes")
 public class QualityOfService {
-    private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
+	private static final Logger logger = LoggerFactory.getLogger(QualityOfService.class);
+
+	private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
     private static final QualityOfService sedpQos = createSEDPQualityOfService();
     private static final QualityOfService spdpQos = createSPDPQualityOfService();
     private HashMap<Class<? extends QosPolicy>, QosPolicy> policies = new HashMap<>();
@@ -64,7 +66,18 @@ public class QualityOfService {
      *             is thrown if there is some inconsistent value with the policy
      */
     public void setPolicy(QosPolicy policy) throws InconsistentPolicy {
-        checkForInconsistencies(policy);
+//    	if (!(policy instanceof Changeable)) {
+//    		synchronized (policies) {
+//    			if (policies.containsKey(policy.getClass())) {
+//    				logger.debug("{} was already within this QualityOfService: {}", policy.getClass(),
+//    						policies.keySet());
+//    				throw new IllegalArgumentException(policy.getClass().getSimpleName() + 
+//    						" is not Changeable; cannot set twice");
+//    			}
+//    		}
+//		}
+    	
+    	checkForInconsistencies(policy);
 
         policies.put(policy.getClass(), policy);
     }
