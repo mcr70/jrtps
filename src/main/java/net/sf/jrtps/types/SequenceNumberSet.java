@@ -33,7 +33,16 @@ public class SequenceNumberSet {
             bitmaps[i] = bb.read_long();
         }
     }
-
+    
+    /**
+     * Tests, whether or not given sequenceNumber is contained in this SequenceNumberSet 
+     * @param seqNum
+     * @return true or false
+     */
+    public boolean isSet(long seqNum) {
+    	return getSequenceNumbers().contains(seqNum);
+    }
+    
     /**
      * Gets the bitmap base.
      * 
@@ -70,12 +79,12 @@ public class SequenceNumberSet {
 
         long seqNum = bitmapBase.getAsLong();
         int bitCount = 0;
-        
+
         for (int i = 0; i < bitmaps.length; i++) {
             int bitmap = bitmaps[i];
 
             for (int j = 0; j < 32 && bitCount < numBits; j++) {
-                if ((bitmap & 0x8000000) == 0x8000000) { // id the MSB matches, add a new seqnum
+                if ((bitmap & 0x80000000) == 0x80000000) { // id the MSB matches, add a new seqnum
                     seqNums.add(seqNum);
                 }
 
