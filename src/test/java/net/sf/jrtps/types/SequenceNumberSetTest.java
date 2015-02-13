@@ -30,12 +30,34 @@ public class SequenceNumberSetTest {
 	
 	@Test
 	public void test1234() {
+		final int BASE = 1234;
+
 		// Tests that example in ch. 9.4.2.6 SequenceNumberSet works correctly
-		SequenceNumberSet sns = new SequenceNumberSet(1234, new int[] {0x30000000});
+		SequenceNumberSet sns = new SequenceNumberSet(BASE, new int[] {0x30000000});
 		assertFalse(sns.isSet(1234));
 		assertFalse(sns.isSet(1235));
 		assertTrue(sns.isSet(1236));
 		assertTrue(sns.isSet(1237));
-		assertFalse(sns.isSet(1238)); // rest seqnums are false
+		for (int i = 4; i < sns.getNumBits(); i++) {
+			assertFalse(sns.isSet(BASE + i)); // rest seqnums are false
+		}	
+
+		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[16]);		
+		bb.write_longlong(BASE);   // Base
+		bb.write_long(12);         // numBits
+		bb.write_long(0x30000000); // bitmap
+		bb.getBuffer().flip();
+		
+		sns = new SequenceNumberSet(bb);
+
+		assertEquals(1, sns.getBitmaps().length);
+		assertFalse(sns.isSet(1234));
+		assertFalse(sns.isSet(1235));
+		assertTrue(sns.isSet(1236));
+		assertTrue(sns.isSet(1237));
+		 
+		for (int i = 4; i < sns.getNumBits(); i++) {
+			assertFalse(sns.isSet(BASE + i)); // rest seqnums are false
+		}	
 	}
 }
