@@ -5,10 +5,13 @@ import java.util.List;
 
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.QualityOfService.PolicyListener;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
+import net.sf.jrtps.message.parameter.QosPolicy;
+import net.sf.jrtps.message.parameter.QosTimeBasedFilter;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterProxy;
 import net.sf.jrtps.util.Watchdog;
@@ -38,7 +41,7 @@ public class Instance <T> {
     private final int historyDepth;
 
     private final Watchdog watchdog;
-    private final long minimum_separation;
+    private long minimum_separation;
     private long nextTimeBasedFilterTime = System.currentTimeMillis();
     private Task tbfTask;
     private Task deadLineMonitorTask;    
@@ -59,6 +62,15 @@ public class Instance <T> {
         else {
             this.historyDepth = qos.getHistory().getDepth();    
         }
+        
+        qos.addPolicyListener(new PolicyListener() {
+			@Override
+			public void policyChanged(QosPolicy policy) {
+				if (policy instanceof QosTimeBasedFilter) {
+					minimum_separation = ((QosTimeBasedFilter)policy).getMinimumSeparation().asMillis();
+				}
+			}
+		});
     }
 
     /**

@@ -3,7 +3,10 @@ package net.sf.jrtps.udds;
 
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.QualityOfService.PolicyListener;
 import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.message.parameter.QosLifespan;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterCache;
 import net.sf.jrtps.types.EntityId;
@@ -11,12 +14,21 @@ import net.sf.jrtps.util.Watchdog;
 import net.sf.jrtps.util.Watchdog.Listener;
 
 class UDDSWriterCache<T> extends UDDSHistoryCache<T, SubscriptionData> implements WriterCache<T> {    
-    private final long lifeSpanDuration;
+    private long lifeSpanDuration;
     
     UDDSWriterCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, false);
 
         lifeSpanDuration = qos.getLifespan().getDuration().asMillis();
+        
+        qos.addPolicyListener(new PolicyListener() {
+			@Override
+			public void policyChanged(QosPolicy policy) {
+				if (policy instanceof QosLifespan) {
+					lifeSpanDuration = ((QosLifespan)policy).getDuration().asMillis();
+				}
+			}
+		});
     }
 
     // ----  WriterCache implementation follows  -------------------------
