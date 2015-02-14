@@ -7,5 +7,4 @@ package net.sf.jrtps.message.parameter;
  * @author mcr70
  */
 public interface Changeable {
-
 }

@@ -4,7 +4,8 @@ import java.util.Arrays;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroupData>, PublisherPolicy<QosGroupData> {
+public class QosGroupData extends Parameter implements SubscriberPolicy<QosGroupData>, 
+PublisherPolicy<QosGroupData>, Changeable {
 	private byte[] groupData;
 
 	public QosGroupData(byte[] groupData) {

@@ -12,7 +12,7 @@ import net.sf.jrtps.types.Duration;
  * @author mcr70
  */
 public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifespan>, DataWriterPolicy<QosLifespan>,
-        TopicPolicy<QosLifespan>, InlineQoS {
+        TopicPolicy<QosLifespan>, InlineQoS, Changeable {
     private Duration duration;
 
     QosLifespan() {

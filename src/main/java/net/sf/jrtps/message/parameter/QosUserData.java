@@ -4,12 +4,19 @@ import java.util.Arrays;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
-public class QosUserData extends Parameter implements DataReaderPolicy<QosUserData>, DataWriterPolicy<QosUserData> {
+/**
+ * UserData QoS policy allows passing an arbitrary byte array to remote entities.
+ * 
+ * @author mcr70
+ */
+public class QosUserData extends Parameter implements DataReaderPolicy<QosUserData>, 
+DataWriterPolicy<QosUserData>, Changeable {
 	private byte[] userData;
 
 	public QosUserData(byte[] userData) {
 		super(ParameterId.PID_USER_DATA);
-        if (userData == null) {
+		
+		if (userData == null) {
             this.userData = new byte[0];
         }
         else {

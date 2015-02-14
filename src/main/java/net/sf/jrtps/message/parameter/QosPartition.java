@@ -7,11 +7,11 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * Partition QoS policy.
+ * 
  * @author mcr70
- *
  */
 public class QosPartition extends Parameter implements SubscriberPolicy<QosPartition>, PublisherPolicy<QosPartition>,
-        InlineQoS {
+        InlineQoS, Changeable {
     private String[] partitions;
 
     QosPartition() {

@@ -1,8 +1,12 @@
 package net.sf.jrtps.message.parameter;
 
 
-
-public class QosWriterDataLifecycle implements DataWriterPolicy<QosWriterDataLifecycle> {
+/**
+ * WriterDataLifecycle QoS policy.
+ * 
+ * @author mcr70
+ */
+public class QosWriterDataLifecycle implements DataWriterPolicy<QosWriterDataLifecycle>, Changeable {
 
     private boolean autodisposeUnregisteredInstances;
     

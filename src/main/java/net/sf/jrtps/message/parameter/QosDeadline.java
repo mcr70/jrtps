@@ -20,7 +20,7 @@ import net.sf.jrtps.types.Duration;
  * 
  */
 public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadline>, DataWriterPolicy<QosDeadline>,
-        TopicPolicy<QosDeadline>, InlineQoS {
+        TopicPolicy<QosDeadline>, InlineQoS, Changeable {
     private Duration period;
 
     QosDeadline() {
