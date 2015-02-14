@@ -16,9 +16,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.QualityOfService.PolicyListener;
 import net.sf.jrtps.builtin.DiscoveredData;
 import net.sf.jrtps.message.parameter.CoherentSet;
 import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.message.parameter.QosDeadline;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.QosResourceLimits;
 import net.sf.jrtps.rtps.ChangeKind;
 import net.sf.jrtps.rtps.Sample;
@@ -78,17 +81,29 @@ class UDDSHistoryCache<T, ENTITY_DATA extends DiscoveredData> implements History
         this.qos = qos;
         this.watchdog = watchdog;
 
-        Duration period = qos.getDeadline().getPeriod();
+        resource_limits = qos.getResourceLimits();
+        setDeadlinePeriod(qos.getDeadline());
+        
+        qos.addPolicyListener(new PolicyListener() {
+			@Override
+			public void policyChanged(QosPolicy policy) {
+				if (policy instanceof QosDeadline) {
+					setDeadlinePeriod((QosDeadline) policy);
+				}
+			}
+		});
+    }
+
+    private void setDeadlinePeriod(QosDeadline dl) {
+        Duration period = dl.getPeriod();
 
         if (!Duration.INFINITE.equals(period)) { 
             this.deadLinePeriod = period.asMillis();
 
             logger.debug("deadline period was set to {}", deadLinePeriod);
-        }
-
-        resource_limits = qos.getResourceLimits();
+        }    	
     }
-
+    
     /**
      * Dispose a sample.
      * @param sample

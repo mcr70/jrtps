@@ -2,7 +2,9 @@ package net.sf.jrtps;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import net.sf.jrtps.message.parameter.Changeable;
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
@@ -47,10 +49,11 @@ import org.slf4j.LoggerFactory;
 public class QualityOfService {
 	private static final Logger logger = LoggerFactory.getLogger(QualityOfService.class);
 
-	private static final Logger log = LoggerFactory.getLogger(QualityOfService.class);
     private static final QualityOfService sedpQos = createSEDPQualityOfService();
     private static final QualityOfService spdpQos = createSPDPQualityOfService();
-    private HashMap<Class<? extends QosPolicy>, QosPolicy> policies = new HashMap<>();
+    
+    private final List<PolicyListener> policyListeners = new CopyOnWriteArrayList<QualityOfService.PolicyListener>(); 
+    private final HashMap<Class<? extends QosPolicy>, QosPolicy> policies = new HashMap<>();
 
     /**
      * Constructor with default QosPolicies.
@@ -70,7 +73,7 @@ public class QualityOfService {
     	if (!(policy instanceof Changeable)) {
     		synchronized (policies) {
     			if (policies.containsKey(policy.getClass())) {
-    				logger.warn("{} was already within this QualityOfService: {}", policy.getClass(),
+    				logger.debug("{} was already within this QualityOfService: {}", policy.getClass(),
     						policies.keySet());
     				throw new IllegalArgumentException(policy.getClass().getSimpleName() + 
     						" is not Changeable; cannot set twice");
@@ -81,9 +84,16 @@ public class QualityOfService {
     	checkForInconsistencies(policy);
 
         policies.put(policy.getClass(), policy);
+        notifyPolicyChanged(policy);
     }
 
-    private void checkForInconsistencies(QosPolicy policy) throws InconsistentPolicy {
+    private void notifyPolicyChanged(QosPolicy policy) {
+    	for (PolicyListener listener : policyListeners) {
+    		listener.policyChanged(policy);
+    	}
+    }
+
+	private void checkForInconsistencies(QosPolicy policy) throws InconsistentPolicy {
         if (policy instanceof QosDeadline) { // ---  DEADLINE  ---
             QosTimeBasedFilter tbf = (QosTimeBasedFilter) policies.get(QosTimeBasedFilter.class);
             if (tbf == null) {
@@ -248,7 +258,7 @@ public class QualityOfService {
             
             if (!qp.isCompatible(qpOther)) {
                 set.add(qpOther);
-                log.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
+                logger.warn("Offered QosPolicy {} is not compatible with requested {}", qp, qpOther);
             }
         }
 
@@ -320,7 +330,7 @@ public class QualityOfService {
             return QosTypeConsistencyEnforcement.defaultTypeConsistencyEnforcement();
         }
 
-        log.warn("Don't know how to get default for {}", clazz);
+        logger.warn("Don't know how to get default for {}", clazz);
 
         return null;
     }
@@ -664,4 +674,17 @@ public class QualityOfService {
         return policies.values().toString();
     }
 
+    
+    public void addPolicyListener(PolicyListener listener) {
+    	policyListeners.add(listener);
+    }
+    
+    /**
+     * PolicyChangedListener can be used to track changes to QualityOfService.
+     * 
+     * @author mcr70
+     */
+    public interface PolicyListener {
+    	void policyChanged(QosPolicy policy);
+    }
 }
