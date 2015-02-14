@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 
+import net.sf.jrtps.message.parameter.Changeable;
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.InlineQoS;
@@ -66,16 +67,16 @@ public class QualityOfService {
      *             is thrown if there is some inconsistent value with the policy
      */
     public void setPolicy(QosPolicy policy) throws InconsistentPolicy {
-//    	if (!(policy instanceof Changeable)) {
-//    		synchronized (policies) {
-//    			if (policies.containsKey(policy.getClass())) {
-//    				logger.debug("{} was already within this QualityOfService: {}", policy.getClass(),
-//    						policies.keySet());
-//    				throw new IllegalArgumentException(policy.getClass().getSimpleName() + 
-//    						" is not Changeable; cannot set twice");
-//    			}
-//    		}
-//		}
+    	if (!(policy instanceof Changeable)) {
+    		synchronized (policies) {
+    			if (policies.containsKey(policy.getClass())) {
+    				logger.warn("{} was already within this QualityOfService: {}", policy.getClass(),
+    						policies.keySet());
+    				throw new IllegalArgumentException(policy.getClass().getSimpleName() + 
+    						" is not Changeable; cannot set twice");
+    			}
+    		}
+		}
     	
     	checkForInconsistencies(policy);
 

@@ -10,7 +10,7 @@ import net.sf.jrtps.types.Duration;
  * @author mcr70
  * 
  */
-public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<QosTimeBasedFilter> {
+public class QosTimeBasedFilter extends Parameter implements DataReaderPolicy<QosTimeBasedFilter>, Changeable{
     private Duration minimum_separation;
 
     public QosTimeBasedFilter(Duration minimum_separation) {

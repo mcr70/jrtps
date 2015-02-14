@@ -5,7 +5,7 @@ import java.util.Arrays;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class QosTopicData extends Parameter implements DataReaderPolicy<QosTopicData>, 
-    DataWriterPolicy<QosTopicData>, TopicPolicy<QosTopicData> {
+    DataWriterPolicy<QosTopicData>, TopicPolicy<QosTopicData>, Changeable {
     
     private byte[] topicData;
 

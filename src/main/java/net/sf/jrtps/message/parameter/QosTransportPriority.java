@@ -2,8 +2,13 @@ package net.sf.jrtps.message.parameter;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
+/**
+ * TransportPriority QoS policy.
+ * 
+ * @author mcr70
+ */
 public class QosTransportPriority extends Parameter implements TopicPolicy<QosTransportPriority>,
-        DataWriterPolicy<QosTransportPriority>, InlineQoS {
+        DataWriterPolicy<QosTransportPriority>, InlineQoS, Changeable {
     private int value;
 
     public QosTransportPriority(int value) {
