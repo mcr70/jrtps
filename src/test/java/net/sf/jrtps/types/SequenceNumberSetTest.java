@@ -34,13 +34,18 @@ public class SequenceNumberSetTest {
 
 		// Tests that example in ch. 9.4.2.6 SequenceNumberSet works correctly
 		SequenceNumberSet sns = new SequenceNumberSet(BASE, new int[] {0x30000000});
-		assertFalse(sns.isSet(1234));
-		assertFalse(sns.isSet(1235));
-		assertTrue(sns.isSet(1236));
-		assertTrue(sns.isSet(1237));
+		assertFalse(sns.containsSeqNum(1234));
+		assertFalse(sns.containsSeqNum(1235));
+		assertTrue(sns.containsSeqNum(1236));
+		assertTrue(sns.containsSeqNum(1237));
 		for (int i = 4; i < sns.getNumBits(); i++) {
-			assertFalse(sns.isSet(BASE + i)); // rest seqnums are false
+			assertFalse(sns.containsSeqNum(BASE + i)); // rest seqnums are false
 		}	
+
+		assertTrue(sns.getNumBits() == 32);
+		assertTrue(sns.getSequenceNumbers().size() == 2);
+		assertTrue(sns.getMissingSequenceNumbers().size() == 30);
+		
 
 		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[16]);		
 		bb.write_longlong(BASE);   // Base
@@ -51,13 +56,17 @@ public class SequenceNumberSetTest {
 		sns = new SequenceNumberSet(bb);
 
 		assertEquals(1, sns.getBitmaps().length);
-		assertFalse(sns.isSet(1234));
-		assertFalse(sns.isSet(1235));
-		assertTrue(sns.isSet(1236));
-		assertTrue(sns.isSet(1237));
+		assertFalse(sns.containsSeqNum(1234));
+		assertFalse(sns.containsSeqNum(1235));
+		assertTrue(sns.containsSeqNum(1236));
+		assertTrue(sns.containsSeqNum(1237));
 		 
 		for (int i = 4; i < sns.getNumBits(); i++) {
-			assertFalse(sns.isSet(BASE + i)); // rest seqnums are false
+			assertFalse(sns.containsSeqNum(BASE + i)); // rest seqnums are false
 		}	
+
+		assertTrue(sns.getNumBits() == 12);
+		assertTrue(sns.getSequenceNumbers().size() == 2);
+		assertTrue(sns.getMissingSequenceNumbers().size() == 10);	
 	}
 }
