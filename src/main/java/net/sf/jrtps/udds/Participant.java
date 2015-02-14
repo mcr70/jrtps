@@ -27,6 +27,7 @@ import javax.crypto.NoSuchPaddingException;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.QualityOfService.PolicyListener;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.ParticipantDataMarshaller;
 import net.sf.jrtps.builtin.ParticipantMessage;
@@ -40,6 +41,7 @@ import net.sf.jrtps.builtin.TopicDataMarshaller;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
+import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.message.parameter.QosReliability.Kind;
 import net.sf.jrtps.rtps.RTPSParticipant;
@@ -387,7 +389,7 @@ public class Participant {
 	 * @param qos QualityOfService
 	 * @return a DataReader<T>
 	 */
-	public <T> DataReader<T> createDataReader(String topicName, Class<T> type, String typeName, QualityOfService qos) {        
+	public <T> DataReader<T> createDataReader(final String topicName, Class<T> type, final String typeName, final QualityOfService qos) {        
 		logger.debug("Creating DataReader for topic {}, type {}, qos {}", topicName, typeName, qos);
 
 		Marshaller<T> m = getMarshaller(type);
@@ -428,29 +430,43 @@ public class Participant {
 		}
 
 		UDDSReaderCache<T> rCache = new UDDSReaderCache<>(eId, m, qos, watchdog);
-		RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
+		final RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
 		rCache.setRTPSReader(rtps_reader);
 
-		DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
+		final DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
 		rCache.setCommunicationListeners(reader.communicationListeners);
 		reader.setHistoryCache(rCache);
 		readers.add(reader);
 
-		SubscriptionData rd = new SubscriptionData(topicName, typeName, reader.getRTPSReader().getGuid(), qos);
-		reader.setSubscriptionData(rd);
+		writeSubscriptionData(reader, typeName);
 
+		qos.addPolicyListener(new PolicyListener() {
+			@Override
+			public void policyChanged(QosPolicy policy) {
+				writeSubscriptionData(reader, typeName);
+			}
+		});
+
+		logger.debug("Created DataReader {}", reader.getGuid());
+		
+		return reader;
+	}
+
+	private void writeSubscriptionData(DataReader reader, String typeName) {
+		RTPSReader<?> rtps_reader = reader.getRTPSReader();
+
+		SubscriptionData rd = new SubscriptionData(reader.getTopicName(), typeName, 
+				rtps_reader.getGuid(), rtps_reader.getQualityOfService());
+		reader.setSubscriptionData(rd);
+		
 		if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
 			@SuppressWarnings("unchecked")
 			DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
 					SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
 			sw.write(rd);
-		}
-
-		logger.debug("Created DataReader {}", reader.getGuid());
-
-		return reader;
+		}		
 	}
-
+	
 	void removeDataReader(DataReader<?> dr) {
 		readers.remove(dr);
 
@@ -506,7 +522,8 @@ public class Participant {
 	 * @param qos QualityOfService
 	 * @return a DataWriter<T>
 	 */
-	public <T> DataWriter<T> createDataWriter(String topicName, Class<T> type, String typeName, QualityOfService qos) {
+	public <T> DataWriter<T> createDataWriter(final String topicName, final Class<T> type, 
+			final String typeName, final QualityOfService qos) {
 		logger.debug("Creating DataWriter for topic {}, type {}, qos {}", topicName, typeName, qos);
 
 		Marshaller<T> m = getMarshaller(type);
@@ -546,14 +563,31 @@ public class Participant {
 
 		UDDSWriterCache<T> wCache = new UDDSWriterCache<>(eId, m, qos, watchdog);
 		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);				
-		DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
+		final DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
 
 		wCache.setCommunicationListeners(writer.communicationListeners);
 
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
 
-		PublicationData wd = new PublicationData(writer.getTopicName(), typeName, writer.getRTPSWriter().getGuid(), qos);
+		writePublicationData(writer, typeName);
+
+		qos.addPolicyListener(new PolicyListener() {
+			@Override
+			public void policyChanged(QosPolicy policy) {
+				writePublicationData(writer, typeName);
+			}
+		});
+
+		logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
+
+		return writer;
+	}
+
+	void writePublicationData(DataWriter writer, String typeName) {
+		RTPSWriter rtps_writer = writer.getRTPSWriter();
+		PublicationData wd = new PublicationData(writer.getTopicName(), typeName, 
+				rtps_writer.getGuid(), rtps_writer.getQualityOfService());
 		writer.setPublicationData(wd);
 
 		if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
@@ -561,13 +595,10 @@ public class Participant {
 			DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
 					PublicationData.BUILTIN_TOPIC_NAME).get(0);
 			pw.write(wd);
-
-			logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
 		}
-
-		return writer;
 	}
-
+	
+	
 	void removeDataWriter(DataWriter<?> dw) {
 		dw.getRTPSWriter().close();
 		writers.remove(dw);
