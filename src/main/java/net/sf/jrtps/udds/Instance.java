@@ -46,7 +46,6 @@ public class Instance <T> {
     private Task tbfTask;
     private Task deadLineMonitorTask;    
     private WriterProxy owner;
-    private int ownerStrength;
 
     Instance(KeyHash key, QualityOfService qos, Watchdog watchdog) {
         this.key = key;
@@ -225,14 +224,17 @@ public class Instance <T> {
      * @return true if ownership changed
      */
     boolean claimOwnership(WriterProxy writer) {
-        if (owner == null || !owner.isAlive() || this.ownerStrength < writer.getStrength() ||
-                owner.getGuid().compareTo(writer.getGuid()) < 0) {
+    	if (owner == null || !owner.isAlive() || owner.getStrength() < writer.getStrength()) {
+                //owner.getGuid().compareTo(writer.getGuid()) < 0) {
             this.owner = writer;
-            this.ownerStrength = writer.getStrength();
             
             return true;
         }
         
+    	if (owner.getGuid().equals(writer.getGuid())) {
+    		return true;
+    	}
+    	
         return false;
     }
 
@@ -256,6 +258,5 @@ public class Instance <T> {
      */
     void deadlineMissed() {
         owner = null;
-        ownerStrength = 0;
     }
 }

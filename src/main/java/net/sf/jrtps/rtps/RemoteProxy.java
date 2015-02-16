@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 public class RemoteProxy {
     private static final Logger logger = LoggerFactory.getLogger(RemoteProxy.class);
     
-    private final DiscoveredData discoveredData;
+    private DiscoveredData discoveredData;
     private final List<Locator> locators = new LinkedList<>();
     private boolean preferMulticast = false; // TODO: not used at the moment
 
@@ -46,6 +46,10 @@ public class RemoteProxy {
         }
     }
 
+    public void update(DiscoveredData dd) {
+    	this.discoveredData = dd;
+    }
+    
     /**
      * Gets the Locator for the remote entity. Tries to return preferred locator
      * (unicast or multicast). If the preferred locator is null, return non

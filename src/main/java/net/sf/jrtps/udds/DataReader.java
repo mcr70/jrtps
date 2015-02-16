@@ -11,6 +11,9 @@ import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterLivelinessListener;
 import net.sf.jrtps.rtps.WriterProxy;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * This class represents a strongly typed DataReader in spirit of DDS specification.
  * DataReader maintains a history cache where it keeps Samples received from writers on the network.
@@ -26,7 +29,9 @@ import net.sf.jrtps.rtps.WriterProxy;
  *            Object that is used with uDDS.
  */
 public class DataReader<T> extends Entity<T, PublicationData> {
-    private UDDSReaderCache<T> hCache;
+	private static final Logger logger = LoggerFactory.getLogger(DataReader.class);
+	
+	private UDDSReaderCache<T> hCache;
 
     /**
      * RTPSReader associated with this DataReader
@@ -199,8 +204,9 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
     void removeMatchedWriter(PublicationData pd) {
-        WriterProxy writer = rtps_reader.removeMatchedWriter(pd);
-        writer.isAlive(false);
+    	WriterProxy writer = rtps_reader.removeMatchedWriter(pd);
+        logger.debug("marking writer {}({}) as not alive", writer.getGuid(), writer.hashCode());
+    	writer.isAlive(false);
     }
 
     void inconsistentQoS(PublicationData pd) {
