@@ -7,10 +7,14 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.LocatorUDPv4_t;
+import net.sf.jrtps.types.SequenceNumber;
+import net.sf.jrtps.types.SequenceNumberSet;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 public class MessageTests {
@@ -113,6 +117,30 @@ public class MessageTests {
 		
 		// Test, that bytes1 and bytes2 are equal
 		assertArrayEquals(bytes1, bytes2);
+	}
+
+	@Test
+	public void testGap() {
+		// Test Gap of seqNums 0,1,2
+
+		Gap gap = new Gap(null, null, 0, 2);
+		Assert.assertTrue(0 == gap.getGapStart());
+		Assert.assertTrue(2 == gap.getGapEnd());
+		
+		RTPSByteBuffer bb = new RTPSByteBuffer(new byte[128]);
+		EntityId.UNKNOWN_ENTITY.writeTo(bb); // readerId
+		EntityId.UNKNOWN_ENTITY.writeTo(bb); // writerId
+		SequenceNumber sn = new SequenceNumber(0);
+		sn.writeTo(bb); // gapStart
+		SequenceNumberSet sns = new SequenceNumberSet(1, new int[] {0x80000000 >> 1});
+		Assert.assertTrue(2 == sns.getSequenceNumbers().size());
+		sns.writeTo(bb); // gapList
+		
+		bb.getBuffer().flip();
+		
+		Gap gap2 = new Gap(new SubMessageHeader(Gap.KIND), bb);		
+		Assert.assertTrue(0 == gap2.getGapStart());
+		Assert.assertTrue(2 == gap2.getGapEnd());
 	}
 	
 	/**
