@@ -73,55 +73,58 @@ public class VendorId extends Parameter {
 		sb.append('(');
 
 		switch (id) {
-		case 1:
+		case 0x0000:
+			sb.append("Invalid");
+			break;
+		case 0x0101:
 			sb.append("Real-Time Innovations, Inc. (RTI) - Connext DDS");
 			break;
-		case 2:
+		case 0x0102:
 			sb.append("PrismTech - OpenSplice");
 			break;
-		case 3:
+		case 0x0103:
 			sb.append("Object Computing Incorporated, Inc. (OCI) - OpenDDS");
 			break;
-		case 4:
+		case 0x0104:
 			sb.append("MilSoft");
 			break;
-		case 5:
+		case 0x0105:
 			sb.append("Gallium Visual Systems Inc. - InterCOM DDS");
 			break;
-		case 6:
+		case 0x0106:
 			sb.append("TwinOaks Computing, Inc. - CoreDX DDS");
 			break;
-		case 7:
+		case 0x0107:
 			sb.append("Lakota Technical Solutions, Inc.");
 			break;
-		case 8:
+		case 0x0108:
 			sb.append("ICOUP Consulting");
 			break;
-		case 9:
+		case 0x0109:
 			sb.append("ETRI Electronics and Telecommunication Research Institute");
 			break;
-		case 0xa:
+		case 0x010a:
 			sb.append("Real-Time Innovations, Inc. (RTI) - Connext DDS Micro");
 			break;
-		case 0xb:
+		case 0x010b:
 			sb.append("PrimsTech - Vortex Cafe");
 			break;
-		case 0xc:
+		case 0x010c:
 			sb.append("PrimsTech - Vortex Gateway");
 			break;
-		case 0xd:
+		case 0x010d:
 			sb.append("PrimsTech - Vortex Lite");
 			break;
-		case 0xe:
+		case 0x010e:
 			sb.append("Technicolor Inc. - Qeo");
 			break;
-		case 0xf:
+		case 0x010f:
 			sb.append("eProsima - Fast RTPS");
 			break;
-		case 0x20:
+		case 0x0120:
 			sb.append("PrismTech - Vortex Cloud");
 			break;
-		case 0x21:
+		case 0x0121:
 			sb.append("jRTPS");
 			break;
 		default:
