@@ -92,7 +92,7 @@ public class Gap extends SubMessage {
 	}
 
 	/**
-	 * SequenceNumberSet.bitmapBase is the last sequence number of irrelevant
+	 * SequenceNumberSet.bitmapBase - 1 is the last sequence number of irrelevant
 	 * seq nums. SequenceNumberSet.bitmaps identifies additional irrelevant
 	 * sequence numbers.
 	 * 
