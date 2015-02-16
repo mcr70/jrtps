@@ -25,7 +25,7 @@ public class DiscoveredData {
 
 	// While reading data from stream, qos policies might come in 'wrong' order.
     // This list keeps track of inconsistencies occured
-    private List<QosPolicy<?>> inconsistenPolicies = new LinkedList<>();
+    private List<QosPolicy<?>> inconsistentPolicies = new LinkedList<>();
     private List<Parameter> params = new LinkedList<>();
 
     protected QualityOfService qos;
@@ -76,9 +76,9 @@ public class DiscoveredData {
      *             if discovered data would contain inconsistent policies.
      */
     protected void resolveInconsistencies() throws InconsistentPolicy {
-        if (inconsistenPolicies.size() > 0) {
-        	logger.debug("resolveInconsistencies: {}", inconsistenPolicies);
-            resolveInconsistencies(inconsistenPolicies);
+        if (inconsistentPolicies.size() > 0) {
+        	logger.debug("resolveInconsistencies: {}", inconsistentPolicies);
+            resolveInconsistencies(inconsistentPolicies);
         }
     }
 
@@ -100,25 +100,26 @@ public class DiscoveredData {
         return params;
     }
 
-    private void resolveInconsistencies(List<QosPolicy<?>> inconsistentPolicies) throws InconsistentPolicy {
-        int size = inconsistenPolicies.size();
+    private void resolveInconsistencies(List<QosPolicy<?>> inconsistencies) throws InconsistentPolicy {
+        int size = inconsistencies.size();
 
-        for (QosPolicy<?> qp : inconsistentPolicies) {
+        for (QosPolicy<?> qp : inconsistencies) {
             try {
                 qos.setPolicy(qp);
-                inconsistenPolicies.remove(qp);
+                inconsistencies.remove(qp);
             } catch (InconsistentPolicy e) {
                 // Ignore during resolve
             }
         }
 
-        int __size = inconsistenPolicies.size();
+        int __size = inconsistencies.size();
 
         if (size != __size) { // If the size changes, recursively call again
-            resolveInconsistencies(inconsistentPolicies);
-        } else {
-            if (inconsistentPolicies.size() > 0) {
-                throw new InconsistentPolicy(inconsistenPolicies.toString());
+            resolveInconsistencies(inconsistencies);
+        } 
+        else {
+            if (inconsistencies.size() > 0) {
+                throw new InconsistentPolicy(inconsistencies.toString());
             }
         }
     }
@@ -185,7 +186,7 @@ public class DiscoveredData {
         try {
             qos.setPolicy(policy);
         } catch (InconsistentPolicy e) {
-            inconsistenPolicies.add(policy);
+            inconsistentPolicies.add(policy);
         }
     }
 
