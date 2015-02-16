@@ -174,27 +174,6 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
 
-    /**
-     * Gets samples that match Filter. History cache is scanned through and for each
-     * Sample, a Filter is applied. Only the accepted Samples are returned.
-     * 
-     * @param filter
-     * @return A List of Samples that matched given Filter
-     */
-    List<Sample<T>> getSamples(SampleFilter<T> filter) {
-        List<Sample<T>> filteredSampled = new LinkedList<>();
-        
-        List<Sample<T>> samples = getSamples();
-        for (Sample<T> sample : samples) {
-            if (filter.acceptSample(sample)) {
-                filteredSampled.add(sample);
-            }
-        }
-        
-        return filteredSampled;
-    }
-
-
     void addMatchedWriter(PublicationData pd) {
         rtps_reader.addMatchedWriter(pd);
         synchronized (communicationListeners) {
@@ -238,5 +217,25 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     void addFilter(SampleFilter<T> filter) {
         // QosOwnership could be implemented with Filters.
         // QosResourceLimits could be implemented with Filters.
+    }
+
+    /**
+     * Gets samples that match Filter. History cache is scanned through and for each
+     * Sample, a Filter is applied. Only the accepted Samples are returned.
+     * 
+     * @param filter
+     * @return A List of Samples that matched given Filter
+     */
+    List<Sample<T>> getSamples(SampleFilter<T> filter) {
+        List<Sample<T>> filteredSampled = new LinkedList<>();
+        
+        List<Sample<T>> samples = getSamples();
+        for (Sample<T> sample : samples) {
+            if (filter.acceptSample(sample)) {
+                filteredSampled.add(sample);
+            }
+        }
+        
+        return filteredSampled;
     }
 }
