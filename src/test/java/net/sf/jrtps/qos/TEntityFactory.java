@@ -8,7 +8,7 @@ import net.sf.jrtps.udds.Participant;
 
 class TEntityFactory extends EntityFactory {
     @Override
-    public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter,
+    public <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, String typeName, RTPSWriter<T> rtpsWriter,
             HistoryCache<T> hCache) {
         return new TDataWriter<>(p, type, rtpsWriter, hCache);
     }
