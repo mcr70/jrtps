@@ -45,7 +45,7 @@ public class Data extends SubMessage {
      * @param dEnc If null, neither dataFlag or keyFlag is set
      */
     public Data(EntityId readerId, EntityId writerId, long seqNum, ParameterList inlineQosParams, DataEncapsulation dEnc) {
-        super(new SubMessageHeader(0x15));
+        super(new SubMessageHeader(KIND));
 
         this.readerId = readerId;
         this.writerId = writerId;
