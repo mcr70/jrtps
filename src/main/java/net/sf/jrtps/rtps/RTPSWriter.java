@@ -51,401 +51,408 @@ import org.slf4j.LoggerFactory;
  * @author mcr70
  */
 public class RTPSWriter<T> extends Endpoint {
-    private static final Logger logger = LoggerFactory.getLogger(RTPSWriter.class);
+	private static final Logger logger = LoggerFactory.getLogger(RTPSWriter.class);
 
-    private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
+	private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
 
-    private final WriterCache<T> writer_cache;
-    private final int nackResponseDelay;
-    private final int heartbeatPeriod;
-    private final boolean pushMode;
-    
-    private int hbCount; // heartbeat counter. incremented each time hb is sent
+	private final WriterCache<T> writer_cache;
+	private final int nackResponseDelay;
+	private final int heartbeatPeriod;
+	private final boolean pushMode;
 
-    private ScheduledFuture<?> hbAnnounceTask;
+	private int hbCount; // heartbeat counter. incremented each time hb is sent
 
-    
+	private ScheduledFuture<?> hbAnnounceTask;
 
-    RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache<T> wCache,
-            QualityOfService qos, Configuration configuration) {
-        super(participant, entityId, topicName, qos, configuration);
 
-        this.writer_cache = wCache;
-        this.nackResponseDelay = configuration.getNackResponseDelay();
-        this.heartbeatPeriod = configuration.getHeartbeatPeriod();
-        this.pushMode = configuration.getPushMode();
-        
-        if (isReliable()) {
-            Runnable r = new Runnable() {
-                @Override
-                public void run() {
-                    logger.debug("[{}] Starting periodical notification", getEntityId());
-                    try {
-                        // periodical notification is handled always as pushMode == false
-                        notifyReaders(false);
-                    } catch (Exception e) {
-                        logger.error("Got exception while doing periodical notification", e);
-                    }
-                }
-            };
 
-            hbAnnounceTask = participant.scheduleAtFixedRate(r, heartbeatPeriod);
-        }
-    }
+	RTPSWriter(RTPSParticipant participant, EntityId entityId, String topicName, WriterCache<T> wCache,
+			QualityOfService qos, Configuration configuration) {
+		super(participant, entityId, topicName, qos, configuration);
 
-    /**
-     * Get the BuiltinEndpointSet ID of this RTPSWriter.
-     * 
-     * @return 0, if this RTPSWriter is not builtin endpoint
-     */
-    public int endpointSetId() {
-        return getEntityId().getEndpointSetId();
-    }
+		this.writer_cache = wCache;
+		this.nackResponseDelay = configuration.getNackResponseDelay();
+		this.heartbeatPeriod = configuration.getHeartbeatPeriod();
+		this.pushMode = configuration.getPushMode();
 
-    /**
-     * Notify every matched RTPSReader. For reliable readers, a Heartbeat is
-     * sent. For best effort readers Data is sent. This provides means to create
-     * multiple changes, before announcing the state to readers.
-     */
-    public void notifyReaders() {
-        notifyReaders(this.pushMode);
-    }
-    
-    /**
-     * Notify readers. Heartbeat announce thread calls this method always with 'false' as pushMode.
-     * @param pushMode 
-     */
-    private void notifyReaders(boolean pushMode) {
-        if (readerProxies.size() > 0) {
-            logger.debug("[{}] Notifying {} matched readers of changes in history cache", getEntityId(),
-                    readerProxies.size());
+		if (isReliable()) {
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					logger.debug("[{}] Starting periodical notification", getEntityId());
+					try {
+						// periodical notification is handled always as pushMode == false
+						notifyReaders(false);
+					} catch (Exception e) {
+						logger.error("Got exception while doing periodical notification", e);
+					}
+				}
+			};
 
-            for (ReaderProxy proxy : readerProxies.values()) {
-                Guid guid = proxy.getSubscriptionData().getBuiltinTopicKey();
-                notifyReader(guid, pushMode);
-            }
-        }
-    }
-        
-    /**
-     * Notifies a remote reader with given Guid of the changes available in this writer.
-     * 
-     * @param guid
-     */
-    public void notifyReader(Guid guid) {
-        notifyReader(guid, this.pushMode);
-    }
-    
-    /**
-     * Notify a reader. Heartbeat announce thread calls this method always with 'false' as pushMode.
-     * @param pushMode 
-     */
-    private void notifyReader(Guid guid, boolean pushMode) {
-        ReaderProxy proxy = readerProxies.get(guid);
+			hbAnnounceTask = participant.scheduleAtFixedRate(r, heartbeatPeriod);
+		}
+	}
 
-        if (proxy == null) {
-            logger.warn("Will not notify, no proxy for {}", guid);
-            return;
-        }
+	/**
+	 * Get the BuiltinEndpointSet ID of this RTPSWriter.
+	 * 
+	 * @return 0, if this RTPSWriter is not builtin endpoint
+	 */
+	public int endpointSetId() {
+		return getEntityId().getEndpointSetId();
+	}
 
-        // Send HB only if proxy is reliable and we are not configured to be in pushMode
-        if (proxy.isReliable() && !pushMode) {
-            sendHeartbeat(proxy);
-        } 
-        else {
-            long readersHighestSeqNum = proxy.getReadersHighestSeqNum();            
-            sendData(proxy, readersHighestSeqNum);
-            
-            if (!proxy.isReliable()) {
-            	// For best effort readers, update readers highest seqnum
-                proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
-            }
-        }
-    }
+	/**
+	 * Notify every matched RTPSReader. For reliable readers, a Heartbeat is
+	 * sent. For best effort readers Data is sent. This provides means to create
+	 * multiple changes, before announcing the state to readers.
+	 */
+	public void notifyReaders() {
+		notifyReaders(this.pushMode);
+	}
 
-    /**
-     * Assert liveliness of this writer. Matched readers are notified via
-     * Heartbeat message of the liveliness of this writer.
-     */
-    public void assertLiveliness() {
-        for (ReaderProxy proxy : readerProxies.values()) {
-            sendHeartbeat(proxy, true); // Send Heartbeat regardless of readers QosReliability
-        }
-    }
+	/**
+	 * Notify readers. Heartbeat announce thread calls this method always with 'false' as pushMode.
+	 * @param pushMode 
+	 */
+	private void notifyReaders(boolean pushMode) {
+		if (readerProxies.size() > 0) {
+			logger.debug("[{}] Notifying {} matched readers of changes in history cache", getEntityId(),
+					readerProxies.size());
 
-    /**
-     * Close this writer.
-     */
-    public void close() {
-        if (hbAnnounceTask != null) {
-            hbAnnounceTask.cancel(true);
-        }
+			for (ReaderProxy proxy : readerProxies.values()) {
+				Guid guid = proxy.getSubscriptionData().getBuiltinTopicKey();
+				notifyReader(guid, pushMode);
+			}
+		}
+	}
 
-        readerProxies.clear();
-    }
+	/**
+	 * Notifies a remote reader with given Guid of the changes available in this writer.
+	 * 
+	 * @param guid
+	 */
+	public void notifyReader(Guid guid) {
+		notifyReader(guid, this.pushMode);
+	}
 
-    /**
-     * Add a matched reader.
-     * 
-     * @param readerData
-     * @return ReaderProxy
-     */
-    public ReaderProxy addMatchedReader(SubscriptionData readerData) {
-        List<Locator> locators = getLocators(readerData);
-        ReaderProxy proxy = new ReaderProxy(getGuid().getEntityId(), readerData, locators, getConfiguration().getNackSuppressionDuration());
-        proxy.preferMulticast(getConfiguration().preferMulticast());
-        
-        readerProxies.put(readerData.getBuiltinTopicKey(), proxy);
+	/**
+	 * Notify a reader. Heartbeat announce thread calls this method always with 'false' as pushMode.
+	 * @param pushMode 
+	 */
+	private void notifyReader(Guid guid, boolean pushMode) {
+		ReaderProxy proxy = readerProxies.get(guid);
 
-        QosDurability readerDurability = readerData.getQualityOfService().getDurability();
+		if (proxy == null) {
+			logger.warn("Will not notify, no proxy for {}", guid);
+			return;
+		}
 
-        if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
-            // VOLATILE readers are marked having received all the samples so far
-            logger.trace("[{}] Setting highest seqNum to {} for VOLATILE reader", getEntityId(),
-                    writer_cache.getSeqNumMax());
+		// Send HB only if proxy is reliable and we are not configured to be in pushMode
+		if (proxy.isReliable() && !pushMode) {
+			sendHeartbeat(proxy);
+		} 
+		else {
+			long readersHighestSeqNum = proxy.getReadersHighestSeqNum();            
+			sendData(proxy, readersHighestSeqNum);
 
-            proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
-        } else {
-            notifyReader(proxy.getGuid());
-        }
+			if (!proxy.isReliable()) {
+				// For best effort readers, update readers highest seqnum
+				proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+			}
+		}
+	}
 
-        logger.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
-        return proxy;
-    }
+	/**
+	 * Assert liveliness of this writer. Matched readers are notified via
+	 * Heartbeat message of the liveliness of this writer.
+	 */
+	public void assertLiveliness() {
+		for (ReaderProxy proxy : readerProxies.values()) {
+			sendHeartbeat(proxy, true); // Send Heartbeat regardless of readers QosReliability
+		}
+	}
 
-    /**
-     * Removes all the matched writers that have a given GuidPrefix
-     * 
-     * @param prefix
-     */
-    public void removeMatchedReaders(GuidPrefix prefix) {
-        for (ReaderProxy rp : readerProxies.values()) {
-            if (prefix.equals(rp.getGuid().getPrefix())) {
-                removeMatchedReader(rp.getSubscriptionData());
-            }
-        }
-    }
+	/**
+	 * Close this writer.
+	 */
+	public void close() {
+		if (hbAnnounceTask != null) {
+			hbAnnounceTask.cancel(true);
+		}
 
-    /**
-     * Remove a matched reader.
-     * 
-     * @param readerData
-     */
-    public void removeMatchedReader(SubscriptionData readerData) {
-        readerProxies.remove(readerData.getBuiltinTopicKey());
-        logger.debug("[{}] Removed matchedReader {}, {}", getEntityId(), readerData.getBuiltinTopicKey());
-    }
+		readerProxies.clear();
+	}
 
-    /**
-     * Gets all the matched readers of this RTPSWriter
-     * 
-     * @return a Collection of matched readers
-     */
-    public Collection<ReaderProxy> getMatchedReaders() {
-        return readerProxies.values();
-    }
+	/**
+	 * Add a matched reader.
+	 * 
+	 * @param readerData
+	 * @return ReaderProxy
+	 */
+	public ReaderProxy addMatchedReader(SubscriptionData readerData) {
+		List<Locator> locators = getLocators(readerData);
 
-    /**
-     * Gets the matched readers owned by given remote participant.
-     * 
-     * @param prefix
-     *            GuidPrefix of the remote participant
-     * @return a Collection of matched readers
-     */
-    public Collection<ReaderProxy> getMatchedReaders(GuidPrefix prefix) {
-        List<ReaderProxy> proxies = new LinkedList<>();
-        for (Guid guid : readerProxies.keySet()) {
-            if (guid.getPrefix().equals(prefix)) {
-                proxies.add(readerProxies.get(guid));
-            }
-        }
-        return proxies;
-    }
+		ReaderProxy proxy = readerProxies.get(readerData.getBuiltinTopicKey());
+		if (proxy == null) {
+			proxy = new ReaderProxy(getGuid().getEntityId(), readerData, locators, getConfiguration().getNackSuppressionDuration());
+			proxy.preferMulticast(getConfiguration().preferMulticast());
 
-    /**
-     * Handle incoming AckNack message.
-     * 
-     * @param senderPrefix
-     * @param ackNack
-     */
-    void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
-        logger.debug("[{}] Got AckNack: #{} {}, F:{} from {}", getEntityId(), ackNack.getCount(),
-                ackNack.getReaderSNState(), ackNack.finalFlag(), senderPrefix);
+			readerProxies.put(readerData.getBuiltinTopicKey(), proxy);
+		}
+		else {
+			proxy.update(readerData);;
+		}
 
-        ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
-        if (proxy != null) {
-            if (proxy.ackNackReceived(ackNack)) {
-                logger.trace("[{}] Wait for nack response delay: {} ms", getEntityId(), nackResponseDelay);
-                getParticipant().waitFor(nackResponseDelay);
+		QosDurability readerDurability = readerData.getQualityOfService().getDurability();
 
-                sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
-            }
-        } 
-        else {
-            logger.warn("[{}] Discarding AckNack from unknown reader {}", getEntityId(), ackNack.getReaderId());
-        }
-    }
+		if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
+			// VOLATILE readers are marked having received all the samples so far
+			logger.trace("[{}] Setting highest seqNum to {} for VOLATILE reader", getEntityId(),
+					writer_cache.getSeqNumMax());
 
-    /**
-     * Send data to given participant & reader. readersHighestSeqNum specifies
-     * which is the first data to be sent.
-     * 
-     * @param targetPrefix
-     * @param readerId
-     * @param readersHighestSeqNum
-     */
-    private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
-        Message m = new Message(getGuid().getPrefix());
-        LinkedList<Sample<T>> samples = writer_cache.getSamplesSince(readersHighestSeqNum);
+			proxy.setReadersHighestSeqNum(writer_cache.getSeqNumMax());
+		} else {
+			notifyReader(proxy.getGuid());
+		}
 
-        if (samples.size() == 0) {
-            logger.debug("[{}] Remote reader already has all the data", getEntityId(),
-                    proxy, readersHighestSeqNum);
-            return;
-        }
+		logger.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
+		return proxy;
+	}
 
-        // Add INFO_DESTINATION
-        m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));
-        
-        long prevTimeStamp = 0;
-        EntityId proxyEntityId = proxy.getEntityId();
-        
-        for (Sample<T> aSample : samples) {
-            try {
-                long timeStamp = aSample.getTimestamp();
-                if (timeStamp > prevTimeStamp) {
-                    InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
-                    m.addSubMessage(infoTS);
-                }
-                prevTimeStamp = timeStamp;
+	/**
+	 * Removes all the matched writers that have a given GuidPrefix
+	 * 
+	 * @param prefix
+	 */
+	public void removeMatchedReaders(GuidPrefix prefix) {
+		for (ReaderProxy rp : readerProxies.values()) {
+			if (prefix.equals(rp.getGuid().getPrefix())) {
+				removeMatchedReader(rp.getSubscriptionData());
+			}
+		}
+	}
 
-                logger.trace("Marshalling {}", aSample.getData());
-                Data data = createData(proxyEntityId, proxy.expectsInlineQoS(), aSample);
-                m.addSubMessage(data);
-            } catch (IOException ioe) {
-                logger.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
-            }
-        }
+	/**
+	 * Remove a matched reader.
+	 * 
+	 * @param readerData
+	 */
+	public void removeMatchedReader(SubscriptionData readerData) {
+		readerProxies.remove(readerData.getBuiltinTopicKey());
+		logger.debug("[{}] Removed matchedReader {}, {}", getEntityId(), readerData.getBuiltinTopicKey());
+	}
 
-        // add HB at the end of data, see 8.4.15.4 Piggybacking HeartBeat submessages
-        if (proxy.isReliable()) {
-            Heartbeat hb = createHeartbeat(proxyEntityId);
-            hb.finalFlag(false); // Reply needed
-            m.addSubMessage(hb);
-        }
+	/**
+	 * Gets all the matched readers of this RTPSWriter
+	 * 
+	 * @return a Collection of matched readers
+	 */
+	public Collection<ReaderProxy> getMatchedReaders() {
+		return readerProxies.values();
+	}
 
-        long firstSeqNum = samples.getFirst().getSequenceNumber();
-        long lastSeqNum = samples.getLast().getSequenceNumber();
-        
-        logger.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
+	/**
+	 * Gets the matched readers owned by given remote participant.
+	 * 
+	 * @param prefix
+	 *            GuidPrefix of the remote participant
+	 * @return a Collection of matched readers
+	 */
+	public Collection<ReaderProxy> getMatchedReaders(GuidPrefix prefix) {
+		List<ReaderProxy> proxies = new LinkedList<>();
+		for (Guid guid : readerProxies.keySet()) {
+			if (guid.getPrefix().equals(prefix)) {
+				proxies.add(readerProxies.get(guid));
+			}
+		}
+		return proxies;
+	}
 
-        boolean overFlowed = sendMessage(m, proxy);
-        if (overFlowed) {
-            logger.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
-            sendHeartbeat(proxy);
-        }
-    }
+	/**
+	 * Handle incoming AckNack message.
+	 * 
+	 * @param senderPrefix
+	 * @param ackNack
+	 */
+	void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
+		logger.debug("[{}] Got AckNack: #{} {}, F:{} from {}", getEntityId(), ackNack.getCount(),
+				ackNack.getReaderSNState(), ackNack.finalFlag(), senderPrefix);
 
-    private void sendHeartbeat(ReaderProxy proxy) {
-        sendHeartbeat(proxy, false);
-    }
+		ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
+		if (proxy != null) {
+			if (proxy.ackNackReceived(ackNack)) {
+				logger.trace("[{}] Wait for nack response delay: {} ms", getEntityId(), nackResponseDelay);
+				getParticipant().waitFor(nackResponseDelay);
 
-    private void sendHeartbeat(ReaderProxy proxy, boolean livelinessFlag) {
-        Message m = new Message(getGuid().getPrefix());
+				sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
+			}
+		} 
+		else {
+			logger.warn("[{}] Discarding AckNack from unknown reader {}", getEntityId(), ackNack.getReaderId());
+		}
+	}
 
-        // Add INFO_DESTINATION
-        m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));        
-        
-        Heartbeat hb = createHeartbeat(proxy.getEntityId());
-        hb.livelinessFlag(livelinessFlag);
-        m.addSubMessage(hb);
+	/**
+	 * Send data to given participant & reader. readersHighestSeqNum specifies
+	 * which is the first data to be sent.
+	 * 
+	 * @param targetPrefix
+	 * @param readerId
+	 * @param readersHighestSeqNum
+	 */
+	private void sendData(ReaderProxy proxy, long readersHighestSeqNum) {
+		Message m = new Message(getGuid().getPrefix());
+		LinkedList<Sample<T>> samples = writer_cache.getSamplesSince(readersHighestSeqNum);
 
-        logger.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getEntityId(), hb.getCount(),
-                hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), hb.finalFlag(), hb.livelinessFlag(),
-                proxy.getGuid());
+		if (samples.size() == 0) {
+			logger.debug("[{}] Remote reader already has all the data", getEntityId(),
+					proxy, readersHighestSeqNum);
+			return;
+		}
 
-        sendMessage(m, proxy);
+		// Add INFO_DESTINATION
+		m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));
 
-        if (!livelinessFlag) {
-            proxy.heartbeatSent();
-        }
-    }
+		long prevTimeStamp = 0;
+		EntityId proxyEntityId = proxy.getEntityId();
 
-    private Heartbeat createHeartbeat(EntityId entityId) {
-        if (entityId == null) {
-            entityId = EntityId.UNKNOWN_ENTITY;
-        }
+		for (Sample<T> aSample : samples) {
+			try {
+				long timeStamp = aSample.getTimestamp();
+				if (timeStamp > prevTimeStamp) {
+					InfoTimestamp infoTS = new InfoTimestamp(timeStamp);
+					m.addSubMessage(infoTS);
+				}
+				prevTimeStamp = timeStamp;
 
-        Heartbeat hb = new Heartbeat(entityId, getEntityId(), writer_cache.getSeqNumMin(),
-                writer_cache.getSeqNumMax(), hbCount++);
+				logger.trace("Marshalling {}", aSample.getData());
+				Data data = createData(proxyEntityId, proxy.expectsInlineQoS(), aSample);
+				m.addSubMessage(data);
+			} catch (IOException ioe) {
+				logger.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
+			}
+		}
 
-        return hb;
-    }
+		// add HB at the end of data, see 8.4.15.4 Piggybacking HeartBeat submessages
+		if (proxy.isReliable()) {
+			Heartbeat hb = createHeartbeat(proxyEntityId);
+			hb.finalFlag(false); // Reply needed
+			m.addSubMessage(hb);
+		}
 
-    private Data createData(EntityId readerId, boolean expectsInlineQos, Sample<T> sample) throws IOException {
-        DataEncapsulation dEnc = sample.getDataEncapsulation();
-        ParameterList inlineQos = new ParameterList();
+		long firstSeqNum = samples.getFirst().getSequenceNumber();
+		long lastSeqNum = samples.getLast().getSequenceNumber();
 
-        if (expectsInlineQos) { // If reader expects inline qos, add them 
-            Set<QosPolicy<?>> inlinePolicies = getQualityOfService().getInlinePolicies();
-            for (QosPolicy<?> policy : inlinePolicies) {
-                if (policy instanceof DataWriterPolicy) {
-                    inlineQos.add((Parameter) policy); // TODO: safe cast, but ugly
-                }
-            }
-        }
-        
-        CoherentSet cs = sample.getCoherentSet();
-        
-        if (cs != null) { // Add CoherentSet if present
-            inlineQos.add(cs);
-        }
-        
-        if (sample.hasKey()) { // Add KeyHash if present
-            inlineQos.add(new KeyHash(sample.getKey().getBytes()));
-        }
+		logger.debug("[{}] Sending Data: {}-{} to {}", getEntityId(), firstSeqNum, lastSeqNum, proxy);
 
-        if (!ChangeKind.WRITE.equals(sample.getKind()) && sample.getKind() != null) { 
-            // Add status info for operations other than WRITE
-            inlineQos.add(new StatusInfo(sample.getKind()));
-        }
+		boolean overFlowed = sendMessage(m, proxy);
+		if (overFlowed) {
+			logger.trace("Sending of Data overflowed. Sending HeartBeat to notify reader.");
+			sendHeartbeat(proxy);
+		}
+	}
 
-        Data data = new Data(readerId, getEntityId(), sample.getSequenceNumber(), inlineQos, dEnc);
+	private void sendHeartbeat(ReaderProxy proxy) {
+		sendHeartbeat(proxy, false);
+	}
 
-        return data;
-    }
+	private void sendHeartbeat(ReaderProxy proxy, boolean livelinessFlag) {
+		Message m = new Message(getGuid().getPrefix());
 
-    /**
-     * Checks, if a given change number has been acknowledged by every known
-     * matched reader.
-     * 
-     * @param sequenceNumber sequenceNumber of a change to check
-     * @return true, if every matched reader has acknowledged given change number
-     */
-    public boolean isAcknowledgedByAll(long sequenceNumber) {
-        for (ReaderProxy proxy : readerProxies.values()) {
-            if (proxy.isActive() && proxy.getReadersHighestSeqNum() < sequenceNumber) {
-                return false;
-            }
-        }
+		// Add INFO_DESTINATION
+		m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));        
 
-        return true;
-    }
+		Heartbeat hb = createHeartbeat(proxy.getEntityId());
+		hb.livelinessFlag(livelinessFlag);
+		m.addSubMessage(hb);
 
-    /**
-     * Checks, if this RTPSWriter is already matched with a RTPSReader
-     * represented by given Guid.
-     * 
-     * @param readerGuid
-     * @return true if matched
-     */
-    public boolean isMatchedWith(Guid readerGuid) {
-        return readerProxies.get(readerGuid) != null;
-    }
+		logger.debug("[{}] Sending Heartbeat: #{} {}-{}, F:{}, L:{} to {}", getEntityId(), hb.getCount(),
+				hb.getFirstSequenceNumber(), hb.getLastSequenceNumber(), hb.finalFlag(), hb.livelinessFlag(),
+				proxy.getGuid());
 
-    boolean isReliable() {
-        QosReliability policy = getQualityOfService().getReliability();
+		sendMessage(m, proxy);
 
-        return policy.getKind() == QosReliability.Kind.RELIABLE;
-    }
+		if (!livelinessFlag) {
+			proxy.heartbeatSent();
+		}
+	}
+
+	private Heartbeat createHeartbeat(EntityId entityId) {
+		if (entityId == null) {
+			entityId = EntityId.UNKNOWN_ENTITY;
+		}
+
+		Heartbeat hb = new Heartbeat(entityId, getEntityId(), writer_cache.getSeqNumMin(),
+				writer_cache.getSeqNumMax(), hbCount++);
+
+		return hb;
+	}
+
+	private Data createData(EntityId readerId, boolean expectsInlineQos, Sample<T> sample) throws IOException {
+		DataEncapsulation dEnc = sample.getDataEncapsulation();
+		ParameterList inlineQos = new ParameterList();
+
+		if (expectsInlineQos) { // If reader expects inline qos, add them 
+			Set<QosPolicy<?>> inlinePolicies = getQualityOfService().getInlinePolicies();
+			for (QosPolicy<?> policy : inlinePolicies) {
+				if (policy instanceof DataWriterPolicy) {
+					inlineQos.add((Parameter) policy); // TODO: safe cast, but ugly
+				}
+			}
+		}
+
+		CoherentSet cs = sample.getCoherentSet();
+
+		if (cs != null) { // Add CoherentSet if present
+			inlineQos.add(cs);
+		}
+
+		if (sample.hasKey()) { // Add KeyHash if present
+			inlineQos.add(new KeyHash(sample.getKey().getBytes()));
+		}
+
+		if (!ChangeKind.WRITE.equals(sample.getKind()) && sample.getKind() != null) { 
+			// Add status info for operations other than WRITE
+			inlineQos.add(new StatusInfo(sample.getKind()));
+		}
+
+		Data data = new Data(readerId, getEntityId(), sample.getSequenceNumber(), inlineQos, dEnc);
+
+		return data;
+	}
+
+	/**
+	 * Checks, if a given change number has been acknowledged by every known
+	 * matched reader.
+	 * 
+	 * @param sequenceNumber sequenceNumber of a change to check
+	 * @return true, if every matched reader has acknowledged given change number
+	 */
+	public boolean isAcknowledgedByAll(long sequenceNumber) {
+		for (ReaderProxy proxy : readerProxies.values()) {
+			if (proxy.isActive() && proxy.getReadersHighestSeqNum() < sequenceNumber) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Checks, if this RTPSWriter is already matched with a RTPSReader
+	 * represented by given Guid.
+	 * 
+	 * @param readerGuid
+	 * @return true if matched
+	 */
+	public boolean isMatchedWith(Guid readerGuid) {
+		return readerProxies.get(readerGuid) != null;
+	}
+
+	boolean isReliable() {
+		QosReliability policy = getQualityOfService().getReliability();
+
+		return policy.getKind() == QosReliability.Kind.RELIABLE;
+	}
 }

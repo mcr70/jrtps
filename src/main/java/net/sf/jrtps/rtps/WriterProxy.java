@@ -163,26 +163,22 @@ public class WriterProxy extends RemoteProxy {
     }
 
     /**
-     * Marks writer represented by this proxy as not being alive.
-     * @param livelinessFlag
+     * Marks writer represented by this proxy as being alive or not.
+     * @param b
      */
-    public void isAlive(boolean livelinessFlag) {
-        this.isAlive = livelinessFlag;
+    public void isAlive(boolean b) {
+        this.isAlive = b;
     }
     
     public boolean isAlive() {
         return isAlive;
     }
 
-    public String toString() {
-        return getGuid().toString();
-    }
-
-
     public int getStrength() {
-        // TODO Auto-generated method stub
         return strength;
     }
 
-
+    public String toString() {
+        return getGuid().toString();
+    }
 }

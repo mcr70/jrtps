@@ -72,7 +72,7 @@ public class VendorId extends Parameter {
 		int id = (bytes[0] << 8) | bytes[1];
 		sb.append('(');
 
-		switch (bytes[1]) {
+		switch (id) {
 		case 1:
 			sb.append("Real-Time Innovations, Inc. (RTI) - Connext DDS");
 			break;

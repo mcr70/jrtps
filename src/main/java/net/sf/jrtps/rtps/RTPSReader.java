@@ -99,13 +99,18 @@ public class RTPSReader<T> extends Endpoint {
     public WriterProxy addMatchedWriter(final PublicationData writerData) {
 
         List<Locator> locators = getLocators(writerData);
+        WriterProxy wp = writerProxies.get(writerData.getBuiltinTopicKey());
+        if (wp == null) {
+        	wp = new WriterProxy(this, writerData, locators, heartbeatSuppressionDuration);
+        	wp.preferMulticast(getConfiguration().preferMulticast());
+        	wp.setLivelinessTask(createLivelinessTask(wp));
 
-        WriterProxy wp = new WriterProxy(this, writerData, locators, heartbeatSuppressionDuration);
-        wp.preferMulticast(getConfiguration().preferMulticast());
-        wp.setLivelinessTask(createLivelinessTask(wp));
-
-        writerProxies.put(writerData.getBuiltinTopicKey(), wp);
-
+        	writerProxies.put(writerData.getBuiltinTopicKey(), wp);
+        }
+        else {
+        	wp.update(writerData);
+        }
+        
         logger.debug("[{}] Added matchedWriter {}, locators {}", getEntityId(), writerData, wp.getLocators());
 
         //sendAckNack(wp);
@@ -169,7 +174,9 @@ public class RTPSReader<T> extends Endpoint {
      */
     public WriterProxy removeMatchedWriter(PublicationData writerData) {
         logger.debug("[{}] Removing matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
-        return writerProxies.remove(writerData.getBuiltinTopicKey());
+        WriterProxy proxy = writerProxies.remove(writerData.getBuiltinTopicKey());
+        logger.debug("WriterProxies: {}", writerProxies.keySet());
+        return proxy;
     }
 
     /**

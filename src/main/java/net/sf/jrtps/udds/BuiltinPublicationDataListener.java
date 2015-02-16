@@ -34,26 +34,29 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
             }
 
             List<DataReader<?>> readers = participant.getReadersForTopic(pd.getTopicName());
-            log.debug("considering {} readers for topic {}", readers.size(), pd.getTopicName());
+            log.debug("considering {} readers for topic {}, is disposed: {}", readers.size(), 
+            		pd.getTopicName(), pdSample.isDisposed());
             
             for (DataReader<?> r : readers) {
-                if (!r.getRTPSReader().isMatchedWith(pd.getBuiltinTopicKey()) && !pdSample.isDisposed()) {
-                    // Not associated and sample is not a dispose -> do
-                    // associate
-                    QualityOfService offered = pd.getQualityOfService();
+                if (!pdSample.isDisposed()) {
+                	// Try to associate 
+                	QualityOfService offered = pd.getQualityOfService();
                     QualityOfService requested = r.getRTPSReader().getQualityOfService();
                     log.trace("Check for compatible QoS for {} and {}", pd.getBuiltinTopicKey().getEntityId(), 
                             r.getRTPSReader().getGuid().getEntityId());
                     
                     if (offered.isCompatibleWith(requested)) {
                         r.addMatchedWriter(pd);
-                    } else {
+                    } 
+                    else {
+                    	// Reader might have been previously associated. Remove association.
+                    	r.removeMatchedWriter(pd);
                         log.warn("Discovered writer had incompatible QoS with reader. {}, {}", pd, 
                                 r.getRTPSReader().getQualityOfService());
                         r.inconsistentQoS(pd);
                     }
                 } 
-                else if (r.getRTPSReader().isMatchedWith(pd.getBuiltinTopicKey()) && pdSample.isDisposed()) {
+                else {
                     log.debug("PublicationData was disposed, removing matched writer");
                     // Associated and sample is dispose -> remove association
                     r.removeMatchedWriter(pd);

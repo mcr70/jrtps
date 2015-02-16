@@ -41,11 +41,12 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
             }
 
             List<DataWriter<?>> writers = participant.getWritersForTopic(sd.getTopicName());
-            log.debug("considering {} writers for topic {}", writers.size(), sd.getTopicName());
+            log.debug("considering {} writers for topic {}, is disposed: {}", writers.size(), 
+            		sd.getTopicName(), sdSample.isDisposed());
             
             for (DataWriter<?> w : writers) {
-                if (!w.getRTPSWriter().isMatchedWith(sd.getBuiltinTopicKey()) && !sdSample.isDisposed()) {
-                    // Not associated and sample is not a dispose -> do associate
+                if (!sdSample.isDisposed()) {
+                    // Not disposed, check for compatible qos
                     QualityOfService requested = sd.getQualityOfService();
                     QualityOfService offered = w.getRTPSWriter().getQualityOfService();
                     log.trace("Check for compatible QoS for {} and {}", w.getRTPSWriter().getGuid().getEntityId(), 
@@ -53,12 +54,16 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
 
                     if (offered.isCompatibleWith(requested)) {
                         w.addMatchedReader(sd);
-                    } else {
-                        log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", sd, w
+                    } 
+                    else {
+                    	// Reader might have been previously associated. Remove association.
+                        w.removeMatchedReader(sd); 
+                    	log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", sd, w
                                 .getRTPSWriter().getQualityOfService());
                         w.inconsistentQoS(sd);
                     }
-                } else if (w.getRTPSWriter().isMatchedWith(sd.getBuiltinTopicKey()) && sdSample.isDisposed()) {
+                } 
+                else {
                     log.debug("SubscriptionData was disposed, removing matched writer");
                     // Associated and sample is dispose -> remove association
                     w.removeMatchedReader(sd);
