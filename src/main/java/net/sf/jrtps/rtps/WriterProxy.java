@@ -7,7 +7,6 @@ import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Locator;
-import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.util.Watchdog.Task;
 
 import org.slf4j.Logger;
@@ -155,11 +154,14 @@ public class WriterProxy extends RemoteProxy {
     }
 
     void applyGap(Gap gap) {
-        SequenceNumberSet gapList = gap.getGapList();
-        long bitmapBase = gapList.getBitmapBase();
-        if (bitmapBase - 1 > seqNumMax) {
-            seqNumMax = bitmapBase - 1;
-        }
+    	// If the gap start is smaller than current seqNumMax + 1 (I.e. next seqNum)...
+    	if (gap.getGapStart() <= seqNumMax + 1) {
+    		long gapEnd = gap.getGapEnd();
+    		// ...and gap end is greater than current seqNum...
+    		if (gapEnd > seqNumMax) {
+    			seqNumMax = gapEnd; // ...then mark current seqNum to be gap end.
+    		}
+    	}
     }
 
     /**
