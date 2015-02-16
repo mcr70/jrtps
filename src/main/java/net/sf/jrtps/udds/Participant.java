@@ -433,17 +433,17 @@ public class Participant {
 		final RTPSReader<T> rtps_reader = rtps_participant.createReader(eId, topicName, rCache, qos);
 		rCache.setRTPSReader(rtps_reader);
 
-		final DataReader<T> reader = entityFactory.createDataReader(this, type, rtps_reader);
+		final DataReader<T> reader = entityFactory.createDataReader(this, type, typeName, rtps_reader);
 		rCache.setCommunicationListeners(reader.communicationListeners);
 		reader.setHistoryCache(rCache);
 		readers.add(reader);
 
-		writeSubscriptionData(reader, typeName);
+		writeSubscriptionData(reader);
 
 		qos.addPolicyListener(new PolicyListener() {
 			@Override
 			public void policyChanged(QosPolicy policy) {
-				writeSubscriptionData(reader, typeName);
+				writeSubscriptionData(reader);
 			}
 		});
 
@@ -452,10 +452,10 @@ public class Participant {
 		return reader;
 	}
 
-	private void writeSubscriptionData(DataReader reader, String typeName) {
+	private void writeSubscriptionData(DataReader reader) {
 		RTPSReader<?> rtps_reader = reader.getRTPSReader();
 
-		SubscriptionData rd = new SubscriptionData(reader.getTopicName(), typeName, 
+		SubscriptionData rd = new SubscriptionData(reader.getTopicName(), reader.getTypeName(), 
 				rtps_reader.getGuid(), rtps_reader.getQualityOfService());
 		reader.setSubscriptionData(rd);
 		
@@ -563,19 +563,19 @@ public class Participant {
 
 		UDDSWriterCache<T> wCache = new UDDSWriterCache<>(eId, m, qos, watchdog);
 		RTPSWriter<T> rtps_writer = rtps_participant.createWriter(eId, topicName, wCache, qos);				
-		final DataWriter<T> writer = entityFactory.createDataWriter(this, type, rtps_writer, wCache);
+		final DataWriter<T> writer = entityFactory.createDataWriter(this, type, typeName, rtps_writer, wCache);
 
 		wCache.setCommunicationListeners(writer.communicationListeners);
 
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
 
-		writePublicationData(writer, typeName);
+		writePublicationData(writer);
 
 		qos.addPolicyListener(new PolicyListener() {
 			@Override
 			public void policyChanged(QosPolicy policy) {
-				writePublicationData(writer, typeName);
+				writePublicationData(writer);
 			}
 		});
 
@@ -584,9 +584,9 @@ public class Participant {
 		return writer;
 	}
 
-	void writePublicationData(DataWriter writer, String typeName) {
+	void writePublicationData(DataWriter writer) {
 		RTPSWriter rtps_writer = writer.getRTPSWriter();
-		PublicationData wd = new PublicationData(writer.getTopicName(), typeName, 
+		PublicationData wd = new PublicationData(writer.getTopicName(), writer.getTypeName(), 
 				rtps_writer.getGuid(), rtps_writer.getQualityOfService());
 		writer.setPublicationData(wd);
 

@@ -29,9 +29,9 @@ public class EntityFactory {
      * @param hCache HistoryCache of DataWriter
      * @return DataWriter
      */
-    protected <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, RTPSWriter<T> rtpsWriter, 
+    protected <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, String typeName, RTPSWriter<T> rtpsWriter, 
             HistoryCache<T> hCache) {
-        return new DataWriter<>(p, type, rtpsWriter, hCache);
+        return new DataWriter<>(p, type, typeName, rtpsWriter, hCache);
     }
     
     /**
@@ -41,7 +41,7 @@ public class EntityFactory {
      * @param rtpsReader RTPSReader to be associated with created DataReader
      * @return DataReader
      */
-    protected <T> DataReader<T> createDataReader(Participant p, Class<T> type, RTPSReader<T> rtpsReader) {
-        return new DataReader<>(p, type, rtpsReader);
+    protected <T> DataReader<T> createDataReader(Participant p, Class<T> type, String typeName, RTPSReader<T> rtpsReader) {
+        return new DataReader<>(p, type, typeName, rtpsReader);
     }
 }

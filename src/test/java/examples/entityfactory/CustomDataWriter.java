@@ -7,7 +7,7 @@ import net.sf.jrtps.udds.Participant;
 
 public class CustomDataWriter<T> extends DataWriter<T> {
     CustomDataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
-        super(p, type, writer, hCache);
+        super(p, type, null, writer, hCache);
     }
 
     public void write(T sample, long timestamp) {

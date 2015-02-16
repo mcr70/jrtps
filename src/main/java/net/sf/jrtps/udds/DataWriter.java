@@ -33,15 +33,23 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
     private PublicationData publicationData;
 
     /**
+     * Constructor with null typeName
+     */
+    protected DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+    	this(p, type, null, writer, hCache);
+    }
+    
+    /**
      * Constructor for DataWriter.
      * 
      * @param p Participant that created this DataWriter
      * @param type Type of this DataWriter
+     * @param typeName typeName
      * @param writer associated RTPSWriter
      * @param hCache HistoryCache for DataWriter
      */
-    protected DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
-        super(p, type, writer.getTopicName(), writer.getGuid());
+    protected DataWriter(Participant p, Class<T> type, String typeName, RTPSWriter<T> writer, HistoryCache<T> hCache) {
+        super(p, type, typeName, writer.getTopicName(), writer.getGuid());
         this.rtps_writer = writer;
         this.hCache = hCache;
         this.writeCollectionsCoherently = p.getConfiguration().getWriteCollectionsCoherently();

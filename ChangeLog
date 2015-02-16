@@ -1,5 +1,7 @@
 1.3.0
     - OMG assigned vendorId 0x0121
+    - Changes to quality of service is tracked and sent to remote entities 
+      with SEDP.
 
 1.2.1
 	- FIX: shared secret was not used :|

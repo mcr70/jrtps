@@ -40,17 +40,23 @@ public class DataReader<T> extends Entity<T, PublicationData> {
 
     private SubscriptionData subscriptionData;
 
-
-
+    /**
+     * Constructor with null typeName 
+     */
+    protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
+    	this(p, type, null, reader);
+    }
+    
     /**
      * Constructor for DataReader.
      * 
      * @param p Participant that created this DataReader
      * @param type Type of this DataReader
+     * @param typeName typeName
      * @param reader associated RTPSReader
      */
-    protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
-        super(p, type, reader.getTopicName(), reader.getGuid());
+    protected DataReader(Participant p, Class<T> type, String typeName, RTPSReader<T> reader) {
+        super(p, type, typeName, reader.getTopicName(), reader.getGuid());
         this.rtps_reader = reader;
     }
 

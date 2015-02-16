@@ -17,6 +17,7 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
     private final String topicName;
     private final Participant participant;
     private final Class<T> type;
+    private final String typeName;
     private final Guid guid;
     /**
      * A List of communication listeners
@@ -27,14 +28,20 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
      * Constructor
      * 
      * @param p
-     * @param type
-     * @param topicName
-     *            name of the topic this entity is bound to.
+     * @param type Type of the entity
+     * @param typeName if type null, typeName is set to be fully qualified class name of type 
+     * @param topicName name of the topic this entity is bound to.
      * @param guid 
      */
-    protected Entity(Participant p, Class<T> type, String topicName, Guid guid) {
+    protected Entity(Participant p, Class<T> type, String typeName, String topicName, Guid guid) {
         this.participant = p;
         this.type = type;
+        if (typeName != null) {
+        	this.typeName = typeName;
+        }
+        else {
+        	this.typeName = type.getName();
+        }
         this.topicName = topicName;
         this.guid = guid;
     }
@@ -59,7 +66,6 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
     
     /**
      * Get the name of the topic of this entity.
-     * 
      * @return topic name
      */
     public String getTopicName() {
@@ -68,7 +74,6 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
 
     /**
      * Get the Participant that has created this Entity.
-     * 
      * @return Participant
      */
     public Participant getParticipant() {
@@ -77,11 +82,18 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
 
     /**
      * Gets the type associated with this entity.
-     * 
      * @return Class<T>
      */
     public Class<T> getType() {
         return type;
+    }
+    
+    /**
+     * Gets the typeName of this entity.
+     * @return typeName
+     */
+    public String getTypeName() {
+    	return typeName;
     }
     
     /**
