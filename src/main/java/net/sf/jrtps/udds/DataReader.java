@@ -75,9 +75,6 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     public void addSampleListener(SampleListener<T> listener) {
         hCache.addListener(listener);
     }
-
-    // ----  End of experimental code
-    
     
     /**
      * Adds a WriterListener to this DataReader.
@@ -150,9 +147,7 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     public void clear(List<Sample<T>> samples) {
         hCache.clear(samples); 
     }
-    
-    // ----  End of experimental code
-    
+
     
     /**
      * Removes a given SampleListener from this DataReader.
