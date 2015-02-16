@@ -2,6 +2,8 @@
     - OMG assigned vendorId 0x0121
     - Changes to quality of service is tracked and sent to remote entities 
       with SEDP.
+    - typeName is stored in Entity, EntityFactory gets typeName  parameter 
+      in create methods
 
 1.2.1
 	- FIX: shared secret was not used :|
