@@ -225,37 +225,37 @@ public class ParameterFactory {
             
             // Table 9.17: deprecated ids
         case 0x0003:
-            param = new Persistence();
+            param = new DeprecatedParameter.Persistence();
             break;
         case 0x0008:
-            param = new TypeChecksum();
+            param = new DeprecatedParameter.TypeChecksum();
             break;
         case 0x0009:
-            param = new Type2Name();
+            param = new DeprecatedParameter.Type2Name();
             break;
         case 0x000a:
-            param = new Type2Checksum();
+            param = new DeprecatedParameter.Type2Checksum();
             break;
         case 0x0010:
-            param = new ExpectsAck();
+            param = new DeprecatedParameter.ExpectsAck();
             break;
         case 0x0012:
-            param = new ManagerKey();
+            param = new DeprecatedParameter.ManagerKey();
             break;
         case 0x0013:
-            param = new SendQueueSize();
+            param = new DeprecatedParameter.SendQueueSize();
             break;
         case 0x0014:
-            param = new ReliabilityEnabled();
+            param = new DeprecatedParameter.ReliabilityEnabled();
             break;
         case 0x0017:
-            param = new VargappsSequenceNumberLast();
+            param = new DeprecatedParameter.VargappsSequenceNumberLast();
             break;
         case 0x0018:
-            param = new RecvQueueSize();
+            param = new DeprecatedParameter.RecvQueueSize();
             break;
         case 0x0019:
-            param = new ReliabilityOffered();
+            param = new DeprecatedParameter.ReliabilityOffered();
             break;
         case 0x1001:
             param = new IdentityToken();
