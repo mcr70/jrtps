@@ -13,6 +13,7 @@ import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.udds.ContentFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,9 @@ public class SubscriptionData extends DiscoveredData {
             case PID_EXPECTS_INLINE_QOS:
                 expectsInlineQos = ((ExpectsInlineQos) param).expectsInlineQos();
                 break;
+            case PID_CONTENT_FILTER_PROPERTY:
+            	contentFilter = (ContentFilterProperty) param;
+            	break;
             case PID_SENTINEL:
                 break;
             case PID_PAD:
@@ -87,7 +91,13 @@ public class SubscriptionData extends DiscoveredData {
     }
 
     public SubscriptionData(String topicName, String typeName, Guid key, QualityOfService qos) {
+    	this(topicName, typeName, key, null, qos);
+    }
+    
+    public SubscriptionData(String topicName, String typeName, Guid key, ContentFilterProperty cfp, 
+    		QualityOfService qos) {
         super(typeName, topicName, key, qos);
+        contentFilter = cfp;
     }
 
     public Guid getParticipantGuid() {
