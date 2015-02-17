@@ -4,11 +4,10 @@ import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
+import net.sf.jrtps.transport.RTPSByteBuffer;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import net.sf.jrtps.transport.RTPSByteBuffer;
-import net.sf.jrtps.udds.Participant;
 
 /**
  * ContentFilterProperty parameter is sent by reader to writer, so that writer side
@@ -150,5 +149,11 @@ public class ContentFilterProperty extends Parameter {
     	for (int i = 0; i < expressionParameters.length; i++) {
     		bb.write_string(expressionParameters[i]);
     	}
+    }
+
+    public String toString() {
+    	return "ContentFilterProperty: cfTopic " + contentFilteredTopicName + ", related topic " + 
+    			relatedTopicName + ", filter class " + filterClassName + ", filter expression " +
+    			filterExpression;
     }
 }

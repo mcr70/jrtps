@@ -40,6 +40,8 @@ public class DataReader<T> extends Entity<T, PublicationData> {
 
     private SubscriptionData subscriptionData;
 
+	private ContentFilter<T> contentFilter;
+
     /**
      * Constructor with null typeName 
      */
@@ -207,18 +209,37 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
     /**
-     * Adds a reader side Filter. When samples are received, they are evaluated with
-     * SampleFitler. If SampleFilter accepts incoming Sample, it is added to history 
-     * cache of this reader, and clients are notified of new samples.
-     *  
+     * Sets a SampleFilter. When samples are received, they are evaluated with
+     * SampleFilter. If SampleFilter accepts incoming Sample, it is added to history 
+     * cache of this reader, and clients are notified of new samples.<p>
+     * 
+     * If SampleFilter is also an instance of ContentFilter, ContentFilterProperty
+     * will be sent to remote writers, so that writer side filtering is made possible.
+     * 
      * @param sf
      */
     public void setSampleFilter(SampleFilter<T> sf) {
-        // QosOwnership could be implemented with Filters.
+    	// TODO: Should we just create setContentFilter() method instead 
+    	
+    	// QosOwnership could be implemented with Filters.
         // QosResourceLimits could be implemented with Filters.
+    	if (sf instanceof ContentFilter) {
+    		this.contentFilter = (ContentFilter<T>) sf;
+    		// Write ContentFilterProperty to remote writers
+    		getParticipant().writeSubscriptionData(this);
+    	}
+    	
     	hCache.setSampleFilter(sf);
     }
 
+    /**
+     * Gets the ContentFilter associated with this reader.
+     * @return ContentFilter, or null if this reader has no ContentFilter
+     */
+    ContentFilter<T> getContentFilter() {
+    	return contentFilter;
+    }
+    
     // ----  Experimental code follows  ------------------------
     /**
      * Gets samples that match Filter. History cache is scanned through and for each
