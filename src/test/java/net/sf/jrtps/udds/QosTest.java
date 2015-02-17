@@ -194,4 +194,38 @@ public class QosTest {
 
         assertEquals(0, rCache.getSamplesSince(0).size());
     }
+
+
+    @Test
+    public <T> void testSampleFilter() {
+        ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
+        Watchdog watchdog = new Watchdog(ses);
+        
+        QualityOfService qos = new QualityOfService();
+        qos.setPolicy(new QosHistory(Kind.KEEP_ALL, 10));
+        UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
+        rCache.setSampleFilter(new SampleFilter() {
+        	int count = 0;
+        	@Override
+			public boolean acceptSample(Sample sample) {
+        		if (count++ % 2 == 0) {
+        			return true;
+        		}
+        		return false;
+			}
+		});
+
+        // Add Sample
+        rCache.addSample(new Sample(1));
+        assertEquals(1, rCache.getSamplesSince(0).size());
+
+        rCache.addSample(new Sample(2));
+        assertEquals(1, rCache.getSamplesSince(0).size());
+
+        rCache.addSample(new Sample(3));
+        assertEquals(2, rCache.getSamplesSince(0).size());
+
+        rCache.addSample(new Sample(4));
+        assertEquals(2, rCache.getSamplesSince(0).size());
+    }
 }

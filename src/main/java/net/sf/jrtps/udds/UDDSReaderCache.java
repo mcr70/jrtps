@@ -38,6 +38,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     private RTPSReader<T> rtps_reader;
 
+	private SampleFilter<T> sampleFilter;
+
 
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
         super(eId, marshaller, qos, watchdog, true);
@@ -55,7 +57,52 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         this.rtps_reader = rtps_reader;
     }
 
+    
+    void setSampleFilter(SampleFilter<T> sf) {
+    	this.sampleFilter = sf;
+    }
 
+    @Override
+    public Sample<T> addSample(final Sample<T> aSample) {
+        if (rtps_reader != null) { // TODO: can be null on junit tests 
+            WriterProxy matchedWriter = rtps_reader.getMatchedWriter(aSample.getWriterGuid());
+            if (matchedWriter == null) {
+                // Could happen asynchronously
+                logger.debug("Ignoring sample from unknown writer {}", aSample.getWriterGuid());
+                return null;
+            }
+
+            if (!checkOwnershipPolicy(matchedWriter, aSample)) {
+                logger.debug("Ignoring sample from {}, since it is not a owner of instance", aSample.getWriterGuid());
+                return null;
+            }
+        }
+
+        // If SampleFilter is set and it rejects Sample, just return
+        if (sampleFilter != null && !sampleFilter.acceptSample(aSample)) {
+        	return null;
+        }
+        
+        Duration lifespanDuration = getLifespan(aSample.getWriterGuid());
+        if (!lifespanDuration.isInfinite()) {
+            // NOTE, should we try to calculate timediff of source timestamp
+            // and destination timestamp? And network delay? 
+            // Since spec talks about adding duration to source timestamp. 
+            // But allows using destination timestamp as well...
+            watchdog.addTask(lifespanDuration.asMillis(), new Listener() {
+                @Override
+                public void triggerTimeMissed() {
+                    logger.debug("Lifespan expired for {}", aSample);
+                    clear(aSample);
+                }
+            });
+        }
+
+        return super.addSample(aSample);
+    }
+
+    
+    
     // ----  ReaderCache implementation follows  -------------------------
     @Override
     public void changesBegin(int id) {
@@ -148,40 +195,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     }
 
 
-    @Override
-    public Sample<T> addSample(final Sample<T> aSample) {
-        if (rtps_reader != null) { // TODO: can be null on junit tests 
-            WriterProxy matchedWriter = rtps_reader.getMatchedWriter(aSample.getWriterGuid());
-            if (matchedWriter == null) {
-                // Could happen asynchronously
-                logger.debug("Ignoring sample from unknown writer {}", aSample.getWriterGuid());
-                return null;
-            }
-
-            if (!checkOwnershipPolicy(matchedWriter, aSample)) {
-                logger.debug("Ignoring sample from {}, since it is not a owner of instance", aSample.getWriterGuid());
-                return null;
-            }
-        }
-
-        Duration lifespanDuration = getLifespan(aSample.getWriterGuid());
-        if (!lifespanDuration.isInfinite()) {
-            // NOTE, should we try to calculate timediff of source timestamp
-            // and destination timestamp? And network delay? 
-            // Since spec talks about adding duration to source timestamp. 
-            // But allows using destination timestamp as well...
-            watchdog.addTask(lifespanDuration.asMillis(), new Listener() {
-                @Override
-                public void triggerTimeMissed() {
-                    logger.debug("Lifespan expired for {}", aSample);
-                    clear(aSample);
-                }
-            });
-        }
-
-        return super.addSample(aSample);
-    }
-
+    
     private boolean checkOwnershipPolicy(WriterProxy writer, Sample<T> sample) {
         if (!exclusiveOwnership) {
             return true;
