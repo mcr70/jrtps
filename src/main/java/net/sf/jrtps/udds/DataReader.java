@@ -6,6 +6,7 @@ import java.util.Set;
 
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterLivelinessListener;
@@ -209,35 +210,46 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
     /**
+     * Sets a ContentFilter. ContentFilterProperty from ContentFilter will be sent to
+     * writers. Writers that support writer side filtering will be able to apply
+     * filtering if the parameters of ContentFilterProperty match.<p>
+     * 
+     * As ContentFilter is also a SampleFilter, this method calls also sets SampleFilter,
+     * as not all of the writers might not support writer side filtering.
+     * @param cf
+     */
+    public void setContentFilter(ContentFilter<T> cf) {
+		advertiseContentFilter(cf, cf);
+    }
+    
+    private void advertiseContentFilter(SampleFilter<T> sf, ContentFilter<T> cf) {
+    	this.contentFilter = cf;
+    	// Write ContentFilterProperty to remote writers
+    	getParticipant().writeSubscriptionData(this);
+    	hCache.setSampleFilter(sf);
+    }
+    
+    /**
      * Sets a SampleFilter. When samples are received, they are evaluated with
      * SampleFilter. If SampleFilter accepts incoming Sample, it is added to history 
      * cache of this reader, and clients are notified of new samples.<p>
      * 
-     * If SampleFilter is also an instance of ContentFilter, ContentFilterProperty
-     * will be sent to remote writers, so that writer side filtering is made possible.
-     * 
      * @param sf
      */
     public void setSampleFilter(SampleFilter<T> sf) {
-    	// TODO: Should we just create setContentFilter() method instead 
-    	
-    	// QosOwnership could be implemented with Filters.
-        // QosResourceLimits could be implemented with Filters.
-    	if (sf instanceof ContentFilter) {
-    		this.contentFilter = (ContentFilter<T>) sf;
-    		// Write ContentFilterProperty to remote writers
-    		getParticipant().writeSubscriptionData(this);
-    	}
-    	
-    	hCache.setSampleFilter(sf);
+    	advertiseContentFilter(sf, null);
     }
 
     /**
-     * Gets the ContentFilter associated with this reader.
-     * @return ContentFilter, or null if this reader has no ContentFilter
+     * Gets the ContentFilterProperty associated with this reader.
+     * @return ContentFilterProperty, or null if this reader has no ContentFilter
      */
-    ContentFilter<T> getContentFilter() {
-    	return contentFilter;
+    ContentFilterProperty getContentFilterProperty() {
+    	if (contentFilter != null) {
+    		return contentFilter.getContentFilterProperty();
+    	}
+    	
+    	return null;
     }
     
     // ----  Experimental code follows  ------------------------
