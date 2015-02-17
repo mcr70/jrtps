@@ -461,12 +461,7 @@ public class Participant {
 	void writeSubscriptionData(DataReader<?> reader) {
 		RTPSReader<?> rtps_reader = reader.getRTPSReader();
 
-		ContentFilterProperty cfp = null;
-		ContentFilter<?> contentFilter = reader.getContentFilter();
-		if (contentFilter != null) {
-			cfp = contentFilter.getContentFilterProperty();
-			
-		}
+		ContentFilterProperty cfp = reader.getContentFilterProperty();
 		
 		SubscriptionData sd = new SubscriptionData(reader.getTopicName(), reader.getTypeName(), 
 				rtps_reader.getGuid(), cfp, rtps_reader.getQualityOfService());

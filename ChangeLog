@@ -2,8 +2,11 @@
     - OMG assigned vendorId 0x0121
     - Changes to quality of service is tracked and sent to remote entities 
       with SEDP.
-    - typeName is stored in Entity, EntityFactory gets typeName  parameter 
+    - typeName is stored in Entity, EntityFactory gets typeName parameter 
       in create methods
+    - Simple content filter support. Readers can do reader side filtering and
+      optionally inform writers of the filter setup, but CONTENT_FILTER_INFO 
+      parameters are not handled.
 
 1.2.1
 	- FIX: shared secret was not used :|
