@@ -206,19 +206,20 @@ public class DataReader<T> extends Entity<T, PublicationData> {
         return subscriptionData;
     }
 
-    // ----  Experimental code follows  ------------------------
     /**
      * Adds a reader side Filter. When samples are received, they are evaluated with
-     * all the Filters this DataReader has. If a Sample is accepted by all of the Filters,
-     * it is added to history cache of this reader, and clients are notified of new samples.
+     * SampleFitler. If SampleFilter accepts incoming Sample, it is added to history 
+     * cache of this reader, and clients are notified of new samples.
      *  
-     * @param filter
+     * @param sf
      */
-    void addFilter(SampleFilter<T> filter) {
+    public void setSampleFilter(SampleFilter<T> sf) {
         // QosOwnership could be implemented with Filters.
         // QosResourceLimits could be implemented with Filters.
+    	hCache.setSampleFilter(sf);
     }
 
+    // ----  Experimental code follows  ------------------------
     /**
      * Gets samples that match Filter. History cache is scanned through and for each
      * Sample, a Filter is applied. Only the accepted Samples are returned.
