@@ -29,6 +29,7 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
      * HistoryCache associated with this DataWriter
      */
     protected final HistoryCache<T> hCache;
+
     private final boolean writeCollectionsCoherently;
     private PublicationData publicationData;
 
@@ -182,6 +183,13 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
         rtps_writer.notifyReaders();
     }
 
+    /**
+     * Registers a ContentFilter
+     * @param cf
+     */
+    public void registerContentFilter(ContentFilter<T> cf) {
+    	rtps_writer.registerContentFilter(cf);
+    }
 
     void addMatchedReader(SubscriptionData sd) {
         rtps_writer.addMatchedReader(sd);

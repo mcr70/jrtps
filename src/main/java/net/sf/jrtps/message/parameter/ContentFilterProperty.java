@@ -29,7 +29,7 @@ public class ContentFilterProperty extends Parameter {
     private String filterExpression;
     private String[] expressionParameters;
 
-	private byte[] signature; // filter signature
+	private String signature; // filter signature in hex encoded byte array
     
 	public ContentFilterProperty(String cfTopicName, String relatedTopicName,
 			String filterClassName, String filterExpression) {
@@ -104,7 +104,7 @@ public class ContentFilterProperty extends Parameter {
 	 * 
 	 * @return filter signature, or null if filter signature could not be calculated
 	 */
-	public byte[] getFilterSignature() {
+	public String getSignature() {
 		if (signature == null) {
 	        try {
 				MessageDigest md5 = MessageDigest.getInstance("MD5");
@@ -116,7 +116,7 @@ public class ContentFilterProperty extends Parameter {
 					md5.update(expressionParameters[i].getBytes("UTF-8"));
 				}
 				
-				signature = md5.digest();
+				signature = javax.xml.bind.DatatypeConverter.printHexBinary(md5.digest());
 			} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 				logger.warn("Writer side content filtering is not possible, as signature cannot be calculated due {}: {}", 
 						e.getClass(), e.getMessage());
