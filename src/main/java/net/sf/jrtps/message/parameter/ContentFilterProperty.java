@@ -29,7 +29,7 @@ public class ContentFilterProperty extends Parameter {
     private String filterExpression;
     private String[] expressionParameters;
 
-	private String signature; // filter signature in hex encoded byte array
+	private byte[] signature;
     
 	public ContentFilterProperty(String cfTopicName, String relatedTopicName,
 			String filterClassName, String filterExpression) {
@@ -116,16 +116,23 @@ public class ContentFilterProperty extends Parameter {
 					md5.update(expressionParameters[i].getBytes("UTF-8"));
 				}
 				
-				signature = javax.xml.bind.DatatypeConverter.printHexBinary(md5.digest());
+				signature = md5.digest();
 			} catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
 				logger.warn("Writer side content filtering is not possible, as signature cannot be calculated due {}: {}", 
 						e.getClass(), e.getMessage());
 			}
 		}
 		
-		return signature;
+		return javax.xml.bind.DatatypeConverter.printHexBinary(signature);
 	}
 	
+	/**
+	 * Gets the signature as byte array
+	 * @return signature
+	 */
+	public byte[] getRawSignature() {
+		return signature;
+	}
 	
     @Override
     public void read(RTPSByteBuffer bb, int length) {
@@ -156,4 +163,5 @@ public class ContentFilterProperty extends Parameter {
     			relatedTopicName + ", filter class " + filterClassName + ", filter expression " +
     			filterExpression;
     }
+
 }

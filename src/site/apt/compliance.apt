@@ -52,7 +52,9 @@ Compliance
  
  For the Content filtering, uDDS readers send ContentFilterProperty to writers, so that 
  writers may do writer side filtering. ContentFilterProperty will be sent if an application
- registers a ContentFilter to DataReader. 
+ registers a ContentFilter to DataReader. Writer side content filtering is supported by
+ registering a ContentFilter to writer. Note, that DDSSQL is not parsed. Rather, one can
+ register a ContentFilter that <implements> corresponding DDSSQL. 
  
  Following inlineable parameters are not handled by jRTPS: 
  <PID_PROPERTY_LIST(0x0059), PID_ORIGINAL_WRITER_INFO(0x0061)>
