@@ -219,7 +219,7 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      */
     public void setContentFilter(ContentFilter<T> cf) {
 		advertiseContentFilter(cf, cf);
-		if (cf != null) {
+		if (cf != null && cf.getContentFilterProperty() != null) {
 			hCache.setContentFilterSignature(cf.getContentFilterProperty().getRawSignature());
 		}
 		else {
