@@ -1,10 +1,12 @@
 package net.sf.jrtps.message.parameter;
 
+import java.util.Arrays;
+
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * ContentFilterInfo is transmitted with Data submessage as an inline-qos parameter.
- * Writer to informs reader which filters was applied to Data and whether  
+ * Writer informs reader which filters was applied to Data and whether  
  * corresponding filter passed given filter or not.
  * Each bit in bitmaps (filterResult) represents one FilterSignature. First bit is 
  * reserved for FilterSignature[0] etc.
@@ -32,6 +34,20 @@ public class ContentFilterInfo extends Parameter implements InlineQoS {
     	}
     }
 
+    public boolean containsSignature(byte[] signature) {
+    	for (int i = 0; i < signatures.length; i++) {
+    		if (Arrays.equals(signature, signatures[i].getSignature())) {
+    			int bitMapIdx = i / 32;
+    			int bitIdx = i % 32;
+    			int bitMap = bitmaps[bitMapIdx] << bitIdx; // MSB contains the bit
+    			
+    			return (bitMap & 0x80000000) == 0x80000000;
+    		}
+    	}
+    	
+    	return false;
+    }
+    
     @Override
     public void writeTo(RTPSByteBuffer bb) {
     	bb.write_long(bitmaps.length);

@@ -145,6 +145,9 @@ public class MessageTests {
 		Gap gap3 = new Gap(null, null, 1, 1);
 		Assert.assertTrue(1 == gap3.getGapStart());
 		Assert.assertTrue(1 == gap3.getGapEnd());
+
+	
+		System.out.println("" + 1/32 + ", " + 1%32 + "::" + 33 / 32 + ", " + 33%32);
 	}
 	
 	/**

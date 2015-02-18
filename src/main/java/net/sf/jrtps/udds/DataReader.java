@@ -220,6 +220,12 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      */
     public void setContentFilter(ContentFilter<T> cf) {
 		advertiseContentFilter(cf, cf);
+		if (cf != null) {
+			hCache.setContentFilterSignature(cf.getContentFilterProperty().getRawSignature());
+		}
+		else {
+			hCache.setContentFilterSignature(null);
+		}
     }
     
     private void advertiseContentFilter(SampleFilter<T> sf, ContentFilter<T> cf) {
