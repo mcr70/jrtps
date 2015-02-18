@@ -82,7 +82,7 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
 
     /**
      * Gets the type associated with this entity.
-     * @return Class<T>
+     * @return Class
      */
     public Class<T> getType() {
         return type;

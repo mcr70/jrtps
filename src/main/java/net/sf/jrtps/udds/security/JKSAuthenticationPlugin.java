@@ -19,6 +19,7 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
+import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -28,6 +29,7 @@ import javax.crypto.NoSuchPaddingException;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.IdentityToken;
+import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -139,7 +141,6 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	 * See 9.3.4.2 Protocol description
 	 * 
 	 * @param pd ParticipantData to authenticate
-	 * @see net.sf.jrtps.udds.BuiltinParticipantDataListener#onSamples(java.util.List)
 	 */
 	@Override
 	public void beginHandshake(ParticipantData pd) {

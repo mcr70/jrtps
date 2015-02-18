@@ -5,7 +5,7 @@ import java.util.Arrays;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
- * Every Participant has GUID <prefix, ENTITYID_PARTICIPANT>, where the constant
+ * Every Participant has GUID (prefix, ENTITYID_PARTICIPANT), where the constant
  * ENTITYID_PARTICIPANT is a special value defined by the RTPS protocol. Its
  * actual value depends on the PSM. The implementation is free to choose the
  * prefix, as long as every Participant in the Domain has a unique GUID.

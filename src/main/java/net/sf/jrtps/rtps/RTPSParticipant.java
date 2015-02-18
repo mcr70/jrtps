@@ -83,9 +83,11 @@ public class RTPSParticipant {
      *        RTPSParticipant will share the GuidPrefix of this Guid. 
      * @param domainId Domain ID of the participant
      * @param participantId Participant ID of this participant. If set to -1, and port number is not given
-     *                      during starting of receivers, participantId will be determined based on the first
-     *                      suitable network socket.
-     * @param config Configuration used
+     *        during starting of receivers, participantId will be determined based on the first
+     *        suitable network socket.
+     * @param tpe threadPoolExecutor
+     * @param discoveredParticipants a Map that holds discovered participants
+     * @param aPlugin AuthenticationPlugin 
      */
     public RTPSParticipant(Guid guid, int domainId, int participantId, ScheduledThreadPoolExecutor tpe, 
             Map<GuidPrefix, ParticipantData> discoveredParticipants, AuthenticationPlugin aPlugin) {
