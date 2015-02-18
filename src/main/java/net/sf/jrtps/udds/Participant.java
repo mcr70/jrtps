@@ -357,7 +357,7 @@ public class Participant {
 	 * TypeName is set to fully qualified class name.
 	 * 
 	 * @param type
-	 * @return a DataReader<T>
+	 * @return a DataReader
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> type) {
 		return createDataReader(type, new QualityOfService());
@@ -372,7 +372,7 @@ public class Participant {
 	 * 
 	 * @param type 
 	 * @param qos QualityOfService used
-	 * @return a DataReader<T>
+	 * @return a DataReader
 	 * @see Type
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
@@ -387,7 +387,7 @@ public class Participant {
 	 * @param type type of the DataReader
 	 * @param typeName name of the type
 	 * @param qos QualityOfService
-	 * @return a DataReader<T>
+	 * @return a DataReader
 	 */
 	public <T> DataReader<T> createDataReader(final String topicName, Class<T> type, final String typeName, final QualityOfService qos) {        
 		logger.debug("Creating DataReader for topic {}, type {}, qos {}", topicName, typeName, qos);
@@ -490,7 +490,7 @@ public class Participant {
 	 * 
 	 * 
 	 * @param type A class, that is used with created DataWriter.
-	 * @return a DataWriter<T>
+	 * @return a DataWriter
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> type) {
 		return createDataWriter(type, new QualityOfService());
@@ -506,7 +506,7 @@ public class Participant {
 	 * 
 	 * @param type A class, that is used with created DataWriter.
 	 * @param qos QualityOfService
-	 * @return a DataWriter<T>
+	 * @return a DataWriter
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> type, QualityOfService qos) {
 		return createDataWriter(getTopicName(type), type, getTypeName(type), qos);
@@ -520,7 +520,7 @@ public class Participant {
 	 * @param type type of the DataWriter
 	 * @param typeName name of the type. typeName gets sent to remote readers. 
 	 * @param qos QualityOfService
-	 * @return a DataWriter<T>
+	 * @return a DataWriter
 	 */
 	public <T> DataWriter<T> createDataWriter(final String topicName, final Class<T> type, 
 			final String typeName, final QualityOfService qos) {

@@ -1,6 +1,5 @@
 package net.sf.jrtps.udds;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -62,7 +61,7 @@ public class DataReader<T> extends Entity<T, PublicationData> {
 
     /**
      * Package access.
-     * @param hCache
+     * @param hCache history cache
      */
     void setHistoryCache(UDDSReaderCache<T> hCache) {
         this.hCache = hCache;
@@ -211,32 +210,11 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * SampleFitler. If SampleFilter accepts incoming Sample, it is added to history 
      * cache of this reader, and clients are notified of new samples.
      *  
-     * @param sf
+     * @param sf SampleFilter
      */
     public void setSampleFilter(SampleFilter<T> sf) {
         // QosOwnership could be implemented with Filters.
         // QosResourceLimits could be implemented with Filters.
     	hCache.setSampleFilter(sf);
-    }
-
-    // ----  Experimental code follows  ------------------------
-    /**
-     * Gets samples that match Filter. History cache is scanned through and for each
-     * Sample, a Filter is applied. Only the accepted Samples are returned.
-     * 
-     * @param filter
-     * @return A List of Samples that matched given Filter
-     */
-    List<Sample<T>> getSamples(SampleFilter<T> filter) {
-        List<Sample<T>> filteredSampled = new LinkedList<>();
-        
-        List<Sample<T>> samples = getSamples();
-        for (Sample<T> sample : samples) {
-            if (filter.acceptSample(sample)) {
-                filteredSampled.add(sample);
-            }
-        }
-        
-        return filteredSampled;
     }
 }
