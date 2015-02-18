@@ -51,8 +51,7 @@ public abstract class AuthenticationPlugin {
 	
 	/**
 	 * Registers a AuthenticationPlugin. 
-	 * @param name Name of the plugin 
-	 * @param plugin 
+	 * @param plugin AuthenticationPlugin 
 	 */
 	public static void registerPlugin(AuthenticationPlugin plugin) {
 		synchronized (authPlugins) {
@@ -82,7 +81,7 @@ public abstract class AuthenticationPlugin {
 	
 	/**
 	 * This method is called after security endpoints have been created by participant.
-	 * @param p
+	 * @param p Participant
 	 */
 	public void init(Participant p) {
 	}
@@ -90,7 +89,7 @@ public abstract class AuthenticationPlugin {
 	
 	/**
 	 * Begins a handshake protocol with given ParticipantData.
-	 * @param pd
+	 * @param pd ParticipantData
 	 */
 	public abstract void beginHandshake(ParticipantData pd);
 	
@@ -106,7 +105,7 @@ public abstract class AuthenticationPlugin {
 
 	/**
 	 * Adds an AuthenticationListener.
-	 * @param aListener
+	 * @param aListener AuthenticationListener
 	 */
 	public void addAuthenticationListener(AuthenticationListener aListener) {
 		authListeners.add(aListener);
@@ -114,7 +113,7 @@ public abstract class AuthenticationPlugin {
 
 	/**
 	 * Removes an AuthenticationListener.
-	 * @param aListener
+	 * @param aListener AuthenticationListener
 	 */
 	public void removeAuthenticationListener(AuthenticationListener aListener) {
 		authListeners.remove(aListener);
@@ -122,7 +121,7 @@ public abstract class AuthenticationPlugin {
 
 	/**
 	 * Notifies AuthenticationListeners of successful authentication
-	 * @param ad
+	 * @param ad AuthenticationData
 	 */
 	protected void notifyListenersOfSuccess(AuthenticationData ad) {
 		cryptoPlugin.setParticipantKeyMaterial(ad.getParticipantData().getGuidPrefix(), ad.getSharedSecret());
@@ -134,7 +133,7 @@ public abstract class AuthenticationPlugin {
 
 	/**
 	 * Notifies AuthenticationListeners of failed authentication
-	 * @param pd
+	 * @param pd ParticipantData
 	 */
 	protected void notifyListenersOfFailure(ParticipantData pd) {
 		for (AuthenticationListener al : authListeners) {
@@ -144,7 +143,7 @@ public abstract class AuthenticationPlugin {
 
 	/**
 	 * Gets the Guid of local participant
-	 * @return Guid
+	 * @return Guid Guid
 	 */
 	public abstract Guid getGuid();
 
