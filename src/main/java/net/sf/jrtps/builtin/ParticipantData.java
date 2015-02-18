@@ -113,7 +113,7 @@ public class ParticipantData extends DiscoveredData {
 	 * positioned to start of serializedData of Data submessage, aligned at 32
 	 * bit boundary.
 	 * 
-	 * @param parameterList
+	 * @param parameterList ParameterList
 	 */
 	public ParticipantData(ParameterList parameterList) {
 		this.discoveryLocators = new LinkedList<>();
