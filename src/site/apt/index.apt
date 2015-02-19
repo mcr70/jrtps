@@ -45,8 +45,7 @@ Overview
       optionally inform writers of the filter setup. Content filter class name 'java': 
       jRTPS writers interprets filterExpression as a fully qualified class name of 
       java class, that implements ContentFilter interface, and tries to register this
-      filter automatically when matched with reader.
-      
+      filter automatically when matched with reader. 
       DDSSQL parsing is not implemented by jRTPS.
 
     
