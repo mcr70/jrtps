@@ -218,32 +218,19 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * @param cf
      */
     public void setContentFilter(ContentFilter<T> cf) {
-		advertiseContentFilter(cf, cf);
-		if (cf != null && cf.getContentFilterProperty() != null) {
+    	this.contentFilter = cf;
+    	// Write ContentFilterProperty to remote writers
+    	getParticipant().writeSubscriptionData(this);
+    	hCache.setSampleFilter(cf);
+
+    	if (cf != null && cf.getContentFilterProperty() != null) {
 			hCache.setContentFilterSignature(cf.getContentFilterProperty().getRawSignature());
 		}
 		else {
 			hCache.setContentFilterSignature(null);
 		}
     }
-    
-    private void advertiseContentFilter(SampleFilter<T> sf, ContentFilter<T> cf) {
-    	this.contentFilter = cf;
-    	// Write ContentFilterProperty to remote writers
-    	getParticipant().writeSubscriptionData(this);
-    	hCache.setSampleFilter(sf);
-    }
-    
-    /**
-     * Sets a SampleFilter. When samples are received, they are evaluated with
-     * SampleFilter. If SampleFilter accepts incoming Sample, it is added to history 
-     * cache of this reader, and clients are notified of new samples.<p>
-     * 
-     * @param sf SampleFilter
-     */
-    public void setSampleFilter(SampleFilter<T> sf) {
-    	advertiseContentFilter(sf, null);
-    }
+
 
     /**
      * Gets the ContentFilterProperty associated with this reader.

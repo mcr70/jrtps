@@ -39,7 +39,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     private RTPSReader<T> rtps_reader;
 
-	private SampleFilter<T> sampleFilter;
+	private ContentFilter<T> sampleFilter;
 
 	private byte[] filterSignature;
 
@@ -61,7 +61,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     }
 
     
-    void setSampleFilter(SampleFilter<T> sf) {
+    void setSampleFilter(ContentFilter<T> sf) {
     	this.sampleFilter = sf;
     }
 
