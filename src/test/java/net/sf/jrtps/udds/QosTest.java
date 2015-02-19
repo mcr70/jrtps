@@ -198,14 +198,14 @@ public class QosTest {
 
 
     @Test
-    public <T> void testSampleFilter() {
+    public <T> void testContentFilter() {
         ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
         Watchdog watchdog = new Watchdog(ses);
         
         QualityOfService qos = new QualityOfService();
         qos.setPolicy(new QosHistory(Kind.KEEP_ALL, 10));
         UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
-        rCache.setSampleFilter(new ContentFilter() {
+        rCache.setContentFilter(new ContentFilter() {
         	int count = 0;
         	@Override
 			public boolean acceptSample(Sample sample) {
