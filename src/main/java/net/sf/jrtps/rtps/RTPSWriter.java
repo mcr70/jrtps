@@ -278,10 +278,16 @@ public class RTPSWriter<T> extends Endpoint {
 
     /**
      * Registers a ContentFilter
-     * @param cf
+     * @param cf ContentFilter
+     * @throws NullPointerException if cf.getContentFilterProperty() returns null
      */
     public void registerContentFilter(ContentFilter<T> cf) {
-    	String signature = cf.getContentFilterProperty().getSignature();
+    	ContentFilterProperty cfp = cf.getContentFilterProperty();
+    	if (cfp == null) {
+    		throw new NullPointerException("ContentFilterProperty cannot be null when registering ContentFilter to writer");
+    	}
+    	
+    	String signature = cfp.getSignature();
 
     	contentFilters.put(signature, cf);
     }

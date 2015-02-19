@@ -111,8 +111,8 @@ public class AbstractQosTest {
     
     void waitFor(CountDownLatch latch, long durationInMillis, boolean countToZeroExpected) {
         try {
-            boolean await = latch.await(durationInMillis, TimeUnit.MILLISECONDS); 
-            Assert.assertEquals(countToZeroExpected, await);
+            boolean await = latch.await(durationInMillis, TimeUnit.MILLISECONDS);
+            Assert.assertEquals("Latch count remaining: " + latch.getCount(), countToZeroExpected, await);
         } catch (InterruptedException e) {
             Assert.fail("Interrupted");
         }        
