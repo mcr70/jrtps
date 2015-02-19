@@ -71,7 +71,7 @@ public class ContentFilterTest extends AbstractQosTest {
 
 
     @Test
-    public void testWriterSideFiltering() {
+    public void testExplicitWriterSideFiltering() {
         QualityOfService qos = new QualityOfService();
         qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 10));
         qos.setPolicy(new QosDurability(Kind.TRANSIENT_LOCAL));
@@ -105,6 +105,44 @@ public class ContentFilterTest extends AbstractQosTest {
         
         DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class, qos);
         dw.registerContentFilter(cf); // Explicitly register writer side content filter 
+        
+        final CountDownLatch emLatch = new CountDownLatch(2); // Latch used to synchronize on entity matched
+        addCommunicationListener(dr, null, emLatch);
+        addCommunicationListener(dw, null, emLatch);
+        waitFor(emLatch, LATCH_WAIT_MILLIS, true);
+        
+        for (int i = 0; i < 8; i++) { // Write 10 message, filter should accept every other
+        	dw.write(new HelloMessage(i, "hello"));
+        }
+        
+        waitFor(dataLatch, LATCH_WAIT_MILLIS, true);
+        assertEquals(2, dr.getSamples().size()); 
+    }
+
+
+    @Test
+    public void testImplicitWriterSideFiltering() {
+        QualityOfService qos = new QualityOfService();
+        qos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_LAST, 10));
+        qos.setPolicy(new QosDurability(Kind.TRANSIENT_LOCAL));
+        
+        ContentFilter<HelloMessage> cf = new TestContentFilter();
+        
+        DataReader<HelloMessage> dr = p1.createDataReader(HelloMessage.class, qos);
+        dr.setContentFilter(cf);
+        
+        final CountDownLatch dataLatch = new CountDownLatch(2); // Expect to receive 2 samples
+        dr.addSampleListener(new SampleListener<HelloMessage>() {
+			@Override
+			public void onSamples(List<Sample<HelloMessage>> samples) {
+				for (Sample<HelloMessage> s : samples) {
+					dataLatch.countDown();
+				}
+			}
+		});
+        
+        DataWriter<HelloMessage> dw = p2.createDataWriter(HelloMessage.class, qos);
+        //dw.registerContentFilter(cf); // content filter is implicitly registered 
         
         final CountDownLatch emLatch = new CountDownLatch(2); // Latch used to synchronize on entity matched
         addCommunicationListener(dr, null, emLatch);

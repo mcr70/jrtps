@@ -239,7 +239,11 @@ class RTPSMessageReceiver implements Runnable {
 
     private void handleGap(GuidPrefix sourceGuidPrefix, Gap gap) {
         RTPSReader<?> reader = participant.getReader(gap.getReaderId(), sourceGuidPrefix, gap.getWriterId());
-        reader.onGap(sourceGuidPrefix, gap);
+        if (reader != null) {
+        	reader.onGap(sourceGuidPrefix, gap);
+        } else {
+            logger.debug("No Reader({}) to handle Gap from {}", gap.getReaderId(), gap.getWriterId());
+        }
     }
 
     private void handleHeartbeat(GuidPrefix sourceGuidPrefix, Heartbeat hb) {
