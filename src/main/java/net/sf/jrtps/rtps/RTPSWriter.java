@@ -15,11 +15,13 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.DataEncapsulation;
+import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.message.InfoDestination;
 import net.sf.jrtps.message.InfoTimestamp;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.CoherentSet;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.DataWriterPolicy;
 import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.Parameter;
@@ -32,6 +34,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.udds.ContentFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +57,10 @@ public class RTPSWriter<T> extends Endpoint {
 	private static final Logger logger = LoggerFactory.getLogger(RTPSWriter.class);
 
 	private final Map<Guid, ReaderProxy> readerProxies = new ConcurrentHashMap<>();
+	/**
+	 * ContentFilters, key is hex representation of filters signature
+	 */
+	private final Map<String, ContentFilter<T>> contentFilters = new ConcurrentHashMap<>();
 
 	private final WriterCache<T> writer_cache;
 	private final int nackResponseDelay;
@@ -201,9 +208,11 @@ public class RTPSWriter<T> extends Endpoint {
 			readerProxies.put(readerData.getBuiltinTopicKey(), proxy);
 		}
 		else {
-			proxy.update(readerData);;
+			proxy.update(readerData);
 		}
 
+		checkContentFilter(readerData.getContentFilter());
+		
 		QosDurability readerDurability = readerData.getQualityOfService().getDurability();
 
 		if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
@@ -218,6 +227,29 @@ public class RTPSWriter<T> extends Endpoint {
 
 		logger.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
 		return proxy;
+	}
+
+	private void checkContentFilter(ContentFilterProperty cfp) {
+		if (cfp != null) {
+			String filterClassName = cfp.getFilterClassName();
+			if (ContentFilterProperty.JAVA_FILTER_CLASS.equals(filterClassName)) {
+				try {
+					// TODO: Class.forName is not OSGi friendly
+					@SuppressWarnings({ "rawtypes", "unchecked" })
+					ContentFilter<T> cf = (ContentFilter) Class.forName(cfp.getFilterExpression()).newInstance();
+					registerContentFilter(cf);
+				} catch (InstantiationException | IllegalAccessException
+						| ClassNotFoundException e) {
+					logger.warn("Failed to");
+				}
+			}
+			else {
+				ContentFilter<T> cf = contentFilters.get(cfp.getSignature());
+				if (cf == null) {
+					logger.warn("No ContentFilter matching readers ContentFilterProperty: {} ", cfp);
+				}
+			}
+		}
 	}
 
 	/**
@@ -269,6 +301,25 @@ public class RTPSWriter<T> extends Endpoint {
 		return proxies;
 	}
 
+    /**
+     * Registers a ContentFilter
+     * @param cf ContentFilter
+     * @throws NullPointerException if cf.getContentFilterProperty() returns null
+     */
+    public void registerContentFilter(ContentFilter<T> cf) {
+    	ContentFilterProperty cfp = cf.getContentFilterProperty();
+    	if (cfp == null) {
+    		throw new NullPointerException("ContentFilterProperty cannot be null when registering ContentFilter to writer");
+    	}
+
+    	logger.debug("[{}] Registering ContentFilter with class '{}', expression '{}'", getEntityId(),
+    			cfp.getFilterClassName(), cfp.getFilterExpression());
+
+    	String signature = cfp.getSignature();
+    	contentFilters.put(signature, cf);
+    }
+	
+	
 	/**
 	 * Handle incoming AckNack message.
 	 * 
@@ -311,6 +362,12 @@ public class RTPSWriter<T> extends Endpoint {
 			return;
 		}
 
+		ContentFilter<T> filter = null;
+		ContentFilterProperty cfp = proxy.getSubscriptionData().getContentFilter();
+		if (cfp != null) {
+			filter = contentFilters.get(cfp.getSignature()); // might return null
+		}
+		
 		// Add INFO_DESTINATION
 		m.addSubMessage(new InfoDestination(proxy.getGuid().getPrefix()));
 
@@ -326,9 +383,17 @@ public class RTPSWriter<T> extends Endpoint {
 				}
 				prevTimeStamp = timeStamp;
 
-				logger.trace("Marshalling {}", aSample.getData());
-				Data data = createData(proxyEntityId, proxy.expectsInlineQoS(), aSample);
-				m.addSubMessage(data);
+				if (filter != null && !filter.acceptSample(aSample)) {
+					// writer side filtering
+					long sn = aSample.getSequenceNumber();
+					Gap gap = new Gap(proxyEntityId, getEntityId(), sn, sn);
+					m.addSubMessage(gap);
+				}
+				else {
+					logger.trace("Marshalling {}", aSample.getData());
+					Data data = createData(proxyEntityId, proxy.expectsInlineQoS(), aSample);
+					m.addSubMessage(data);
+				}
 			} catch (IOException ioe) {
 				logger.warn("[{}] Failed to add Sample to message", getEntityId(), ioe);
 			}

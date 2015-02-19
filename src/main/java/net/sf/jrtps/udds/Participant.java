@@ -38,6 +38,7 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
@@ -452,21 +453,29 @@ public class Participant {
 		return reader;
 	}
 
-	private void writeSubscriptionData(DataReader reader) {
+	
+	/**
+	 * This method is called by createDataReader(...), or by DataReader.setSampleFilter()
+	 * @param reader
+	 */
+	void writeSubscriptionData(DataReader<?> reader) {
 		RTPSReader<?> rtps_reader = reader.getRTPSReader();
 
-		SubscriptionData rd = new SubscriptionData(reader.getTopicName(), reader.getTypeName(), 
-				rtps_reader.getGuid(), rtps_reader.getQualityOfService());
-		reader.setSubscriptionData(rd);
+		ContentFilterProperty cfp = reader.getContentFilterProperty();
+		
+		SubscriptionData sd = new SubscriptionData(reader.getTopicName(), reader.getTypeName(), 
+				rtps_reader.getGuid(), cfp, rtps_reader.getQualityOfService());
+		
+		reader.setSubscriptionData(sd);
 		
 		if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
 			@SuppressWarnings("unchecked")
 			DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
 					SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
-			sw.write(rd);
+			sw.write(sd);
 		}		
 	}
-	
+
 	void removeDataReader(DataReader<?> dr) {
 		readers.remove(dr);
 

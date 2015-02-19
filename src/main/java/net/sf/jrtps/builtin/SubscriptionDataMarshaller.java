@@ -7,6 +7,7 @@ import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.BuiltinTopicKey;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.DataReaderPolicy;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
@@ -69,7 +70,12 @@ public class SubscriptionDataMarshaller implements Marshaller<SubscriptionData> 
         payloadParams.add(new BuiltinTopicKey(rd.getBuiltinTopicKey()));
         payloadParams.add(new TopicName(rd.getTopicName()));
         payloadParams.add(new TypeName(rd.getTypeName()));
-
+        
+        ContentFilterProperty contentFilter = rd.getContentFilter();
+        if (contentFilter != null) {
+        	payloadParams.add(contentFilter);
+        }
+        
         addQoS(rd, payloadParams);
         payloadParams.add(new Sentinel());
 

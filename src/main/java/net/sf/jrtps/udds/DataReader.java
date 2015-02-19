@@ -5,6 +5,7 @@ import java.util.Set;
 
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.rtps.RTPSReader;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.rtps.WriterLivelinessListener;
@@ -38,6 +39,8 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     protected final RTPSReader<T> rtps_reader;
 
     private SubscriptionData subscriptionData;
+
+	private ContentFilter<T> contentFilter;
 
     /**
      * Constructor with null typeName 
@@ -206,15 +209,51 @@ public class DataReader<T> extends Entity<T, PublicationData> {
     }
 
     /**
-     * Adds a reader side Filter. When samples are received, they are evaluated with
-     * SampleFitler. If SampleFilter accepts incoming Sample, it is added to history 
-     * cache of this reader, and clients are notified of new samples.
-     *  
+     * Sets a ContentFilter. ContentFilterProperty from ContentFilter will be sent to
+     * writers. Writers that support writer side filtering will be able to apply
+     * filtering if the parameters of ContentFilterProperty match.<p>
+     * 
+     * As ContentFilter is also a SampleFilter, this method calls also sets SampleFilter,
+     * as not all of the writers might not support writer side filtering.
+     * @param cf
+     */
+    public void setContentFilter(ContentFilter<T> cf) {
+		advertiseContentFilter(cf, cf);
+		if (cf != null && cf.getContentFilterProperty() != null) {
+			hCache.setContentFilterSignature(cf.getContentFilterProperty().getRawSignature());
+		}
+		else {
+			hCache.setContentFilterSignature(null);
+		}
+    }
+    
+    private void advertiseContentFilter(SampleFilter<T> sf, ContentFilter<T> cf) {
+    	this.contentFilter = cf;
+    	// Write ContentFilterProperty to remote writers
+    	getParticipant().writeSubscriptionData(this);
+    	hCache.setSampleFilter(sf);
+    }
+    
+    /**
+     * Sets a SampleFilter. When samples are received, they are evaluated with
+     * SampleFilter. If SampleFilter accepts incoming Sample, it is added to history 
+     * cache of this reader, and clients are notified of new samples.<p>
+     * 
      * @param sf SampleFilter
      */
     public void setSampleFilter(SampleFilter<T> sf) {
-        // QosOwnership could be implemented with Filters.
-        // QosResourceLimits could be implemented with Filters.
-    	hCache.setSampleFilter(sf);
+    	advertiseContentFilter(sf, null);
+    }
+
+    /**
+     * Gets the ContentFilterProperty associated with this reader.
+     * @return ContentFilterProperty, or null if this reader has no ContentFilter
+     */
+    ContentFilterProperty getContentFilterProperty() {
+    	if (contentFilter != null) {
+    		return contentFilter.getContentFilterProperty();
+    	}
+    	
+    	return null;
     }
 }

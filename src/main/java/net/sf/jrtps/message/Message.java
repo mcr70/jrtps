@@ -131,23 +131,6 @@ public class Message {
         }
     }
 
-    /**
-     * Gets all the SubMessages with given SubMessage.Kind.
-     * 
-     * @param kind
-     * @return a List of SubMessages of given Kind, or an empty List if none was
-     *         found.
-     */
-    public List<SubMessage> getSubMessage(SubMessage.Kind kind) {
-        List<SubMessage> list = new LinkedList<>();
-        for (SubMessage sm : submessages) {
-            if (sm.getKind() == kind) {
-                list.add(sm);
-            }
-        }
-
-        return list;
-    }
 
     /**
      * Gets the Header of this Message.

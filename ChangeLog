@@ -2,8 +2,15 @@
     - OMG assigned vendorId 0x0121
     - Changes to quality of service is tracked and sent to remote entities 
       with SEDP.
-    - typeName is stored in Entity, EntityFactory gets typeName  parameter 
+    - typeName is stored in Entity, EntityFactory gets typeName parameter 
       in create methods
+    - Simple content filter support. Readers can do reader side filtering and
+      optionally inform writers of the filter setup.   
+      Content filter class name 'java': jRTPS writers interprets filterExpression 
+      as a fully qualified class name of java class, that implements ContentFilter
+      interface, and tries to register this filter automatically when matched
+      with reader.
+      DDSSQL parsing is not implemented by jRTPS.
 
 1.2.1
 	- FIX: shared secret was not used :|

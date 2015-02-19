@@ -10,6 +10,7 @@ import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.parameter.CoherentSet;
+import net.sf.jrtps.message.parameter.ContentFilterInfo;
 import net.sf.jrtps.message.parameter.QosDestinationOrder.Kind;
 import net.sf.jrtps.message.parameter.QosLifespan;
 import net.sf.jrtps.message.parameter.QosOwnership;
@@ -39,6 +40,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private RTPSReader<T> rtps_reader;
 
 	private SampleFilter<T> sampleFilter;
+
+	private byte[] filterSignature;
 
 
     UDDSReaderCache(EntityId eId, Marshaller<T> marshaller, QualityOfService qos, Watchdog watchdog) {
@@ -113,6 +116,17 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
     @Override
     public void addChange(int id, Guid writerGuid, Data data, Time timestamp) {
+    	if (filterSignature != null) { // If we have a filter...
+    		ContentFilterInfo contentFilterInfo = data.getContentFilterInfo();
+    		if (contentFilterInfo != null) { // ...and writer did filtering...
+    			//...check, that our filter was applied or not
+        		if (!contentFilterInfo.containsSignature(filterSignature)) {
+        			logger.debug("Discarding data as writers ContentFilterInfo did not contain my filter signature");
+        			return;
+        		}
+        	}
+        }
+        
         long sourceTimeStamp;
         if (timestamp != null) {
             sourceTimeStamp = timestamp.timeMillis();
@@ -135,6 +149,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
         Sample<T> sample = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, sourceTimeStamp, data);
         CoherentSet cs = sample.getCoherentSet();
 
+        
+        
         // Check, if we need to add existing CoherentSet into pendingSamples
         if (coherentSet.size() > 0) { // If no samples in cs, no need to add to pending samples 
             if (cs == null || 
@@ -221,4 +237,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
         return Duration.INFINITE;
     }
+
+	public void setContentFilterSignature(byte[] signature) {
+		this.filterSignature = signature;
+	}
 }

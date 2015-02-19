@@ -30,10 +30,11 @@ public class ReaderProxy extends RemoteProxy {
     private final EntityId entityId;
 
 
-    ReaderProxy(EntityId entityId, SubscriptionData rd, List<Locator> locators, int anSuppressionDuration) {
-        super(rd, locators);
+    ReaderProxy(EntityId entityId, SubscriptionData sd, List<Locator> locators, int anSuppressionDuration) {
+        super(sd, locators);
+        
         this.entityId = entityId;
-        this.expectsInlineQoS = rd.expectsInlineQos(); 
+        this.expectsInlineQoS = sd.expectsInlineQos(); 
 		this.anSuppressionDuration = anSuppressionDuration;
     }
 
@@ -46,6 +47,9 @@ public class ReaderProxy extends RemoteProxy {
         return (SubscriptionData) getDiscoveredData();
     }
 
+    
+    
+    
     /**
      * Returns true if remote reader expects QoS to be sent inline with each
      * Data submessage.

@@ -18,7 +18,8 @@
 	<description>jRTPS - An implementation of RTPS protocol by OMG</description>
 
 	<properties>
-		<slf4j-version>1.7.6</slf4j-version>
+    	<additionalparam>-Xdoclint:none</additionalparam>
+  		<slf4j-version>1.7.6</slf4j-version>
 		<log4j-version>2.1</log4j-version>
 		<org.omg.dds.security.version>1.0-Beta1</org.omg.dds.security.version>
 	</properties>
@@ -128,9 +129,6 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
 				<version>2.9.1</version>
-				<configuration>
-					<additionalparam>-Xdoclint:none</additionalparam>
-				</configuration>
 				<executions>
 					<execution>
 						<id>attach-javadoc</id>

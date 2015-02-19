@@ -64,10 +64,8 @@ public class QualityOfService {
     /**
      * Sets a given QosPolicy. Old value will be overridden.
      * 
-     * @param policy
-     *            QosPolicy to set.
-     * @throws InconsistentPolicy
-     *             is thrown if there is some inconsistent value with the policy
+     * @param policy QosPolicy to set.
+     * @throws InconsistentPolicy is thrown if there is some inconsistent value with the policy
      */
     public void setPolicy(QosPolicy policy) throws InconsistentPolicy {
     	if (!(policy instanceof Changeable)) {
@@ -227,9 +225,11 @@ public class QualityOfService {
     }
 
     /**
-     * Gets all the incompatible qos policies of the other QualityOfService
-     * @param other
-     * @return a Set of QosPolicies. If all the policies a re compatible, return an empty Set.
+     * Gets all the incompatible policies that are found from either QualityOfService.
+     * I.e. check only policies that are explicitly set on either QualityOfService. 
+
+     * @param other Other QoS 
+     * @return a Set of QosPolicies. If all the policies are compatible, return an empty Set.
      */
     @SuppressWarnings("unchecked")
     public Set<QosPolicy<?>> getIncompatibleQos(QualityOfService other) {
@@ -337,7 +337,7 @@ public class QualityOfService {
 
     /**
      * Checks wheter or not this QualityOfService is compatible with the other.
-     * @param other
+     * @param other Other QualityOfService
      * @return true, if compatible
      */
     public boolean isCompatibleWith(QualityOfService other) {
