@@ -19,8 +19,6 @@ import org.slf4j.LoggerFactory;
  * DataReader maintains a history cache where it keeps Samples received from writers on the network.
  * There are two ways to get these Samples from DataReader. One is by using any of the get methods,
  * and the other is by registering a SampleListener.
- * <p>
- * DataReader sets COM_LISTENER_TYPE of super class Entity to PublicationData.
  * 
  * @author mcr70
  * 
@@ -213,37 +211,22 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * writers. Writers that support writer side filtering will be able to apply
      * filtering if the parameters of ContentFilterProperty match.<p>
      * 
-     * As ContentFilter is also a SampleFilter, this method calls also sets SampleFilter,
-     * as not all of the writers might not support writer side filtering.
-     * @param cf
+     * @param cf ContentFilter to set
      */
     public void setContentFilter(ContentFilter<T> cf) {
-		advertiseContentFilter(cf, cf);
-		if (cf != null && cf.getContentFilterProperty() != null) {
+    	this.contentFilter = cf;
+    	// Write ContentFilterProperty to remote writers
+    	getParticipant().writeSubscriptionData(this);
+    	hCache.setContentFilter(cf);
+
+    	if (cf != null && cf.getContentFilterProperty() != null) {
 			hCache.setContentFilterSignature(cf.getContentFilterProperty().getRawSignature());
 		}
 		else {
 			hCache.setContentFilterSignature(null);
 		}
     }
-    
-    private void advertiseContentFilter(SampleFilter<T> sf, ContentFilter<T> cf) {
-    	this.contentFilter = cf;
-    	// Write ContentFilterProperty to remote writers
-    	getParticipant().writeSubscriptionData(this);
-    	hCache.setSampleFilter(sf);
-    }
-    
-    /**
-     * Sets a SampleFilter. When samples are received, they are evaluated with
-     * SampleFilter. If SampleFilter accepts incoming Sample, it is added to history 
-     * cache of this reader, and clients are notified of new samples.<p>
-     * 
-     * @param sf SampleFilter
-     */
-    public void setSampleFilter(SampleFilter<T> sf) {
-    	advertiseContentFilter(sf, null);
-    }
+
 
     /**
      * Gets the ContentFilterProperty associated with this reader.
