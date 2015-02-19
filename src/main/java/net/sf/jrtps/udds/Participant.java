@@ -455,7 +455,7 @@ public class Participant {
 
 	
 	/**
-	 * This method is called by createDataReader(...), or by DataReader.setSampleFilter()
+	 * This method is called by createDataReader(...), or by DataReader.setContentFilter()
 	 * @param reader
 	 */
 	void writeSubscriptionData(DataReader<?> reader) {

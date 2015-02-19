@@ -11,6 +11,7 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.OutOfResources;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosHistory.Kind;
@@ -197,14 +198,14 @@ public class QosTest {
 
 
     @Test
-    public <T> void testSampleFilter() {
+    public <T> void testContentFilter() {
         ScheduledExecutorService ses = new ScheduledThreadPoolExecutor(10);
         Watchdog watchdog = new Watchdog(ses);
         
         QualityOfService qos = new QualityOfService();
         qos.setPolicy(new QosHistory(Kind.KEEP_ALL, 10));
         UDDSReaderCache<?> rCache = new UDDSReaderCache<>(null, null, qos, watchdog);
-        rCache.setSampleFilter(new SampleFilter() {
+        rCache.setContentFilter(new ContentFilter() {
         	int count = 0;
         	@Override
 			public boolean acceptSample(Sample sample) {
@@ -212,6 +213,10 @@ public class QosTest {
         			return true;
         		}
         		return false;
+			}
+			@Override
+			public ContentFilterProperty getContentFilterProperty() {
+				return null;
 			}
 		});
 

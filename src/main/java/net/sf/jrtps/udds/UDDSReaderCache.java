@@ -38,9 +38,7 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     private final boolean exclusiveOwnership;
 
     private RTPSReader<T> rtps_reader;
-
-	private SampleFilter<T> sampleFilter;
-
+	private ContentFilter<T> contentFilter;
 	private byte[] filterSignature;
 
 
@@ -61,8 +59,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
     }
 
     
-    void setSampleFilter(SampleFilter<T> sf) {
-    	this.sampleFilter = sf;
+    void setContentFilter(ContentFilter<T> sf) {
+    	this.contentFilter = sf;
     }
 
     @Override
@@ -81,8 +79,8 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
             }
         }
 
-        // If SampleFilter is set and it rejects Sample, just return
-        if (sampleFilter != null && !sampleFilter.acceptSample(aSample)) {
+        // If ContentFilter is set and it rejects Sample, just return
+        if (contentFilter != null && !contentFilter.acceptSample(aSample)) {
         	return null;
         }
         
