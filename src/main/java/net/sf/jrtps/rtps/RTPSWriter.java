@@ -243,6 +243,12 @@ public class RTPSWriter<T> extends Endpoint {
 					logger.warn("Failed to");
 				}
 			}
+			else {
+				ContentFilter<T> cf = contentFilters.get(cfp.getSignature());
+				if (cf == null) {
+					logger.warn("No ContentFilter matching readers ContentFilterProperty: {} ", cfp);
+				}
+			}
 		}
 	}
 
