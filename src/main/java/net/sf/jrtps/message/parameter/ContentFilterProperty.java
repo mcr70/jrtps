@@ -181,10 +181,24 @@ public class ContentFilterProperty extends Parameter {
     	}
     }
 
+    @Override
     public String toString() {
-    	return "ContentFilterProperty: cfTopic " + contentFilteredTopicName + ", related topic " + 
-    			relatedTopicName + ", filter class " + filterClassName + ", filter expression " +
-    			filterExpression;
+    	StringBuffer sb = new StringBuffer("[cfTopic ");
+    	sb.append(contentFilteredTopicName);
+    	sb.append(", related topic ");
+    	sb.append(relatedTopicName);
+    	sb.append(", filter class ");
+    	sb.append(filterClassName);
+    	sb.append(", filter expression ");
+    	sb.append(filterExpression);
+    	sb.append(", expression params {");
+    	for (int i = 0; i < expressionParameters.length; i++) {
+    		sb.append("'");
+    		sb.append(expressionParameters[i]);
+    		sb.append("'");
+    	}
+    	sb.append("}]");
+    	
+    	return sb.toString();
     }
-
 }
