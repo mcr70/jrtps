@@ -5,6 +5,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.udds.ContentFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,10 @@ public class ContentFilterProperty extends Parameter {
 	 * Filter class name defined by DDS specification.
 	 */
 	public static final String DDSSQL = "DDSSQL";
+	/**
+	 * Filter class java
+	 */
+	public static final String JAVA_FILTER_CLASS = "java";
 	
     private String contentFilteredTopicName; // length 256
     private String relatedTopicName; // length 256
@@ -31,6 +36,24 @@ public class ContentFilterProperty extends Parameter {
 
 	private byte[] signature;
     
+	/**
+	 * Constructor for ContentFilterProperty. filterClassName is set to 'java', 
+	 * filterExpression is set to fully qualified class name of the goven class. 
+	 * expressionParameters is set to empty String array.<p>
+	 *  
+	 * jRTPS writers recognize this type of filterClass, and tries to instantiate
+	 * a ContentFilter with this className. If it succeeds, it is automatically
+	 * registered to writer.
+	 * 
+	 * @param cfTopicName
+	 * @param relatedTopicName
+	 * @param cfClass
+	 */
+	public ContentFilterProperty(String cfTopicName, String relatedTopicName, 
+			Class<? extends ContentFilter> cfClass) {
+		this(cfTopicName, relatedTopicName, "java", cfClass.getName(), new String[0]);
+	}
+	
 	public ContentFilterProperty(String cfTopicName, String relatedTopicName,
 			String filterClassName, String filterExpression) {
 		this(cfTopicName, relatedTopicName, filterClassName, filterExpression, new String[0]);

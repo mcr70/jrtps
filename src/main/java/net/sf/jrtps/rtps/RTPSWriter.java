@@ -208,9 +208,11 @@ public class RTPSWriter<T> extends Endpoint {
 			readerProxies.put(readerData.getBuiltinTopicKey(), proxy);
 		}
 		else {
-			proxy.update(readerData);;
+			proxy.update(readerData);
 		}
 
+		checkContentFilter(readerData.getContentFilter());
+		
 		QosDurability readerDurability = readerData.getQualityOfService().getDurability();
 
 		if (QosDurability.Kind.VOLATILE == readerDurability.getKind()) {
@@ -225,6 +227,23 @@ public class RTPSWriter<T> extends Endpoint {
 
 		logger.debug("[{}] Added matchedReader {}", getEntityId(), readerData);
 		return proxy;
+	}
+
+	private void checkContentFilter(ContentFilterProperty cfp) {
+		if (cfp != null) {
+			String filterClassName = cfp.getFilterClassName();
+			if (ContentFilterProperty.JAVA_FILTER_CLASS.equals(filterClassName)) {
+				try {
+					// TODO: Class.forName is not OSGi friendly
+					@SuppressWarnings({ "rawtypes", "unchecked" })
+					ContentFilter<T> cf = (ContentFilter) Class.forName(cfp.getFilterExpression()).newInstance();
+					registerContentFilter(cf);
+				} catch (InstantiationException | IllegalAccessException
+						| ClassNotFoundException e) {
+					logger.warn("Failed to");
+				}
+			}
+		}
 	}
 
 	/**
@@ -286,9 +305,11 @@ public class RTPSWriter<T> extends Endpoint {
     	if (cfp == null) {
     		throw new NullPointerException("ContentFilterProperty cannot be null when registering ContentFilter to writer");
     	}
-    	
-    	String signature = cfp.getSignature();
 
+    	logger.debug("[{}] Registering ContentFilter with class '{}', expression '{}'", getEntityId(),
+    			cfp.getFilterClassName(), cfp.getFilterExpression());
+
+    	String signature = cfp.getSignature();
     	contentFilters.put(signature, cf);
     }
 	
