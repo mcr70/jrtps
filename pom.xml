@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -11,14 +10,13 @@
 
 	<groupId>net.sf.jrtps</groupId>
 	<artifactId>jrtps</artifactId>
-	<version>1.3.0-SNAPSHOT</version>
+	<version>1.3.0</version>
 	<packaging>jar</packaging>
 
 	<name>jRTPS</name>
 	<description>jRTPS - An implementation of RTPS protocol by OMG</description>
 
 	<properties>
-    	<additionalparam>-Xdoclint:none</additionalparam>
   		<slf4j-version>1.7.6</slf4j-version>
 		<log4j-version>2.1</log4j-version>
 		<org.omg.dds.security.version>1.0-Beta1</org.omg.dds.security.version>
@@ -217,7 +215,7 @@
 		<connection>scm:hg:http://hg.code.sf.net/p/jrtps/code</connection>
 		<developerConnection>scm:hg:https://hg.code.sf.net/p/jrtps/code</developerConnection>
 		<url>https://sourceforge.net/p/jrtps/code/ci/default/tree/</url>
-		<tag>jrtps-1.1</tag>
+		<tag>jrtps-1.3.0</tag>
 	</scm>
 
 	<developers>
