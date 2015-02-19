@@ -25,7 +25,7 @@ public interface Marshaller<T> {
      * However, if the byte arrays length is greater than 15, it is internally converted to
      * a MD5 hash. 
      * 
-     * @param data
+     * @param data Object that holds key
      * @return key
      */
     public byte[] extractKey(T data);
@@ -33,7 +33,7 @@ public interface Marshaller<T> {
     /**
      * Unmarshalls given DataEncapsulation to Object.
      * 
-     * @param dEnc
+     * @param dEnc DataEncapsulation
      * @return An instance of type T
      * @throws IOException
      */
@@ -42,7 +42,7 @@ public interface Marshaller<T> {
     /**
      * Marshalls given Object to DataEncapsulation
      * 
-     * @param data
+     * @param data An Object to marshall
      * @return DataEncapsulation
      * @throws IOException
      */

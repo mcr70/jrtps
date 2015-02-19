@@ -4,6 +4,7 @@ import java.util.Iterator;
 
 import net.sf.jrtps.InconsistentPolicy;
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.ExpectsInlineQos;
 import net.sf.jrtps.message.parameter.Parameter;
 import net.sf.jrtps.message.parameter.ParameterList;
@@ -11,8 +12,8 @@ import net.sf.jrtps.message.parameter.ParticipantGuid;
 import net.sf.jrtps.message.parameter.QosPolicy;
 import net.sf.jrtps.message.parameter.TopicName;
 import net.sf.jrtps.message.parameter.TypeName;
-import net.sf.jrtps.types.ContentFilterProperty_t;
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.udds.ContentFilter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +33,7 @@ public class SubscriptionData extends DiscoveredData {
     private Guid participantGuid;
     private boolean expectsInlineQos = false;
 
-    private ContentFilterProperty_t contentFilter;
+    private ContentFilterProperty contentFilter;
 
     public SubscriptionData(ParameterList parameterList) throws InconsistentPolicy {
         Iterator<Parameter> iter = parameterList.getParameters().iterator();
@@ -64,6 +65,9 @@ public class SubscriptionData extends DiscoveredData {
             case PID_EXPECTS_INLINE_QOS:
                 expectsInlineQos = ((ExpectsInlineQos) param).expectsInlineQos();
                 break;
+            case PID_CONTENT_FILTER_PROPERTY:
+            	contentFilter = (ContentFilterProperty) param;
+            	break;
             case PID_SENTINEL:
                 break;
             case PID_PAD:
@@ -87,7 +91,13 @@ public class SubscriptionData extends DiscoveredData {
     }
 
     public SubscriptionData(String topicName, String typeName, Guid key, QualityOfService qos) {
+    	this(topicName, typeName, key, null, qos);
+    }
+    
+    public SubscriptionData(String topicName, String typeName, Guid key, ContentFilterProperty cfp, 
+    		QualityOfService qos) {
         super(typeName, topicName, key, qos);
+        contentFilter = cfp;
     }
 
     public Guid getParticipantGuid() {
@@ -98,7 +108,11 @@ public class SubscriptionData extends DiscoveredData {
         return expectsInlineQos;
     }
 
-    public ContentFilterProperty_t getContentFilter() {
+    /**
+     * Gets the ContentFilterProperty associated with this SubscriptionData.
+     * @return ContentFilterProperty, or null if there is no ContentFilterProperty available.
+     */
+    public ContentFilterProperty getContentFilter() {
         return contentFilter;
     }
 }

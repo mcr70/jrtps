@@ -50,7 +50,7 @@ public class AckNack extends SubMessage {
     /**
      * Sets the finalFlag.
      * 
-     * @param value
+     * @param value Final flag
      */
     public void finalFlag(boolean value) {
         if (value) {
@@ -63,6 +63,7 @@ public class AckNack extends SubMessage {
     /**
      * Identifies the Reader entity that acknowledges receipt of certain
      * sequence numbers and/or requests to receive certain sequence numbers.
+	 * @return reader id
      */
     public EntityId getReaderId() {
         return readerId;
@@ -73,6 +74,7 @@ public class AckNack extends SubMessage {
      * This is the Writer Entity that is being asked to re-send some sequence
      * numbers or is being informed of the reception of certain sequence
      * numbers.
+     * @return writer id
      */
     public EntityId getWriterId() {
         return writerId;
@@ -84,6 +86,8 @@ public class AckNack extends SubMessage {
      * the reader. The sequence numbers that appear in the set indicate missing
      * sequence numbers on the reader side. The ones that do not appear in the
      * set are undetermined (could be received or not).
+     * 
+     * @return readerSNState
      */
     public SequenceNumberSet getReaderSNState() {
         return readerSNState;
@@ -93,6 +97,8 @@ public class AckNack extends SubMessage {
      * A counter that is incremented each time a new AckNack message is sent.
      * Provides the means for a Writer to detect duplicate AckNack messages that
      * can result from the presence of redundant communication paths.
+     * 
+     * @return count
      */
     public int getCount() {
         return count;
@@ -113,6 +119,7 @@ public class AckNack extends SubMessage {
         bb.write_long(count);
     }
 
+    @Override
     public String toString() {
         return super.toString() + " #" + count + ", " + readerId + ", " + writerId + ", " + readerSNState + ", F:"
                 + finalFlag();

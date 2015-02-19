@@ -141,6 +141,10 @@ public class MessageTests {
 		Gap gap2 = new Gap(new SubMessageHeader(Gap.KIND), bb);		
 		Assert.assertTrue(0 == gap2.getGapStart());
 		Assert.assertTrue(2 == gap2.getGapEnd());
+
+		Gap gap3 = new Gap(null, null, 1, 1);
+		Assert.assertTrue(1 == gap3.getGapStart());
+		Assert.assertTrue(1 == gap3.getGapEnd());
 	}
 	
 	/**

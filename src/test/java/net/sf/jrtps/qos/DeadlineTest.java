@@ -43,5 +43,4 @@ public class DeadlineTest extends AbstractQosTest {
         // If we do not write next message within deadline period, deadline missed should happen
         waitFor(dlLatch, LATCH_WAIT_MILLIS, true);
     }
-
 }

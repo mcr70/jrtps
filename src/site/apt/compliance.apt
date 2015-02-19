@@ -41,7 +41,8 @@ Compliance
  <PID_EXPECTS_INLINE_QOS(0x0043)>, reader is marked as needing inline QoS to be sent.
 
  In Addition, following inlineable parameters are recognised and handled by jRTPS: 
- <PID_COHERENT_SET(0x0056), PID_DIRECTED_WRITE(0x0057), PID_KEYHASH(0x0070), PID_STATUS_INFO(0x0071)>.
+ <PID_COHERENT_SET(0x0056), PID_DIRECTED_WRITE(0x0057), PID_KEYHASH(0x0070), PID_STATUS_INFO(0x0071),
+ PID_CONTENT_FILTER_INFO(0x0055)>
  
  For the Coherent sets, udds supports writing of collections coherently.
  For access scope <GROUP>, RTPS specification says that 
@@ -49,8 +50,14 @@ Compliance
  jRTPS does not support access scope <GROUP>. jRTPS writers does not support directed writes, 
  but readers handle them correctly(not tested).
  
+ For the Content filtering, uDDS readers send ContentFilterProperty to writers, so that 
+ writers may do writer side filtering. ContentFilterProperty will be sent if an application
+ registers a ContentFilter to DataReader. Writer side content filtering is supported by
+ registering a ContentFilter to writer. Note, that DDSSQL is not parsed. Rather, one can
+ register a ContentFilter that <implements> corresponding DDSSQL. 
+ 
  Following inlineable parameters are not handled by jRTPS: 
- <PID_CONTENT_FILTER_INFO(0x0055), PID_PROPERTY_LIST(0x0059), PID_ORIGINAL_WRITER_INFO(0x0061)>
+ <PID_PROPERTY_LIST(0x0059), PID_ORIGINAL_WRITER_INFO(0x0061)>
  
 
 

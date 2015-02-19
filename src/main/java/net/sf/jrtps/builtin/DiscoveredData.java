@@ -52,14 +52,10 @@ public class DiscoveredData {
      * This constructor is used when DiscoveredData is being created from
      * scratch
      * 
-     * @param typeName
-     *            Type name of the data
-     * @param topicName
-     *            name of the topic
-     * @param key
-     *            guid of the remote entity, which acts as a key for topic
-     * @param qos
-     *            QualityOfService of discovered entity
+     * @param typeName Type name of the data
+     * @param topicName name of the topic
+     * @param key guid of the remote entity, which acts as a key for topic
+     * @param qos QualityOfService of discovered entity
      */
     protected DiscoveredData(String typeName, String topicName, Guid key, QualityOfService qos) {
         this.typeName = typeName;
@@ -85,7 +81,7 @@ public class DiscoveredData {
     /**
      * Adds a Parameter that was not handled by subclass.
      * 
-     * @param param
+     * @param param Parameter
      */
     protected void addParameter(Parameter param) {
         params.add(param);
@@ -164,7 +160,7 @@ public class DiscoveredData {
 
     /**
      * Gets the Parameter with given ParameterEnum
-     * @param id
+     * @param id Id of the Parameter
      * @return Parameter, or null if not found
      */
     public Parameter getParameter(ParameterId id) {
@@ -180,7 +176,7 @@ public class DiscoveredData {
     /**
      * Adds a QosPolicy.
      * 
-     * @param policy
+     * @param policy QosPolicy to add
      */
     protected void addQosPolicy(QosPolicy<?> policy) {
         try {
