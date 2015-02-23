@@ -7,10 +7,13 @@
     </Appenders>
 
     <Loggers>
-        <Root level="WARN">
+        <Root level="DEBUG">
             <AppenderRef ref="STDOUT" />
         </Root>
         
+        <Logger name="net.sf.jrtps.message.parameter.ParameterList" level="TRACE" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
         <Logger name="dds.sec.auth" level="WARN" additivity="false">
             <AppenderRef ref="STDOUT" />
         </Logger>
