@@ -1,5 +1,6 @@
 package net.sf.jrtps.transport;
 
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -51,7 +52,7 @@ class UDPLocator extends Locator {
                 inetAddress = InetAddress.getByAddress(addr);
                 break;
             case Locator.LOCATOR_KIND_UDPv6:
-                inetAddress = InetAddress.getByAddress(address);
+                inetAddress = Inet6Address.getByAddress(address);
                 break;
             default:
                 throw new IllegalArgumentException("Internal error: Unknown Locator kind: 0x"
