@@ -193,7 +193,7 @@ public class Participant {
 		// UDPProvider is used 
 		UDPProvider provider = new UDPProvider(config); 
 		TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
-				Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
+				Locator.LOCATOR_KIND_UDPv4 /*, Locator.LOCATOR_KIND_UDPv6*/);
 
 		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
 		int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
