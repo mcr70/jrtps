@@ -11,6 +11,7 @@ import net.sf.jrtps.message.AckNack;
 import net.sf.jrtps.message.Data;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
+import net.sf.jrtps.message.IllegalMessageException;
 import net.sf.jrtps.message.InfoDestination;
 import net.sf.jrtps.message.InfoReply;
 import net.sf.jrtps.message.InfoReplyIp4;
@@ -63,19 +64,23 @@ class RTPSMessageReceiver implements Runnable {
     @Override
     public void run() {
         while (running) {
-            try {
+        	byte[] bytes = null;
+        	try {
                 // NOTE: We can have only one MessageReceiver. pending samples
                 // concept relies on it.
                 // NOTE2: pending samples concept has changed. Check this.
-                byte[] bytes = queue.take();
+                bytes = queue.take();
                 if (running) {
                     Message msg = new Message(new RTPSByteBuffer(bytes));
                     logger.debug("Parsed RTPS message {}", msg);
 
                     handleMessage(msg);
                 }
-            } catch (InterruptedException e) {
+            } catch(InterruptedException e) {
                 running = false;
+            } catch(IllegalMessageException ime) {
+            	logger.warn("Got Illegal message: {}, enable trace to see stacktrace", ime.getMessage());
+            	logger.trace("Illegal message", ime);
             } catch(Exception e) {
                 logger.warn("Got unexpected exception during Message handling", e);
             }
