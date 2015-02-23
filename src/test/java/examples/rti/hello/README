@@ -1,0 +1,10 @@
+o Set environment variables
+    > export NDDSHOME=/opt/rti/ndds.5.1.0/
+    > export LD_LIBRARY_PATH=/opt/rti/ndds.5.1.0/lib/x64Linux3.xgcc4.6.3jdk/:$LD_LIBRARY_PATH
+    
+o To run publisher, type
+    ..../Hello_simple> ./runPub.sh  
+    
+o To run subscriber, type
+    ..../Hello_simple> ./runSub.sh
+
