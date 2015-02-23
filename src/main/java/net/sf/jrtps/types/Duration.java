@@ -13,6 +13,7 @@ public class Duration implements Comparable<Duration> {
     //    const long DURATION_INFINITE_SEC  = 0x7fffffff
     //    const long DURATION_INFINITE_NSEC = 0x7fffffff
     public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, Integer.MAX_VALUE);
+	//public static final Duration INFINITE = new Duration(Integer.MAX_VALUE, -1);
     private int sec;
     private int nano;
 

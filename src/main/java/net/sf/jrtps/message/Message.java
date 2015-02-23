@@ -46,15 +46,22 @@ public class Message {
      * Constructs a Message from given RTPSByteBuffer.
      * 
      * @param bb
+     * @throws IllegalMessageException 
      * @throws IOException
      */
-    public Message(RTPSByteBuffer bb) {
+    public Message(RTPSByteBuffer bb) throws IllegalMessageException {
         header = new Header(bb);
-
+        
         while (bb.getBuffer().hasRemaining()) {
             try {
                 bb.align(4);
-
+                if (!bb.getBuffer().hasRemaining()) {
+                	// Data submessage may contain sentinel as last, which may cause
+                	// alignement error. Break from the loop if we are at the end
+                	// of buffer
+                	break; 
+                }
+                
                 SubMessageHeader smh = new SubMessageHeader(bb);
                 bb.setEndianess(smh.endiannessFlag());
                 
@@ -113,13 +120,8 @@ public class Message {
                 int smEnd = bb.position();
                 int smLength = smEnd - smStart;
                 if (smLength != smh.submessageLength && smh.submessageLength != 0) {
-                    log.warn("SubMessage length differs for {} != {} for {}", smLength, smh.submessageLength, sm);
-                    if (smLength < smh.submessageLength) {
-                    	byte[] unknownBytes = new byte[smh.submessageLength - smLength];
-                    	log.debug("Trying to skip {} bytes", unknownBytes.length);
-                    	
-                    	bb.read(unknownBytes);
-                    }
+                    log.debug("SubMessage length differs: {} != {} for {}", 
+                    		smLength, smh.submessageLength, sm);
                 }
 
                 log.trace("SubMsg in:  {}", sm);

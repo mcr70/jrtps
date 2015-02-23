@@ -28,7 +28,7 @@ public class ParameterList {
             log.trace("Read Parameter {}, length {} from position {}", param, length, pos1);
 
             if (param.getParameterId() == ParameterId.PID_SENTINEL) {
-                break;
+            	break;
             }
         }
     }

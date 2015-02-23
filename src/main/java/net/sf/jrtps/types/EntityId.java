@@ -102,7 +102,10 @@ public abstract class EntityId {
     public static final EntityId UNKNOWN_ENTITY = new UnknownEntity();
 
     private byte[] entityKey;
-    private byte entityKind;
+    
+    // 0x02:writer_key, 0x03:writer_no_key,
+    // 0x04:reader_no_key, 0x07:reader_key
+    private byte entityKind;  
 
     private EntityId(byte[] entityKey, byte entityKind) {
         this.entityKey = entityKey;

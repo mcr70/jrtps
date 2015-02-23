@@ -20,9 +20,10 @@ import org.junit.Test;
 public class MessageTests {
 	/**
 	 * Tests, that reading and writing of InfoDestination is symmetrical.
+	 * @throws IllegalMessageException 
 	 */
 	@Test
-	public void testInfoDestination() {
+	public void testInfoDestination() throws IllegalMessageException {
 		// Create a Message with InfoDestination
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 		m1.addSubMessage(new InfoDestination(GuidPrefix.GUIDPREFIX_UNKNOWN));
@@ -42,9 +43,10 @@ public class MessageTests {
 	
 	/**
 	 * Tests, that reading and writing of InfoReply is symmetrical.
+	 * @throws IllegalMessageException 
 	 */
 	@Test
-	public void testInfoReply() {
+	public void testInfoReply() throws IllegalMessageException {
 		// Create a Message with InfoDestination
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 
@@ -73,9 +75,10 @@ public class MessageTests {
 
 	/**
 	 * Tests, that reading and writing of InfoReplyIp4 is symmetrical.
+	 * @throws IllegalMessageException 
 	 */
 	@Test
-	public void testInfoReplyIp4() {
+	public void testInfoReplyIp4() throws IllegalMessageException {
 		// Create a Message with InfoDestination
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 
@@ -99,9 +102,10 @@ public class MessageTests {
 
 	/**
 	 * Tests, that reading and writing of InfoSource is symmetrical.
+	 * @throws IllegalMessageException 
 	 */
 	@Test
-	public void testInfoSource() {
+	public void testInfoSource() throws IllegalMessageException {
 		// Create a Message with InfoDestination
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 		m1.addSubMessage(new InfoSource(GuidPrefix.GUIDPREFIX_UNKNOWN));
@@ -149,9 +153,10 @@ public class MessageTests {
 	
 	/**
 	 * Tests, that reading and writing of InfoTimestamp is symmetrical.
+	 * @throws IllegalMessageException 
 	 */
 	@Test
-	public void testInfoTimestamp() {
+	public void testInfoTimestamp() throws IllegalMessageException {
 		// Create a Message with InfoDestination
 		Message m1 = new Message(GuidPrefix.GUIDPREFIX_UNKNOWN);
 		m1.addSubMessage(new InfoTimestamp(123));
@@ -202,13 +207,14 @@ public class MessageTests {
 	 * 
 	 * @param bytes
 	 * @return Message
+	 * @throws IllegalMessageException 
 	 */
-	private Message read(byte[] bytes) {
+	private Message read(byte[] bytes) throws IllegalMessageException {
 		byte[] __bytes = new byte[bytes.length];
 		System.arraycopy(bytes, 0, __bytes, 0, bytes.length);
 		
 		RTPSByteBuffer bb2 = new RTPSByteBuffer(__bytes);
-		return new Message(bb2);		
+		return new Message(bb2);
 	}
 	
 	@SuppressWarnings("unused")

@@ -11,6 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.message.Header;
+import net.sf.jrtps.message.IllegalMessageException;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.SecureSubMessage;
 import net.sf.jrtps.message.SubMessage;
@@ -156,7 +157,13 @@ public class CryptoPlugin {
 
 		Key key = createKey(sourceGuidPrefix);
 		RTPSByteBuffer bb = ctr.decode(key, msg.getSecurePayload());
-		Message message = new Message(bb);
+
+		Message message = null;
+		try {
+			message = new Message(bb);
+		} catch (IllegalMessageException e) {
+			logger.error("Failed to read message", e);
+		}
 		
 		return message;
 	}

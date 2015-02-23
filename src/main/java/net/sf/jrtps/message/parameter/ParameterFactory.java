@@ -264,7 +264,7 @@ public class ParameterFactory {
 //            break;
             
         // jRTPS specific parameters
-        case (short) 0x8001:
+        case (short) 0x8ff1:
             param = new X509Cert();
             break;
             

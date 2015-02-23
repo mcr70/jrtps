@@ -2,7 +2,7 @@ package examples.rti.hello;
 
 import net.sf.jrtps.udds.Type;
 
-@Type(topicName = "Message.java", typeName = "DDS::String")
+@Type(topicName = "Hello, World", typeName = "DDS::String")
 public class Hello {
     public String message;
 
