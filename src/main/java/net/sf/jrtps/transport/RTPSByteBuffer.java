@@ -415,13 +415,15 @@ public class RTPSByteBuffer {
      * 
      * @param byteBoundary
      */
-    public void align(int byteBoundary) {
+    public int align(int byteBoundary) {
         int position = buffer.position();
         int adv = (position % byteBoundary);
 
         if (adv != 0) {
             buffer.position(position + (byteBoundary - adv));
         }
+        
+        return adv;
     }
 
     /**
