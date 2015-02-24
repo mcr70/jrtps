@@ -10,11 +10,13 @@ public class Sentinel extends Parameter implements InlineQoS {
     @Override
     public void read(RTPSByteBuffer bb, int length) {
         readBytes(bb, length);
+    	bb.align(4);
     }
 
     @Override
-    public void writeTo(RTPSByteBuffer buffer) {
-        // buffer.write_short(getParameterId().kind());
+    public void writeTo(RTPSByteBuffer bb) {
+    	bb.align(4);
+    	// buffer.write_short(getParameterId().kind());
         // System.out.println("*** " + buffer.position() + ", " +
         // buffer.position() %4);
         // buffer.write_short(2);
