@@ -38,6 +38,7 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
+import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -469,6 +470,16 @@ public class Participant {
 		reader.setSubscriptionData(sd);
 		
 		if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+			try {
+				// Log subscription data. ignore on failure
+				@SuppressWarnings("unchecked")
+				Marshaller<SubscriptionData> m = (Marshaller<SubscriptionData>) marshallers.get(SubscriptionData.class);
+				ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(sd);
+				logger.debug("Writing subscription data: {}", plEnc.getParameterList());
+			} catch (Exception e) {
+				// ignore
+			}
+
 			@SuppressWarnings("unchecked")
 			DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
 					SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
@@ -600,6 +611,16 @@ public class Participant {
 		writer.setPublicationData(wd);
 
 		if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+			try {
+				// Log publication data. ignore on failure
+				@SuppressWarnings("unchecked")
+				Marshaller<PublicationData> m = (Marshaller<PublicationData>) marshallers.get(PublicationData.class);
+				ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(wd);
+				logger.debug("Writing publication data: {}", plEnc.getParameterList());
+			} catch (Exception e) {
+				// ignore
+			}
+
 			@SuppressWarnings("unchecked")
 			DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
 					PublicationData.BUILTIN_TOPIC_NAME).get(0);
