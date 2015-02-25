@@ -423,8 +423,11 @@ public class RTPSReader<T> extends Endpoint {
         // out-of-order data samples in a separate cache.
 
         long seqNumFirst = wp.getGreatestDataSeqNum(); // Positively ACK all that we have..
-        int[] bitmaps = new int[] { -1 }; // Negatively ACK rest
-        SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1, bitmaps);
+        //int[] bitmaps = new int[] { -1 }; // Negatively ACK rest
+        //SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1, bitmaps);
+        
+        // Only positive ack
+        SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1);
 
         AckNack an = new AckNack(getEntityId(), wp.getEntityId(), snSet, ++ackNackCount);
 

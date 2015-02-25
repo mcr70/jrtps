@@ -20,7 +20,14 @@ public class SequenceNumberSet {
 	private List<Long> seqNums;
 	private List<Long> missingSeqNums;
 
-    /**
+
+	public SequenceNumberSet(long base) {
+		this.bitmapBase = new SequenceNumber(base);
+		this.bitmaps = new int[0];
+		this.numBits = 0;
+	}
+	
+	/**
      * Constructor for SequenceNumberSet. 
      * 
      * @param base base of the SequenceNumberSet
