@@ -11,7 +11,7 @@ public class HelloSubscriber {
 
         p.setMarshaller(Hello.class, new HelloMarshaller());
 
-        DataReader<Hello> dr = p.createDataReader(Hello.class);
+        DataReader<Hello> dr = p.createDataReader(Hello.class, new HelloQoS());
         HelloListener hl = new HelloListener();
         dr.addSampleListener(hl);
 
