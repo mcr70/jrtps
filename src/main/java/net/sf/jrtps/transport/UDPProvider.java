@@ -82,6 +82,7 @@ public class UDPProvider extends TransportProvider {
                 try {
                     ds = new DatagramSocket(port);
                     logger.trace("Port set to {}", port);
+                    participantId = pId;
                     break;
                 }
                 catch(SocketException se) {
@@ -89,9 +90,13 @@ public class UDPProvider extends TransportProvider {
                 }
             }
             while(ds == null && !participantIdFixed && pId < pnp.getDomainIdGain() + pnp.getD3());
-            participantId = pId;
         }
 
+        if (ds == null) {
+        	throw new RuntimeException("Failed to get DatagramSocket for " + uri + ", domain " +
+        			domainId + ", participantId " + participantId);
+        }
+        
         return new ReceiverConfig(participantId, ds, discovery);
     }
 
