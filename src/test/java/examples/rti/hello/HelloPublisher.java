@@ -9,7 +9,7 @@ public class HelloPublisher {
 
         p.setMarshaller(Hello.class, new HelloMarshaller());
 
-        DataWriter<Hello> dw = p.createDataWriter(Hello.class);
+        DataWriter<Hello> dw = p.createDataWriter(Hello.class, new HelloQoS());
         
         for (int i = 0; i < 10; i++) {
             Hello h = new Hello("hello " + i);
