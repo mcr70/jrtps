@@ -219,7 +219,7 @@ public class Participant {
 				| SignatureException | NoSuchPaddingException | IOException e) {
 			logger.warn("Failed to register JKSAuthenticationPlugin", e);
 		}
-				
+
 		authPlugin = AuthenticationPlugin.getInstance(config.getAuthenticationPluginName());
 
 		this.guid = authPlugin.getGuid();
@@ -232,7 +232,7 @@ public class Participant {
 		this.livelinessManager = new WriterLivelinessManager(this);
 		createSecurityEndpoints();
 		authPlugin.init(this);		
-		
+
 		registerBuiltinMarshallers();
 		createSPDPEntities();
 
@@ -243,10 +243,10 @@ public class Participant {
 		rtps_participant.start();
 
 		createSEDPEntities();
-		
+
 		@SuppressWarnings("unchecked")
 		DataReader<ParticipantData> pdReader = 
-				(DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+		(DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 		createSPDPResender();
@@ -450,11 +450,11 @@ public class Participant {
 		});
 
 		logger.debug("Created DataReader {}", reader.getGuid());
-		
+
 		return reader;
 	}
 
-	
+
 	/**
 	 * This method is called by createDataReader(...), or by DataReader.setContentFilter()
 	 * @param reader
@@ -463,21 +463,23 @@ public class Participant {
 		RTPSReader<?> rtps_reader = reader.getRTPSReader();
 
 		ContentFilterProperty cfp = reader.getContentFilterProperty();
-		
+
 		SubscriptionData sd = new SubscriptionData(reader.getTopicName(), reader.getTypeName(), 
 				rtps_reader.getGuid(), cfp, rtps_reader.getQualityOfService());
-		
+
 		reader.setSubscriptionData(sd);
-		
+
 		if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
-			try {
-				// Log subscription data. ignore on failure
-				@SuppressWarnings("unchecked")
-				Marshaller<SubscriptionData> m = (Marshaller<SubscriptionData>) marshallers.get(SubscriptionData.class);
-				ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(sd);
-				logger.debug("Writing subscription data: {}", plEnc.getParameterList());
-			} catch (Exception e) {
-				// ignore
+			if (logger.isDebugEnabled()) {
+				try {
+					// Log subscription data. ignore on failure
+					@SuppressWarnings("unchecked")
+					Marshaller<SubscriptionData> m = (Marshaller<SubscriptionData>) marshallers.get(SubscriptionData.class);
+					ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(sd);
+					logger.debug("Writing subscription data: {}", plEnc.getParameterList());
+				} catch (Exception e) {
+					// ignore
+				}
 			}
 
 			@SuppressWarnings("unchecked")
@@ -611,14 +613,16 @@ public class Participant {
 		writer.setPublicationData(wd);
 
 		if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
-			try {
-				// Log publication data. ignore on failure
-				@SuppressWarnings("unchecked")
-				Marshaller<PublicationData> m = (Marshaller<PublicationData>) marshallers.get(PublicationData.class);
-				ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(wd);
-				logger.debug("Writing publication data: {}", plEnc.getParameterList());
-			} catch (Exception e) {
-				// ignore
+			if (logger.isDebugEnabled()) {
+				try {
+					// Log publication data. ignore on failure
+					@SuppressWarnings("unchecked")
+					Marshaller<PublicationData> m = (Marshaller<PublicationData>) marshallers.get(PublicationData.class);
+					ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(wd);
+					logger.debug("Writing publication data: {}", plEnc.getParameterList());
+				} catch (Exception e) {
+					// ignore
+				}
 			}
 
 			@SuppressWarnings("unchecked")
@@ -627,8 +631,8 @@ public class Participant {
 			pw.write(wd);
 		}
 	}
-	
-	
+
+
 	void removeDataWriter(DataWriter<?> dw) {
 		dw.getRTPSWriter().close();
 		writers.remove(dw);

@@ -7,7 +7,7 @@ import net.sf.jrtps.udds.Participant;
 
 public class HelloSubscriber {
     public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
-        Participant p = new Participant(0); // domain 0, participant 1
+        Participant p = new Participant(0); // domain 0
 
         p.setMarshaller(Hello.class, new HelloMarshaller());
 
@@ -20,5 +20,4 @@ public class HelloSubscriber {
 
         p.close();
     }
-
 }

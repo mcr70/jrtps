@@ -11,7 +11,7 @@ public class HelloPublisher {
 
         DataWriter<Hello> dw = p.createDataWriter(Hello.class, new HelloQoS());
         
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             Hello h = new Hello("hello " + i);
             dw.write(h);
             Thread.sleep(1000);
@@ -19,5 +19,4 @@ public class HelloPublisher {
 
         p.close();
     }
-
 }
