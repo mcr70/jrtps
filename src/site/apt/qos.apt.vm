@@ -6,25 +6,39 @@ Quality of Service
  if their Quality of Service is compatible. Compatibility of Quality of Service  is presented with 
  request-offer(RxO) semantics, where writers 'offer' Quality of Service and readers 'request' for it. 
 
-* Reliability
+* Deadline
 
- Reliability QoS determines how samples are communicated from writers to readers. RELIABLE kind
- causes RTPS entities to exchange <HeartBeat> and <AckNack> messages. I.e. writers advertise 
- what samples are available and readers will report back what samples they have received, 
- and what are still missing. By using these messages, writers can eventually communicate all 
- the changes in correct order to readers.
- When BEST_EFFORT kind is used, writers just sends samples to readers. That is the only promise
- writer makes about delivery of messages. Samples might be lost during transmission, or reader
- might decide to drop samples before it passes them to application.
+ Deadline QoS is used to make a contract between reader and writer of how frequently 
+ each instance is to be updated. If a reader detects that deadline has been missed,
+ its <CommunicationListener>s will be notified of this fact. Likewise, udds
+ DataWriter internally monitors that writers fulfill the deadline contract
+ applications has made, and notifies <CommunicationListener>s of failures.
  
- Reliability QoS between reader and writer is compatible if 
+ Deadline QoS between reader and writer is compatible if 
+ 
++------
+ offered.deadline_period <= requested.deadline_period
++------
+ 
+
+* Destination Order
+
+ This QoS policy controls how readers determine the order of Samples from multiple writers. If the kind 
+ is BY_RECEPTION_TIMESTAMP, the latest received value for the instance should be kept. BY_SOURCE_TIMESTAMP
+ indicates that the timestamp set by the writers should be considered instead. Using BY_SOURCE_TIMESTAMP
+ ensures that every subscriber in the system will end up having the same latest value for the instance.
+ 
+ Destination order QoS between reader and writer is compatible if 
  
 +------
  offered.kind >= requested.kind
 +------
  
- where BEST_EFFORT \< RELIABLE
+ where BY_RECEPTION_TIMESTAMP \< BY_SOURCE_TIMESTAMP 
  
+ During reception, jRTPS sets timestamp of the Sample to system time if kind is BY_RECEPTION_TIME
+ or writer does not provide timestamp even though it should. 
+
  
 * Durability
 
@@ -67,6 +81,41 @@ Quality of Service
  
  where AUTOMATIC \< MANUAL_BY_PARTICIPANT \< MANUAL_BY_TOPIC
  
+* Reliability
+
+ Reliability QoS determines how samples are communicated from writers to readers. RELIABLE kind
+ causes RTPS entities to exchange <HeartBeat> and <AckNack> messages. I.e. writers advertise 
+ what samples are available and readers will report back what samples they have received, 
+ and what are still missing. By using these messages, writers can eventually communicate all 
+ the changes in correct order to readers.
+ When BEST_EFFORT kind is used, writers just sends samples to readers. That is the only promise
+ writer makes about delivery of messages. Samples might be lost during transmission, or reader
+ might decide to drop samples before it passes them to application.
+ 
+ Reliability QoS between reader and writer is compatible if 
+ 
++------
+ offered.kind >= requested.kind
++------
+ 
+ where BEST_EFFORT \< RELIABLE
+ 
+* TimeBasedFilter
+
+ Time based filter is used to restrict reception of samples at reader to rate specified
+ with <minimum_separation>. When a sample arrives at reader, and <minimum_separation>
+ has not elapsed since previous sample, reader will discard that sample. 
+ The specification also says that last sample of writer should 
+ be delivered, if writer stops sending samples for period "long" compared to 
+ <minimum_separation>, and latest sample was filtered out by TimeBasedFilter. 
+ 
+ TimeBasedFilter must be consistent with deadline QoS policy, so that
+  
++------
+ deadline >= minimum_separation
++------
+
+
 
 Quality of Service - uDDS
 
@@ -91,39 +140,6 @@ Quality of Service - uDDS
  Note, that other implementations might not behave this way and might result in communication not to be 
  established. For this reason, one should be careful when using regular expressions in partition names.
 
-* Deadline
-
- Deadline QoS is used to make a contract between reader and writer of how frequently 
- each instance is to be updated. If a reader detects that deadline has been missed,
- its <CommunicationListener>s will be notified of this fact. Likewise, udds
- DataWriter internally monitors that writers fulfill the deadline contract
- applications has made, and notifies <CommunicationListener>s of failures.
- 
- Deadline QoS between reader and writer is compatible if 
- 
-+------
- offered.deadline_period <= requested.deadline_period
-+------
- 
-
-* Destination Order
-
- This QoS policy controls how readers determine the order of Samples from multiple writers. If the kind 
- is BY_RECEPTION_TIMESTAMP, the latest received value for the instance should be kept. BY_SOURCE_TIMESTAMP
- indicates that the timestamp set by the writers should be considered instead. Using BY_SOURCE_TIMESTAMP
- ensures that every subscriber in the system will end up having the same latest value for the instance.
- 
- Destination order QoS between reader and writer is compatible if 
- 
-+------
- offered.kind >= requested.kind
-+------
- 
- where BY_RECEPTION_TIMESTAMP \< BY_SOURCE_TIMESTAMP 
- 
- During reception, jRTPS sets timestamp of the Sample to system time if kind is BY_RECEPTION_TIME
- or writer does not provide timestamp even though it should. 
-  
  
 * History
 
@@ -184,21 +200,6 @@ Quality of Service - uDDS
  
  For the TypeConsistencyEnforcement, it is recognized, but not handled in any way.
  
-* TimeBasedFilter
-
- Time based filter is used to restrict reception of samples at reader to rate specified
- with <minimum_separation>. When a sample arrives at reader, and <minimum_separation>
- has not elapsed since previous sample, reader will discard that sample. 
- The specification also says that last sample of writer should 
- be delivered, if writer stops sending samples for period "long" compared to 
- <minimum_separation>, and latest sample was filtered out by TimeBasedFilter. 
- 
- TimeBasedFilter must be consistent with deadline QoS policy, so that
-  
-+------
- deadline >= minimum_separation
-+------
-
 * Lifespan
 
  Lifespan QoS policy is used to automatically remove samples from history cache of an 
