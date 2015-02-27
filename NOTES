@@ -3,6 +3,15 @@ DDS Security notes
 	- What is the topic name for ParticipantStatelessMessage builtin Topic.
 	  Setting it to "DCPSParticipantStatelessMessage".
 
+RTI Connext 5.1.0 specific notes
+================================
+    - During SEDP, Connext does not understand MD5 checksum of Guid of reader/writer Guid.
+      Instead, it expects KeyHash as is, I.e. byte array of the Guid. As KeyHash is optional,
+      disabled it with builtin data for the sake of interoperability
+      (xxxMarshaller.hasKey() == false)
+    - Connext does not advertise ParticipantMessageData reader/writer.
+      This disables liveliness protocol between jRTPS and Connext
+
 OpenDDS 3.5 specific notes
 ==========================
 	- OpenDDS complains about type names of builtin entities. SUBSCRIPTION_BUILT_IN_TOPIC_TYPE,
