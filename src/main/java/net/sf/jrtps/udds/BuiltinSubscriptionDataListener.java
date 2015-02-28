@@ -57,7 +57,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
                     } 
                     else {
                     	// Reader might have been previously associated. Remove association.
-                        w.removeMatchedReader(sd); 
+                    	w.removeMatchedReader(sd); 
                     	log.warn("Discovered reader had incompatible QoS with writer: {}, local writers QoS: {}", sd, w
                                 .getRTPSWriter().getQualityOfService());
                         w.inconsistentQoS(sd);
@@ -68,6 +68,10 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
                     // Associated and sample is dispose -> remove association
                     w.removeMatchedReader(sd);
                 }
+            }
+            
+            if (sdSample.isDisposed()) {
+            	discoveredReaders.remove(sdSample);
             }
         }
     }
