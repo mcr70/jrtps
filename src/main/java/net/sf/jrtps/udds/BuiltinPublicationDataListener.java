@@ -62,6 +62,10 @@ class BuiltinPublicationDataListener extends BuiltinListener implements SampleLi
                     r.removeMatchedWriter(pd);
                 }
             }
+            
+            if (pdSample.isDisposed()) {
+            	discoveredWriters.remove(pdSample);
+            }
         }
     }
 }

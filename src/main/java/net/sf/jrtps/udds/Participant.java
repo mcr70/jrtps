@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -449,11 +450,22 @@ public class Participant {
 			}
 		});
 
+		checkMatchedWriters(reader);
+		
 		logger.debug("Created DataReader {}", reader.getGuid());
 
 		return reader;
 	}
 
+	private void checkMatchedWriters(DataReader reader) {
+		QualityOfService requested = reader.getRTPSReader().getQualityOfService();
+		for (Entry<Guid, PublicationData> e : discoveredWriters.entrySet()) {
+			PublicationData pd = e.getValue();
+			if (pd.getQualityOfService().isCompatibleWith(requested)) {
+				reader.addMatchedWriter(pd);
+			}
+		}
+	}
 
 	/**
 	 * This method is called by createDataReader(...), or by DataReader.setContentFilter()
@@ -601,12 +613,24 @@ public class Participant {
 			}
 		});
 
+		checkMatchedReaders(writer);
+		
 		logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
 
 		return writer;
 	}
 
-	void writePublicationData(DataWriter writer) {
+	private void checkMatchedReaders(DataWriter writer) {
+		QualityOfService offered = writer.getRTPSWriter().getQualityOfService();
+		for (Entry<Guid, SubscriptionData> e : discoveredReaders.entrySet()) {
+			SubscriptionData sd = e.getValue();
+			if (offered.isCompatibleWith(sd.getQualityOfService())) {
+				writer.addMatchedReader(sd);
+			}
+		}
+	}
+	
+	private void writePublicationData(DataWriter writer) {
 		RTPSWriter rtps_writer = writer.getRTPSWriter();
 		PublicationData wd = new PublicationData(writer.getTopicName(), writer.getTypeName(), 
 				rtps_writer.getGuid(), rtps_writer.getQualityOfService());
