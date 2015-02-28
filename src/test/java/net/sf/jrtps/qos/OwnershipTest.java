@@ -17,9 +17,6 @@ import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.SampleListener;
-
-import org.junit.Test;
-
 import examples.hello.serializable.HelloMessage;
 
 
@@ -113,9 +110,13 @@ public class OwnershipTest extends AbstractQosTest {
      *  8.  wait for data to arrive to reader. Assert we got 0 samples.
      *  9.  assert that we have received a total of 4 samples.
      */
-    @Test
+    //@Test
     public void testOwnershipWhenWriterIsClosed() {
-        final int LEASE_DURATION = 200;
+        //Configuration cfg3 = new Configuration("/mem-test-3.properties");
+
+    	// TODO: We need a third Participant for dw2
+    	
+    	final int LEASE_DURATION = 200;
         
         QualityOfService qosDr = new QualityOfService();
         qosDr.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
