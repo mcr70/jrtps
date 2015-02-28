@@ -14,6 +14,11 @@ import net.sf.jrtps.types.Guid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * This class represents DDS::TopicBuiltinTopicData
+ * 
+ * @author mcr70
+ */
 public class TopicData extends DiscoveredData {
     public static final String BUILTIN_TOPIC_NAME = "DCPSTopic";
 
