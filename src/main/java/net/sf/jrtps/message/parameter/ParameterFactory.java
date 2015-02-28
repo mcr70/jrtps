@@ -14,7 +14,6 @@ public class ParameterFactory {
      * @param bb
      * @return Parameter
      */
-    @SuppressWarnings("deprecation")
     public static Parameter readParameter(RTPSByteBuffer bb) {
         bb.align(4);
 
@@ -265,7 +264,7 @@ public class ParameterFactory {
 //            break;
             
         // jRTPS specific parameters
-        case (short) 0x8001:
+        case (short) 0x8ff1:
             param = new X509Cert();
             break;
             
@@ -275,9 +274,11 @@ public class ParameterFactory {
             } 
             else if ((paramId & 0x4000) == 0x4000) { // 9.6.2.2.1 ParameterId space
                 // Incompatible QoS
-                log.error("Found unknown Parameter -> Mark it as incompatible QoS");
+                log.error("Found unknown Parameter {}({}) -> Mark it as incompatible QoS", 
+                		paramId, Integer.toHexString(paramId));
                 // TODO: what is a clean way of rejecting
                 return null; // throw new IncompatibleQosException(...);
+                //param = new UnknownParameter(paramId);
             } 
             else {
                 // Ignore

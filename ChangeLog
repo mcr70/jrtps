@@ -1,3 +1,8 @@
+1.3.2
+    - Disabled IPv6
+    - Added examples.rti.hello that talks to RTI Connext 5.1.0. 
+    - Fixed reading of TypeObject and PropertyList parameters
+    
 1.3.1
     - FIX: Removed references to SampleFilter. ContentFilter is used instead.
 

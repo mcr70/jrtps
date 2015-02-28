@@ -12,8 +12,8 @@ public class Subscriber {
         p.setMarshaller(Message.class, new MessageMarshaller());
 
         DataReader<Message> dr = p.createDataReader(Message.class, new MessengerQoS());
-        MessageListener hl = new MessageListener();
-        dr.addSampleListener(hl);
+        MessageListener ml = new MessageListener();
+        dr.addSampleListener(ml);
 
         System.out.println("\n*** Press enter to close Participant ***\n");
         System.in.read();

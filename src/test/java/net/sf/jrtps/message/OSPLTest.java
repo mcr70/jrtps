@@ -5,7 +5,7 @@ import java.util.Arrays;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class OSPLTest {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IllegalMessageException {
         String s1 = "52545053 0201cafe 93610200 0e0f0a0c 0e0b0a0b @0x14 07020000 c7040000 c2040000 00000000 00000000 00000000 00000000 01000000";
         //String s2 = "52545053 0201cafe 93610200 0e0f0a0c 0e0b0a0b @0x14 07020000 c7040000 c2040000 00000000 00000000 00000000 00000000 01000000";
 

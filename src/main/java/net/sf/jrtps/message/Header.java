@@ -1,5 +1,7 @@
 package net.sf.jrtps.message;
 
+import java.util.Arrays;
+
 import net.sf.jrtps.message.parameter.ProtocolVersion;
 import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
@@ -48,11 +50,21 @@ public class Header {
      * Constructs Header from given RTPSByteBuffer.
      * 
      * @param bb
+     * @throws IllegalMessageException 
      */
-    Header(RTPSByteBuffer bb) {
-        // Header length == 20
+    Header(RTPSByteBuffer bb) throws IllegalMessageException {
+    	if (bb.getBuffer().remaining() < 20) {
+    		throw new IllegalMessageException("Message length must be at least 20 bytes, was " + 
+    				Arrays.toString(bb.getBuffer().array()));
+    	}
+    	
         hdrStart = new byte[4];
         bb.read(hdrStart);
+        if (!Arrays.equals(HDR_START, hdrStart)) {
+        	throw new IllegalMessageException("Illegal message header start bytes: " + 
+        			Arrays.toString(hdrStart) + ", expected " + Arrays.toString(HDR_START));
+        }
+        
         version = new ProtocolVersion(bb);
         vendorId = new VendorId(bb);
         guidPrefix = new GuidPrefix(bb);
@@ -92,7 +104,8 @@ public class Header {
     public ProtocolVersion getVersion() {
         return version;
     }
-
+	
+	
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(new String(hdrStart));
@@ -105,4 +118,5 @@ public class Header {
 
         return sb.toString();
     }
+
 }
