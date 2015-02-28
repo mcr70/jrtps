@@ -925,6 +925,19 @@ public class Participant {
 	 */
 	public void addEntityListener(EntityListener el) {
 		entityListeners.add(el);
+		if (config.getEntityListenerHistory()); { // udds.entity-listener-history = false
+			for (Entry<GuidPrefix, ParticipantData> e : discoveredParticipants.entrySet()) {
+				el.participantDetected(e.getValue());
+			}
+
+			for (Entry<Guid, SubscriptionData> e : discoveredReaders.entrySet()) {
+				el.readerDetected(e.getValue());
+			}
+
+			for (Entry<Guid, PublicationData> e : discoveredWriters.entrySet()) {
+				el.writerDetected(e.getValue());
+			}
+		}
 	}
 
 	/**

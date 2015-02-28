@@ -29,6 +29,7 @@ jrtps.discovery.announce-uris = udp://239.255.0.1
 # ---  uDDS configuration parameters  ------------------
 udds.collections.coherent=false
 udds.sedp-delay = 0
+udds.entity-listener-history = false
 
 # ---  uDDS security configuration  --------------------
 udds.security.authentication = none
@@ -122,6 +123,11 @@ udds.security.jks.principal.password = <NO_DEFAULT>
   During discovery, when a ParticipantMessage (SPDP) is received, local participant will first send
   a ParticipantMessage (SPDP) to remote participant to make sure it knows about us, then waits
   <udds.sedp-delay> before starting to announce local endpoints (SEDP).
+  
+  * <<{udds.entity-listener-history}>>
+  When adding an <EntityListener> to <Participant>, this configuration parameter tells if
+  historical knowledge of known Participants, readers and writers should be delivered to
+  EntityListener. 
   
 * uDDS security configuration
   
