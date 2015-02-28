@@ -215,7 +215,7 @@
 		<connection>scm:hg:http://hg.code.sf.net/p/jrtps/code</connection>
 		<developerConnection>scm:hg:https://hg.code.sf.net/p/jrtps/code</developerConnection>
 		<url>https://sourceforge.net/p/jrtps/code/ci/default/tree/</url>
-		<tag>jrtps-1.3.0</tag>
+		<tag>jrtps-1.3.2</tag>
 	</scm>
 
 	<developers>
