@@ -64,7 +64,7 @@ public class Sample<T> implements Cloneable {
      * This constructor is used when adding Sample to UDDSWriterCache.
      */
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, ChangeKind kind, T obj) {
-        this(writerGuid, m, seqNum, timestamp, timestamp, new StatusInfo(kind));        
+        this(writerGuid, m, seqNum, System.currentTimeMillis(), timestamp, new StatusInfo(kind));        
         this.obj = obj;
     }
 

@@ -143,7 +143,6 @@ class UDDSReaderCache<T> extends UDDSHistoryCache<T, PublicationData> implements
 
         List<Sample<T>> coherentSet = getCoherentSet(writerGuid); // Get current CoherentSet for writer
         List<Sample<T>> pendingSamples = incomingSamples.get(id); 
-
         Sample<T> sample = new Sample<T>(writerGuid, marshaller, ++seqNum, ts, sourceTimeStamp, data);
         CoherentSet cs = sample.getCoherentSet();
 

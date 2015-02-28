@@ -4,6 +4,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import net.sf.jrtps.Configuration;
+import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.KeyHash;
@@ -14,6 +15,7 @@ import net.sf.jrtps.udds.CommunicationListener;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.EntityFactory;
+import net.sf.jrtps.udds.EntityListener;
 import net.sf.jrtps.udds.Participant;
 
 import org.junit.After;
@@ -39,18 +41,42 @@ public class AbstractQosTest {
     @Before
     public void init() {
         EntityFactory ef = new TEntityFactory();
+        CountDownLatch pLatch = new CountDownLatch(2);
         // Create two participants; one reader, one for writer
         p1 = new Participant(0,0, ef, cfg1);
         p2 = new Participant(0,0, ef, cfg2);
+        
+        addEntityListener(p1, pLatch);
+        addEntityListener(p2, pLatch);
+        
+        waitFor(pLatch, LATCH_WAIT_MILLIS, true);
     }
 
     @After 
     public void destroy() {
         p1.close();        
         p2.close();
+        //p3.close();
     }
 
-
+    private void addEntityListener(Participant p, final CountDownLatch pLatch) {
+    	p.addEntityListener(new EntityListener() {
+			@Override
+			public void writerDetected(PublicationData wd) {
+			}
+			@Override
+			public void readerDetected(SubscriptionData rd) {
+			}
+			@Override
+			public void participantLost(ParticipantData pd) {
+			}
+			@Override
+			public void participantDetected(ParticipantData pd) {
+				pLatch.countDown();
+			}
+		});
+    }
+    
     void addCommunicationListener(DataReader<HelloMessage> dr, final CountDownLatch dlLatch, final CountDownLatch emLatch) {
         dr.addCommunicationListener(new CommunicationListener<PublicationData>() {            
             @Override
