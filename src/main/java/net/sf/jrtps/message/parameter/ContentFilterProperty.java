@@ -38,7 +38,7 @@ public class ContentFilterProperty extends Parameter {
     
 	/**
 	 * Constructor for ContentFilterProperty. filterClassName is set to 'java', 
-	 * filterExpression is set to fully qualified class name of the goven class. 
+	 * filterExpression is set to fully qualified class name of the given class. 
 	 * expressionParameters is set to empty String array.<p>
 	 *  
 	 * jRTPS writers recognize this type of filterClass, and tries to instantiate
