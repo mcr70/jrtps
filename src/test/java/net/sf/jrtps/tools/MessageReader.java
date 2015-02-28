@@ -6,6 +6,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import net.sf.jrtps.message.IllegalMessageException;
 import net.sf.jrtps.message.Message;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
@@ -15,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class MessageReader {
     private static final Logger logger = LoggerFactory.getLogger(MessageReader.class);
     
-    public static void main(String[] args) throws FileNotFoundException, IOException {
+    public static void main(String[] args) throws FileNotFoundException, IOException, IllegalMessageException {
         MessageReader mr = new MessageReader();
         LinkedList<File> fileList = new LinkedList<>();
         logger.debug("{} arguments", args.length);
@@ -43,7 +44,7 @@ public class MessageReader {
     }
 
     
-    private void readMessage(File f) throws FileNotFoundException, IOException {    
+    private void readMessage(File f) throws FileNotFoundException, IOException, IllegalMessageException {    
         logger.info("Reading file {}", f);
         
         RTPSByteBuffer bb = new RTPSByteBuffer(new FileInputStream(f));

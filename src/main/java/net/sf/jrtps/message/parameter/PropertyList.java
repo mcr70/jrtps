@@ -34,6 +34,19 @@ public class PropertyList extends Parameter implements InlineQoS {
         }
     }
 
+    
+    @Override
+    public String toString() {
+    	StringBuffer sb = new StringBuffer("PropertyList[ ");
+    	for (Property p : properties) {
+    		sb.append(p.toString());
+    		sb.append(" ");
+    	}
+    	sb.append("]");
+    	
+    	return sb.toString();
+    }
+    
     /**
      * Property class represents name-value pair in PropertyList 
      * @author mcr70
@@ -43,8 +56,8 @@ public class PropertyList extends Parameter implements InlineQoS {
         private String value;
         
         Property(RTPSByteBuffer bb) {
-            this.name = bb.readString();
-            this.value = bb.readString();
+            this.name = bb.read_string();
+            this.value = bb.read_string();
         }
         
         public void writeTo(RTPSByteBuffer bb) {
@@ -71,6 +84,11 @@ public class PropertyList extends Parameter implements InlineQoS {
          */
         public String getValue() {
             return value;
+        }
+        
+        @Override
+        public String toString() {
+        	return name + "=" + value;
         }
     }
 }

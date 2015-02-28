@@ -16,13 +16,13 @@ public class TypeObject extends Parameter {
 
     @Override
     public void read(RTPSByteBuffer bb, int length) {
-        typeLibrary = new TypeLibrary(bb);
+        //typeLibrary = new TypeLibrary(bb);
+    	super.readBytes(bb, length);
     }
 
     @Override
     public void writeTo(RTPSByteBuffer bb) {
-        // TODO Auto-generated method stub
-
+    	super.writeBytes(bb);
     }
 }
 

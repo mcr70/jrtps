@@ -95,7 +95,7 @@ public enum ParameterId {
     // On reception, 
     PID_UNKNOWN_PARAMETER(0x8000), // 0x8000 is just invented, @see 9.6.2.2.1
     PID_VENDOR_SPECIFIC(0x8000),   // 0x8000 is just invented, @see 9.6.2.2.1
-    PID_X509CERT(0x8001);
+    PID_X509CERT(0x8ff1);
     
     // ParameterId space
     // ParameterId space

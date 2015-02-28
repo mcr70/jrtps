@@ -70,4 +70,6 @@ Compliance
  jRTPS is known to be interoperable with {{{http://www.opendds.org/}OpenDDS 3.5}}.
  Within jRTPS sources, there are publisher and subscriber (<examples.opendds.messenger>)
  that talk to OpenDDS example <DevGuideExamples/DCPS/Messenger> counterparts.
+ RTI Connext 5.1.0 is also working. <examples.rti.hello> provides publisher and subscriber
+ which talks to example/JAVA/Hello_simple. 
  

@@ -75,7 +75,7 @@ public class KeyHash extends Parameter implements InlineQoS {
     
     
     public String toString() {
-        return Arrays.toString(bytes);
+        return "KeyHash" + Arrays.toString(bytes);
     }
 
     private byte[] prepareKey(byte[] key) {        

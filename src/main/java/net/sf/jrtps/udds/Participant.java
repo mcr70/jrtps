@@ -38,6 +38,7 @@ import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.builtin.SubscriptionDataMarshaller;
 import net.sf.jrtps.builtin.TopicData;
 import net.sf.jrtps.builtin.TopicDataMarshaller;
+import net.sf.jrtps.message.ParameterListEncapsulation;
 import net.sf.jrtps.message.parameter.ContentFilterProperty;
 import net.sf.jrtps.message.parameter.IdentityToken;
 import net.sf.jrtps.message.parameter.QosDurability;
@@ -193,7 +194,7 @@ public class Participant {
 		// UDPProvider is used 
 		UDPProvider provider = new UDPProvider(config); 
 		TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
-				Locator.LOCATOR_KIND_UDPv4, Locator.LOCATOR_KIND_UDPv6);
+				Locator.LOCATOR_KIND_UDPv4 /*, Locator.LOCATOR_KIND_UDPv6*/);
 
 		int corePoolSize = config.getIntProperty("jrtps.thread-pool.core-size", 20);
 		int maxPoolSize = config.getIntProperty("jrtps.thread-pool.max-size", 20);
@@ -218,7 +219,7 @@ public class Participant {
 				| SignatureException | NoSuchPaddingException | IOException e) {
 			logger.warn("Failed to register JKSAuthenticationPlugin", e);
 		}
-				
+
 		authPlugin = AuthenticationPlugin.getInstance(config.getAuthenticationPluginName());
 
 		this.guid = authPlugin.getGuid();
@@ -231,7 +232,7 @@ public class Participant {
 		this.livelinessManager = new WriterLivelinessManager(this);
 		createSecurityEndpoints();
 		authPlugin.init(this);		
-		
+
 		registerBuiltinMarshallers();
 		createSPDPEntities();
 
@@ -242,10 +243,10 @@ public class Participant {
 		rtps_participant.start();
 
 		createSEDPEntities();
-		
+
 		@SuppressWarnings("unchecked")
 		DataReader<ParticipantData> pdReader = 
-				(DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+		(DataReader<ParticipantData>) getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
 		pdReader.addSampleListener(new BuiltinParticipantDataListener(this, discoveredParticipants));
 
 		createSPDPResender();
@@ -449,11 +450,11 @@ public class Participant {
 		});
 
 		logger.debug("Created DataReader {}", reader.getGuid());
-		
+
 		return reader;
 	}
 
-	
+
 	/**
 	 * This method is called by createDataReader(...), or by DataReader.setContentFilter()
 	 * @param reader
@@ -462,13 +463,25 @@ public class Participant {
 		RTPSReader<?> rtps_reader = reader.getRTPSReader();
 
 		ContentFilterProperty cfp = reader.getContentFilterProperty();
-		
+
 		SubscriptionData sd = new SubscriptionData(reader.getTopicName(), reader.getTypeName(), 
 				rtps_reader.getGuid(), cfp, rtps_reader.getQualityOfService());
-		
+
 		reader.setSubscriptionData(sd);
-		
+
 		if (rtps_reader.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+			if (logger.isDebugEnabled()) {
+				try {
+					// Log subscription data. ignore on failure
+					@SuppressWarnings("unchecked")
+					Marshaller<SubscriptionData> m = (Marshaller<SubscriptionData>) marshallers.get(SubscriptionData.class);
+					ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(sd);
+					logger.debug("Writing subscription data: {}", plEnc.getParameterList());
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+
 			@SuppressWarnings("unchecked")
 			DataWriter<SubscriptionData> sw = (DataWriter<SubscriptionData>) getWritersForTopic(
 					SubscriptionData.BUILTIN_TOPIC_NAME).get(0);
@@ -600,14 +613,26 @@ public class Participant {
 		writer.setPublicationData(wd);
 
 		if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
+			if (logger.isDebugEnabled()) {
+				try {
+					// Log publication data. ignore on failure
+					@SuppressWarnings("unchecked")
+					Marshaller<PublicationData> m = (Marshaller<PublicationData>) marshallers.get(PublicationData.class);
+					ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(wd);
+					logger.debug("Writing publication data: {}", plEnc.getParameterList());
+				} catch (Exception e) {
+					// ignore
+				}
+			}
+
 			@SuppressWarnings("unchecked")
 			DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
 					PublicationData.BUILTIN_TOPIC_NAME).get(0);
 			pw.write(wd);
 		}
 	}
-	
-	
+
+
 	void removeDataWriter(DataWriter<?> dw) {
 		dw.getRTPSWriter().close();
 		writers.remove(dw);
