@@ -32,5 +32,7 @@ public class DurationTest {
         Duration d = Duration.INFINITE;
         
         assertTrue(d.isInfinite());
+        assertTrue(d.getSeconds() == 0x7fffffff);
+        assertTrue(d.getNanoSeconds() == 0x7fffffff);
     }
 }
