@@ -127,7 +127,7 @@ public class Endpoint {
 	protected boolean sendMessage(Message m, RemoteProxy proxy) {
 		if (isSecure) {
 			try {
-				m = cryptoPlugin.encodeMessage(m);
+				m = cryptoPlugin.encodeMessage(proxy.getGuid(), m);
 			} catch (SecurityException e1) {
 				logger.error("Failed to encode message", e1);
 				return false;

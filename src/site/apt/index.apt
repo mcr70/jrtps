@@ -30,6 +30,10 @@ Overview
 
  Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}
 
+ 1.3.3
+ 
+    * KeyHash fix
+
  1.3.2
  
     * Disabled IPv6

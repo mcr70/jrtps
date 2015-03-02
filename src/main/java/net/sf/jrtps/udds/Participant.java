@@ -426,7 +426,7 @@ public class Participant {
 		}
 
 		DataReader<?> rdr = getReader(eId);
-		if (rdr != null) {
+		if (rdr != null && eId.isBuiltinEntity()) {
 			logger.debug("A reader with same entityId {} already exists, will not create another one", eId);
 			return (DataReader<T>) rdr;
 		}
@@ -589,7 +589,7 @@ public class Participant {
 		}
 
 		DataWriter<?> wr = getWriter(eId);
-		if (wr != null) {
+		if (wr != null && eId.isBuiltinEntity()) {
 			logger.debug("A writer with same entityId {} already exists, will not create another one", eId);
 			return (DataWriter<T>) wr;
 		}
@@ -630,9 +630,9 @@ public class Participant {
 	
 	private void writePublicationData(DataWriter writer) {
 		RTPSWriter rtps_writer = writer.getRTPSWriter();
-		PublicationData wd = new PublicationData(writer.getTopicName(), writer.getTypeName(), 
+		PublicationData pd = new PublicationData(writer.getTopicName(), writer.getTypeName(), 
 				rtps_writer.getGuid(), rtps_writer.getQualityOfService());
-		writer.setPublicationData(wd);
+		writer.setPublicationData(pd);
 
 		if (rtps_writer.getEntityId().isUserDefinedEntity() || config.getPublishBuiltinEntities()) {
 			if (logger.isDebugEnabled()) {
@@ -640,7 +640,7 @@ public class Participant {
 					// Log publication data. ignore on failure
 					@SuppressWarnings("unchecked")
 					Marshaller<PublicationData> m = (Marshaller<PublicationData>) marshallers.get(PublicationData.class);
-					ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(wd);
+					ParameterListEncapsulation plEnc = (ParameterListEncapsulation) m.marshall(pd);
 					logger.debug("Writing publication data: {}", plEnc.getParameterList());
 				} catch (Exception e) {
 					// ignore
@@ -650,7 +650,7 @@ public class Participant {
 			@SuppressWarnings("unchecked")
 			DataWriter<PublicationData> pw = (DataWriter<PublicationData>) getWritersForTopic(
 					PublicationData.BUILTIN_TOPIC_NAME).get(0);
-			pw.write(wd);
+			pw.write(pd);
 		}
 	}
 

@@ -26,6 +26,7 @@ public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 
 	private final Guid guid;
 	private final byte[] sharedSecret;
+
 	public NoOpAuthenticationPlugin(Configuration conf) {
 		super(conf);
 		
@@ -45,14 +46,14 @@ public class NoOpAuthenticationPlugin extends AuthenticationPlugin {
 			throw new RuntimeException(e); // Should not happen
 		}
 
-		getCryptoPlugin().setParticipantKeyMaterial(guid.getPrefix(), sharedSecret);
+		//getCryptoPlugin().setParticipantKeyMaterial(guid.getPrefix(), sharedSecret);
 	}
 	
 	@Override
 	public void beginHandshake(ParticipantData pd) {
 		AuthenticationData ad = new AuthenticationData(pd);
 		ad.setSharedSecret(sharedSecret);
-		getCryptoPlugin().setParticipantKeyMaterial(pd.getGuidPrefix(), sharedSecret);
+		getCryptoPlugin().setParticipantKeyMaterial(getGuid().getPrefix(), pd.getGuidPrefix(), sharedSecret);
 		
 		super.notifyListenersOfSuccess(ad);
 	}

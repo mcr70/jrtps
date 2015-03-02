@@ -84,7 +84,7 @@ public class KeyHash extends Parameter implements InlineQoS {
         }
         
         byte[] bytes = null;
-        if (key.length < 16) {
+        if (key.length <= 16) {
             bytes = new byte[16];
             System.arraycopy(key, 0, bytes, 0, key.length);
         } else {
