@@ -441,6 +441,7 @@ public class Participant {
 		reader.setHistoryCache(rCache);
 		readers.add(reader);
 
+		checkMatchedWriters(reader);
 		writeSubscriptionData(reader);
 
 		qos.addPolicyListener(new PolicyListener() {
@@ -450,7 +451,6 @@ public class Participant {
 			}
 		});
 
-		checkMatchedWriters(reader);
 		
 		logger.debug("Created DataReader {}", reader.getGuid());
 
@@ -603,6 +603,7 @@ public class Participant {
 
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
+		checkMatchedReaders(writer);
 
 		writePublicationData(writer);
 
@@ -612,8 +613,6 @@ public class Participant {
 				writePublicationData(writer);
 			}
 		});
-
-		checkMatchedReaders(writer);
 		
 		logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
 
