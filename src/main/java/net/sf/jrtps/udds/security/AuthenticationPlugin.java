@@ -125,7 +125,7 @@ public abstract class AuthenticationPlugin {
 	 */
 	protected void notifyListenersOfSuccess(AuthenticationData ad) {
 		if (ad.getSharedSecret() != null) {
-			cryptoPlugin.setParticipantKeyMaterial(ad.getParticipantData().getGuidPrefix(), ad.getSharedSecret());
+			cryptoPlugin.setParticipantKeyMaterial(getGuid().getPrefix(), ad.getParticipantData().getGuidPrefix(), ad.getSharedSecret());
 		}
 			
 		for (AuthenticationListener al : authListeners) {

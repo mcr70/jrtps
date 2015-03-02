@@ -36,7 +36,7 @@ public class PublicationDataMarshaller implements Marshaller<PublicationData> {
     public boolean hasKey() {
     	// Always false, KeyHash is optional and RTI Connext expects
     	// that KeyHash of builtin topics is not a MD5 sum
-    	return false; // Always true. Key is PID_KEY_HASH.
+    	return true; // Always true. Key is PID_KEY_HASH.
     }
 
     /**

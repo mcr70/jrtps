@@ -17,6 +17,7 @@ import net.sf.jrtps.message.SecureSubMessage;
 import net.sf.jrtps.message.SubMessage;
 import net.sf.jrtps.message.parameter.VendorId;
 import net.sf.jrtps.transport.RTPSByteBuffer;
+import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 
 import org.slf4j.Logger;
@@ -81,6 +82,7 @@ public class CryptoPlugin {
 	
 	private final Configuration conf;
 	private final int transformationKind;
+	private Guid localGuid;
 	
 	CryptoPlugin(Configuration conf) {
 		this.conf = conf;
@@ -95,7 +97,9 @@ public class CryptoPlugin {
 		transformationKind = transformerByName.getTransformationKind();
 	}
 	
-
+	void setLocalGuid(Guid guid) {
+		localGuid = guid;
+	}
 	/**
 	 * Registers a Transformer to this CryptoPlugin
 	 * @param ct
@@ -109,11 +113,12 @@ public class CryptoPlugin {
 	
 	/**
 	 * This method is called by jRTPS when a message is being sent.
+	 * @param remoteGuid Guid of the remote entity
 	 * @param message Message to be sent.
 	 * @return An encoded message
 	 * @throws SecurityException 
 	 */
-	public Message encodeMessage(Message message) throws SecurityException {
+	public Message encodeMessage(Guid remoteGuid, Message message) throws SecurityException {
 		if (transformationKind == 0) {
 			return message;
 		}
@@ -126,7 +131,8 @@ public class CryptoPlugin {
 		message.writeTo(bb);
 		
 		// then encode it, and create new Message
-		Key key = createKey(message.getHeader().getGuidPrefix());
+		//Key key = createKey(message.getHeader().getGuidPrefix());
+		Key key = createKey(remoteGuid.getPrefix());
 		SecurePayload payload = ctr.encode(key, bb); 
 		
 		SecureSubMessage ssm = new SecureSubMessage(payload);
@@ -218,7 +224,7 @@ public class CryptoPlugin {
 	 * @param guid Guid
 	 * @param bytes key material
 	 */
-	void setParticipantKeyMaterial(GuidPrefix prefix, byte[] bytes) {
+	void setParticipantKeyMaterial(GuidPrefix localPrefix, GuidPrefix prefix, byte[] bytes) {
 		participantKeyMaterials.put(prefix, bytes);
 	}
 	

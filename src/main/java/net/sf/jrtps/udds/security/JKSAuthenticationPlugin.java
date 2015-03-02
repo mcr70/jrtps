@@ -186,7 +186,9 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	 * @param remoteGuid
 	 */
 	private void sendHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
-		//System.out.println("REQ:" + getGuid().getPrefix() + " -> " + remoteGuid.getPrefix());
+//		System.out.println("REQ:" + getGuid().getPrefix() + " -> " + remoteGuid.getPrefix() + " / " +
+//				getLocalIdentity().getIdentityCredential().getCertificate().getSubjectDN() + ", " +
+//				getLocalIdentity().getIdentityCredential().getCertificate().getSerialNumber());
 
 		byte[] challenge = createChallenge();
 		AuthenticationData authData = authDataMap.get(remoteGuid.getPrefix());
@@ -304,7 +306,8 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			authData.setState(State.FIN_SENT);
 		}
 
-		//System.out.println("FIN:" + getGuid().getPrefix() + " -> " + sourceGuid.getPrefix());
+//		System.out.println("FIN:" + getGuid().getPrefix() + " -> " + sourceGuid.getPrefix() + 
+//				" / " + certificate.getSubjectDN() + ", " + certificate.getSerialNumber());
 		
 		try {
 			verify(certificate);
@@ -316,9 +319,10 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			byte[] sharedSecret = createSharedSecret();
 			//System.out.println(getGuid().getPrefix() + ", " + sourceGuid.getPrefix() + ", SHARED SECRET " + Arrays.toString(sharedSecret));
 			// Register local key material also
-			getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
+			//getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
 			byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
-
+			//System.out.println(certificate.getSerialNumber() + ", " + Arrays.toString(encryptedSharedSecret));
+			
 			byte[] challenge = hRep.getChallenge();
 			authData.setReplyChallenge(challenge);
 
@@ -358,6 +362,10 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 		AuthenticationData authData = authDataMap.get(mi.getSourceGuid().getPrefix());
 		X509Certificate cert = authData.getCertificate();
 
+//		System.out.println("MI: " + getGuid().getPrefix() + ", " + mi.getSourceGuid().getPrefix() + 
+//				", " + cert.getSerialNumber());
+//		System.out.println(cert.getSerialNumber() + "::" + Arrays.toString(hFin.getEncryptedSharedSicret()));
+		
 		byte[] signedData = hFin.getSignedData();
 		try {
 			verify(signedData, cert.getPublicKey());
@@ -365,14 +373,13 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
 			// Register local key material also
-			getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
+			//getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
 
 			authData.setSharedSecret(sharedSecret);
 			logger.info("{} Authenticated {} successfully", getGuid().getPrefix(), authData.getCertificate().getSubjectDN());
 			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
-
 			cancelHandshake(authData.getParticipantData());
 		}
 	}
