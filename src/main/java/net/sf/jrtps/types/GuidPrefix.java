@@ -59,15 +59,7 @@ public class GuidPrefix {
     }
 
     public String toString() {
-        StringBuffer sb = new StringBuffer("GuidPrefix[");
-        for (int i = 0; i < bytes.length - 1; i++) {
-            sb.append(bytes[i]);
-            sb.append(',');
-        }
-        sb.append(bytes[bytes.length - 1]);
-        sb.append(']');
-
-        return sb.toString();
+        return Arrays.toString(bytes);
     }
 
     public void writeTo(RTPSByteBuffer buffer) {

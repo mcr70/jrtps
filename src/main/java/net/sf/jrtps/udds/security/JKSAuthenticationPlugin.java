@@ -159,9 +159,12 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			}
 			else {
 				logger.info("Remote identity is the same as we are; authentication succeeded");
+				if(getGuid().compareTo(pd.getGuid()) < 0) {
+					beginHandshakeRequest(iToken, pd.getGuid());
+				}
 				// TODO: setSharedSecret
-				authData.setCertificate(getLocalIdentity().getIdentityCredential().getCertificate());
-				notifyListenersOfSuccess(authData);
+//				authData.setCertificate(getLocalIdentity().getIdentityCredential().getCertificate());
+//				notifyListenersOfSuccess(authData);
 			}
 		}
 		else {
@@ -307,7 +310,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			logger.debug("Sending handshake final message");
 			statelessWriter.write(psm);
 
-			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
+			logger.info("[{}] Authenticated {} successfully", getGuid().getPrefix(), authData.getCertificate().getSubjectDN());
 			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException | NoSuchAlgorithmException | SignatureException 

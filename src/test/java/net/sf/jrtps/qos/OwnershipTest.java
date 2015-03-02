@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.message.parameter.QosDeadline;
 import net.sf.jrtps.message.parameter.QosHistory;
@@ -16,7 +17,11 @@ import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
+import net.sf.jrtps.udds.Participant;
 import net.sf.jrtps.udds.SampleListener;
+
+import org.junit.Test;
+
 import examples.hello.serializable.HelloMessage;
 
 
@@ -33,8 +38,11 @@ public class OwnershipTest extends AbstractQosTest {
      *  7.  write a sample with weaker writer
      *  8.  assert that we have received a total of 2 samples.
      */
-    //@Test
+    @Test
     public void testOwnership() {
+    	Configuration cfg3 = new Configuration("/mem-test-3.properties");
+    	Participant p3 = new Participant(0, -1, null, cfg3);
+    	
         QualityOfService qosDr = new QualityOfService();
         qosDr.setPolicy(new QosOwnership(Kind.EXCLUSIVE));
         qosDr.setPolicy(new QosHistory(10)); // Keep all the samples we write in this test
@@ -49,13 +57,13 @@ public class OwnershipTest extends AbstractQosTest {
 
         // Create DataWriters
         DataWriter<HelloMessage> dw1 = p2.createDataWriter(HelloMessage.class, qos1);
-        DataWriter<HelloMessage> dw2 = p2.createDataWriter(HelloMessage.class, qos2);
+        DataWriter<HelloMessage> dw2 = p3.createDataWriter(HelloMessage.class, qos2);
 
         // Create DataReader
         DataReader<HelloMessage> dr = p1.createDataReader(HelloMessage.class, qosDr);
 
         // Latch used to synchronize on entity matched
-        final CountDownLatch emLatch = new CountDownLatch(4); 
+        final CountDownLatch emLatch = new CountDownLatch(6); 
 
         TestListener<HelloMessage> listener = new TestListener<>();
         dr.addSampleListener(listener);
