@@ -3,10 +3,9 @@ package net.sf.jrtps.types;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
- * Duration_t.
+ * Duration.
  * 
  * @author mcr70
- * 
  */
 public class Duration implements Comparable<Duration> {
     // INFINITE: dds v1.2, IDL :
@@ -18,7 +17,7 @@ public class Duration implements Comparable<Duration> {
     private int nano;
 
     /**
-     * Constructor for Duration_t.
+     * Constructor for Duration
      * 
      * @param millis Duration expressed in milliseconds. -1 represents INFINITE duration
      */
@@ -35,7 +34,7 @@ public class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Constructor for Duration_t
+     * Constructor for Duration
      * 
      * @param sec seconds
      * @param nano nanoseconds
@@ -46,7 +45,7 @@ public class Duration implements Comparable<Duration> {
     }
     
     /**
-     * Constructs Duration_t from RTPSByteBuffer.
+     * Reads Duration from RTPSByteBuffer.
      * 
      * @param bb
      */
@@ -57,6 +56,7 @@ public class Duration implements Comparable<Duration> {
 
     /**
      * Writes this Duration to given RTPSByteBuffer.
+     * 
      * @param buffer
      */
     public void writeTo(RTPSByteBuffer buffer) {
@@ -78,7 +78,15 @@ public class Duration implements Comparable<Duration> {
     }
 
     /**
-     * Gets the sec attribute of this Duration;
+     * Checks whether this Duration is infinite or not
+     * @return true or false
+     */
+    public boolean isInfinite() {
+        return sec == Integer.MAX_VALUE && nano == Integer.MAX_VALUE;
+    }
+    
+    /**
+     * Gets the sec attribute of this Duration
      * @return seconds
      */
     int getSeconds() { // package private. used for testing
@@ -86,7 +94,7 @@ public class Duration implements Comparable<Duration> {
     }
     
     /**
-     * Gets the nano attribute of this Duration;
+     * Gets the nano attribute of this Duration
      * @return Nano seconds
      */
     int getNanoSeconds() { // package private. used for testing
@@ -110,14 +118,7 @@ public class Duration implements Comparable<Duration> {
         return false;
     }
     
-    /**
-     * Checks whether this Duration is infinite or note
-     * @return true or false
-     */
-    public boolean isInfinite() {
-        return sec == Integer.MAX_VALUE && nano == Integer.MAX_VALUE;
-    }
-    
+    @Override
     public String toString() {
         return "[" + sec + ":" + nano + "]";
     }
