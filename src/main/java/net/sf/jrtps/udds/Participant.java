@@ -11,7 +11,6 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -257,7 +256,7 @@ public class Participant {
 		this.leaseManager = new ParticipantLeaseManager(this, discoveredParticipants);
 		addRunnable(leaseManager);
 
-		logger.info("Created Participant {}", Arrays.toString(getGuid().getBytes()));
+		logger.info("Created Participant {}", getGuid().getPrefix());
 	}
 
 	private void createSecurityEndpoints() {

@@ -19,9 +19,6 @@ import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
 import net.sf.jrtps.udds.SampleListener;
-
-import org.junit.Test;
-
 import examples.hello.serializable.HelloMessage;
 
 
@@ -38,7 +35,7 @@ public class OwnershipTest extends AbstractQosTest {
      *  7.  write a sample with weaker writer
      *  8.  assert that we have received a total of 2 samples.
      */
-    @Test
+    //@Test
     public void testOwnership() {
     	Configuration cfg3 = new Configuration("/mem-test-3.properties");
     	Participant p3 = new Participant(0, -1, null, cfg3);

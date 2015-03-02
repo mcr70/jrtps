@@ -34,6 +34,7 @@ import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
+import net.sf.jrtps.udds.security.AuthenticationData.State;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -142,29 +143,35 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	 */
 	@Override
 	public void beginHandshake(ParticipantData pd) {
-		logger.debug("Begin handshake with {}", pd.getGuidPrefix());
+		synchronized (authDataMap) {
+			if (authDataMap.containsKey(pd.getGuidPrefix())) {
+				logger.debug("Handshake already in started");
+				return;
+			}
+			else {
+				authDataMap.put(pd.getGuidPrefix(), new AuthenticationData(pd));
+			}
+		}
+
+		logger.debug("Begin handshake with {}", getGuid().getPrefix(), pd.getGuidPrefix());
+
 
 		IdentityToken iToken = pd.getIdentityToken();
 		if (iToken != null) {
-			AuthenticationData authData = new AuthenticationData(pd);
-			authDataMap.put(pd.getGuidPrefix(), authData);
 
 			int comparison = identity.getIdentityToken().getEncodedHash().compareTo(iToken.getEncodedHash());		
 			if (comparison < 0) { // Remote is lexicographically greater
 				// VALIDATION_PENDING_HANDSHAKE_REQUEST
-				beginHandshakeRequest(iToken, pd.getGuid());
+				sendHandshakeRequest(iToken, pd.getGuid());
 			}
 			else if (comparison > 0) {
 				logger.debug("Starting to wait for HandshakeRequestMessage from {}", pd.getGuidPrefix());
 			}
 			else {
-				logger.info("Remote identity is the same as we are; authentication succeeded");
+				logger.info("{} Remote identity is the same as we are", getGuid().getPrefix());
 				if(getGuid().compareTo(pd.getGuid()) < 0) {
-					beginHandshakeRequest(iToken, pd.getGuid());
+					sendHandshakeRequest(iToken, pd.getGuid());
 				}
-				// TODO: setSharedSecret
-//				authData.setCertificate(getLocalIdentity().getIdentityCredential().getCertificate());
-//				notifyListenersOfSuccess(authData);
 			}
 		}
 		else {
@@ -178,12 +185,14 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	 * @param remoteIdentity
 	 * @param remoteGuid
 	 */
-	private void beginHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
-		byte[] challenge = createChallenge();
+	private void sendHandshakeRequest(IdentityToken remoteIdentity, Guid remoteGuid) {
+		//System.out.println("REQ:" + getGuid().getPrefix() + " -> " + remoteGuid.getPrefix());
 
+		byte[] challenge = createChallenge();
 		AuthenticationData authData = authDataMap.get(remoteGuid.getPrefix());
 		authData.setRequestChallenge(challenge);
-
+		authData.setState(State.REQ_SENT);
+		
 		HandshakeRequestMessageToken hrmt = 
 				new HandshakeRequestMessageToken(getLocalIdentity().getIdentityCredential(),
 						challenge); 
@@ -209,16 +218,16 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			String classId = psm.message_data[0].class_id;
 
 			if (HandshakeRequestMessageToken.DDS_AUTH_CHALLENGEREQ_DSA_DH.equals(classId)) {			
-				doHandshake(psm.message_identity, (HandshakeRequestMessageToken) psm.message_data[0],
+				sendHandshakeReply(psm.message_identity, (HandshakeRequestMessageToken) psm.message_data[0],
 						psm.source_endpoint_key);
 			}
 			else if (HandshakeReplyMessageToken.DDS_AUTH_CHALLENGEREP_DSA_DH.equals(classId)) {
-				doHandshake(psm.getSourceGuid(), psm.related_message_identity, 
+				sendHandshakeFinal(psm.getSourceGuid(), psm.related_message_identity, 
 						(HandshakeReplyMessageToken) psm.message_data[0]);
 
 			}
 			else if (HandshakeFinalMessageToken.DDS_AUTH_CHALLENGEFIN_DSA_DH.equals(classId)) {
-				doHandshake(psm.message_identity, (HandshakeFinalMessageToken) psm.message_data[0]);					
+				processHandshakeFinal(psm.message_identity, (HandshakeFinalMessageToken) psm.message_data[0]);					
 			}
 			else {
 				logger.warn("HandshakeMessageToken with class_id '{}' not handled", classId);
@@ -232,13 +241,22 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	/**
 	 * Called on the reception of handshake request message.
 	 */
-	private void doHandshake(MessageIdentity mi, HandshakeRequestMessageToken hReq,
+	private void sendHandshakeReply(MessageIdentity mi, HandshakeRequestMessageToken hReq,
 			Guid remoteTarget) {
 		logger.debug("doHandshake(request) from {}", mi.getSourceGuid());
-		X509Certificate certificate = hReq.getCertificate();
 		AuthenticationData authData = authDataMap.get(mi.getSourceGuid().getPrefix());
 
+		synchronized (authData) {
+			if (authData.getState() != null) {
+				return;
+			}
+			authData.setState(State.REP_SENT);
+		}
+
+		//System.out.println("REP:" + getGuid().getPrefix() + " -> " + remoteTarget.getPrefix());
+		
 		try {
+			X509Certificate certificate = hReq.getCertificate();
 			verify(certificate);
 
 			authData.setCertificate(certificate);
@@ -264,7 +282,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 		}
 		catch(CertificateException | InvalidKeyException | SignatureException | NoSuchAlgorithmException 
 				| NoSuchProviderException e) {
-			logger.warn("Failed to process handshake request message token");
+			logger.warn("Failed to process handshake request message token", e);
 
 			cancelHandshake(authData.getParticipantData());
 		}
@@ -273,12 +291,21 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	/**
 	 * Called on reception of handshake reply message
 	 */
-	private void doHandshake(Guid sourceGuid, MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
+	private void sendHandshakeFinal(Guid sourceGuid, MessageIdentity relatedMessageIdentity, HandshakeReplyMessageToken hRep) {
 		logger.debug("doHandshake(reply)");
-
+		
 		X509Certificate certificate = hRep.getCertificate();
 		AuthenticationData authData = authDataMap.get(sourceGuid.getPrefix());
 
+		synchronized (authData) {
+			if (authData.getState() != State.REQ_SENT) {
+				return;
+			}
+			authData.setState(State.FIN_SENT);
+		}
+
+		//System.out.println("FIN:" + getGuid().getPrefix() + " -> " + sourceGuid.getPrefix());
+		
 		try {
 			verify(certificate);
 			authData.setCertificate(certificate);
@@ -287,6 +314,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			verify(signedChallenge, certificate.getPublicKey());
 
 			byte[] sharedSecret = createSharedSecret();
+			//System.out.println(getGuid().getPrefix() + ", " + sourceGuid.getPrefix() + ", SHARED SECRET " + Arrays.toString(sharedSecret));
 			// Register local key material also
 			getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
 			byte[] encryptedSharedSecret = encrypt(certificate.getPublicKey(), sharedSecret);
@@ -310,7 +338,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			logger.debug("Sending handshake final message");
 			statelessWriter.write(psm);
 
-			logger.info("[{}] Authenticated {} successfully", getGuid().getPrefix(), authData.getCertificate().getSubjectDN());
+			logger.info("{} Authenticated {} successfully", getGuid().getPrefix(), authData.getCertificate().getSubjectDN());
 			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | IllegalBlockSizeException
 				| BadPaddingException | NoSuchAlgorithmException | SignatureException 
@@ -324,7 +352,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	/**
 	 * Called on reception of handshake final message
 	 */
-	private void doHandshake(MessageIdentity mi, HandshakeFinalMessageToken hFin) {
+	private void processHandshakeFinal(MessageIdentity mi, HandshakeFinalMessageToken hFin) {
 		logger.debug("doHandshake(final)");
 
 		AuthenticationData authData = authDataMap.get(mi.getSourceGuid().getPrefix());
@@ -334,13 +362,13 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 		try {
 			verify(signedData, cert.getPublicKey());
 			byte[] encryptedSharedSecret = hFin.getEncryptedSharedSicret();			
-
+			
 			byte[] sharedSecret = decrypt(encryptedSharedSecret);
 			// Register local key material also
 			getCryptoPlugin().setParticipantKeyMaterial(getLocalIdentity().getGuid().getPrefix(), sharedSecret);
 
 			authData.setSharedSecret(sharedSecret);
-			logger.info("Authenticated {} successfully", authData.getCertificate().getSubjectDN());
+			logger.info("{} Authenticated {} successfully", getGuid().getPrefix(), authData.getCertificate().getSubjectDN());
 			notifyListenersOfSuccess(authData);
 		} catch (InvalidKeyException | SignatureException | IllegalBlockSizeException | BadPaddingException e) {
 			logger.warn("Failed to process handshake final message token", e);
@@ -404,6 +432,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 	 * decrypts given bytes with private key of local identity.
 	 */
 	private byte[] decrypt(byte[] bytesToDecrypt) throws InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
+		//System.out.println("Decrypting " + Arrays.toString(bytesToDecrypt));
 		synchronized (cipher) {
 			cipher.init(Cipher.DECRYPT_MODE, identity.getIdentityCredential().getPrivateKey());
 			return cipher.doFinal(bytesToDecrypt);

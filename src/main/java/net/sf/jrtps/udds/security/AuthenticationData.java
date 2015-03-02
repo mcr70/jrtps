@@ -14,7 +14,20 @@ class AuthenticationData {
 	private byte[] challengeB;
 	private byte[] sharedSecret;
 	private X509Certificate certificate;
+	private State state = null;
 
+	enum State {
+		REQ_SENT, REP_SENT, FIN_SENT
+	}
+	
+	State getState() {
+		return state;
+	}
+	
+	void setState(State state) {
+		this.state = state;
+	}
+	
 	/**
 	 * Constructs AuthenticationData
 	 * @param pd ParticipantData of remote participant
