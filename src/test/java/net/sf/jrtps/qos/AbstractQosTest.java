@@ -89,7 +89,8 @@ public class AbstractQosTest {
             }            
             @Override
             public void entityMatched(PublicationData ed) {
-                emLatch.countDown();
+                System.out.println("Publication " + ed);
+            	emLatch.countDown();
             }
         });    
     }
@@ -107,6 +108,7 @@ public class AbstractQosTest {
             }
             @Override
             public void entityMatched(SubscriptionData ed) {
+                System.out.println("Subscription " + ed);
                 emLatch.countDown();
             }
         });
