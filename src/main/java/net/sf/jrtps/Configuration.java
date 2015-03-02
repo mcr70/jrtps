@@ -401,4 +401,12 @@ public class Configuration {
 	public String getRTPSProtection() {
 		return props.getProperty("udds.security.rtps-protection", "none");
 	}
+
+	/**
+	 * Gets wheter or not deliver historical data to EntityListeners.
+	 * @return true or false
+	 */
+	public boolean getEntityListenerHistory() {
+		return getBooleanProperty("udds.entity-listener-history", false);
+	}
 }

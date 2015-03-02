@@ -2,6 +2,8 @@
     - Disabled IPv6
     - Added examples.rti.hello that talks to RTI Connext 5.1.0. 
     - Fixed reading of TypeObject and PropertyList parameters
+    - Fixed DestinationOrder
+    - Config: udds.entity-listener-history
     
 1.3.1
     - FIX: Removed references to SampleFilter. ContentFilter is used instead.

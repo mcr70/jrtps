@@ -222,6 +222,10 @@ public class CryptoPlugin {
 		participantKeyMaterials.put(prefix, bytes);
 	}
 	
+	byte[] getParticipantKeyMaterial(GuidPrefix prefix) {
+		return participantKeyMaterials.get(prefix);
+	}
+	
 	private SecretKeySpec createKey(GuidPrefix prefix) throws SecurityException {
 		byte[] keyMaterial = participantKeyMaterials.get(prefix);
 		if (keyMaterial == null) {

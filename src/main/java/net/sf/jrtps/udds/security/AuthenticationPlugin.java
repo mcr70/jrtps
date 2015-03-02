@@ -124,8 +124,10 @@ public abstract class AuthenticationPlugin {
 	 * @param ad AuthenticationData
 	 */
 	protected void notifyListenersOfSuccess(AuthenticationData ad) {
-		cryptoPlugin.setParticipantKeyMaterial(ad.getParticipantData().getGuidPrefix(), ad.getSharedSecret());
-		
+		if (ad.getSharedSecret() != null) {
+			cryptoPlugin.setParticipantKeyMaterial(ad.getParticipantData().getGuidPrefix(), ad.getSharedSecret());
+		}
+			
 		for (AuthenticationListener al : authListeners) {
 			al.authenticationSucceded(ad.getParticipantData());
 		}

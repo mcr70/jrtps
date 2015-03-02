@@ -11,13 +11,12 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -98,12 +97,12 @@ public class Participant {
 	 * Maps that stores discovered participants. discovered participant is
 	 * shared with all entities created by this participant.
 	 */
-	private final Map<GuidPrefix, ParticipantData> discoveredParticipants = Collections
-			.synchronizedMap(new HashMap<GuidPrefix, ParticipantData>());
-	private final Map<Guid, SubscriptionData> discoveredReaders = Collections
-			.synchronizedMap(new HashMap<Guid, SubscriptionData>());
-	private final Map<Guid, PublicationData> discoveredWriters = Collections
-			.synchronizedMap(new HashMap<Guid, PublicationData>());
+	private final Map<GuidPrefix, ParticipantData> discoveredParticipants = 
+			new ConcurrentHashMap<GuidPrefix, ParticipantData>();
+	private final Map<Guid, SubscriptionData> discoveredReaders = 
+			new ConcurrentHashMap<Guid, SubscriptionData>();
+	private final Map<Guid, PublicationData> discoveredWriters = 
+			new ConcurrentHashMap<Guid, PublicationData>();
 
 	private final WriterLivelinessManager livelinessManager;
 	private final ParticipantLeaseManager leaseManager;
@@ -257,7 +256,7 @@ public class Participant {
 		this.leaseManager = new ParticipantLeaseManager(this, discoveredParticipants);
 		addRunnable(leaseManager);
 
-		logger.info("Created Participant {}", Arrays.toString(getGuid().getBytes()));
+		logger.info("Created Participant {}", getGuid().getPrefix());
 	}
 
 	private void createSecurityEndpoints() {
@@ -441,6 +440,7 @@ public class Participant {
 		reader.setHistoryCache(rCache);
 		readers.add(reader);
 
+		checkMatchedWriters(reader);
 		writeSubscriptionData(reader);
 
 		qos.addPolicyListener(new PolicyListener() {
@@ -450,7 +450,6 @@ public class Participant {
 			}
 		});
 
-		checkMatchedWriters(reader);
 		
 		logger.debug("Created DataReader {}", reader.getGuid());
 
@@ -603,6 +602,7 @@ public class Participant {
 
 		writers.add(writer);
 		livelinessManager.registerWriter(writer);
+		checkMatchedReaders(writer);
 
 		writePublicationData(writer);
 
@@ -612,8 +612,6 @@ public class Participant {
 				writePublicationData(writer);
 			}
 		});
-
-		checkMatchedReaders(writer);
 		
 		logger.debug("Created DataWriter {} for {}", writer.getGuid(), writer.getTopicName());
 
@@ -925,6 +923,19 @@ public class Participant {
 	 */
 	public void addEntityListener(EntityListener el) {
 		entityListeners.add(el);
+		if (config.getEntityListenerHistory()); { // udds.entity-listener-history = false
+			for (Entry<GuidPrefix, ParticipantData> e : discoveredParticipants.entrySet()) {
+				el.participantDetected(e.getValue());
+			}
+
+			for (Entry<Guid, SubscriptionData> e : discoveredReaders.entrySet()) {
+				el.readerDetected(e.getValue());
+			}
+
+			for (Entry<Guid, PublicationData> e : discoveredWriters.entrySet()) {
+				el.writerDetected(e.getValue());
+			}
+		}
 	}
 
 	/**

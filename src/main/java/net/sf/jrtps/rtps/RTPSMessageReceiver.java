@@ -163,9 +163,9 @@ class RTPSMessageReceiver implements Runnable {
                         r.onData(msgId, sourceGuidPrefix, data, timestamp);
                     }
                     else {
-                        logger.warn("No reader({}) was matched with {} to handle Data message from {}", 
-                                data.getReaderId(), new Guid(sourceGuidPrefix, data.getWriterId()),
-                                participant.getReaders());
+                        logger.warn("No reader({}) was matched with {} to handle Data", 
+                                data.getReaderId(), new Guid(sourceGuidPrefix, data.getWriterId()));
+                        logger.debug("Known readers: {}", participant.getReaders());
                     }
                 } catch (IOException ioe) {
                     logger.warn("Failed to handle data", ioe);
