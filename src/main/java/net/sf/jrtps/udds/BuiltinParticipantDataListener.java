@@ -54,7 +54,7 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
                     if (pd.getGuidPrefix().equals(participant.getRTPSParticipant().getGuid().getPrefix())) {
                         logger.trace("Ignoring self");
                     } else {
-                        logger.debug("A new Participant detected: {}, parameters received: {}", pd.getGuidPrefix(), pd.getParameters());
+                        logger.info("A new Participant detected: {}, parameters received: {}", pd.getGuidPrefix(), pd.getParameters());
                         
                         discoveredParticipants.put(pd.getGuidPrefix(), pd);
 
