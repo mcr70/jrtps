@@ -19,7 +19,6 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.HashMap;
-import java.util.List;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -29,7 +28,6 @@ import javax.crypto.NoSuchPaddingException;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.message.parameter.IdentityToken;
-import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -161,6 +159,8 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 			}
 			else {
 				logger.info("Remote identity is the same as we are; authentication succeeded");
+				// TODO: setSharedSecret
+				authData.setCertificate(getLocalIdentity().getIdentityCredential().getCertificate());
 				notifyListenersOfSuccess(authData);
 			}
 		}
