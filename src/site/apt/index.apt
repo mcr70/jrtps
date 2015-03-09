@@ -30,41 +30,8 @@ Overview
 
  Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}
 
- 1.3.3
+ 1.3.4
  
-    * KeyHash fix
-
- 1.3.2
- 
-    * Disabled IPv6
-
-    * Added examples.rti.hello that talks to RTI Connext 5.1.0. 
-
-    * Fixed reading of TypeObject and PropertyList parameters
-    
-    * Fixed DestinationOrder
-    
-    * Config: udds.entity-listener-history 
-
- 1.3.1
- 
-    * FIX: Removed references to SampleFilter. ContentFilter is used instead.
-  
- 1.3.0
- 
-    * OMG assigned vendorId 0x0121
-    
-    * Changes to quality of service is tracked and sent to remote entities 
-      with SEDP.
-    
-    * typeName is stored in Entity, EntityFactory gets typeName parameter 
-      in create methods
-    
-    * Content filter support. Readers can do reader side filtering and
-      optionally inform writers of the filter setup. Content filter class name 'java': 
-      jRTPS writers interprets filterExpression as a fully qualified class name of 
-      java class, that implements ContentFilter interface, and tries to register this
-      filter automatically when matched with reader. 
-      DDSSQL parsing is not implemented by jRTPS.
-
-    
+    * Improved AckNack by providing both positive and negative 
+      acknowledgement of the sequence numbers writer has advertised.
+      This improves interoperability.
