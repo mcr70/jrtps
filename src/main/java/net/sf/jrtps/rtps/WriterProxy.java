@@ -7,6 +7,7 @@ import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.util.Watchdog.Task;
 
 import org.slf4j.Logger;
@@ -164,8 +165,21 @@ public class WriterProxy extends RemoteProxy {
     	}
     }
 
-    Heartbeat getLatestHeartbeat() {
-    	return latestHeartbeat;
+    SequenceNumberSet getSequenceNumberSet() {
+    	long base = getGreatestDataSeqNum() + 1;
+    	long firstSN = latestHeartbeat.getFirstSequenceNumber();
+    	long lastSN = latestHeartbeat.getLastSequenceNumber();
+    	int numBits; 
+    	
+    	if (base < firstSN) {
+    		base = firstSN;
+    		numBits = (int) (lastSN - firstSN + 1);
+    	}
+    	else {
+    		numBits = (int) (lastSN - base + 1);
+    	}
+    	
+    	return new SequenceNumberSet(base, numBits);
     }
     
     

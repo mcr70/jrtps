@@ -424,15 +424,16 @@ public class RTPSReader<T> extends Endpoint {
     	
         long seqNumFirst = wp.getGreatestDataSeqNum(); 
         
-        SequenceNumberSet snSet;
-        if (seqNumFirst == 0) { 
-        	// If we haven't received any samples so far, negatively ack first sample
-        	snSet = new SequenceNumberSet(seqNumFirst + 1, 1, new int[]{-1});
-        }
-        else { 
-        	// Only positive ack
-        	snSet = new SequenceNumberSet(seqNumFirst + 1);
-        }
+//        SequenceNumberSet snSet;
+//        if (seqNumFirst == 0) { 
+//        	// If we haven't received any samples so far, negatively ack first sample
+//        	snSet = new SequenceNumberSet(seqNumFirst + 1, 1, new int[]{-1});
+//        }
+//        else { 
+//        	// Only positive ack
+//        	snSet = new SequenceNumberSet(seqNumFirst + 1);
+//        }
+        SequenceNumberSet snSet = wp.getSequenceNumberSet();
         
         AckNack an = new AckNack(getEntityId(), wp.getEntityId(), snSet, ++ackNackCount);
 
