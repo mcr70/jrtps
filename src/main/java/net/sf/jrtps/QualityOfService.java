@@ -642,6 +642,8 @@ public class QualityOfService {
             qos.setPolicy(new QosDurability(QosDurability.Kind.TRANSIENT)); 
             // TODO: OSPL uses TRANSIENT, while TRANSIENT_LOCAL would be correct
             
+            //qos.setPolicy(new QosPartition(new String[]{".*"})); // TODO: OSPL has "__BUILT-IN PARTITION__"
+            
             qos.setPolicy(new QosPresentation(QosPresentation.Kind.TOPIC, false, false));
             qos.setPolicy(new QosDeadline(Duration.INFINITE));
             qos.setPolicy(new QosOwnership(QosOwnership.Kind.SHARED));

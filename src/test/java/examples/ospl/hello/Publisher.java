@@ -11,7 +11,7 @@ public class Publisher {
 
         DataWriter<Msg> dw = p.createDataWriter(Msg.class, new MsgQoS());
         
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 100; i++) {
             Msg m = new Msg(i, "message" + i);
             dw.write(m);
             Thread.sleep(1000);
