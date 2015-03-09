@@ -68,7 +68,17 @@ public class SequenceNumberSet {
         }
     }
     
-    /**
+    public SequenceNumberSet(long base, int numBits) {
+    	this.bitmapBase = new SequenceNumber(base);
+    	this.numBits = numBits;
+    	this.bitmaps = new int[(numBits + 31) / 32];
+    	
+    	for (int i = 0; i < bitmaps.length; i++) {
+    		bitmaps[i] = -1;
+    	}
+    }
+
+	/**
      * Tests, whether or not given sequenceNumber is contained in this SequenceNumberSet 
      * @param seqNum
      * @return true or false
