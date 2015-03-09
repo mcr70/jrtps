@@ -179,6 +179,10 @@ public class WriterProxy extends RemoteProxy {
     		numBits = (int) (lastSN - base + 1);
     	}
     	
+    	if (numBits > 256) {
+    		numBits = 256;
+    	}
+    	
     	return new SequenceNumberSet(base, numBits);
     }
     
