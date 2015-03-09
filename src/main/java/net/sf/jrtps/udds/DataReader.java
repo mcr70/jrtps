@@ -185,8 +185,10 @@ public class DataReader<T> extends Entity<T, PublicationData> {
 
     void removeMatchedWriter(PublicationData pd) {
     	WriterProxy writer = rtps_reader.removeMatchedWriter(pd);
-        logger.debug("marking writer {}({}) as not alive", writer.getGuid(), writer.hashCode());
-    	writer.isAlive(false);
+    	if (writer != null) {
+    		logger.debug("marking writer {}({}) as not alive", writer.getGuid(), writer.hashCode());
+    		writer.isAlive(false);
+    	}
     }
 
     void inconsistentQoS(PublicationData pd) {

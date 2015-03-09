@@ -175,7 +175,7 @@ public class RTPSReader<T> extends Endpoint {
     public WriterProxy removeMatchedWriter(PublicationData writerData) {
         logger.debug("[{}] Removing matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
         WriterProxy proxy = writerProxies.remove(writerData.getBuiltinTopicKey());
-        logger.debug("WriterProxies: {}", writerProxies.keySet());
+
         return proxy;
     }
 
@@ -407,7 +407,7 @@ public class RTPSReader<T> extends Endpoint {
         
         AckNack an = createAckNack(wp);   // If all the data is already received, set finalFlag to true,
         an.finalFlag(wp.isAllReceived()); // otherwise false(response required)
-
+        //an.finalFlag(true);
         m.addSubMessage(an);
 
         GuidPrefix targetPrefix = wp.getGuid().getPrefix();
@@ -421,14 +421,19 @@ public class RTPSReader<T> extends Endpoint {
     private AckNack createAckNack(WriterProxy wp) {
         // This is a simple AckNack, that can be optimized if store
         // out-of-order data samples in a separate cache.
-
-        long seqNumFirst = wp.getGreatestDataSeqNum(); // Positively ACK all that we have..
-        //int[] bitmaps = new int[] { -1 }; // Negatively ACK rest
-        //SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1, bitmaps);
+    	
+        long seqNumFirst = wp.getGreatestDataSeqNum(); 
         
-        // Only positive ack
-        SequenceNumberSet snSet = new SequenceNumberSet(seqNumFirst + 1);
-
+        SequenceNumberSet snSet;
+        if (seqNumFirst == 0) { 
+        	// If we haven't received any samples so far, negatively ack first sample
+        	snSet = new SequenceNumberSet(seqNumFirst + 1, 1, new int[]{-1});
+        }
+        else { 
+        	// Only positive ack
+        	snSet = new SequenceNumberSet(seqNumFirst + 1);
+        }
+        
         AckNack an = new AckNack(getEntityId(), wp.getEntityId(), snSet, ++ackNackCount);
 
         return an;
