@@ -7,9 +7,16 @@
     </Appenders>
 
     <Loggers>
-        <Root level="warn">
+        <Root level="debug">
             <AppenderRef ref="STDOUT" />
         </Root>
+
+        <Logger name="net.sf.jrtps.rtps.RTPSReader" level="debug" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
+        <Logger name="net.sf.jrtps.rtps.RTPSWriter" level="debug" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
         
         <Logger name="dds.sec.auth" level="warn" additivity="false">
             <AppenderRef ref="STDOUT" />

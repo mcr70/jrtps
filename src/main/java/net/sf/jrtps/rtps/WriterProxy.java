@@ -164,6 +164,11 @@ public class WriterProxy extends RemoteProxy {
     	}
     }
 
+    Heartbeat getLatestHeartbeat() {
+    	return latestHeartbeat;
+    }
+    
+    
     /**
      * Marks writer represented by this proxy as being alive or not.
      * @param b

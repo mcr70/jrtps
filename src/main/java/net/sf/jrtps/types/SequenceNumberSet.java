@@ -39,6 +39,19 @@ public class SequenceNumberSet {
         this.numBits = bitmaps.length * 32;
     }
 
+	/**
+     * Constructor for SequenceNumberSet. 
+     * 
+     * @param base base of the SequenceNumberSet
+     * @param numBits Number of bits in bitmaps
+     * @param bitmaps Bitmap of the contained sequence numbers in set
+     */
+    public SequenceNumberSet(long base, int numBits, int[] bitmaps) {
+        this.bitmapBase = new SequenceNumber(base);
+        this.bitmaps = bitmaps;
+        this.numBits = numBits;
+    }
+
     /**
      * Reads a SequenceNumberSet from RTPSByteBuffer.
      * @param bb
