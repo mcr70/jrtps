@@ -1,0 +1,13 @@
+Testing performance of publisher and subscriber.
+
+ - Publisher sends messages as fast it can
+ - Subscriber reports after 10 messages, how long it took to 
+   receive these messages.
+   
+Note, that this test is the worst case scenario from the publisher 
+point of view, as publisher does not pack multiple messages in 
+one Data sub-message.
+
+Initial results are, that 10 messages are delivered to Subscriber
+roughly in 1 second.
+ 
