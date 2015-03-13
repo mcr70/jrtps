@@ -71,10 +71,14 @@ class RTPSMessageReceiver implements Runnable {
                 // NOTE2: pending samples concept has changed. Check this.
                 bytes = queue.take();
                 if (running) {
+                	long l1 = System.currentTimeMillis();
                     Message msg = new Message(new RTPSByteBuffer(bytes));
-                    logger.debug("Parsed RTPS message {}", msg);
+                    long l2 = System.currentTimeMillis();
+                    logger.debug("Parsed RTPS message {} in {} ms", msg, l2-l1);
 
                     handleMessage(msg);
+                    long l3 = System.currentTimeMillis();
+                    logger.trace("handleMessage in {} ms", l3-l2);
                 }
             } catch(InterruptedException e) {
                 running = false;
@@ -113,6 +117,8 @@ class RTPSMessageReceiver implements Runnable {
         List<SubMessage> subMessages = msg.getSubMessages();
 
         for (SubMessage subMsg : subMessages) {
+        	long smStartTime = System.currentTimeMillis();
+        	
         	if (subMsg.getKind() == Kind.SECURESUBMSG) {
         		SecureSubMessage ssm = (SecureSubMessage) subMsg;
         		if (ssm.singleSubMessageFlag()) {
@@ -223,6 +229,9 @@ class RTPSMessageReceiver implements Runnable {
             default:
                 logger.warn("SubMessage not handled: {}", subMsg);
             }
+        
+        	long smEndTime = System.currentTimeMillis();
+        	logger.trace("Processed {} in {} ms", subMsg.getKind(), smEndTime - smStartTime);
         }
 
         logger.trace("Releasing samples for {} readers", dataReceivers.size());

@@ -20,7 +20,7 @@ public interface Transmitter {
     public boolean sendMessage(Message msg);
     
     /**
-     * Close this Writer
+     * Close this Transmitter
      * @throws IOException
      */
     public void close() throws IOException;
