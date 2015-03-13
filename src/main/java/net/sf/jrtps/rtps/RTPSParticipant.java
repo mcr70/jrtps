@@ -258,6 +258,10 @@ public class RTPSParticipant {
     ScheduledFuture<?> scheduleAtFixedRate(Runnable r, long millis) {
         return threadPoolExecutor.scheduleAtFixedRate(r, millis, millis, TimeUnit.MILLISECONDS);
     }
+    
+    ScheduledFuture<?> schedule(Runnable r, long delayInMillis) {
+    	return threadPoolExecutor.schedule(r, delayInMillis, TimeUnit.MILLISECONDS);
+    }
 
     /**
      * Gets a Reader with given readerId. If readerId is null or
