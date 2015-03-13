@@ -90,7 +90,7 @@ public class WriterProxy extends RemoteProxy {
         // Data for reliable readers must come in order. If not, drop it. 
         // Manage out-of-order data with HeartBeat & AckNack & Gap messages
 
-        if (sequenceNumber >= seqNumMax) {
+        if (sequenceNumber > seqNumMax) {
             if (sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
                 log.warn("[{}] Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}",
                         entityId, sequenceNumber, seqNumMax);
