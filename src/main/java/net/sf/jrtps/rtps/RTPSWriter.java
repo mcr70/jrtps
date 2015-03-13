@@ -326,17 +326,22 @@ public class RTPSWriter<T> extends Endpoint {
 	 * @param senderPrefix
 	 * @param ackNack
 	 */
-	void onAckNack(GuidPrefix senderPrefix, AckNack ackNack) {
+	void onAckNack(GuidPrefix senderPrefix, final AckNack ackNack) {
 		logger.debug("[{}] Got AckNack: #{} {}, F:{} from {}", getEntityId(), ackNack.getCount(),
 				ackNack.getReaderSNState(), ackNack.finalFlag(), senderPrefix);
 
-		ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
+		final ReaderProxy proxy = readerProxies.get(new Guid(senderPrefix, ackNack.getReaderId()));
 		if (proxy != null) {
 			if (proxy.ackNackReceived(ackNack)) {
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
+					}
+				};
+				
 				logger.trace("[{}] Wait for nack response delay: {} ms", getEntityId(), nackResponseDelay);
-				getParticipant().waitFor(nackResponseDelay);
-
-				sendData(proxy, ackNack.getReaderSNState().getBitmapBase() - 1);
+				getParticipant().schedule(r, nackResponseDelay);
 			}
 		} 
 		else {
