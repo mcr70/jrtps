@@ -1,6 +1,7 @@
 1.3.5
     - FIX: reader accepted a sample it had previously received.
-
+    - Response to AckNack and Heartbeat is asynchronous
+    
 1.3.4
     - Improved AckNack by providing both positive and negative 
       acknowledgement of the sequence numbers writer has advertised.
