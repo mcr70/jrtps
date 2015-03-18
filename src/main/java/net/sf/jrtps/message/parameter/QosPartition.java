@@ -18,6 +18,18 @@ public class QosPartition extends Parameter implements SubscriberPolicy<QosParti
         super(ParameterId.PID_PARTITION);
     }
 
+    /**
+     * Constructor for QosPartition
+     * @param partition Name of the partition
+     */
+    public QosPartition(String partition) {
+    	this(new String[] {partition});
+    }
+    
+    /**
+     * Constructor for QosPartition
+     * @param partitions Names of the partitions
+     */
     public QosPartition(String[] partitions) {
         super(ParameterId.PID_PARTITION);
         this.partitions = partitions;
