@@ -7,6 +7,3 @@ o To run publisher, type
     
 o To run subscriber, type
     ..../Hello_simple> ./runSub.sh
-
-For some reason, you need to run HelloPublisher(jrtps) before running
-subscriber with runSub.sh. Otherwise Connext never sends subscription data.

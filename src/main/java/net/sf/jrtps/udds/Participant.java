@@ -188,7 +188,7 @@ public class Participant {
 	public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
-		this.entityFactory = ef != null ? ef : new EntityFactory();;
+		this.entityFactory = ef != null ? ef : new EntityFactory();
 		this.config = cfg != null ? cfg : new Configuration();
 
 		// UDPProvider is used 
@@ -212,7 +212,13 @@ public class Participant {
 
 		try {		
 			AuthenticationPlugin.registerPlugin(new NoOpAuthenticationPlugin(config));
-			AuthenticationPlugin.registerPlugin(new JKSAuthenticationPlugin(config));
+			if (config.getProperty(JKSAuthenticationPlugin.JKS_KEYSTORE_KEY) != null) {
+				AuthenticationPlugin.registerPlugin(new JKSAuthenticationPlugin(config));
+			}
+			else {
+				logger.debug("No configuration parameter " + JKSAuthenticationPlugin.JKS_KEYSTORE_KEY + 
+						" was found in configuration, skipping registration of JKSAuthenticationPlugin");
+			}
 		} catch (InvalidKeyException | UnrecoverableKeyException
 				| KeyStoreException | NoSuchAlgorithmException
 				| CertificateException | NoSuchProviderException

@@ -16,7 +16,7 @@ public class HelloReader {
         qos.setPolicy(new QosPartition(new String[]{"partition-1"}));
         
         DataReader<HelloMessage> dr = p.createDataReader(HelloMessage.class, qos);
-        HelloListener hl = new HelloListener(); // implements DataListener
+        HelloListener hl = new HelloListener(); // implements SampleListener
         dr.addSampleListener(hl);
         
         System.out.println("\n*** Press enter to close Participant ***\n");
