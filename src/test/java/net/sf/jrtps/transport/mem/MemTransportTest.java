@@ -6,8 +6,6 @@ import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
-import examples.hello.serializable.HelloListener;
-import examples.hello.serializable.HelloMessage;
 
 public class MemTransportTest {
     public static void main(String[] args) throws Exception {

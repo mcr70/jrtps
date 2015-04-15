@@ -188,6 +188,16 @@ public class Configuration {
     }
     
     /**
+     * Sets the value of given configuration parameter.
+     * 
+     * @param name Name of the configuration parameter
+     * @param value Value of the parameter.
+     */
+    public void setProperty(String name, String value) {
+    	props.put(name, value);
+    }
+    
+    /**
      * Gets a property with given key.
      * 
      * @param key key of the property
