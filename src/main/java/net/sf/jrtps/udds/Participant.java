@@ -212,7 +212,8 @@ public class Participant {
 
 		try {		
 			AuthenticationPlugin.registerPlugin(new NoOpAuthenticationPlugin(config));
-			if (config.getProperty(JKSAuthenticationPlugin.JKS_KEYSTORE_KEY) != null) {
+			String keyStore = config.getProperty(JKSAuthenticationPlugin.JKS_KEYSTORE_KEY);
+			if (keyStore != null && keyStore.length() > 0) {
 				AuthenticationPlugin.registerPlugin(new JKSAuthenticationPlugin(config));
 			}
 			else {

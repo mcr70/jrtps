@@ -109,7 +109,7 @@ public class JKSAuthenticationPlugin extends AuthenticationPlugin {
 
 			logger.debug("Successfully locally authenticated {}", alias);
 		} catch (NoSuchAlgorithmException | CertificateException | IOException | KeyStoreException | InvalidKeyException | NoSuchProviderException | SignatureException | UnrecoverableKeyException e) {
-			throw new RuntimeException("Failed to initialize AuthenticationPlugin", e);
+			throw new RuntimeException("Failed to initialize JKSAuthenticationPlugin", e);
 		}
 	}
 
