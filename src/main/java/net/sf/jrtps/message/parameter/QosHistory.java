@@ -4,7 +4,7 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * QosHistory. This policy must be consistent with QosResourceLimits, so that
- * HISTORY.depth <= RESOURCE_LIMITS.max_samples_per_instance
+ * HISTORY.depth &le; RESOURCE_LIMITS.max_samples_per_instance
  * 
  * @author mcr70
  * 
@@ -24,7 +24,7 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
 
     /**
      * Constructs QosHistory with kind KEEP_LAST and given depth
-     * @param depth
+     * @param depth Depth of history
      */
     public QosHistory(int depth) {
         this(Kind.KEEP_LAST, depth);
@@ -32,7 +32,8 @@ public class QosHistory extends Parameter implements DataReaderPolicy<QosHistory
     
     /**
      * Constructs QosHistory given kind and depth
-     * @param depth
+     * @param kind KEEP_LAST or KEEP_ALL
+     * @param depth depth of history
      */
     public QosHistory(Kind kind, int depth) {
         super(ParameterId.PID_HISTORY);

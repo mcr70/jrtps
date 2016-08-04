@@ -153,7 +153,7 @@ public class QualityOfService {
      * always created when calling this method. Changes to returned Set is not
      * reflected back to this QualityOfService.
      * 
-     * @return Set<DataReaderPolicy>
+     * @return Data reader policies
      */
     public Set<DataReaderPolicy> getReaderPolicies() {
         Set<DataReaderPolicy> readerPolicies = new HashSet<>();
@@ -172,7 +172,7 @@ public class QualityOfService {
      * always created when calling this method. Changes to returned Set is not
      * reflected back to this QualityOfService.
      * 
-     * @return Set<DataWriterPolicy>
+     * @return Data writer policies
      */
     public Set<DataWriterPolicy> getWriterPolicies() {
         Set<DataWriterPolicy> writerPolicies = new HashSet<>();
@@ -191,7 +191,7 @@ public class QualityOfService {
      * always created when calling this method. Changes to returned Set is not
      * reflected back to this QualityOfService.
      * 
-     * @return Set<TopicPolicy>
+     * @return Topic policies
      */
     public Set<TopicPolicy> getTopicPolicies() {
         Set<TopicPolicy> topicPolicies = new HashSet<>();
@@ -210,7 +210,7 @@ public class QualityOfService {
      * is always created when calling this method. Changes to returned Set is
      * not reflected back to this QualityOfService.
      * 
-     * @return Set<QosPolicy>
+     * @return Inlineable QosPolicies
      */
     public Set<QosPolicy<?>> getInlinePolicies() {
         Set<QosPolicy<?>> inlinePolicies = new HashSet<>();

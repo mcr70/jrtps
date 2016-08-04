@@ -21,7 +21,7 @@ public class RTPSByteBuffer {
     /**
      * Constructs RTPSByteBuffer.
      * 
-     * @param bytes
+     * @param bytes An array of bytes to wrap into this RTPSByteBuffer
      */
     public RTPSByteBuffer(byte[] bytes) {
         this(ByteBuffer.wrap(bytes));
@@ -30,7 +30,7 @@ public class RTPSByteBuffer {
     /**
      * Constructs RTPSByteBuffer.
      * 
-     * @param buffer
+     * @param buffer Underlying ByteBuffer
      * @see java.nio.ByteBuffer
      */
     public RTPSByteBuffer(ByteBuffer buffer) {
@@ -40,8 +40,9 @@ public class RTPSByteBuffer {
     /**
      * Constructs RTPSByteBuffer.
      * 
-     * @param is
+     * @param is InputStream used to read bytes from
      * @see java.io.InputStream
+     * @throws IOException on IOException
      */
     public RTPSByteBuffer(InputStream is) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -74,7 +75,7 @@ public class RTPSByteBuffer {
     /**
      * Writes an octet (1 byte) to underlying buffer.
      * 
-     * @param an_octet
+     * @param an_octet An octet to write
      */
     public void write_octet(byte an_octet) {
         buffer.put(an_octet);
@@ -93,7 +94,7 @@ public class RTPSByteBuffer {
     /**
      * Writes a short (2 bytes) to underlying buffer
      * 
-     * @param a_short
+     * @param a_short a short to write
      */
     public void write_short(int a_short) {
         align(2);
@@ -113,7 +114,7 @@ public class RTPSByteBuffer {
     /**
      * Writes a long (4 bytes) to underlying buffer
      * 
-     * @param a_long
+     * @param a_long a long to write
      */
     public void write_long(int a_long) {
         align(4);
@@ -133,7 +134,7 @@ public class RTPSByteBuffer {
     /**
      * Writes a longlong (8 bytes) to underlying buffer
      * 
-     * @param a_longlong
+     * @param a_longlong a longlong to write
      */
     public void write_longlong(long a_longlong) {
         align(8);
@@ -157,7 +158,7 @@ public class RTPSByteBuffer {
     /**
      * Writes a boolean to underlying buffer
      * 
-     * @param b
+     * @param b boolean to write
      */
     public void write_boolean(boolean b) {
         if (b) {
@@ -188,7 +189,7 @@ public class RTPSByteBuffer {
     /**
      * Writes a string to underlying buffer
      * 
-     * @param s
+     * @param s string to write
      */
     public void write_string(String s) {
         write_long(s.length() + 1); // +1 for adding terminating NUL character
@@ -212,7 +213,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive int.
-     * @param i
+     * @param i int to write
      */
     public void writeInt(int i) {
         align(4);
@@ -230,7 +231,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive short.
-     * @param s
+     * @param s a Java short to write
      */
     public void writeShort(short s) {
         align(2);
@@ -248,7 +249,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive long.
-     * @param l
+     * @param l a Java long to write
      */
     public void writeLong(long l) {
         align(8);
@@ -266,7 +267,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive float.
-     * @param f
+     * @param f a Java float to write
      */
     public void writeFloat(float f) {
         align(4);
@@ -284,7 +285,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive double.
-     * @param d
+     * @param d a Java double to write
      */
     public void writeDouble(double d) {
         align(8);
@@ -301,7 +302,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive char.
-     * @param c
+     * @param c a java char to write
      */
     public void writeChar(char c) {
         buffer.putChar(c);
@@ -317,7 +318,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive byte.
-     * @param b
+     * @param b a java byte to write
      */
     public void writeByte(byte b) {
         buffer.put(b);
@@ -333,7 +334,7 @@ public class RTPSByteBuffer {
     
     /**
      * Writes a java primitive boolean.
-     * @param b
+     * @param b a java boolean to write
      */
     public void writeBoolean(boolean b) {
         write_boolean(b);
@@ -344,7 +345,7 @@ public class RTPSByteBuffer {
     /**
      * Reads in bytes(octets) from underlying buffer.
      * 
-     * @param bytes
+     * @param bytes byte array
      */
     public void read(byte[] bytes) {
         buffer.get(bytes);
@@ -353,7 +354,7 @@ public class RTPSByteBuffer {
     /**
      * Writes bytes(octets).
      * 
-     * @param bytes
+     * @param bytes byte to write
      */
     public void write(byte[] bytes) {
         buffer.put(bytes);
@@ -368,6 +369,7 @@ public class RTPSByteBuffer {
     }
     
     /**
+    
      * Writes a String into this buffer with given charsetName. charsetName is used when getting the bytes of the
      * String. 
      * @param s String to write
@@ -376,7 +378,6 @@ public class RTPSByteBuffer {
      */
     public void writeString(String s, String charsetName) {
         buffer.putInt(s.length());
-        
         try {
             buffer.put(s.getBytes(charsetName));
         } catch (UnsupportedEncodingException e) {
@@ -413,7 +414,8 @@ public class RTPSByteBuffer {
     /**
      * Aligns this buffer to given byteBoundary.
      * 
-     * @param byteBoundary
+     * @param byteBoundary alignement boundary
+     * @return number of bytes that was advanced in order to meet alignment
      */
     public int align(int byteBoundary) {
         int position = buffer.position();

@@ -13,7 +13,7 @@ InlineQoS, Changeable {
     /**
      * Constructor
      * 
-     * @param strength
+     * @param strength Strength
      */
     public QosOwnershipStrength(int strength) {
         super(ParameterId.PID_OWNERSHIP_STRENGTH);

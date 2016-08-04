@@ -64,7 +64,7 @@ public abstract class AuthenticationPlugin {
 	 * @param name name of the plugin. If name is null or empty string, it is considered
 	 *        as "none".
 	 * @return AuthenticationPlugin
-	 * @throws SecurityException if there was not AuthenticationPlugin registered with given name
+	 * @throws RuntimeException if there was not AuthenticationPlugin registered with given name
 	 */
 	public static AuthenticationPlugin getInstance(String name) {
 		if (name == null || "".equals(name)) {
@@ -129,7 +129,7 @@ public abstract class AuthenticationPlugin {
 		}
 			
 		for (AuthenticationListener al : authListeners) {
-			al.authenticationSucceded(ad.getParticipantData());
+			al.authenticationSucceeded(ad.getParticipantData());
 		}
 	}
 

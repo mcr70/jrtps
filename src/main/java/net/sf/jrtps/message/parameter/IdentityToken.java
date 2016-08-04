@@ -10,7 +10,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * See DDS Security specification: ch. 9.3.2.2 DDS:Auth:PKI-RSA/DSA-DH IdentityToken for
  * more details.
  *
- * @see net.sf.jrtps.udds.security.IdentityCredential
  * @author mcr70
  */
 public class IdentityToken extends Parameter /* extends DataHolder */ {

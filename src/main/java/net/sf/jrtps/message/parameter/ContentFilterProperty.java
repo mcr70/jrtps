@@ -45,9 +45,9 @@ public class ContentFilterProperty extends Parameter {
 	 * a ContentFilter with this className. If it succeeds, it is automatically
 	 * registered to writer.
 	 * 
-	 * @param cfTopicName
-	 * @param relatedTopicName
-	 * @param cfClass
+	 * @param cfTopicName Name of the topic
+	 * @param relatedTopicName related topic name
+	 * @param cfClass ContentFilter class
 	 */
 	public ContentFilterProperty(String cfTopicName, String relatedTopicName, 
 			Class<? extends ContentFilter> cfClass) {

@@ -93,7 +93,7 @@ public class RTPSReader<T> extends Endpoint {
 	/**
 	 * Adds a matched writer for this RTPSReader.
 	 * 
-	 * @param writerData
+	 * @param writerData PublicationData
 	 * @return WriterProxy
 	 */
 	public WriterProxy addMatchedWriter(final PublicationData writerData) {
@@ -157,7 +157,7 @@ public class RTPSReader<T> extends Endpoint {
 	/**
 	 * Removes all the matched writers that have a given GuidPrefix
 	 * 
-	 * @param prefix
+	 * @param prefix GuidPrefix
 	 */
 	public void removeMatchedWriters(GuidPrefix prefix) {
 		for (WriterProxy wp : writerProxies.values()) {
@@ -170,7 +170,8 @@ public class RTPSReader<T> extends Endpoint {
 	/**
 	 * Removes a matched writer from this RTPSReader.
 	 * 
-	 * @param writerData writer to remove. If corresponding writer does not exists, this method silently returns
+	 * @param writerData writer to remove. 
+	 * @return WriterProxy or null writer corresponding to PublicationData was not found
 	 */
 	public WriterProxy removeMatchedWriter(PublicationData writerData) {
 		logger.debug("[{}] Removing matchedWriter {}", getEntityId(), writerData.getBuiltinTopicKey());
@@ -215,7 +216,7 @@ public class RTPSReader<T> extends Endpoint {
 	 * Checks, if this RTPSReader is already matched with a RTPSWriter
 	 * represented by given Guid.
 	 * 
-	 * @param writerGuid
+	 * @param writerGuid Guid of the writer
 	 * @return true if matched
 	 */
 	public boolean isMatchedWith(Guid writerGuid) {
@@ -225,7 +226,7 @@ public class RTPSReader<T> extends Endpoint {
 
 	/**
 	 * Adds WriterLivelinessListener
-	 * @param listener
+	 * @param listener WriterLivelinessListener
 	 */
 	public void addWriterLivelinessListener(WriterLivelinessListener listener) {
 		synchronized (livelinessListeners) {
@@ -236,7 +237,7 @@ public class RTPSReader<T> extends Endpoint {
 
 	/**
 	 * Adds WriterLivelinessListener
-	 * @param listener
+	 * @param listener WriterLivelinessListener
 	 */
 	public void removeWriterLivelinessListener(WriterLivelinessListener listener) {
 		synchronized (livelinessListeners) {

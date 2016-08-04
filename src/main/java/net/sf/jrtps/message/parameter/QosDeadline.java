@@ -11,7 +11,7 @@ import net.sf.jrtps.types.Duration;
  * that are expected to supply the data values.
  * <p>
  * 
- * This policy must be consistent with QosTimeBasedFilter, so that period <=
+ * This policy must be consistent with QosTimeBasedFilter, so that period &le;
  * minimum_separation.
  * 
  * See 7.1.3.7 DEADLINE
@@ -28,16 +28,16 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
     }
 
     /**
-     * Constructor for new Duration with given milliseconds
-     * @param periodAsMillis
+     * Constructor with period given as milliseconds
+     * @param periodAsMillis milliseconds
      */
     public QosDeadline(long periodAsMillis) {
         this(new Duration(periodAsMillis));
     }
 
     /**
-     * Constructor with given duration
-     * @param period
+     * Constructor with period given as Duration
+     * @param period Duration
      */
     public QosDeadline(Duration period) {
         super(ParameterId.PID_DEADLINE);
@@ -66,7 +66,7 @@ public class QosDeadline extends Parameter implements DataReaderPolicy<QosDeadli
     /**
      * Checks, if this QosDeadline is compatible with the other QosPolicy.
      * 
-     * @return true, if this.period <= other.period
+     * @return true, if this.period &le; other.period
      */
     @Override
     public boolean isCompatible(QosDeadline other) {

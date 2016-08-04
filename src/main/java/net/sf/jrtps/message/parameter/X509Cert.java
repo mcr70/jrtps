@@ -29,7 +29,7 @@ public class X509Cert extends Parameter implements JRTPSSpecificParameter {
     /**
      * Gets the X509Certificate
      * @return X509Certificate
-     * @throws CertificateException
+     * @throws CertificateException on CertificateException
      */
     public X509Certificate getCertificate() throws CertificateException {
         CertificateFactory cf = CertificateFactory.getInstance("X.509");

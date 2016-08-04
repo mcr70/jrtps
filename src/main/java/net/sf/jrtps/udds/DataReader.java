@@ -41,7 +41,10 @@ public class DataReader<T> extends Entity<T, PublicationData> {
 	private ContentFilter<T> contentFilter;
 
     /**
-     * Constructor with null typeName 
+     * Constructor with null typeName
+     * @param p Participant
+     * @param type Class of the type this DataReader handles
+     * @param reader RTPSReader used 
      */
     protected DataReader(Participant p, Class<T> type, RTPSReader<T> reader) {
     	this(p, type, null, reader);
@@ -52,7 +55,7 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * 
      * @param p Participant that created this DataReader
      * @param type Type of this DataReader
-     * @param typeName typeName
+     * @param typeName Name of the type. If null, fully qualified class name is used
      * @param reader associated RTPSReader
      */
     protected DataReader(Participant p, Class<T> type, String typeName, RTPSReader<T> reader) {
@@ -100,11 +103,11 @@ public class DataReader<T> extends Entity<T, PublicationData> {
      * this method will return null.
      * <pre>
      *   App                      DataReader                  RTPSReader
-     *    |------- getSamples() ----->|                           |
-     *    |<------ samples -----------|                           |
-     *    |                           |<-------- dispose ---------|
-     *    |------- getInstance() ---->|                           |
-     *    |<------ null --------------|                           |
+     *    |------- getSamples() -----&gt;|                           |
+     *    |&lt;------ samples -----------|                           |
+     *    |                           |&lt;-------- dispose ---------|
+     *    |------- getInstance() ----&gt;|                           |
+     *    |&lt;------ null --------------|                           |
      *    |                           |                           |
      * </pre>
      * @param sample a Sample, whose instance is retrieved 

@@ -47,6 +47,7 @@ public class Gap extends SubMessage {
 	/**
 	 * Get the Reader Entity that is being informed of the irrelevance of a set
 	 * of sequence numbers.
+	 * @return EntityId of the reader
 	 */
 	public EntityId getReaderId() {
 		return readerId;
@@ -54,6 +55,7 @@ public class Gap extends SubMessage {
 
 	/**
 	 * Get the Writer Entity to which the range of sequence numbers applies.
+	 * @return EntityId of the writer
 	 */
 	public EntityId getWriterId() {
 		return writerId;

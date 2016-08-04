@@ -36,6 +36,8 @@ public class InfoSource extends SubMessage {
 
     /**
      * Indicates the protocol used to encapsulate subsequent Submessages.
+     * 
+     * @return ProtocolVersion
      */
     public ProtocolVersion getProtocolVersion() {
         return protocolVersion;
@@ -44,6 +46,8 @@ public class InfoSource extends SubMessage {
     /**
      * Indicates the VendorId of the vendor that encapsulated subsequent
      * Submessages.
+     * 
+     * @return VendorId
      */
     public VendorId getVendorId() {
         return vendorId;
@@ -52,6 +56,8 @@ public class InfoSource extends SubMessage {
     /**
      * Identifies the Participant that is the container of the RTPS Writer
      * entities that are the source of the Submessages that follow.
+     * 
+     * @return GuidPrefix
      */
     public GuidPrefix getGuidPrefix() {
         return guidPrefix;
@@ -73,6 +79,7 @@ public class InfoSource extends SubMessage {
         guidPrefix.writeTo(bb);
     }
 
+    @Override
     public String toString() {
         return super.toString() + ", " + guidPrefix;
     }

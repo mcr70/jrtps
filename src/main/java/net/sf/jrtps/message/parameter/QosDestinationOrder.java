@@ -29,7 +29,7 @@ public class QosDestinationOrder extends Parameter implements DataReaderPolicy<Q
     /**
      * Create a QosDestinationOrder.
      * 
-     * @param kind
+     * @param kind BY_RECEPTION_TIMESTAMP or BY_SOURCE_TIMESTAMP
      */
     public QosDestinationOrder(Kind kind) {
         super(ParameterId.PID_DESTINATION_ORDER);

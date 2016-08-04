@@ -54,7 +54,7 @@ public class SequenceNumberSet {
 
     /**
      * Reads a SequenceNumberSet from RTPSByteBuffer.
-     * @param bb
+     * @param bb RTPSByteBuffer
      */
     public SequenceNumberSet(RTPSByteBuffer bb) {
         bitmapBase = new SequenceNumber(bb);
@@ -80,7 +80,7 @@ public class SequenceNumberSet {
 
 	/**
      * Tests, whether or not given sequenceNumber is contained in this SequenceNumberSet 
-     * @param seqNum
+     * @param seqNum Sequence number
      * @return true or false
      */
     public boolean containsSeqNum(long seqNum) {

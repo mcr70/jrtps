@@ -7,18 +7,17 @@ public abstract class LocatorParameter extends Parameter {
     private Locator locator;
 
     /**
-     * 
-     * @param pe
-     *            Must be one to define a locator. No check is made.
+     * Constructor
+     * @param pe Must be one to define a locator. No check is made.
      */
     protected LocatorParameter(ParameterId pe) {
         super(pe);
     }
 
     /**
-     * 
-     * @param pe
-     *            Must be one to define a locator. No check is made.
+     * Constructor
+     * @param pe Must be one to define a locator. No check is made.
+     * @param locator Locator
      */
     protected LocatorParameter(ParameterId pe, Locator locator) {
         super(pe);

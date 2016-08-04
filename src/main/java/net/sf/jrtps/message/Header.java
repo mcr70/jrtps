@@ -27,7 +27,7 @@ public class Header {
      * Constructor for Header. ProtocolVersion is set to 2.1 and VendorId is set
      * to jRTPS.
      * 
-     * @param prefix
+     * @param prefix GuidPrefix of the header
      */
     public Header(GuidPrefix prefix) {
     	this(prefix, ProtocolVersion.PROTOCOLVERSION_2_1, VendorId.JRTPS);
@@ -73,7 +73,7 @@ public class Header {
     /**
      * Writer this Header to given RTPSByteBuffer.
      * 
-     * @param bb
+     * @param bb RTPSByteBuffer to write to
      */
     public void writeTo(RTPSByteBuffer bb) {
         bb.write(hdrStart);
@@ -85,6 +85,7 @@ public class Header {
     /**
      * Defines a default prefix to use for all GUIDs that appear within the
      * Submessages contained in the message.
+     * @return GuidPrefix associated with submessages
      */
     public GuidPrefix getGuidPrefix() {
         return guidPrefix;
@@ -93,6 +94,7 @@ public class Header {
     /**
      * Indicates the vendor that provides the implementation of the RTPS
      * protocol.
+     * @return VendorId
      */
     public VendorId getVendorId() {
         return vendorId;
@@ -100,12 +102,13 @@ public class Header {
 
     /**
      * Identifies the version of the RTPS protocol.
+     * @return ProtocolVersion
      */
     public ProtocolVersion getVersion() {
         return version;
     }
 	
-	
+	@Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append(new String(hdrStart));

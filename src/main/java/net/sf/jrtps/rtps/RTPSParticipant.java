@@ -133,7 +133,7 @@ public class RTPSParticipant {
      * @param topicName Name of the topic
      * @param rCache ReaderCache
      * @param qos QualityOfService
-     * 
+     * @param <T> Type of RTPSReader 
      * @return RTPSReader
      */
     public <T> RTPSReader<T> createReader(EntityId eId, String topicName, ReaderCache<T> rCache, QualityOfService qos) {
@@ -150,10 +150,9 @@ public class RTPSParticipant {
      * 
      * @param eId EntityId of the reader
      * @param topicName Name of the topic
-     * @param wCache
-     *            WriterCache
-     * @param qos
-     *            QualityOfService
+     * @param wCache WriterCache
+     * @param qos QualityOfService
+     * @param <T> Type of RTPSWriter
      * 
      * @return RTPSWriter
      */

@@ -29,7 +29,7 @@ public class QosLifespan extends Parameter implements DataReaderPolicy<QosLifesp
     
     /**
      * Constructor for QosLifespan.
-     * @param duration
+     * @param duration Duration
      */
     public QosLifespan(Duration duration) {
         super(ParameterId.PID_LIFESPAN);

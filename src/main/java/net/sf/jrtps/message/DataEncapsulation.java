@@ -21,7 +21,7 @@ public abstract class DataEncapsulation {
      * <i>This method is not implemented at the moment.</i> Currently, it is only possible to
      * use predefined DataEncapsulations: CDREncapsulation and ParameterListEncapsulation 
      * 
-     * @param dEnc
+     * @param dEnc DataEncapsulation to register
      * @see CDREncapsulation
      * @see ParameterListEncapsulation
      */
@@ -48,7 +48,7 @@ public abstract class DataEncapsulation {
      * Creates an instance of DataEncapsulation. Encapsulation identified by
      * reading first 2 bytes of serializedPayload.
      * 
-     * @param serializedPayload
+     * @param serializedPayload byte array that is converted into DataEncapsulation
      * @return DataEncapsulation
      */
     public static DataEncapsulation createInstance(byte[] serializedPayload) {

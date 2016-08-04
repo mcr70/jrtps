@@ -2,7 +2,7 @@ package net.sf.jrtps.transport;
 
 /**
  * This class encapsulates parameters used in calculation of port numbers.
- * <table border='1'>
+ * <table border='1' summary=''>
  * <tr><th>Traffic type</th> <th>Port number expression</th></tr>
  * <tr><td>Discovery multicast</td> <td>PB + DG * domainId + d0</td></tr>
  * <tr><td>Discovery unicast</td> <td>PB + DG * domainId + d1 + PG * participantId</td></tr>

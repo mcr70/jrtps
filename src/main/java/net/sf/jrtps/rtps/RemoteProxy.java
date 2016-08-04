@@ -28,8 +28,8 @@ public class RemoteProxy {
     /**
      * Constructor for RemoteProxy.
      * 
-     * @param dd
-     * @param locators
+     * @param dd DiscoveredData
+     * @param locators a List of Locators
      */
     protected RemoteProxy(DiscoveredData dd, List<Locator> locators) {
         this.discoveredData = dd;
@@ -120,9 +120,11 @@ public class RemoteProxy {
      * Sets whether or not to prefer multicast. Default is not to prefer
      * multicast.
      * 
-     * @param preferMulticast
+     * @param preferMulticast Whether or not proxy prefers multicast
      */
     public void preferMulticast(boolean preferMulticast) {
+    	// BUG: this concept can be removed. Writer can determine if reader
+    	// can receive multicast or not
         this.preferMulticast = preferMulticast;
     }
 

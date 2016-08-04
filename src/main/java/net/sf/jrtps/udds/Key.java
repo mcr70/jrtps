@@ -13,7 +13,6 @@ import java.lang.annotation.Target;
  * 
  * A default index is set to 0, which allows fields to be annotated with a
  * simple Key annotation:
- * <p>
  * 
  * <pre>
  * public class HelloMessage {
@@ -24,7 +23,6 @@ import java.lang.annotation.Target;
  * </pre>
  * 
  * An example with multiple Key elements:
- * <p>
  * 
  * <pre>
  * public class HelloMessage {

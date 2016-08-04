@@ -16,6 +16,8 @@ import net.sf.jrtps.message.DataEncapsulation;
 public interface Marshaller<T> {
     /**
      * Determines whether or not a key is associated with type T.
+     * 
+     * @return true if a key is associated with type T
      */
     public boolean hasKey();
 
@@ -35,7 +37,7 @@ public interface Marshaller<T> {
      * 
      * @param dEnc DataEncapsulation
      * @return An instance of type T
-     * @throws IOException
+     * @throws IOException if a failure is detected during operation
      */
     public T unmarshall(DataEncapsulation dEnc) throws IOException;
 
@@ -44,7 +46,7 @@ public interface Marshaller<T> {
      * 
      * @param data An Object to marshall
      * @return DataEncapsulation
-     * @throws IOException
+     * @throws IOException if a failure is detected during operation
      */
     public DataEncapsulation marshall(T data) throws IOException;
 }

@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  * a latest Sample is preserved in history. 
  * 
  * @author mcr70
- * @param <T>
+ * @param <T> Type of Instance
  */
 public class Instance <T> {
     private static final Logger logger = LoggerFactory.getLogger(Instance.class);

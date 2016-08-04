@@ -17,7 +17,7 @@ public class QosOwnership extends Parameter implements DataReaderPolicy<QosOwner
     /**
      * Constructor.
      * 
-     * @param kind
+     * @param kind SHARED or EXCLUSIVE
      */
     public QosOwnership(Kind kind) {
         super(ParameterId.PID_OWNERSHIP);

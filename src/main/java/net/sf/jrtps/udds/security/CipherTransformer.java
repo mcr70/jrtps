@@ -44,8 +44,8 @@ public class CipherTransformer implements Transformer {
 	 * 
 	 * @param cipherName Name of the transformation
 	 * @param kind transformationKind
-	 * @throws NoSuchAlgorithmException
-	 * @throws NoSuchPaddingException
+	 * @throws NoSuchAlgorithmException on NoSuchAlgorithmException
+	 * @throws NoSuchPaddingException on NoSuchPaddingException
 	 */
     public CipherTransformer(String cipherName, int kind) throws NoSuchAlgorithmException, NoSuchPaddingException {
 		this.name = cipherName;

@@ -24,8 +24,8 @@ public class PermissionsToken extends Parameter {
     /**
      * Constructs new PermissionsToken by reading the xml file from given InputStream
      * @param xml InputStream to permissions document
-     * @throws IOException
-     * @throws NoSuchAlgorithmException
+     * @throws IOException on IOException
+     * @throws NoSuchAlgorithmException on NoSuchAlgorithmException
      */
     public PermissionsToken(InputStream xml) throws IOException, NoSuchAlgorithmException {
         super(ParameterId.PID_PERMISSIONS_TOKEN);

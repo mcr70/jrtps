@@ -160,8 +160,8 @@ public class Participant {
 	/**
 	 * Create a Participant with given domainId and participantId.
 	 * 
-	 * @param domainId domainId
-	 * @param participantId
+	 * @param domainId Domain ID
+	 * @param participantId Participant ID
 	 */
 	public Participant(int domainId, int participantId) {
 		this(domainId, participantId, null, null);
@@ -180,8 +180,8 @@ public class Participant {
 	 * By providing a custom EntityFactory, application can provide customized 
 	 * DataReaders and DataWriters, including entities for builtin topics.
 	 * 
-	 * @param domainId domainId of this participant.
-	 * @param participantId participantId of this participant.
+	 * @param domainId Domain Id of this participant.
+	 * @param participantId Participant Id of this participant.
 	 * @param ef EntityFactory to be used. If ef is null, a default EntityFactory will be used.
 	 * @param cfg Configuration used. If config is null, default Configuration is used.
 	 */
@@ -365,7 +365,8 @@ public class Participant {
 	 * the value of TypeName to be announced to remote entities. Otherwise
 	 * TypeName is set to fully qualified class name.
 	 * 
-	 * @param type
+	 * @param type Type of the DataReader to create
+	 * @param <T> Type of DataReader
 	 * @return a DataReader
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> type) {
@@ -379,10 +380,10 @@ public class Participant {
 	 * the value of TypeName to be announced to remote entities. Otherwise
 	 * TypeName is set to fully qualified class name.
 	 * 
-	 * @param type 
+	 * @param type Type of the DataReader to create
 	 * @param qos QualityOfService used
+	 * @param <T> Type of DataReader
 	 * @return a DataReader
-	 * @see Type
 	 */
 	public <T> DataReader<T> createDataReader(Class<T> type, QualityOfService qos) {
 		return createDataReader(getTopicName(type), type, getTypeName(type), qos);
@@ -396,6 +397,7 @@ public class Participant {
 	 * @param type type of the DataReader
 	 * @param typeName name of the type
 	 * @param qos QualityOfService
+	 * @param <T> Type of the reader
 	 * @return a DataReader
 	 */
 	public <T> DataReader<T> createDataReader(final String topicName, Class<T> type, final String typeName, final QualityOfService qos) {        
@@ -530,6 +532,7 @@ public class Participant {
 	 * 
 	 * 
 	 * @param type A class, that is used with created DataWriter.
+	 * @param <T> Type of DataWriter
 	 * @return a DataWriter
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> type) {
@@ -546,6 +549,7 @@ public class Participant {
 	 * 
 	 * @param type A class, that is used with created DataWriter.
 	 * @param qos QualityOfService
+	 * @param <T> Type of DataWriter
 	 * @return a DataWriter
 	 */
 	public <T> DataWriter<T> createDataWriter(Class<T> type, QualityOfService qos) {
@@ -560,6 +564,7 @@ public class Participant {
 	 * @param type type of the DataWriter
 	 * @param typeName name of the type. typeName gets sent to remote readers. 
 	 * @param qos QualityOfService
+	 * @param <T> Type of DataWriter
 	 * @return a DataWriter
 	 */
 	public <T> DataWriter<T> createDataWriter(final String topicName, final Class<T> type, 
@@ -713,7 +718,8 @@ public class Participant {
 	 * over other matching Marshallers. 
 	 * 
 	 * @param type a Class, that will be associated with given Marshaller 
-	 * @param m Marshaller associated with given type
+	 * @param m Marshaller associated with given typ
+	 * @param <T> Type of Marshaller
 	 */
 	public <T> void setMarshaller(Class<T> type, Marshaller<T> m) {
 		marshallers.put(type, m);
@@ -926,7 +932,7 @@ public class Participant {
 	/**
 	 * Adds a new EntityListener
 	 * 
-	 * @param el
+	 * @param el EntityListener to add
 	 */
 	public void addEntityListener(EntityListener el) {
 		entityListeners.add(el);

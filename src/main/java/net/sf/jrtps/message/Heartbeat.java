@@ -54,7 +54,7 @@ public class Heartbeat extends SubMessage {
     /**
      * Sets the finalFlag to given value.
      * 
-     * @param flag
+     * @param flag finalFlag
      */
     public void finalFlag(boolean flag) {
         if (flag) {
@@ -78,7 +78,7 @@ public class Heartbeat extends SubMessage {
     /**
      * Sets the livelinessFlag to given value
      * 
-     * @param livelinessFlag
+     * @param livelinessFlag livelinessFlag
      */
     public void livelinessFlag(boolean livelinessFlag) {
         if (livelinessFlag) {
@@ -92,6 +92,8 @@ public class Heartbeat extends SubMessage {
      * Identifies the Reader Entity that is being informed of the availability
      * of a set of sequence numbers. Can be set to ENTITYID_UNKNOWN to indicate
      * all readers for the writer that sent the message.
+     * 
+     * @return EntityId of the reader
      */
     public EntityId getReaderId() {
         return readerId;
@@ -100,6 +102,8 @@ public class Heartbeat extends SubMessage {
     /**
      * Identifies the Writer Entity to which the range of sequence numbers
      * applies.
+     * 
+     * @return EntityId of the writer
      */
     public EntityId getWriterId() {
         return writerId;
@@ -108,6 +112,7 @@ public class Heartbeat extends SubMessage {
     /**
      * Identifies the first (lowest) sequence number that is available in the
      * Writer.
+     * @return First available sequence number
      */
     public long getFirstSequenceNumber() {
         return firstSN.getAsLong();
@@ -116,6 +121,8 @@ public class Heartbeat extends SubMessage {
     /**
      * Identifies the last (highest) sequence number that is available in the
      * Writer.
+     * 
+     * @return Last available sequence number
      */
     public long getLastSequenceNumber() {
         return lastSN.getAsLong();
@@ -125,6 +132,8 @@ public class Heartbeat extends SubMessage {
      * A counter that is incremented each time a new Heartbeat message is sent.
      * Provides the means for a Reader to detect duplicate Heartbeat messages
      * that can result from the presence of redundant communication paths.
+     * 
+     * @return a count
      */
     public int getCount() {
         return count;

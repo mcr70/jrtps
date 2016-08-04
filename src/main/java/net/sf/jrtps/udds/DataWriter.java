@@ -34,7 +34,11 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
     private PublicationData publicationData;
 
     /**
-     * Constructor with null typeName
+     * Constructor with null typeName.
+     * @param p Participant
+     * @param type Class of the type this DataWriter manages
+     * @param writer RTPSWriter used
+     * @param hCache History cache used
      */
     protected DataWriter(Participant p, Class<T> type, RTPSWriter<T> writer, HistoryCache<T> hCache) {
     	this(p, type, null, writer, hCache);
@@ -185,7 +189,7 @@ public class DataWriter<T> extends Entity<T, SubscriptionData> {
 
     /**
      * Registers a ContentFilter
-     * @param cf
+     * @param cf ContentFilter to register
      */
     public void registerContentFilter(ContentFilter<T> cf) {
     	rtps_writer.registerContentFilter(cf);

@@ -28,7 +28,7 @@ public class InfoDestination extends SubMessage {
     /**
      * This constructor is used when the intention is to send data into network.
      * 
-     * @param guidPrefix
+     * @param guidPrefix GuidPrefix of InfoDestination
      */
     public InfoDestination(GuidPrefix guidPrefix) {
         super(new SubMessageHeader(KIND));
@@ -51,6 +51,8 @@ public class InfoDestination extends SubMessage {
      * Provides the GuidPrefix that should be used to reconstruct the GUIDs of
      * all the RTPS Reader entities whose EntityIds appears in the Submessages
      * that follow.
+     * 
+     * @return GuidPrefix
      */
     public GuidPrefix getGuidPrefix() {
         return guidPrefix;
@@ -61,6 +63,7 @@ public class InfoDestination extends SubMessage {
         guidPrefix.writeTo(bb);
     }
 
+    @Override
     public String toString() {
         return super.toString() + ", " + guidPrefix;
     }

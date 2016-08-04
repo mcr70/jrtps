@@ -60,8 +60,8 @@ public class Locator {
 
     /**
      * Create new Locator.
-     * @param kind
-     * @param port
+     * @param kind Kind
+     * @param port port
      * @param address address must be an array of length 16
      * @throws IllegalArgumentException if address is not of length 16
      */

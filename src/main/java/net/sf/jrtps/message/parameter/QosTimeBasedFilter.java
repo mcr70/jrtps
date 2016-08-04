@@ -5,7 +5,7 @@ import net.sf.jrtps.types.Duration;
 
 /**
  * QosTimeBasedFilter. This policy must be consistent with QosDeadline, so that
- * period <= minimum_separation.
+ * period &le; minimum_separation.
  * 
  * @author mcr70
  * 
