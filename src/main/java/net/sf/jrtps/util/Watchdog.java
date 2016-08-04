@@ -16,7 +16,7 @@ public class Watchdog {
 
     /**
      * Create Watchdog with given ScheduledExecutorService.
-     * @param ses
+     * @param ses ScheduledExecutorService to be used with this Watchdog
      */
     public Watchdog(ScheduledExecutorService ses) {
         this.ses = ses;

@@ -27,11 +27,11 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
     /**
      * Constructor
      * 
-     * @param p
+     * @param p Participant
      * @param type Type of the entity
      * @param typeName if type null, typeName is set to be fully qualified class name of type 
      * @param topicName name of the topic this entity is bound to.
-     * @param guid 
+     * @param guid Guid of this Entity
      */
     protected Entity(Participant p, Class<T> type, String typeName, String topicName, Guid guid) {
         this.participant = p;
@@ -48,7 +48,7 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
 
     /**
      * Adds a new CommunicationListener to this Entity.
-     * @param cl
+     * @param cl CommunicationListener to add
      */
     public void addCommunicationListener(CommunicationListener<ENTITY_DATA> cl) {
         communicationListeners.add(cl);
@@ -56,7 +56,7 @@ public class Entity<T, ENTITY_DATA extends DiscoveredData> {
     
     /**
      * Removes a CommunicationListener from this Entity.
-     * @param cl
+     * @param cl CommunicationListener to remove
      */
     public void removeCommunicationListener(CommunicationListener<ENTITY_DATA> cl) {
         communicationListeners.remove(cl);

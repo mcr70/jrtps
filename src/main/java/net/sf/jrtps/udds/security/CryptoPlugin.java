@@ -102,7 +102,7 @@ public class CryptoPlugin {
 	}
 	/**
 	 * Registers a Transformer to this CryptoPlugin
-	 * @param ct
+	 * @param ct Transformer to register
 	 */
 	public static void registerTransformer(Transformer ct) {
 		logger.debug("Registering Transformer {}({}) with kind {}", ct.getName(), 
@@ -113,10 +113,11 @@ public class CryptoPlugin {
 	
 	/**
 	 * This method is called by jRTPS when a message is being sent.
+	 * 
 	 * @param remoteGuid Guid of the remote entity
 	 * @param message Message to be sent.
 	 * @return An encoded message
-	 * @throws SecurityException 
+	 * @throws SecurityException  on SecurityException
 	 */
 	public Message encodeMessage(Guid remoteGuid, Message message) throws SecurityException {
 		if (transformationKind == 0) {
@@ -151,10 +152,10 @@ public class CryptoPlugin {
 	 * Decodes a SecureSubMessage into Message. This method is called by message
 	 * receiver to decode secured message.
 	 *
-	 * @param sourceGuidPrefix 
+	 * @param sourceGuidPrefix GuidPrefix
 	 * @param msg SecureSubMessage to decode
 	 * @return decoded Message
-	 * @throws SecurityException 
+	 * @throws SecurityException on SecurityException 
 	 */
 	public Message decodeMessage(GuidPrefix sourceGuidPrefix, SecureSubMessage msg) throws SecurityException {
 		Transformer ctr = getTransformer(msg.getSecurePayload().getTransformationKind());

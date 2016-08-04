@@ -38,11 +38,10 @@ public class Data extends SubMessage {
     /**
      * Constructor for creating a Data message.
      * 
-     * @param readerId
-     * @param writerId
-     * @param seqNum
-     * @param inlineQosParams
-     *            Inline QoS parameters. May be null.
+     * @param readerId EntityId of the reader
+     * @param writerId EntityId of the writer
+     * @param seqNum Sequence number of the Data submessage
+     * @param inlineQosParams Inline QoS parameters. May be null.
      * @param dEnc If null, neither dataFlag or keyFlag is set
      */
     public Data(EntityId readerId, EntityId writerId, long seqNum, ParameterList inlineQosParams, DataEncapsulation dEnc) {

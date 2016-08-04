@@ -47,7 +47,7 @@ public class Duration implements Comparable<Duration> {
     /**
      * Reads Duration from RTPSByteBuffer.
      * 
-     * @param bb
+     * @param bb RTPSByteBuffer to read Duration from
      */
     public Duration(RTPSByteBuffer bb) {
         sec = bb.read_long();
@@ -57,7 +57,7 @@ public class Duration implements Comparable<Duration> {
     /**
      * Writes this Duration to given RTPSByteBuffer.
      * 
-     * @param buffer
+     * @param buffer RTPSByteBuffer to write to
      */
     public void writeTo(RTPSByteBuffer buffer) {
         buffer.write_long(sec);

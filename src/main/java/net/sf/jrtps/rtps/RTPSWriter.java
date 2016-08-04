@@ -137,7 +137,7 @@ public class RTPSWriter<T> extends Endpoint {
 	/**
 	 * Notifies a remote reader with given Guid of the changes available in this writer.
 	 * 
-	 * @param guid
+	 * @param guid Guid of the reader to notify
 	 */
 	public void notifyReader(Guid guid) {
 		notifyReader(guid, this.pushMode);
@@ -194,7 +194,7 @@ public class RTPSWriter<T> extends Endpoint {
 	/**
 	 * Add a matched reader.
 	 * 
-	 * @param readerData
+	 * @param readerData SubscriptionData of the reader
 	 * @return ReaderProxy
 	 */
 	public ReaderProxy addMatchedReader(SubscriptionData readerData) {
@@ -255,7 +255,7 @@ public class RTPSWriter<T> extends Endpoint {
 	/**
 	 * Removes all the matched writers that have a given GuidPrefix
 	 * 
-	 * @param prefix
+	 * @param prefix GuidPrefix
 	 */
 	public void removeMatchedReaders(GuidPrefix prefix) {
 		for (ReaderProxy rp : readerProxies.values()) {
@@ -268,7 +268,7 @@ public class RTPSWriter<T> extends Endpoint {
 	/**
 	 * Remove a matched reader.
 	 * 
-	 * @param readerData
+	 * @param readerData SubscriptionData of the reader to be removed
 	 */
 	public void removeMatchedReader(SubscriptionData readerData) {
 		readerProxies.remove(readerData.getBuiltinTopicKey());
@@ -513,7 +513,7 @@ public class RTPSWriter<T> extends Endpoint {
 	 * Checks, if this RTPSWriter is already matched with a RTPSReader
 	 * represented by given Guid.
 	 * 
-	 * @param readerGuid
+	 * @param readerGuid Guid of the reader
 	 * @return true if matched
 	 */
 	public boolean isMatchedWith(Guid readerGuid) {

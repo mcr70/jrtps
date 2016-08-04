@@ -78,8 +78,8 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
 
     /**
      * Constructs QosLiveliness with given kind and lease_duration
-     * @param kind
-     * @param millis
+     * @param kind Kind os QosLiveliness
+     * @param millis lease duration in milliseconds
      */
     public QosLiveliness(Kind kind, long millis) {
         this(kind, new Duration(millis));
@@ -122,14 +122,14 @@ public class QosLiveliness extends Parameter implements DataReaderPolicy<QosLive
     /**
      * Check if this QosLiveliness is compatible with requested. It is
      * considered compatible, if
-     * <p>
+S     * 
+     * <blockquote> <i>this.kind &ge; requested.kind</i> <b>AND</b><br>
+     * <i>this.lease_duration &le;s requested.lease_duration</i> </blockquote>
      * 
-     * <blockquote> <i>this.kind >= requested.kind</i> <b>AND</b><br>
-     * <i>this.lease_duration <= requested.lease_duration</i> </blockquote>
+     * For the comparison, Kind is ordered like AUTOMATIC &lt;
+     * MANUAL_BY_PARTICIPANT &lt; MANUAL_BY_TOPIC
      * 
-     * For the comparison, Kind is ordered like AUTOMATIC <
-     * MANUAL_BY_PARTICIPANT < MANUAL_BY_TOPIC
-     * 
+     * @param requested Requested QosLiveliness
      * @see Kind
      * @return true, if compatible
      */

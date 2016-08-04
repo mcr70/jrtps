@@ -19,7 +19,7 @@ public abstract class Parameter {
      * Constructs Parameter with null bytes. Bytes are expected to be read by
      * read(RTPSByteBuffer, int)
      * 
-     * @param id
+     * @param id ParameterId
      * @see #read(RTPSByteBuffer, int)
      */
     protected Parameter(ParameterId id) {
@@ -29,8 +29,8 @@ public abstract class Parameter {
     /**
      * Constructs Parameter with given bytes.
      * 
-     * @param id
-     * @param bytes
+     * @param id ParameterId
+     * @param bytes byte array of Parameter
      */
     protected Parameter(ParameterId id, byte[] bytes) {
         this.parameterId = id;
@@ -62,8 +62,8 @@ public abstract class Parameter {
      * This method can be used by implementing classes to read bytes of this
      * parameter to byte array.
      * 
-     * @param bb
-     * @param length
+     * @param bb RTPSByteBuffer, that is used
+     * @param length number of bytes
      */
     protected final void readBytes(RTPSByteBuffer bb, int length) {
         this.bytes = new byte[length];
@@ -75,14 +75,19 @@ public abstract class Parameter {
      * parameter to RTPSByteBuffer. This method must be paired with
      * readBytes(RTPSByteBuffer, int).
      * 
-     * @param bb
+     * @param bb Writes bytes into this RTPSByteBuffer
      */
     protected final void writeBytes(RTPSByteBuffer bb) {
         bb.write(getBytes());
     }
 
+    /**
+     * Writes this Parameter into given RTPSByteBuffer
+     * @param bb RTPSByteBuffer
+     */
     public abstract void writeTo(RTPSByteBuffer bb);
 
+    @Override
     public String toString() {
         if (bytes != null) {
             return getClass().getSimpleName() + Arrays.toString(bytes);

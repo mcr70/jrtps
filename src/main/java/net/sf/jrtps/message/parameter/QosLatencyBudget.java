@@ -12,9 +12,9 @@ public class QosLatencyBudget extends Parameter implements DataReaderPolicy<QosL
     }
 
     /**
-     * Constructor for QosLatenvyBudget.
+     * Constructor for QosLatencyBudget.
      * 
-     * @param duration
+     * @param duration Duration
      */
     public QosLatencyBudget(Duration duration) {
         super(ParameterId.PID_LATENCY_BUDGET);

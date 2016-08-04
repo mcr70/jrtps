@@ -27,7 +27,7 @@ public class QosDurability extends Parameter implements DataReaderPolicy<QosDura
     /**
      * Constructor for QosDurability.
      * 
-     * @param kind
+     * @param kind VOLATILE, TRANSIENT_LOCAL, TRANSIENT or PERSISTENT
      */
     public QosDurability(Kind kind) {
         super(ParameterId.PID_DURABILITY);

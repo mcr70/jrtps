@@ -185,7 +185,7 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
     }
 
 	@Override
-	public void authenticationSucceded(ParticipantData pd) {
+	public void authenticationSucceeded(ParticipantData pd) {
 		logger.debug("Authentication of {} succeeded", pd.getGuidPrefix());
 		participant.waitFor(participant.getConfiguration().getSEDPDelay());
     	

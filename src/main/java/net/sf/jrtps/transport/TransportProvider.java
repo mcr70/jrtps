@@ -66,7 +66,7 @@ public abstract class TransportProvider {
      * Get a provider for given Locator kind. Remote entities advertise Locators, that can be used to
      * connect to them. This method is used to get a corresponding TransportProvider if one exists.
      * 
-     * @param locator
+     * @param locator Locator
      * @return TransportProvider, or null if there was not TransportProvider registered with given Locator.kind
      */
     public static TransportProvider getInstance(Locator locator) {
@@ -115,7 +115,7 @@ public abstract class TransportProvider {
      * @param queue a BlockingQueue, that should be populated with byte[] received by the Receiver.
      * @param bufferSize Size of the buffer that should be used during reception.
      * @return Receiver, or null if Receiver could not be created
-     * @throws IOException 
+     * @throws IOException on IOException
      * 
      * @see #getPortNumberParameters()
      */
@@ -127,13 +127,13 @@ public abstract class TransportProvider {
      * @param locator Locator used
      * @param bufferSize Size of the buffer, that should be used byt the Writer
      * @return Writer
-     * @throws IOException
+     * @throws IOException on IOException
      */
     public abstract Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException;
     
     /**
      * Get the default Locator for discovery.
-     * @param domainId
+     * @param domainId Domain ID
      * @return Locator
      */
     public abstract Locator getDefaultDiscoveryLocator(int domainId);
@@ -141,8 +141,8 @@ public abstract class TransportProvider {
     /**
      * Create a discovery locator with given URI and domainId. This method is called based on
      * the value given in configuration parameter 'jrtps.discovery.announce-uris'
-     * @param uri
-     * @param domainId
+     * @param uri Uri 
+     * @param domainId Domain ID
      * @return Discovery locator
      */
     public abstract Locator createDiscoveryLocator(URI uri, int domainId);

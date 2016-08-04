@@ -24,7 +24,7 @@ public abstract class SubMessage {
     /**
      * Constructor.
      * 
-     * @param header
+     * @param header SubMessageHeader
      */
     protected SubMessage(SubMessageHeader header) {
         this.header = header;
@@ -82,7 +82,7 @@ public abstract class SubMessage {
     /**
      * Writes this SubMessage into given RTPSByteBuffer.
      * 
-     * @param bb
+     * @param bb RTPSByteBuffer
      */
     public abstract void writeTo(RTPSByteBuffer bb);
 

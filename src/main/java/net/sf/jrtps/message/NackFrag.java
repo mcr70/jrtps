@@ -33,6 +33,7 @@ public class NackFrag extends SubMessage {
 
     /**
      * Identifies the Reader entity that requests to receive certain fragments.
+     * @return EntityId of the reader
      */
     public EntityId getReaderId() {
         return readerId;
@@ -41,6 +42,8 @@ public class NackFrag extends SubMessage {
     /**
      * Identifies the Writer entity that is the target of the NackFrag message.
      * This is the Writer Entity that is being asked to re-send some fragments.
+     * 
+     * @return EntityId of the writer
      */
     public EntityId getWriterId() {
         return writerId;
@@ -48,6 +51,8 @@ public class NackFrag extends SubMessage {
 
     /**
      * The sequence number for which some fragments are missing.
+     * 
+     * @return sequence number
      */
     public SequenceNumber getWriterSequenceNumber() {
         return writerSN;
@@ -58,6 +63,8 @@ public class NackFrag extends SubMessage {
      * that appear in the set indicate missing fragments on the reader side. The
      * ones that do not appear in the set are undetermined (could have been
      * received or not).
+     * 
+     * @return SequenceNumberSet indicating missing fragments
      */
     public SequenceNumberSet getFragmentNumberState() {
         return fragmentNumberState;
@@ -67,6 +74,8 @@ public class NackFrag extends SubMessage {
      * A counter that is incremented each time a new NackFrag message is sent.
      * Provides the means for a Writer to detect duplicate NackFrag messages
      * that can result from the presence of redundant communication paths.
+     * 
+     * @return a count
      */
     public int getCount() {
         return count;

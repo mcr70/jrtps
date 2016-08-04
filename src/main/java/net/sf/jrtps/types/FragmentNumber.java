@@ -12,7 +12,7 @@ public class FragmentNumber {
     
     /**
      * Reads a FragmentNumber from given RTPSByteBuffer.
-     * @param bb
+     * @param bb RTPSByteBuffer
      */
     public FragmentNumber(RTPSByteBuffer bb) {
         this.value = bb.read_long();
@@ -20,7 +20,7 @@ public class FragmentNumber {
     
     /**
      * Creates a new FragmentNumber with given value.
-     * @param value
+     * @param value a value
      */
     public FragmentNumber(int value) {
         this.value = value;
@@ -36,7 +36,7 @@ public class FragmentNumber {
     
     /**
      * Writes this FragmentNumber to given RTPSByteBuffer.
-     * @param bb
+     * @param bb RTPSByteBuffer
      */
     public void writeTo(RTPSByteBuffer bb) {
         bb.write_long(value);

@@ -43,8 +43,9 @@ public interface HistoryCache<T> {
     
     /**
      * Registers an instance represented by given sample.
-     * @param sample
-     * @param timestamp
+     * @param sample Sample of type T
+     * @param timestamp timestamp
+     * 
      * @return an Instance
      */
     Instance<T> register(T sample, long timestamp);
@@ -57,7 +58,7 @@ public interface HistoryCache<T> {
     
     /**
      * Get an Instance represented by given Key
-     * @param key
+     * @param key KeyHash representing an instance
      * @return Instance, or null if there was not Instance with given key
      */
     Instance<T> getInstance(KeyHash key);

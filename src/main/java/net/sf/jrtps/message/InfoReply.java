@@ -71,6 +71,8 @@ public class InfoReply extends SubMessage {
     /**
      * Indicates an alternative set of unicast addresses that the Writer should
      * use to reach the Readers when replying to the Submessages that follow.
+     * 
+     * @return a List of Locators
      */
     public List<Locator> getUnicastLocatorList() {
         return unicastLocatorList;
@@ -80,6 +82,8 @@ public class InfoReply extends SubMessage {
      * Indicates an alternative set of multicast addresses that the Writer
      * should use to reach the Readers when replying to the Submessages that
      * follow. Only present when the MulticastFlag is set.
+     * 
+     * @return a List of Locators
      */
     public List<Locator> getMulticastLocatorList() {
         return multicastLocatorList;

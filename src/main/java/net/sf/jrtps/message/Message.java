@@ -27,7 +27,7 @@ public class Message {
     /**
      * Constructor.
      * 
-     * @param prefix
+     * @param prefix GuidPrefix
      */
     public Message(GuidPrefix prefix) {
         this(new Header(prefix));
@@ -36,7 +36,7 @@ public class Message {
     /**
      * Constructor.
      * 
-     * @param header
+     * @param header Header
      */
     public Message(Header header) {
 		this.header = header;
@@ -45,9 +45,8 @@ public class Message {
     /**
      * Constructs a Message from given RTPSByteBuffer.
      * 
-     * @param bb
-     * @throws IllegalMessageException 
-     * @throws IOException
+     * @param bb Reads Message from this RTPSByteBuffer
+     * @throws IllegalMessageException If message could not be parsed
      */
     public Message(RTPSByteBuffer bb) throws IllegalMessageException {
         header = new Header(bb);
@@ -146,7 +145,7 @@ public class Message {
     /**
      * Gets all the SubMessages of this Message.
      * 
-     * @return List<SubMessages>. Returned List is never null.
+     * @return List of SubMessages. Returned List is never null.
      */
     public List<SubMessage> getSubMessages() {
         return submessages;
@@ -159,7 +158,7 @@ public class Message {
      * during writing, buffer position is set to the start of submessage that
      * caused overflow.
      * 
-     * @param buffer
+     * @param buffer RTPSByteBuffer to write to
      * @return true, if an overflow occured during write.
      */
     public boolean writeTo(RTPSByteBuffer buffer) {
@@ -207,11 +206,14 @@ public class Message {
 
     /**
      * Adds a new SubMessage to this Message. SubMessage must well formed.
+     * 
+     * @param sm SubMessage to add
      */
     public void addSubMessage(SubMessage sm) {
         submessages.add(sm);
     }
 
+    @Override
     public String toString() {
         return getHeader() + ", " + getSubMessages();
     }

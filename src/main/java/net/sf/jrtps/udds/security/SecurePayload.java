@@ -69,7 +69,7 @@ public class SecurePayload {
 
 	/**
 	 * Writes this SecurePayload to given RTPSByteBuffer
-	 * @param bb
+	 * @param bb RTPSByteBuffer to write to
 	 */
 	public void writeTo(RTPSByteBuffer bb) {
         bb.write_long(transformationKind);

@@ -8,7 +8,7 @@ import net.sf.jrtps.rtps.Sample;
  * 
  * @author mcr70
  *
- * @param <T>
+ * @param <T> Type of ContentFilter
  */
 public interface ContentFilter<T> {
 	/**

@@ -39,7 +39,7 @@ public class Configuration {
 
     /**
      * Constructs Configuration with given properties.
-     * @param properties
+     * @param properties a Map of properties used to create Configuration
      */
     public Configuration(Map<String, Object> properties) {
         props = new Properties();

@@ -38,6 +38,8 @@ public class InfoTimestamp extends SubMessage {
      * Indicates whether subsequent Submessages should be considered as having a
      * timestamp or not. Timestamp is present in _this_ submessage only if the
      * InvalidateFlag is not set in the header.
+     * 
+     * @return true, if invalidateFlag is set
      */
     public boolean invalidateFlag() {
         return (header.flags & 0x2) != 0;
@@ -65,6 +67,7 @@ public class InfoTimestamp extends SubMessage {
         return timestamp;
     }
 
+    @Override
     public String toString() {
         return super.toString() + ", " + timestamp;
     }

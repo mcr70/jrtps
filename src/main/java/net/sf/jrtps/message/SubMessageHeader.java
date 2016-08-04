@@ -23,7 +23,7 @@ public class SubMessageHeader {
      * DEFAULT_ENDIANESS_FLAG. Length of the SubMessage is set to 0. Length will
      * be calculated during marshalling of the Message.
      * 
-     * @param kind
+     * @param kind Kind of SubMessage
      */
     public SubMessageHeader(int kind) {
         this(kind, DEFAULT_ENDIANNESS_FLAG);
@@ -34,8 +34,8 @@ public class SubMessageHeader {
      * SubMessage is set to 0. Length will be calculated during marshalling of
      * the Message.
      * 
-     * @param kind
-     * @param flags
+     * @param kind Kind of SubMessage
+     * @param flags flags of this SubMessageHeader
      */
     public SubMessageHeader(int kind, int flags) {
         this.kind = (byte) kind;
@@ -60,7 +60,7 @@ public class SubMessageHeader {
     /**
      * Writes this SubMessageHeader into RTPSByteBuffer
      * 
-     * @param bb
+     * @param bb RTPSByteBuffer to write to
      */
     public void writeTo(RTPSByteBuffer bb) {
         bb.write_octet(kind);
@@ -96,6 +96,7 @@ public class SubMessageHeader {
         return kind;
     }
 
+    @Override
     public String toString() {
         StringBuffer sb = new StringBuffer("header[");
         sb.append("0x");

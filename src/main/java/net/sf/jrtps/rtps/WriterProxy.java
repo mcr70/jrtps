@@ -189,7 +189,7 @@ public class WriterProxy extends RemoteProxy {
     
     /**
      * Marks writer represented by this proxy as being alive or not.
-     * @param b
+     * @param b true if this writer is considered alive
      */
     public void isAlive(boolean b) {
         this.isAlive = b;

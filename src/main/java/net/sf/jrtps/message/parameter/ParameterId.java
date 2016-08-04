@@ -1,7 +1,7 @@
 package net.sf.jrtps.message.parameter;
 
 /**
- * ParameterIds for Data submessage. see table 9.12 & table 9.14 & Table 9.17
+ * ParameterIds for Data submessage. see tables 9.12, 9.14 and 9.17
  * 
  * @author mcr70
  * 

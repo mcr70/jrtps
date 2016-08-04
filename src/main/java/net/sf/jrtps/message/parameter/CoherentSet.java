@@ -12,7 +12,7 @@ public class CoherentSet extends Parameter implements InlineQoS {
 
     /**
      * Creates a new CoherentSet with given SequenceNumber
-     * @param seqNum
+     * @param seqNum SequenceNumber
      */
     public CoherentSet(SequenceNumber seqNum) {
         super(ParameterId.PID_COHERENT_SET);

@@ -21,7 +21,7 @@ public interface Transmitter {
     
     /**
      * Close this Transmitter
-     * @throws IOException
+     * @throws IOException on IOException
      */
     public void close() throws IOException;
 }

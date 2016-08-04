@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
  * 
  * @author mcr70
  * 
- * @param <T>
+ * @param <T> Type of Sample
  */
 public class Sample<T> implements Cloneable {
     private static final Logger log = LoggerFactory.getLogger(Sample.class);
@@ -54,7 +54,7 @@ public class Sample<T> implements Cloneable {
     /**
      * This constructor is used to create a Sample, that has no content. It is used to pass
      * only inline QoS parameters to remote reader. For example, indicating an end of coherent set.
-     * @param seqNum
+     * @param seqNum Sequence number
      */
     public Sample(long seqNum) {
         this(null, null, seqNum, System.currentTimeMillis(), System.currentTimeMillis(), (StatusInfo)null);
@@ -62,6 +62,12 @@ public class Sample<T> implements Cloneable {
 
     /**
      * This constructor is used when adding Sample to UDDSWriterCache.
+     * @param writerGuid Guid of the writer
+     * @param m Marshaller used 
+     * @param seqNum Sequence number
+     * @param timestamp Timestamp of this sample
+     * @param kind ChangeKind
+     * @param obj Object of type T
      */
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, long timestamp, ChangeKind kind, T obj) {
         this(writerGuid, m, seqNum, System.currentTimeMillis(), timestamp, new StatusInfo(kind));        
@@ -70,6 +76,12 @@ public class Sample<T> implements Cloneable {
 
     /**
      * This constructor is used when adding Sample to UDDSReaderCache.
+     * @param writerGuid Guid of the writer
+     * @param m Marshaller used
+     * @param seqNum Sequence number
+     * @param timestamp Timestamp of sample
+     * @param sourceTimestamp source timestamp of sample
+     * @param data Data, whose payload is decoded into Object of type T
      */
     public Sample(Guid writerGuid, Marshaller<T> m, long seqNum, 
             long timestamp, long sourceTimestamp, Data data) {
@@ -235,7 +247,7 @@ public class Sample<T> implements Cloneable {
 
     /**
      * Sets a CoherentSet attribute for this Sample.
-     * @param cs
+     * @param cs CoherentSet to set
      */
     public void setCoherentSet(CoherentSet cs) {
         coherentSet = cs;

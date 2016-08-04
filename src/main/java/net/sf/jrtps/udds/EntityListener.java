@@ -13,7 +13,7 @@ public interface EntityListener {
     /**
      * Called when a new Participant has been detected.
      * 
-     * @param pd
+     * @param pd ParticipantData
      */
     public void participantDetected(ParticipantData pd);
 
@@ -21,7 +21,7 @@ public interface EntityListener {
      * Called when a previously know Participant has been lost. Participant gets
      * lost if it does not renew its lease in time.
      * 
-     * @param pd
+     * @param pd ParticipantData
      */
     public void participantLost(ParticipantData pd);
 
@@ -48,14 +48,14 @@ public interface EntityListener {
     /**
      * Called when a new remote reader has been detected.
      * 
-     * @param rd
+     * @param rd SubscriptionData of the reader that was detected
      */
     public void readerDetected(SubscriptionData rd);
 
     /**
      * Called when a new remote writer has been detected.
      * 
-     * @param wd
+     * @param wd PublicationData of the writer that was detected
      */
     public void writerDetected(PublicationData wd);
 }

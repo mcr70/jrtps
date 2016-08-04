@@ -18,6 +18,7 @@ import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
 import net.sf.jrtps.types.Locator;
+import net.sf.jrtps.udds.Participant;
 import net.sf.jrtps.udds.security.CryptoPlugin;
 import net.sf.jrtps.udds.security.SecurityException;
 
@@ -46,12 +47,12 @@ public class Endpoint {
 	private final boolean isSecure;
 
 	/**
-	 * 
-	 * @param participant
-	 * @param entityId
-	 * @param topicName
-	 * @param qos
-	 * @param configuration
+	 * Constructor 
+	 * @param participant {@link RTPSParticipant}
+	 * @param entityId {@link EntityId}
+	 * @param topicName Name of the topic
+	 * @param qos {@link QualityOfService}
+	 * @param configuration {@link Configuration}
 	 */
 	protected Endpoint(RTPSParticipant participant, EntityId entityId, String topicName, QualityOfService qos,
 			Configuration configuration) {

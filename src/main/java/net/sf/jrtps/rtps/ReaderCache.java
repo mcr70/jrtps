@@ -24,6 +24,11 @@ public interface ReaderCache<T> {
     /**
      * Adds a new change to ReaderCache. It is the responsibility of the implementing class
      * to decide whether or not this Sample is actually made available to applications or not.
+     * 
+     * @param id id
+     * @param writerGuid Guid of the writer
+     * @param data Data
+     * @param timestamp Time
      */
     void addChange(int id, Guid writerGuid, Data data, Time timestamp);
     

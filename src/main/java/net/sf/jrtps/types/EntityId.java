@@ -197,8 +197,8 @@ public abstract class EntityId {
     /**
      * Reads EntityId from given byte[] and kind.
      * 
-     * @param eKey
-     * @param kind
+     * @param eKey an array of bytes representing entity key
+     * @param kind Kind of entity
      * @return EntityId
      */
     public static EntityId createEntityId(byte[] eKey, int kind) {
@@ -289,7 +289,7 @@ public abstract class EntityId {
     /**
      * Reads an EntityId from RTPSByteBuffer.
      * 
-     * @param bb
+     * @param bb RTPSByteBuffer
      * @return EntityId
      */
     public static EntityId readEntityId(RTPSByteBuffer bb) {

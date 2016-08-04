@@ -9,12 +9,12 @@ import net.sf.jrtps.builtin.ParticipantData;
 public interface AuthenticationListener {
 	/**
 	 * This method is called after successful authentication. 
-	 * @param pd
+	 * @param pd ParticipantData
 	 */
-	void authenticationSucceded(ParticipantData pd);
+	void authenticationSucceeded(ParticipantData pd);
 	/**
 	 * This method is called when authentication has failed. 
-	 * @param pd
+	 * @param pd ParticipantData
 	 */
 	void authenticationFailed(ParticipantData pd);
 }

@@ -25,8 +25,11 @@ public class EntityFactory {
      * Create a new DataWriter.
      * @param p Participant that is parent of created DataWriter
      * @param type a Class representing the type of writer
+     * @param typeName Name of the type. If null, fully qualified class name is used
      * @param rtpsWriter RTPSWriter to be associated with created DataWriter
      * @param hCache HistoryCache of DataWriter
+     * @param <T> Type of DataWriter
+     * 
      * @return DataWriter
      */
     protected <T> DataWriter<T> createDataWriter(Participant p, Class<T> type, String typeName, RTPSWriter<T> rtpsWriter, 
@@ -38,7 +41,9 @@ public class EntityFactory {
      * Create a new DataReader.
      * @param p Participant that is parent of created DataReader
      * @param type a Class representing the type of reader
+     * @param typeName Name of the type. If null, fully qualified class name is used
      * @param rtpsReader RTPSReader to be associated with created DataReader
+     * @param <T> Type of DataReader
      * @return DataReader
      */
     protected <T> DataReader<T> createDataReader(Participant p, Class<T> type, String typeName, RTPSReader<T> rtpsReader) {
