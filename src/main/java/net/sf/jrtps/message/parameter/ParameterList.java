@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ParameterList {
-    Logger log = LoggerFactory.getLogger(ParameterList.class);
+    private static final Logger log = LoggerFactory.getLogger(ParameterList.class);
 
     private List<Parameter> params = new CopyOnWriteArrayList<>();
 
