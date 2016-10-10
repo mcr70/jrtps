@@ -36,9 +36,4 @@ public class MemTransmitter implements Transmitter {
 
         return overFlowed;
     }
-
-    @Override
-    public void close() throws IOException {
-        // TODO Auto-generated method stub        
-    }
 }

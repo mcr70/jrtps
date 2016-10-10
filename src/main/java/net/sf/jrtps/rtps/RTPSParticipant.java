@@ -2,6 +2,7 @@ package net.sf.jrtps.rtps;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -107,7 +108,6 @@ public class RTPSParticipant {
      */
     public void start() {
         BlockingQueue<byte[]> queue = new LinkedBlockingQueue<>(config.getMessageQueueSize());
-        int bufferSize = config.getBufferSize();
 
         // NOTE: We can have only one MessageReceiver. pending samples concept
         // relies on it.
@@ -116,11 +116,11 @@ public class RTPSParticipant {
 
         logger.debug("Starting receivers for discovery");
         List<URI> discoveryURIs = config.getDiscoveryListenerURIs();
-        startReceiversForURIs(queue, bufferSize, discoveryURIs, true);
+        startReceiversForURIs(queue, discoveryURIs, true);
 
         logger.debug("Starting receivers for user data");
         List<URI> listenerURIs = config.getListenerURIs();
-        startReceiversForURIs(queue, bufferSize, listenerURIs, false);
+        startReceiversForURIs(queue, listenerURIs, false);
 
         logger.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
                 writerEndpoints.size());
@@ -182,6 +182,11 @@ public class RTPSParticipant {
             w.close();
         }
         writerEndpoints.clear();
+        
+        Collection<TransportProvider> transportProviders = TransportProvider.getTransportProviders();
+        for (TransportProvider tp : transportProviders) { // Let TransportProviders do cleanup
+        	tp.close(); 
+        }
     }
 
     /**
@@ -400,7 +405,7 @@ public class RTPSParticipant {
         return null;
     }
 
-    private void startReceiversForURIs(BlockingQueue<byte[]> queue, int bufferSize, List<URI> listenerURIs, 
+    private void startReceiversForURIs(BlockingQueue<byte[]> queue, List<URI> listenerURIs, 
             boolean discovery) {
         for (URI uri : listenerURIs) {
             TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
@@ -408,8 +413,7 @@ public class RTPSParticipant {
             if (provider != null) {
                 try {
                     logger.debug("Starting receiver for {}", uri);
-                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, 
-                            queue, bufferSize);
+                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, queue);
 
                     //if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
                     this.participantId = receiver.getParticipantId();

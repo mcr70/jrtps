@@ -42,6 +42,7 @@ public class UDPReceiver implements Receiver {
         this.discovery = rConfig.discovery;
     }
 
+    @Override
     public void run() {
         log.debug("Listening on udp://{}:{} for {}", uri.getHost(), socket.getLocalPort(),
                 discovery ? "discovery traffic" : "user traffic");

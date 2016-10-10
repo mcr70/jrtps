@@ -30,17 +30,17 @@ public class MemProvider extends TransportProvider {
 
     @Override
     public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery,
-            BlockingQueue<byte[]> queue, int bufferSize) throws IOException {        
+            BlockingQueue<byte[]> queue) throws IOException {        
         BlockingQueue<byte[]> inQueue = getQueue(new MemLocator(uri));
         
         return new MemReceiver(new MemLocator(uri), participantId, inQueue, queue);
     }
 
     @Override
-    public Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException {
+    public Transmitter getTransmitter(Locator locator) throws IOException {
         BlockingQueue<byte[]> outQueue = getQueue(locator);
         logger.debug("Creating transmitter for {}, queue: {}", locator, outQueue.hashCode());
-        return new MemTransmitter(outQueue, bufferSize);
+        return new MemTransmitter(outQueue, getConfiguration().getBufferSize());
     }
 
 
