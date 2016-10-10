@@ -7,6 +7,7 @@ import java.net.MulticastSocket;
 import java.net.SocketException;
 import java.net.URI;
 import java.net.UnknownHostException;
+import java.util.HashMap;
 import java.util.concurrent.BlockingQueue;
 
 import net.sf.jrtps.Configuration;
@@ -25,6 +26,8 @@ import org.slf4j.LoggerFactory;
 public class UDPProvider extends TransportProvider {
     private static final Logger logger = LoggerFactory.getLogger(UDPProvider.class);   
 
+    private HashMap<Locator, UDPTransmitter> transmitters = new HashMap<>();
+    
     /**
      * Provider scheme, that is used in configuring UDP TranportProvider URIs.
      */
@@ -35,17 +38,22 @@ public class UDPProvider extends TransportProvider {
     }
 
     @Override
-    public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue, int bufferSize) throws IOException {
+    public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue) throws IOException {
 
         ReceiverConfig rConfig = getDatagramSocket(uri, domainId, participantId, 
                 getConfiguration().getPortNumberParameters(), discovery);
 
-        return new UDPReceiver(uri, rConfig, queue, bufferSize);
+        return new UDPReceiver(uri, rConfig, queue, getConfiguration().getBufferSize());
     }
 
     @Override
-    public Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException {
-        return new UDPTransmitter(new UDPLocator(locator), bufferSize);
+    public Transmitter getTransmitter(Locator locator) throws IOException {
+    	UDPTransmitter tr = transmitters.get(locator);
+    	if (tr == null) {
+    		tr = new UDPTransmitter(new UDPLocator(locator), getConfiguration().getBufferSize());
+    		transmitters.put(locator, tr);
+    	}
+    	return tr;
     }
 
     private ReceiverConfig getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
@@ -141,5 +149,12 @@ public class UDPProvider extends TransportProvider {
         }
 
         return null;
+    }
+
+    @Override
+    public void close() {
+    	for (UDPTransmitter tr : transmitters.values()) {
+    		tr.close();
+    	}
     }
 }

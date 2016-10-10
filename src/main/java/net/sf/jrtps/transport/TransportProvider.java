@@ -113,23 +113,21 @@ public abstract class TransportProvider {
      * @param participantId participantId
      * @param discovery set to true, if the receiver created will be for discovery
      * @param queue a BlockingQueue, that should be populated with byte[] received by the Receiver.
-     * @param bufferSize Size of the buffer that should be used during reception.
      * @return Receiver, or null if Receiver could not be created
      * @throws IOException on IOException
      * 
      * @see #getPortNumberParameters()
      */
-    public abstract Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue, int bufferSize) throws IOException;
+    public abstract Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue) throws IOException;
 
     /**
-     * Creates a new Transmitter. Remote entities advertise how they can be reached by the means of Locator.
+     * Gets a Transmitter. Remote entities advertise how they can be reached by the means of Locator.
      * 
      * @param locator Locator used
-     * @param bufferSize Size of the buffer, that should be used byt the Writer
      * @return Writer
      * @throws IOException on IOException
      */
-    public abstract Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException;
+    public abstract Transmitter getTransmitter(Locator locator) throws IOException;
     
     /**
      * Get the default Locator for discovery.
@@ -146,4 +144,12 @@ public abstract class TransportProvider {
      * @return Discovery locator
      */
     public abstract Locator createDiscoveryLocator(URI uri, int domainId);
+
+    /**
+     * Closes TransportProvider. This method is called when participant is closed.
+     * TransportProvider implementation might do some cleanup of resources by overriding 
+     * this method.
+     */
+    public void close() { // Default implementation does nothing
+    }
 }

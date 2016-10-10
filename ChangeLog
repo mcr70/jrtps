@@ -1,3 +1,6 @@
+1.4.0
+	- Changed TransportProvider interfaces. 
+	
 1.3.6
     - FIX: Will not instantiate JKSAuthenticationPlugin, if 
       'udds.security.jks.keystore' configuration parameter is 

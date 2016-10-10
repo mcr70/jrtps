@@ -1,3 +1,9 @@
+MacOSX - multicast
+==================
+    - To enable multicast: sudo route -nv add -net 239.255.0.1 -interface en0
+    - To remove multicast: sudo route -v delete -inet 239.255.0.1
+    - -Djava.net.preferIPv4Stack=true
+
 DDS Security notes
 ==================
 	- What is the topic name for ParticipantStatelessMessage builtin Topic.
