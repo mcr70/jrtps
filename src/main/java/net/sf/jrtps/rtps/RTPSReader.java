@@ -448,20 +448,14 @@ public class RTPSReader<T> extends Endpoint {
 
 	private WriterProxy getWriterProxy(Guid writerGuid) {
 		WriterProxy wp = writerProxies.get(writerGuid);
-
 		if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
+			// Create dummy proxy for SPDP writer
 			logger.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
 			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
 					ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
 
-			List<Locator> locators = new LinkedList<>();
-
-			Collection<TransportProvider> providers = TransportProvider.getTransportProviders();
-			for (TransportProvider provider : providers) {
-				locators.add(provider.getDefaultDiscoveryLocator(getParticipant().getDomainId()));
-			}            
-
-			wp = new WriterProxy(this, pd, locators, 0);
+			// Use empty Locator list, it will be handled by defaults later
+			wp = new WriterProxy(this, pd, new LinkedList<Locator>(), 0);
 
 			//wp.setLivelinessTask(createLivelinessTask(wp)); // No need to set liveliness task, since liveliness is infinite
 

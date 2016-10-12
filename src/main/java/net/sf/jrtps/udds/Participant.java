@@ -125,6 +125,9 @@ public class Participant {
 
 	private AuthenticationPlugin authPlugin = null;
 
+	private int domainId; // Keep track of domainId and participantId, needed in port number allocation
+	private int participantId;
+
 	{
 		spdpQoS = QualityOfService.getSPDPQualityOfService(); 
 		sedpQoS = QualityOfService.getSEDPQualityOfService();
@@ -186,6 +189,8 @@ public class Participant {
 	 * @param cfg Configuration used. If config is null, default Configuration is used.
 	 */
 	public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
+		this.domainId = domainId;
+		this.participantId = participantId;
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
 		this.entityFactory = ef != null ? ef : new EntityFactory();
@@ -1082,9 +1087,9 @@ public class Participant {
 
 		List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
 		for (URI uri : discoveryAnnounceURIs) {
-			TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
+			TransportProvider provider = TransportProvider.getProviderForScheme(uri.getScheme());
 			if (provider != null) {
-				Locator locator = provider.createDiscoveryLocator(uri, domainId); 
+				Locator locator = provider.createLocator(uri, domainId, participantId, true); 
 				discoveryLocators.add(locator);
 			}
 			else {
@@ -1103,6 +1108,15 @@ public class Participant {
 		discoveredParticipants.put(GuidPrefix.GUIDPREFIX_UNKNOWN, pd);
 	}
 
+
+	private URI normalizeUri(URI uri, boolean discovery) {
+		if (uri.getPort() == -1) {
+			if (discovery) {
+				
+			}
+		}
+		return uri;
+	}
 
 	AuthenticationPlugin getAuthenticationPlugin() {
 		return authPlugin;
