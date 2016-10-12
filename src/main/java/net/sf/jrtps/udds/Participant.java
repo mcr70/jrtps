@@ -197,7 +197,7 @@ public class Participant {
 		this.config = cfg != null ? cfg : new Configuration();
 
 		// UDPProvider is used 
-		UDPProvider provider = new UDPProvider(config); 
+		UDPProvider provider = new UDPProvider(config, participantId); 
 		TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
 				Locator.LOCATOR_KIND_UDPv4 /*, Locator.LOCATOR_KIND_UDPv6*/);
 

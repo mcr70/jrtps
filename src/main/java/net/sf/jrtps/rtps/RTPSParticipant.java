@@ -414,10 +414,11 @@ public class RTPSParticipant {
             if (provider != null) {
                 try {
                     logger.debug("Starting receiver for {}", uri);
-                    Receiver receiver = provider.getReceiver(uri, domainId, participantId, discovery, queue);
+                    Locator locator = provider.createLocator(uri, domainId, participantId, discovery);
+                    Receiver receiver = provider.getReceiver(locator, queue);
 
                     //if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
-                    this.participantId = receiver.getParticipantId();
+                    //this.participantId = receiver.getParticipantId();
                     //}
 
                     setLocator(receiver.getLocator(), discovery);

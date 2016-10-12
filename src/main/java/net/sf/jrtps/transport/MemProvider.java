@@ -29,11 +29,10 @@ public class MemProvider extends TransportProvider {
 	}
 
 	@Override
-	public Receiver getReceiver(URI uri, int domainId, int participantId, boolean discovery,
-			BlockingQueue<byte[]> queue) throws IOException {        
-		BlockingQueue<byte[]> inQueue = getQueue(new MemLocator(uri));
+	public Receiver getReceiver(Locator locator, BlockingQueue<byte[]> queue) throws IOException {        
+		BlockingQueue<byte[]> inQueue = getQueue(new MemLocator(locator));
 
-		return new MemReceiver(new MemLocator(uri), participantId, inQueue, queue);
+		return new MemReceiver(new MemLocator(locator), inQueue, queue);
 	}
 
 	@Override
@@ -45,17 +44,6 @@ public class MemProvider extends TransportProvider {
 
 	@Override
 	public Locator createLocator(URI uri, int domainId, int participantId, boolean isDiscovery) {
-		if (uri.getPort() == -1) {
-			PortNumberParameters pnp = getConfiguration().getPortNumberParameters();
-			int port;
-			if (isDiscovery) {
-				return new MemLocator(uri, pnp.getDiscoveryMulticastPort(domainId));
-			}
-			else {
-				return new MemLocator(uri, pnp.getUserdataMulticastPort(domainId));
-			}
-		}	
-
 		return new MemLocator(uri);
 	}
 
