@@ -63,10 +63,19 @@ implements SampleListener<ParticipantData>, AuthenticationListener {
                         // First, make sure remote participant knows about us.
                         DataWriter<?> pw = participant.getWriter(EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER);
                         SubscriptionData rd = new SubscriptionData(ParticipantData.BUILTIN_TOPIC_NAME,
-                                ParticipantData.class.getName(), new Guid(pd.getGuidPrefix(),
-                                        EntityId.SPDP_BUILTIN_PARTICIPANT_READER), pd.getQualityOfService());                        
+                                ParticipantData.class.getName(), 
+                                new Guid(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_READER), 
+                                pd.getQualityOfService());                        
                         pw.addMatchedReader(rd);
 
+                        // Next, add matched writer for SPDP reader
+                        DataReader<?> pr = participant.getReader(EntityId.SPDP_BUILTIN_PARTICIPANT_READER);
+            			PublicationData pData = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
+            					ParticipantData.class.getName(), 
+            					new Guid(pd.getGuidPrefix(), EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER), 
+            					pd.getQualityOfService());
+            			pr.addMatchedWriter(pData);
+                        
                         addMatchedEntitiesForAuth(pd);                        	
                         authPlugin.beginHandshake(pd);
                     }

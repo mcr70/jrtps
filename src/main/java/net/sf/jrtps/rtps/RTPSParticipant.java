@@ -18,6 +18,7 @@ import java.util.concurrent.TimeUnit;
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
+import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.transport.Receiver;
 import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
@@ -139,7 +140,7 @@ public class RTPSParticipant {
     public <T> RTPSReader<T> createReader(EntityId eId, String topicName, ReaderCache<T> rCache, QualityOfService qos) {
         RTPSReader<T> reader = new RTPSReader<T>(this, eId, topicName, rCache, qos, config);
         reader.setDiscoveredParticipants(discoveredParticipants);
-
+		
         readerEndpoints.add(reader);
 
         return reader;
@@ -408,12 +409,12 @@ public class RTPSParticipant {
     private void startReceiversForURIs(BlockingQueue<byte[]> queue, List<URI> listenerURIs, 
             boolean discovery) {
         for (URI uri : listenerURIs) {
-            TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
+            TransportProvider provider = TransportProvider.getProviderForScheme(uri.getScheme());
 
             if (provider != null) {
                 try {
                     logger.debug("Starting receiver for {}", uri);
-                    Receiver receiver = provider.createReceiver(uri, domainId, participantId, discovery, queue);
+                    Receiver receiver = provider.getReceiver(uri, domainId, participantId, discovery, queue);
 
                     //if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
                     this.participantId = receiver.getParticipantId();

@@ -38,7 +38,7 @@ public class UDPProvider extends TransportProvider {
     }
 
     @Override
-    public Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue) throws IOException {
+    public Receiver getReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue) throws IOException {
 
         ReceiverConfig rConfig = getDatagramSocket(uri, domainId, participantId, 
                 getConfiguration().getPortNumberParameters(), discovery);
@@ -56,68 +56,8 @@ public class UDPProvider extends TransportProvider {
     	return tr;
     }
 
-    private ReceiverConfig getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
-        logger.trace("Creating DatagramSocket for URI {}, domain {}, pId {}", uri, domainId, participantId);
-
-        InetAddress ia = InetAddress.getByName(uri.getHost());
-        DatagramSocket ds = null;
-        int port = uri.getPort();
-
-        boolean participantIdFixed = participantId != -1;
-
-        if (port == -1) {
-            logger.trace("Port number is not specified in URI {}, using {}", uri, pnp);
-        }
-
-        if (ia.isMulticastAddress()) {
-            if (port == -1) {
-                port = discovery ? pnp.getDiscoveryMulticastPort(domainId) : pnp.getUserdataMulticastPort(domainId);
-            }
-
-            ds = new MulticastSocket(port);
-            ((MulticastSocket) ds).joinGroup(ia);
-        }
-        else {
-            int pId = participantIdFixed ? participantId : 0;
-            boolean portFound = port != -1;
-
-            do {
-                logger.trace("Trying pId {}", pId);
-                if (!portFound) {
-                    port = discovery ? pnp.getDiscoveryUnicastPort(domainId, pId) : pnp.getUserdataUnicastPort(domainId, pId);
-                }
-
-                try {
-                    ds = new DatagramSocket(port);
-                    logger.trace("Port set to {}", port);
-                    participantId = pId;
-                    break;
-                }
-                catch(SocketException se) {
-                    pId++;
-                }
-            }
-            while(ds == null && !participantIdFixed && pId < pnp.getDomainIdGain() + pnp.getD3());
-        }
-
-        if (ds == null) {
-        	throw new RuntimeException("Failed to get DatagramSocket for " + uri + ", domain " +
-        			domainId + ", participantId " + participantId);
-        }
-        
-        return new ReceiverConfig(participantId, ds, discovery);
-    }
-
     @Override
-    public Locator getDefaultDiscoveryLocator(int domainId) {
-        byte[] addr = new byte[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, (byte) 239, (byte) 255, 0, 1 };
-        PortNumberParameters pnp = getConfiguration().getPortNumberParameters();
-
-        return new Locator(Locator.LOCATOR_KIND_UDPv4, pnp.getPortBase() + pnp.getDomainIdGain() * domainId + pnp.getD0(), addr);
-    }
-
-    @Override
-    public Locator createDiscoveryLocator(URI uri, int domainId) {
+    public Locator createLocator(URI uri, int domainId, int participantId, boolean isDiscovery) {
         byte[] address = new byte[16];
         try {
             InetAddress addr = InetAddress.getByName(uri.getHost());
@@ -138,9 +78,24 @@ public class UDPProvider extends TransportProvider {
             }
             
             int port = uri.getPort();
-            if (port == -1) {
-                PortNumberParameters pnp = getConfiguration().getPortNumberParameters();
-                port = pnp.getDiscoveryMulticastPort(domainId);
+            if (port == -1) { // Port number is determined with PortNumberParameters
+                PortNumberParameters pnp = getConfiguration().getPortNumberParameters();            		
+            	if (isDiscovery) { // Determine discovery port
+            		if (addr.isMulticastAddress()) {
+            			port = pnp.getDiscoveryMulticastPort(domainId);
+            		}
+            		else {
+            			port = pnp.getDiscoveryUnicastPort(domainId, participantId);
+            		}
+            	}
+            	else { // Determine user data port 
+            		if (addr.isMulticastAddress()) {
+            			port = pnp.getUserdataMulticastPort(domainId);
+            		}
+            		else {
+            			port = pnp.getUserdataUnicastPort(domainId, participantId);
+            		}
+            	}
             }
             
             return new UDPLocator(kind, port, address);
@@ -157,4 +112,57 @@ public class UDPProvider extends TransportProvider {
     		tr.close();
     	}
     }
+
+
+    private ReceiverConfig getDatagramSocket(URI uri, int domainId, int participantId, PortNumberParameters pnp, boolean discovery) throws IOException {
+	    logger.trace("Creating DatagramSocket for URI {}, domain {}, pId {}", uri, domainId, participantId);
+	
+	    InetAddress ia = InetAddress.getByName(uri.getHost());
+	    DatagramSocket ds = null;
+	    int port = uri.getPort();
+	
+	    boolean participantIdFixed = participantId != -1;
+	
+	    if (port == -1) {
+	        logger.trace("Port number is not specified in URI {}, using {}", uri, pnp);
+	    }
+	
+	    if (ia.isMulticastAddress()) {
+	        if (port == -1) {
+	            port = discovery ? pnp.getDiscoveryMulticastPort(domainId) : pnp.getUserdataMulticastPort(domainId);
+	        }
+	
+	        ds = new MulticastSocket(port);
+	        ((MulticastSocket) ds).joinGroup(ia);
+	    }
+	    else {
+	        int pId = participantIdFixed ? participantId : 0;
+	        boolean portFound = port != -1;
+	
+	        do {
+	            logger.trace("Trying pId {}", pId);
+	            if (!portFound) {
+	                port = discovery ? pnp.getDiscoveryUnicastPort(domainId, pId) : pnp.getUserdataUnicastPort(domainId, pId);
+	            }
+	
+	            try {
+	                ds = new DatagramSocket(port);
+	                logger.trace("Port set to {}", port);
+	                participantId = pId;
+	                break;
+	            }
+	            catch(SocketException se) {
+	                pId++;
+	            }
+	        }
+	        while(ds == null && !participantIdFixed && pId < pnp.getDomainIdGain() + pnp.getD3());
+	    }
+	
+	    if (ds == null) {
+	    	throw new RuntimeException("Failed to get DatagramSocket for " + uri + ", domain " +
+	    			domainId + ", participantId " + participantId);
+	    }
+	    
+	    return new ReceiverConfig(participantId, ds, discovery);
+	}
 }

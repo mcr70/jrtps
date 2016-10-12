@@ -148,11 +148,11 @@ public class Endpoint {
 		}
 
 		for (Locator locator : locators) {
-			logger.debug("Sending message to {}", locator);
+			logger.trace("Sending message to {}", locator);
 
 			if (locator != null) {
 				try {
-					TransportProvider provider = TransportProvider.getInstance(locator);
+					TransportProvider provider = TransportProvider.getProviderForKind(locator.getKind());
 					Transmitter tr = provider.getTransmitter(locator);
 
 					overFlowed = tr.sendMessage(m);
@@ -161,7 +161,7 @@ public class Endpoint {
 				}
 			} 
 			else {
-				logger.debug("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
+				logger.warn("[{}] Unable to send message, no suitable locator for proxy {}", getGuid().getEntityId(), proxy);
 				// participant.ignoreParticipant(targetPrefix);
 			}
 		}
