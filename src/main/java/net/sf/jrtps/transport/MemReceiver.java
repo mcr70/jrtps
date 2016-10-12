@@ -16,16 +16,14 @@ public class MemReceiver implements Receiver {
     private static final Logger logger = LoggerFactory.getLogger(MemReceiver.class);
     
     private final Locator locator;
-    private final int participantId;
     private final BlockingQueue<byte[]> inQueue;
     private final BlockingQueue<byte[]> outQueue;
     
     private boolean running = true;
     
     
-    public MemReceiver(Locator locator, int participantId, BlockingQueue<byte[]> inQueue, BlockingQueue<byte[]> outQueue) {
+    public MemReceiver(Locator locator, BlockingQueue<byte[]> inQueue, BlockingQueue<byte[]> outQueue) {
         this.locator = locator;
-        this.participantId = participantId;
         this.inQueue = inQueue;
         this.outQueue = outQueue;
     }
@@ -49,10 +47,6 @@ public class MemReceiver implements Receiver {
         return locator;
     }
 
-    @Override
-    public int getParticipantId() {
-        return participantId;
-    }
 
     @Override
     public void close() {

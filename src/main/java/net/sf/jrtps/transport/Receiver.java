@@ -17,15 +17,6 @@ public interface Receiver extends Runnable {
      * @return Locator
      */
     Locator getLocator();
-
-    /**
-     * Gets the participantId associated with this receiver. During creation of receiver,
-     * participantId may be given as -1, indicating that provider should generate one.
-     * This method returns the value assigned by the provider.
-     * 
-     * @return participantId
-     */
-    int getParticipantId();
     
     /**
      * Close this Receiver

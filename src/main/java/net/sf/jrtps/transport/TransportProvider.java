@@ -112,17 +112,14 @@ public abstract class TransportProvider {
      * If not, domainId, participantId and discovery parameters should be used to create port number 
      * according to specification.
      * 
-     * @param uri Uri of the receiver to create.
-     * @param domainId domainId
-     * @param participantId participantId
-     * @param discovery set to true, if the receiver created will be for discovery
+     * @param locator Locator of the receiver to create.
      * @param queue a BlockingQueue, that should be populated with byte[] received by the Receiver.
      * @return Receiver, or null if Receiver could not be created
      * @throws IOException on IOException
      * 
      * @see #getPortNumberParameters()
      */
-    public abstract Receiver getReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue) throws IOException;
+    public abstract Receiver getReceiver(Locator locator, BlockingQueue<byte[]> queue) throws IOException;
 
     /**
      * Gets a Transmitter. Remote entities advertise how they can be reached by the means of Locator.
