@@ -4,15 +4,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
 
-import net.sf.jrtps.types.Locator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.sf.jrtps.types.Locator;
 
 /**
  * This class receives UDP packets from the network. 
@@ -26,14 +24,12 @@ public class UDPReceiver implements Receiver {
     private final DatagramSocket socket;
     private final int bufferSize;
     private final UDPLocator locator;
-    private final int participantId;
 
     private boolean running = true;
     
     UDPReceiver(UDPLocator locator, ReceiverConfig rConfig, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {        
         this.locator = locator;
 		this.socket = rConfig.ds;
-        this.participantId = rConfig.participantId;
         this.queue = queue;
         this.bufferSize = bufferSize;
     }
@@ -62,16 +58,8 @@ public class UDPReceiver implements Receiver {
             }
         } // while(...)
     }
-
-    @Override
-    public Locator getLocator() {
-        return locator;
-    }
-
     
-    
-    @Override
-    public void close() {
+    void close() {
         log.debug("Closing {}", socket.getLocalPort());
         
         if (socket != null) {
@@ -79,7 +67,6 @@ public class UDPReceiver implements Receiver {
         }
         running = false;
     }
-
 
     @SuppressWarnings("unused")
     private void writeMessage(String string, byte[] msgBytes) {

@@ -20,7 +20,7 @@ import org.junit.Test;
 public class MessageTests {
 	/**
 	 * Tests, that reading and writing of InfoDestination is symmetrical.
-	 * @throws IllegalMessageException 
+	 * @throws IllegalMessageException on exception
 	 */
 	@Test
 	public void testInfoDestination() throws IllegalMessageException {
@@ -43,7 +43,7 @@ public class MessageTests {
 	
 	/**
 	 * Tests, that reading and writing of InfoReply is symmetrical.
-	 * @throws IllegalMessageException 
+	 * @throws IllegalMessageException on exception
 	 */
 	@Test
 	public void testInfoReply() throws IllegalMessageException {
@@ -75,7 +75,7 @@ public class MessageTests {
 
 	/**
 	 * Tests, that reading and writing of InfoReplyIp4 is symmetrical.
-	 * @throws IllegalMessageException 
+	 * @throws IllegalMessageException on exception
 	 */
 	@Test
 	public void testInfoReplyIp4() throws IllegalMessageException {
@@ -102,7 +102,7 @@ public class MessageTests {
 
 	/**
 	 * Tests, that reading and writing of InfoSource is symmetrical.
-	 * @throws IllegalMessageException 
+	 * @throws IllegalMessageException on exception
 	 */
 	@Test
 	public void testInfoSource() throws IllegalMessageException {
@@ -153,7 +153,7 @@ public class MessageTests {
 	
 	/**
 	 * Tests, that reading and writing of InfoTimestamp is symmetrical.
-	 * @throws IllegalMessageException 
+	 * @throws IllegalMessageException on exception
 	 */
 	@Test
 	public void testInfoTimestamp() throws IllegalMessageException {
@@ -176,7 +176,7 @@ public class MessageTests {
 
 	/**
 	 * Writes a message to a byte array. 
-	 * @param m
+	 * @param m Message
 	 * @return byte[]
 	 */
 	private byte[] write(Message m) {

@@ -41,16 +41,4 @@ public class MemReceiver implements Receiver {
             }
         }
     }
-
-    @Override
-    public Locator getLocator() {
-        return locator;
-    }
-
-
-    @Override
-    public void close() {
-        running = false;
-    }
-    
 }
