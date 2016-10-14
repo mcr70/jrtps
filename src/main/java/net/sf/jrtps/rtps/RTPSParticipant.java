@@ -52,11 +52,6 @@ public class RTPSParticipant {
      */
     private final Map<GuidPrefix, ParticipantData> discoveredParticipants;
 
-    /**
-     * A Set that stores network receivers for each locator we know. (For
-     * listening purposes)
-     */
-    private Set<Receiver> receivers = new HashSet<>();
 
     private final List<RTPSReader<?>> readerEndpoints = new CopyOnWriteArrayList<>();
     private final List<RTPSWriter<?>> writerEndpoints = new CopyOnWriteArrayList<>();
@@ -117,14 +112,14 @@ public class RTPSParticipant {
 
         logger.debug("Starting receivers for discovery");
         List<URI> discoveryURIs = config.getDiscoveryListenerURIs();
-        startReceiversForURIs(queue, discoveryURIs, true);
+        int receiverCount = startReceiversForURIs(queue, discoveryURIs, true);
 
         logger.debug("Starting receivers for user data");
         List<URI> listenerURIs = config.getListenerURIs();
-        startReceiversForURIs(queue, listenerURIs, false);
+        receiverCount += startReceiversForURIs(queue, listenerURIs, false);
 
-        logger.debug("{} receivers, {} readers and {} writers started", receivers.size(), readerEndpoints.size(),
-                writerEndpoints.size());
+        logger.debug("{} receivers, {} readers and {} writers started", receiverCount,  
+        		readerEndpoints.size(), writerEndpoints.size());
     }
 
     /**
@@ -172,20 +167,18 @@ public class RTPSParticipant {
      */
     public void close() {
         logger.debug("Closing RTPSParticipant {}", guid);
-        handler.close();
-        
-        for (Receiver r : receivers) { // close network receivers
-            r.close();
-        }
-        readerEndpoints.clear();
+        handler.close(); // Close RTPSMessageReceiver loop gracefully
 
         for (RTPSWriter<?> w : writerEndpoints) { // Closes periodical announce thread
             w.close();
         }
+
         writerEndpoints.clear();
+        readerEndpoints.clear();
         
+        // Let TransportProviders do cleanup
         Collection<TransportProvider> transportProviders = TransportProvider.getTransportProviders();
-        for (TransportProvider tp : transportProviders) { // Let TransportProviders do cleanup
+        for (TransportProvider tp : transportProviders) { 
         	tp.close(); 
         }
     }
@@ -406,8 +399,9 @@ public class RTPSParticipant {
         return null;
     }
 
-    private void startReceiversForURIs(BlockingQueue<byte[]> queue, List<URI> listenerURIs, 
+    private int startReceiversForURIs(BlockingQueue<byte[]> queue, List<URI> listenerURIs, 
             boolean discovery) {
+    	int count = 0;
         for (URI uri : listenerURIs) {
             TransportProvider provider = TransportProvider.getProviderForScheme(uri.getScheme());
 
@@ -417,13 +411,9 @@ public class RTPSParticipant {
                     Locator locator = provider.createLocator(uri, domainId, participantId, discovery);
                     Receiver receiver = provider.getReceiver(locator, queue);
 
-                    //if (!receiver.getLocator().isMulticastLocator()) { // If not multicast, change participantId
-                    //this.participantId = receiver.getParticipantId();
-                    //}
-
-                    setLocator(receiver.getLocator(), discovery);
-                    receivers.add(receiver);
+                    addLocator(locator, discovery);
                     threadPoolExecutor.execute(receiver);
+                    count++;
                 } catch (IOException ioe) {
                     logger.warn("Failed to start receiver for URI {}", uri, ioe);
                 }
@@ -432,6 +422,8 @@ public class RTPSParticipant {
                 logger.warn("Unknown scheme for URI {}", uri);
             }
         }
+        
+        return count;
     }
 
     /** 
@@ -439,7 +431,7 @@ public class RTPSParticipant {
      * @param loc
      * @param discovery
      */
-    private void setLocator(Locator loc, boolean discovery) {
+    private void addLocator(Locator loc, boolean discovery) {
         if (discovery) {
             discoveryLocators.add(loc);
         }

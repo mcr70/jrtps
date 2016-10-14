@@ -41,13 +41,6 @@ public abstract class TransportProvider {
         return config;
     }
 
-    /**
-     * Gets the port number parameters from configuration.
-     * @return PortNumberParameters
-     */
-    protected PortNumberParameters getPortNumberParameters() {
-        return config.getPortNumberParameters();
-    }
     
     /**
      * Get a TranportProvider for given scheme. Scheme is the same, as is used by
@@ -66,7 +59,7 @@ public abstract class TransportProvider {
      * Get a provider for given Locator kind. Remote entities advertise Locators, that can be used to
      * connect to them. This method is used to get a corresponding TransportProvider if one exists.
      * 
-     * @param int kind Kind of the Locator, as in Locator.getKind()
+     * @param kind Kind of the Locator, as in Locator.getKind()
      * @return TransportProvider, or null if there was not TransportProvider registered with given Locator.kind
      */
     public static TransportProvider getProviderForKind(int kind) {
@@ -116,8 +109,6 @@ public abstract class TransportProvider {
      * @param queue a BlockingQueue, that should be populated with byte[] received by the Receiver.
      * @return Receiver, or null if Receiver could not be created
      * @throws IOException on IOException
-     * 
-     * @see #getPortNumberParameters()
      */
     public abstract Receiver getReceiver(Locator locator, BlockingQueue<byte[]> queue) throws IOException;
 
@@ -132,15 +123,17 @@ public abstract class TransportProvider {
     
 
     /**
-     * Create a Locator with given parameters. If the port of the URI
-     * is not given, domainId and participantId and isDiscovery parameters are
-     * used to construct port number.
+     * Create a Locator with given parameters. If there is no port given in URI,
+     * domainId, participantId and isDiscovery parameters are used to construct 
+     * port number. This is done using PortNumberParameters class.
      * 
      * @param uri Uri 
      * @param domainId Domain ID
      * @param participantId Participant ID
      * @param isDiscovery true or false
-     * @return Discovery locator
+     * @return Locator
+     * 
+     * @see net.sf.jrtps.transport.PortNumberParameters
      */
     public abstract Locator createLocator(URI uri, int domainId, int participantId, boolean isDiscovery);
 

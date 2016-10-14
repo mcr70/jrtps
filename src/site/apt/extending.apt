@@ -91,11 +91,6 @@ jrtps.discovery.listener-uris = mem://10.10.10.11:1024
 jrtps.discovery.announce-uris = mem://10.10.10.12:1024
 +----------- 
 
- 
- <Note, that TransportProvider is a work in progress. In particular, all the abstract
-  methods might need some fine tuning. There is some conceptual overlapping between
-  creation of communication objects and creation of URIs for the same things.>
-
 
 * AuthenticationPlugin
 

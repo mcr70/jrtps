@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * This Provider creates receivers and writers for UDP protocol.
+ * This Provider creates receivers and transmitters for UDP protocol.
  * UDP is the only protocol that is required by the RTPS specification.
  * Both unicast and multicast is supported.
  *  
@@ -27,6 +27,7 @@ public class UDPProvider extends TransportProvider {
     private static final Logger logger = LoggerFactory.getLogger(UDPProvider.class);   
 
     private HashMap<Locator, UDPTransmitter> transmitters = new HashMap<>();
+    private HashMap<Locator, UDPReceiver> receivers = new HashMap<>();
     
     /**
      * Provider scheme, that is used in configuring UDP TranportProvider URIs.
@@ -42,10 +43,15 @@ public class UDPProvider extends TransportProvider {
 
     @Override
     public Receiver getReceiver(Locator locator, BlockingQueue<byte[]> queue) throws IOException {
-    	UDPLocator loc = (UDPLocator) locator;
-        ReceiverConfig rConfig = getDatagramSocket(loc);
-
-        return new UDPReceiver(loc, rConfig, queue, getConfiguration().getBufferSize());
+    	UDPReceiver r = receivers.get(locator);
+    	if (r == null) {
+    		UDPLocator loc = (UDPLocator) locator; 
+    		ReceiverConfig rConfig = getDatagramSocket(loc);
+    		r = new UDPReceiver(loc, rConfig, queue, getConfiguration().getBufferSize());
+    		receivers.put(locator, r);
+    	}
+    	
+        return r;
     }
 
     @Override
@@ -110,6 +116,10 @@ public class UDPProvider extends TransportProvider {
 
     @Override
     public void close() {
+    	for (UDPReceiver r : receivers.values()) {
+    		r.close();
+    	}
+
     	for (UDPTransmitter tr : transmitters.values()) {
     		tr.close();
     	}
