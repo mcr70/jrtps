@@ -276,14 +276,12 @@ public class Participant {
 		QualityOfService statelessQos = new QualityOfService();
 		statelessQos.setPolicy(new QosReliability(Kind.BEST_EFFORT, new Duration(0, 0)));
 
-		DataWriter<ParticipantStatelessMessage> sWriter = 
-				createDataWriter(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
-						ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
-						statelessQos);
-		DataReader<ParticipantStatelessMessage> sReader = 
-				createDataReader(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
-						ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
-						statelessQos);
+		createDataWriter(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
+				ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
+				statelessQos);
+		createDataReader(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
+				ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
+				statelessQos);
 	}
 
 	private void registerSecureBuiltinMarshallers() {
@@ -470,7 +468,7 @@ public class Participant {
 		return reader;
 	}
 
-	private void checkMatchedWriters(DataReader reader) {
+	private void checkMatchedWriters(DataReader<?> reader) {
 		QualityOfService requested = reader.getRTPSReader().getQualityOfService();
 		for (Entry<Guid, PublicationData> e : discoveredWriters.entrySet()) {
 			PublicationData pd = e.getValue();
@@ -645,8 +643,8 @@ public class Participant {
 		}
 	}
 	
-	private void writePublicationData(DataWriter writer) {
-		RTPSWriter rtps_writer = writer.getRTPSWriter();
+	private void writePublicationData(DataWriter<?> writer) {
+		RTPSWriter<?> rtps_writer = writer.getRTPSWriter();
 		PublicationData pd = new PublicationData(writer.getTopicName(), writer.getTypeName(), 
 				rtps_writer.getGuid(), rtps_writer.getQualityOfService());
 		writer.setPublicationData(pd);
@@ -1108,15 +1106,6 @@ public class Participant {
 		discoveredParticipants.put(GuidPrefix.GUIDPREFIX_UNKNOWN, pd);
 	}
 
-
-	private URI normalizeUri(URI uri, boolean discovery) {
-		if (uri.getPort() == -1) {
-			if (discovery) {
-				
-			}
-		}
-		return uri;
-	}
 
 	AuthenticationPlugin getAuthenticationPlugin() {
 		return authPlugin;
