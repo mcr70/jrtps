@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.jrtps.Configuration;
@@ -198,11 +199,17 @@ public class RTPSReader<T> extends Endpoint {
 	public Collection<WriterProxy> getMatchedWriters(GuidPrefix prefix) {
 		List<WriterProxy> proxies = new LinkedList<>();
 
-		for (Guid guid : writerProxies.keySet()) {
-			if (guid.getPrefix().equals(prefix)) {
-				proxies.add(writerProxies.get(guid));
+		for (Entry<Guid, WriterProxy> e : writerProxies.entrySet()) {
+			if (prefix.equals(e.getKey().getPrefix())) {
+				proxies.add(e.getValue());
 			}
-		}
+		}		
+		
+//		for (Guid guid : writerProxies.keySet()) {
+//			if (guid.getPrefix().equals(prefix)) {
+//				proxies.add(writerProxies.get(guid));
+//			}
+//		}
 
 		return proxies;
 	}
@@ -428,7 +435,7 @@ public class RTPSReader<T> extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		long seqNumFirst = wp.getGreatestDataSeqNum(); 
+		//long seqNumFirst = wp.getGreatestDataSeqNum(); 
 
 		//        SequenceNumberSet snSet;
 		//        if (seqNumFirst == 0) { 

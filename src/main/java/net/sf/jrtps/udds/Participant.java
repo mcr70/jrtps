@@ -939,7 +939,7 @@ public class Participant {
 	 */
 	public void addEntityListener(EntityListener el) {
 		entityListeners.add(el);
-		if (config.getEntityListenerHistory()); { // udds.entity-listener-history = false
+		if (config.getEntityListenerHistory()) { // udds.entity-listener-history = false
 			for (Entry<GuidPrefix, ParticipantData> e : discoveredParticipants.entrySet()) {
 				el.participantDetected(e.getValue());
 			}

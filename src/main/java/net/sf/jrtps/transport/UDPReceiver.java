@@ -10,8 +10,6 @@ import java.util.concurrent.BlockingQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.jrtps.types.Locator;
-
 /**
  * This class receives UDP packets from the network. 
  * 
@@ -59,10 +57,9 @@ public class UDPReceiver implements Receiver {
         } // while(...)
     }
     
-    void close() {
-        log.debug("Closing {}", socket.getLocalPort());
-        
+    void close() {        
         if (socket != null) {
+            log.debug("Closing {}", socket.getLocalPort());
             socket.close();
         }
         running = false;
@@ -70,10 +67,8 @@ public class UDPReceiver implements Receiver {
 
     @SuppressWarnings("unused")
     private void writeMessage(String string, byte[] msgBytes) {
-        try {
-            FileOutputStream fos = new FileOutputStream(string);
+    	try (FileOutputStream fos = new FileOutputStream(string)) {
             fos.write(msgBytes, 0, msgBytes.length);
-            fos.close();
         } catch (Exception e) {
             log.error("Failed to write message to {}", string, e);
         }
