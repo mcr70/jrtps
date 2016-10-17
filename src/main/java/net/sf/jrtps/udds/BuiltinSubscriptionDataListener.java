@@ -71,7 +71,7 @@ class BuiltinSubscriptionDataListener extends BuiltinListener implements SampleL
             }
             
             if (sdSample.isDisposed()) {
-            	discoveredReaders.remove(sdSample);
+            	discoveredReaders.remove(key);
             }
         }
     }
