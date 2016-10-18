@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
 import net.sf.jrtps.Configuration;
@@ -198,11 +199,17 @@ public class RTPSReader<T> extends Endpoint {
 	public Collection<WriterProxy> getMatchedWriters(GuidPrefix prefix) {
 		List<WriterProxy> proxies = new LinkedList<>();
 
-		for (Guid guid : writerProxies.keySet()) {
-			if (guid.getPrefix().equals(prefix)) {
-				proxies.add(writerProxies.get(guid));
+		for (Entry<Guid, WriterProxy> e : writerProxies.entrySet()) {
+			if (prefix.equals(e.getKey().getPrefix())) {
+				proxies.add(e.getValue());
 			}
-		}
+		}		
+		
+//		for (Guid guid : writerProxies.keySet()) {
+//			if (guid.getPrefix().equals(prefix)) {
+//				proxies.add(writerProxies.get(guid));
+//			}
+//		}
 
 		return proxies;
 	}
@@ -428,7 +435,7 @@ public class RTPSReader<T> extends Endpoint {
 		// This is a simple AckNack, that can be optimized if store
 		// out-of-order data samples in a separate cache.
 
-		long seqNumFirst = wp.getGreatestDataSeqNum(); 
+		//long seqNumFirst = wp.getGreatestDataSeqNum(); 
 
 		//        SequenceNumberSet snSet;
 		//        if (seqNumFirst == 0) { 
@@ -448,20 +455,14 @@ public class RTPSReader<T> extends Endpoint {
 
 	private WriterProxy getWriterProxy(Guid writerGuid) {
 		WriterProxy wp = writerProxies.get(writerGuid);
-
 		if (wp == null && EntityId.SPDP_BUILTIN_PARTICIPANT_WRITER.equals(writerGuid.getEntityId())) {
+			// Create dummy proxy for SPDP writer
 			logger.debug("[{}] Creating proxy for SPDP writer {}", getEntityId(), writerGuid);
 			PublicationData pd = new PublicationData(ParticipantData.BUILTIN_TOPIC_NAME,
 					ParticipantData.class.getName(), writerGuid, QualityOfService.getSPDPQualityOfService());
 
-			List<Locator> locators = new LinkedList<>();
-
-			Collection<TransportProvider> providers = TransportProvider.getTransportProviders();
-			for (TransportProvider provider : providers) {
-				locators.add(provider.getDefaultDiscoveryLocator(getParticipant().getDomainId()));
-			}            
-
-			wp = new WriterProxy(this, pd, locators, 0);
+			// Use empty Locator list, it will be handled by defaults later
+			wp = new WriterProxy(this, pd, new LinkedList<Locator>(), 0);
 
 			//wp.setLivelinessTask(createLivelinessTask(wp)); // No need to set liveliness task, since liveliness is infinite
 

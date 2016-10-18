@@ -30,7 +30,8 @@ class JRTPSThreadFactory implements ThreadFactory {
     /**
      * Called after participant close
      */
-    synchronized void stopThreads() {
+    @SuppressWarnings("deprecation")
+	synchronized void stopThreads() {
         for (Thread t : threads) {
             t.stop();
         }

@@ -11,11 +11,10 @@ import net.sf.jrtps.types.Locator;
  * @author mcr70
  */
 class MemLocator extends Locator {
+    MemLocator(Locator loc) {
+        super(MemProvider.LOCATOR_KIND_MEM, loc.getPort(), ByteBuffer.wrap(new byte[16]).putInt(loc.toString().hashCode()).array());
+    }   
     MemLocator(URI uri) {
         super(MemProvider.LOCATOR_KIND_MEM, uri.getPort(), ByteBuffer.wrap(new byte[16]).putInt(uri.toString().hashCode()).array());
-    }   
-    
-    MemLocator(URI uri, int port) {
-        super(MemProvider.LOCATOR_KIND_MEM, port, ByteBuffer.wrap(new byte[16]).putInt(uri.toString().hashCode()).array());
     }   
 }

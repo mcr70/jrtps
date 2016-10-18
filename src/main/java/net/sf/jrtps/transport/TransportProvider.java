@@ -41,13 +41,6 @@ public abstract class TransportProvider {
         return config;
     }
 
-    /**
-     * Gets the port number parameters from configuration.
-     * @return PortNumberParameters
-     */
-    protected PortNumberParameters getPortNumberParameters() {
-        return config.getPortNumberParameters();
-    }
     
     /**
      * Get a TranportProvider for given scheme. Scheme is the same, as is used by
@@ -58,7 +51,7 @@ public abstract class TransportProvider {
      * @return TransportProvider, or null if there was not TransportProvider registered with given scheme
      * @see java.net.URI#getScheme()
      */
-    public static TransportProvider getInstance(String scheme) {
+    public static TransportProvider getProviderForScheme(String scheme) {
         return providersForScheme.get(scheme);
     }
 
@@ -66,13 +59,13 @@ public abstract class TransportProvider {
      * Get a provider for given Locator kind. Remote entities advertise Locators, that can be used to
      * connect to them. This method is used to get a corresponding TransportProvider if one exists.
      * 
-     * @param locator Locator
+     * @param kind Kind of the Locator, as in Locator.getKind()
      * @return TransportProvider, or null if there was not TransportProvider registered with given Locator.kind
      */
-    public static TransportProvider getInstance(Locator locator) {
-        TransportProvider transportProvider = providersForKind.get(locator.getKind());
+    public static TransportProvider getProviderForKind(int kind) {
+        TransportProvider transportProvider = providersForKind.get(kind);
         if (transportProvider == null) {
-            logger.warn("Could not get TransportProvider for Locator kind {}", locator.getKind());
+            logger.warn("Could not get TransportProvider for Locator kind {}", kind);
         }
         
         return transportProvider;
@@ -80,11 +73,14 @@ public abstract class TransportProvider {
     
     
     /**
-     * Registers a TranportProvider with given scheme and kind
+     * Registers a TranportProvider with given scheme and kind. Scheme is used by local participant
+     * to distinguish between different transports, for example UDP and HTTP. Locator kind is used
+     * to match remote participants communication capabilities with given provider, for example
+     * LOCATOR_KIND_UDPv4.
      * 
      * @param scheme Scheme for the provider
      * @param provider TranportProvider to register
-     * @param kinds Kinds of the Locators, that will be matched to given provider
+     * @param kinds Kinds of the Locators, that will be handled by the given provider
      */
     public static void registerTransportProvider(String scheme, TransportProvider provider, int ... kinds) {
         logger.debug("Registering provider for scheme '{}', kinds {}: {}", scheme, kinds, provider);
@@ -105,45 +101,47 @@ public abstract class TransportProvider {
     }
     
     /**
-     * Creates a new Receiver. If the URI has a port defined, it should be used. If not, domainId, participantId and
-     * discovery parameters should be used to create port number according to specification.
+     * Gets a Receiver from this TransportProvider. If the URI has a port defined, it should be used. 
+     * If not, domainId, participantId and discovery parameters should be used to create port number 
+     * according to specification.
      * 
-     * @param uri Uri of the receiver to create.
-     * @param domainId domainId
-     * @param participantId participantId
-     * @param discovery set to true, if the receiver created will be for discovery
+     * @param locator Locator of the receiver to create.
      * @param queue a BlockingQueue, that should be populated with byte[] received by the Receiver.
-     * @param bufferSize Size of the buffer that should be used during reception.
      * @return Receiver, or null if Receiver could not be created
      * @throws IOException on IOException
-     * 
-     * @see #getPortNumberParameters()
      */
-    public abstract Receiver createReceiver(URI uri, int domainId, int participantId, boolean discovery, BlockingQueue<byte[]> queue, int bufferSize) throws IOException;
+    public abstract Receiver getReceiver(Locator locator, BlockingQueue<byte[]> queue) throws IOException;
 
     /**
-     * Creates a new Transmitter. Remote entities advertise how they can be reached by the means of Locator.
+     * Gets a Transmitter. Remote entities advertise how they can be reached by the means of Locator.
      * 
      * @param locator Locator used
-     * @param bufferSize Size of the buffer, that should be used byt the Writer
      * @return Writer
      * @throws IOException on IOException
      */
-    public abstract Transmitter createTransmitter(Locator locator, int bufferSize) throws IOException;
+    public abstract Transmitter getTransmitter(Locator locator) throws IOException;
     
-    /**
-     * Get the default Locator for discovery.
-     * @param domainId Domain ID
-     * @return Locator
-     */
-    public abstract Locator getDefaultDiscoveryLocator(int domainId);
 
     /**
-     * Create a discovery locator with given URI and domainId. This method is called based on
-     * the value given in configuration parameter 'jrtps.discovery.announce-uris'
+     * Create a Locator with given parameters. If there is no port given in URI,
+     * domainId, participantId and isDiscovery parameters are used to construct 
+     * port number. This is done using PortNumberParameters class.
+     * 
      * @param uri Uri 
      * @param domainId Domain ID
-     * @return Discovery locator
+     * @param participantId Participant ID
+     * @param isDiscovery true or false
+     * @return Locator
+     * 
+     * @see net.sf.jrtps.transport.PortNumberParameters
      */
-    public abstract Locator createDiscoveryLocator(URI uri, int domainId);
+    public abstract Locator createLocator(URI uri, int domainId, int participantId, boolean isDiscovery);
+
+    /**
+     * Closes TransportProvider. This method is called when participant is closed.
+     * TransportProvider implementation might do some cleanup of resources by overriding 
+     * this method.
+     */
+    public void close() { // Default implementation does nothing
+    }
 }

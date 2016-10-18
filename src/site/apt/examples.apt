@@ -59,7 +59,7 @@ udds examples
 * About Marshallers
 
  udds uses <Marshaller>s to read/write Data from/to network. When creating a DataReader or DataWriter,
- the type of the entity is checked (HelloMessage in the examples above), and a matching Marshaller is 
+ entitys' type  is checked (HelloMessage in the examples above), and a matching Marshaller is 
  assigned to entity being created.
  
  Two builtin Marshallers are provided by udds; ExternalizableMarshaller and SerializableMarshaller.

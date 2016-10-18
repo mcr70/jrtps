@@ -125,6 +125,9 @@ public class Participant {
 
 	private AuthenticationPlugin authPlugin = null;
 
+	private int domainId; // Keep track of domainId and participantId, needed in port number allocation
+	private int participantId;
+
 	{
 		spdpQoS = QualityOfService.getSPDPQualityOfService(); 
 		sedpQoS = QualityOfService.getSEDPQualityOfService();
@@ -186,13 +189,15 @@ public class Participant {
 	 * @param cfg Configuration used. If config is null, default Configuration is used.
 	 */
 	public Participant(int domainId, int participantId, EntityFactory ef, Configuration cfg) {
+		this.domainId = domainId;
+		this.participantId = participantId;
 		logger.debug("Creating Participant for domain {}, participantId {}", domainId, participantId);
 
 		this.entityFactory = ef != null ? ef : new EntityFactory();
 		this.config = cfg != null ? cfg : new Configuration();
 
 		// UDPProvider is used 
-		UDPProvider provider = new UDPProvider(config); 
+		UDPProvider provider = new UDPProvider(config, participantId); 
 		TransportProvider.registerTransportProvider(UDPProvider.PROVIDER_SCHEME, provider, 
 				Locator.LOCATOR_KIND_UDPv4 /*, Locator.LOCATOR_KIND_UDPv6*/);
 
@@ -271,14 +276,12 @@ public class Participant {
 		QualityOfService statelessQos = new QualityOfService();
 		statelessQos.setPolicy(new QosReliability(Kind.BEST_EFFORT, new Duration(0, 0)));
 
-		DataWriter<ParticipantStatelessMessage> sWriter = 
-				createDataWriter(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
-						ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
-						statelessQos);
-		DataReader<ParticipantStatelessMessage> sReader = 
-				createDataReader(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
-						ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
-						statelessQos);
+		createDataWriter(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
+				ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
+				statelessQos);
+		createDataReader(ParticipantStatelessMessage.BUILTIN_TOPIC_NAME, 
+				ParticipantStatelessMessage.class, ParticipantStatelessMessage.class.getSimpleName(), 
+				statelessQos);
 	}
 
 	private void registerSecureBuiltinMarshallers() {
@@ -465,7 +468,7 @@ public class Participant {
 		return reader;
 	}
 
-	private void checkMatchedWriters(DataReader reader) {
+	private void checkMatchedWriters(DataReader<?> reader) {
 		QualityOfService requested = reader.getRTPSReader().getQualityOfService();
 		for (Entry<Guid, PublicationData> e : discoveredWriters.entrySet()) {
 			PublicationData pd = e.getValue();
@@ -640,8 +643,8 @@ public class Participant {
 		}
 	}
 	
-	private void writePublicationData(DataWriter writer) {
-		RTPSWriter rtps_writer = writer.getRTPSWriter();
+	private void writePublicationData(DataWriter<?> writer) {
+		RTPSWriter<?> rtps_writer = writer.getRTPSWriter();
 		PublicationData pd = new PublicationData(writer.getTopicName(), writer.getTypeName(), 
 				rtps_writer.getGuid(), rtps_writer.getQualityOfService());
 		writer.setPublicationData(pd);
@@ -936,7 +939,7 @@ public class Participant {
 	 */
 	public void addEntityListener(EntityListener el) {
 		entityListeners.add(el);
-		if (config.getEntityListenerHistory()); { // udds.entity-listener-history = false
+		if (config.getEntityListenerHistory()) { // udds.entity-listener-history = false
 			for (Entry<GuidPrefix, ParticipantData> e : discoveredParticipants.entrySet()) {
 				el.participantDetected(e.getValue());
 			}
@@ -1082,9 +1085,9 @@ public class Participant {
 
 		List<URI> discoveryAnnounceURIs = config.getDiscoveryAnnounceURIs();
 		for (URI uri : discoveryAnnounceURIs) {
-			TransportProvider provider = TransportProvider.getInstance(uri.getScheme());
+			TransportProvider provider = TransportProvider.getProviderForScheme(uri.getScheme());
 			if (provider != null) {
-				Locator locator = provider.createDiscoveryLocator(uri, domainId); 
+				Locator locator = provider.createLocator(uri, domainId, participantId, true); 
 				discoveryLocators.add(locator);
 			}
 			else {

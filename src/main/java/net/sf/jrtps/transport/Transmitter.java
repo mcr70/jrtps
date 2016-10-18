@@ -1,7 +1,5 @@
 package net.sf.jrtps.transport;
 
-import java.io.IOException;
-
 import net.sf.jrtps.message.Message;
 
 /**
@@ -18,10 +16,4 @@ public interface Transmitter {
      * @return true, if an overflow occured.
      */
     public boolean sendMessage(Message msg);
-    
-    /**
-     * Close this Transmitter
-     * @throws IOException on IOException
-     */
-    public void close() throws IOException;
 }

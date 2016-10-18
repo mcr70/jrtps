@@ -62,6 +62,7 @@ public class VendorId extends Parameter {
 		buffer.write(bytes);
 	}
 
+	@Override
 	public String toString() {
 		StringBuffer sb = new StringBuffer(super.toString());
 		sb.append(":");
@@ -69,7 +70,7 @@ public class VendorId extends Parameter {
 		sb.append(',');
 		sb.append(bytes[1]);
 
-		int id = (bytes[0] << 8) | bytes[1];
+		int id = (bytes[0] << 8) | (bytes[1] & 0xff);
 		sb.append('(');
 
 		switch (id) {

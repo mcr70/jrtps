@@ -4,6 +4,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
+import java.net.URI;
 import java.net.UnknownHostException;
 
 import net.sf.jrtps.types.Locator;
@@ -15,8 +16,11 @@ import net.sf.jrtps.types.Locator;
  */
 class UDPLocator extends Locator {
 
-    UDPLocator(int kind, int port, byte[] address) {
+    private URI uri;
+
+	UDPLocator(URI uri, int kind, int port, byte[] address) {
         super(kind, port, address);
+		this.uri = uri;
     }
 
     UDPLocator(Locator locator) {
@@ -60,10 +64,14 @@ class UDPLocator extends Locator {
             }
         } catch (UnknownHostException uhe) {
             // Not Possible. InetAddress.getByAddress throws this exception if
-            // byte[] length is not
+        	// byte[] length is not
             // 4 or 16. We have ensured this in constructor & switch-case
         }
 
         return inetAddress;
     }
+
+	URI getUri() {
+		return uri;
+	}
 }
