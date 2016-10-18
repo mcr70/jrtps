@@ -3,10 +3,11 @@ Compile OpenDDS as usual.
 In ${OPENDDS_HOME}/DevGuideExamples/DCPS/Messenger/ directory,
   - copy rtps.ini to ${OPENDDS_HOME}/DevGuideExamples/DCPS/Messenger/
     to be easily accessible by samples      
-  - run publisher with command
-      > . ${OPENDDS_HOME}/setenv.sh
-      > ./publisher -DCPSConfigFile rtps.ini
-  - run subscriber with command
+  - run jRTPS Subscriber class from examples.opendds.messenger
+  - run OpenDDS subscriber with command
       > . ${OPENDDS_HOME}/setenv.sh
       > ./subscriber -DCPSConfigFile rtps.ini
+  - run OpenDDS publisher with command
+      > . ${OPENDDS_HOME}/setenv.sh
+      > ./publisher -DCPSConfigFile rtps.ini
   

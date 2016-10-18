@@ -1,7 +1,11 @@
 o Set environment variables
     > export NDDSHOME=/opt/rti/ndds.5.1.0/
     > export LD_LIBRARY_PATH=/opt/rti/ndds.5.1.0/lib/x64Linux3.xgcc4.6.3jdk/:$LD_LIBRARY_PATH
-    
+
+o Start jRTPS HelloSubscriber in examples.rti.hello
+
+o cd $NDDSHOME/example/JAVA/Hello_simple    
+
 o To run publisher, type
     ..../Hello_simple> ./runPub.sh  
     
