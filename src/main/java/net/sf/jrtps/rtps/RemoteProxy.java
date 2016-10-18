@@ -36,7 +36,7 @@ public class RemoteProxy {
 
         // Add only locators we can handle
         for (Locator locator : locators) {
-            TransportProvider provider = TransportProvider.getInstance(locator);
+            TransportProvider provider = TransportProvider.getProviderForKind(locator.getKind());
             if (provider != null) {
                 // TODO: Convert generic locator to UDPLocator, MemLocator etc.
                 //       and remove all the unnecessary stuff Like InetAddress from
@@ -46,6 +46,10 @@ public class RemoteProxy {
         }
     }
 
+    /**
+     * Updates DiscoveredData of this RemoteProxy
+     * @param dd DiscoveredData
+     */
     public void update(DiscoveredData dd) {
     	this.discoveredData = dd;
     }
@@ -128,6 +132,7 @@ public class RemoteProxy {
         this.preferMulticast = preferMulticast;
     }
 
+    @Override
     public String toString() {
         return getGuid().toString() + ", locators " + locators + ", prefers mc: " + preferMulticast;
     }

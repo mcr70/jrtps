@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
@@ -293,11 +294,17 @@ public class RTPSWriter<T> extends Endpoint {
 	 */
 	public Collection<ReaderProxy> getMatchedReaders(GuidPrefix prefix) {
 		List<ReaderProxy> proxies = new LinkedList<>();
-		for (Guid guid : readerProxies.keySet()) {
-			if (guid.getPrefix().equals(prefix)) {
-				proxies.add(readerProxies.get(guid));
+
+		for (Entry<Guid, ReaderProxy> e : readerProxies.entrySet()) {
+			if (prefix.equals(e.getKey().getPrefix())) {
+				proxies.add(e.getValue());
 			}
-		}
+		}		
+//		for (Guid guid : readerProxies.keySet()) {
+//			if (guid.getPrefix().equals(prefix)) {
+//				proxies.add(readerProxies.get(guid));
+//			}
+//		}
 		return proxies;
 	}
 

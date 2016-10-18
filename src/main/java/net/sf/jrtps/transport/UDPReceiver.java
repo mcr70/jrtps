@@ -4,12 +4,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.concurrent.BlockingQueue;
-
-import net.sf.jrtps.types.Locator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,27 +20,21 @@ public class UDPReceiver implements Receiver {
 
     private final BlockingQueue<byte[]> queue;
     private final DatagramSocket socket;
-    private final URI uri;
     private final int bufferSize;
-    private final Locator locator;
-    private final int participantId;
-    private final boolean discovery;
+    private final UDPLocator locator;
 
     private boolean running = true;
     
-    UDPReceiver(URI uri, ReceiverConfig rConfig, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {
-        this.uri = uri;
-        this.socket = rConfig.ds;
-        this.participantId = rConfig.participantId;
+    UDPReceiver(UDPLocator locator, ReceiverConfig rConfig, BlockingQueue<byte[]> queue, int bufferSize) throws UnknownHostException {        
+        this.locator = locator;
+		this.socket = rConfig.ds;
         this.queue = queue;
         this.bufferSize = bufferSize;
-        this.locator = new Locator(InetAddress.getByName(uri.getHost()), socket.getLocalPort());
-        this.discovery = rConfig.discovery;
     }
 
+    @Override
     public void run() {
-        log.debug("Listening on udp://{}:{} for {}", uri.getHost(), socket.getLocalPort(),
-                discovery ? "discovery traffic" : "user traffic");
+        log.debug("Listening on {}:{}", locator.getUri());
         
         byte[] buf = new byte[bufferSize];
 
@@ -66,38 +56,21 @@ public class UDPReceiver implements Receiver {
             }
         } // while(...)
     }
-
-    @Override
-    public Locator getLocator() {
-        return locator;
-    }
-
     
-    
-    @Override
-    public void close() {
-        log.debug("Closing {}", socket.getLocalPort());
-        
+    void close() {        
         if (socket != null) {
+            log.debug("Closing {}", socket.getLocalPort());
             socket.close();
         }
         running = false;
     }
 
-
     @SuppressWarnings("unused")
     private void writeMessage(String string, byte[] msgBytes) {
-        try {
-            FileOutputStream fos = new FileOutputStream(string);
+    	try (FileOutputStream fos = new FileOutputStream(string)) {
             fos.write(msgBytes, 0, msgBytes.length);
-            fos.close();
         } catch (Exception e) {
             log.error("Failed to write message to {}", string, e);
         }
-    }
-
-    @Override
-    public int getParticipantId() {
-        return participantId;
     }
 }

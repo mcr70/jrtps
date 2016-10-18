@@ -7,11 +7,9 @@ import net.sf.jrtps.message.DataEncapsulation;
 /**
  * Marshaller is used to transform Object to/from different data encodings.
  * 
- * @author mcr70
- * 
- * @param <T>
- *            Type of this Marshaller. Type is used to enforce symmetry between
+ * @param <T> Type of this Marshaller. Type is used to enforce symmetry between
  *            unmarshall and marshall methods.
+ * @author mcr70
  */
 public interface Marshaller<T> {
     /**

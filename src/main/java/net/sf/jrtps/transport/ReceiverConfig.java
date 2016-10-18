@@ -11,11 +11,9 @@ import java.net.DatagramSocket;
 class ReceiverConfig {
     final DatagramSocket ds;
     final int participantId;
-    final boolean discovery;
 
-    public ReceiverConfig(int participantId, DatagramSocket ds, boolean discovery) {
+    public ReceiverConfig(int participantId, DatagramSocket ds) {
         this.participantId = participantId;
         this.ds = ds;
-        this.discovery = discovery;
     }
 }
