@@ -2,7 +2,7 @@ DDS Security
 
  As of version 1.1, jRTPS provides basic support for 
  {{{http://www.omg.org/spec/DDS-SECURITY/}DDS security}} specification.
-
+ 
 * Authentication
  
  If security is enabled with {{{./configuration.html#udds.security.authentication}jks authentication}}, 

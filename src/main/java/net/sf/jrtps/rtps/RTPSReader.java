@@ -8,6 +8,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
@@ -21,7 +24,6 @@ import net.sf.jrtps.message.Message;
 import net.sf.jrtps.message.parameter.DirectedWrite;
 import net.sf.jrtps.message.parameter.ParameterId;
 import net.sf.jrtps.message.parameter.QosReliability;
-import net.sf.jrtps.transport.TransportProvider;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.GuidPrefix;
@@ -31,9 +33,6 @@ import net.sf.jrtps.types.Time;
 import net.sf.jrtps.util.Watchdog;
 import net.sf.jrtps.util.Watchdog.Listener;
 import net.sf.jrtps.util.Watchdog.Task;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * RTPSReader implements RTPS Reader endpoint functionality. 
@@ -62,8 +61,6 @@ public class RTPSReader<T> extends Endpoint {
 	private int ackNackCount = 0;
 
 	private List<WriterLivelinessListener> livelinessListeners = new LinkedList<>();
-
-
 
 	RTPSReader(RTPSParticipant participant, EntityId entityId, String topicName, 
 			ReaderCache<T> rCache, QualityOfService qos,
@@ -205,12 +202,6 @@ public class RTPSReader<T> extends Endpoint {
 			}
 		}		
 		
-//		for (Guid guid : writerProxies.keySet()) {
-//			if (guid.getPrefix().equals(prefix)) {
-//				proxies.add(writerProxies.get(guid));
-//			}
-//		}
-
 		return proxies;
 	}
 

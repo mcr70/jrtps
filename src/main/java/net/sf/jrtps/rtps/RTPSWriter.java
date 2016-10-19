@@ -300,11 +300,7 @@ public class RTPSWriter<T> extends Endpoint {
 				proxies.add(e.getValue());
 			}
 		}		
-//		for (Guid guid : readerProxies.keySet()) {
-//			if (guid.getPrefix().equals(prefix)) {
-//				proxies.add(readerProxies.get(guid));
-//			}
-//		}
+
 		return proxies;
 	}
 
