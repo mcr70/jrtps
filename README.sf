@@ -2,6 +2,7 @@
 ssh -t mcr70,jrtps@shell.sourceforge.net create
 
 # Commit and push before making a release
+hg status
 hg commit
 hg push
 
@@ -9,6 +10,13 @@ hg push
 # without -Psf, site is deployed to /tmp/jrtps/site
 mvn release:prepare 
 mvn release:perform -Psf
+
+# Log in to Nexus at https://oss.sonatype.org
+- Click staging repositories, select jrtps repository at bottom of list.
+  Click 'close' button. This will trigger some checks on uploaded code.
+  Refresh the page, if everything is ok, select jrtps repository again
+  and click 'release'
+
 
 # To deploy only site
 mvn site site:deploy -Psf
