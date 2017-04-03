@@ -19,10 +19,14 @@
 	<properties>
 		<slf4j-version>1.7.6</slf4j-version>
 		<log4j-version>2.1</log4j-version>
-		<org.omg.dds.security.version>1.0-Beta1</org.omg.dds.security.version>
 	</properties>
 
 	<dependencies>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>jrtps</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
