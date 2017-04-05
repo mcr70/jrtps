@@ -4,11 +4,11 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumber;
 
-public class Request {
+class Request {
    private RequestHeader header;
    private Call call;
 
-   public Request(RequestHeader header, Call call) {
+   Request(RequestHeader header, Call call) {
       this.header = header;
       this.call = call;
    }
@@ -18,7 +18,15 @@ public class Request {
       this.call = new Call(bb);
    }
 
-   public void writeTo(RTPSByteBuffer bb) {
+   RequestHeader getHeader() {
+      return header;
+   }
+   
+   Call getCall() {
+      return call;
+   }
+   
+   void writeTo(RTPSByteBuffer bb) {
       header.writeTo(bb);
       call.writeTo(bb);
    }
@@ -45,7 +53,7 @@ public class Request {
          this.instanceName = bb.read_string();
       }
 
-      public void writeTo(RTPSByteBuffer bb) {
+      void writeTo(RTPSByteBuffer bb) {
          guid.writeTo(bb);
          seqeunceNumber.writeTo(bb);
          bb.write_string(serviceName);
@@ -62,7 +70,7 @@ public class Request {
          this.request = requestParameters;
       }
 
-      public Call(RTPSByteBuffer bb) {
+      Call(RTPSByteBuffer bb) {
          this.discriminator = bb.read_long();
          this.request = new byte[bb.read_long()];
          
@@ -71,7 +79,7 @@ public class Request {
          }
       }
 
-      public void writeTo(RTPSByteBuffer bb) {
+      void writeTo(RTPSByteBuffer bb) {
          bb.write_long(discriminator);
          bb.write_long(request.length);
          
@@ -80,5 +88,4 @@ public class Request {
          }
       }
    }
-
 }
