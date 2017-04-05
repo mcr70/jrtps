@@ -1,6 +1,7 @@
 package net.sf.jrtps.rpc;
 
 import net.sf.jrtps.types.Guid;
+import net.sf.jrtps.types.SequenceNumber;
 
 class Reply {
    ReplyHeader header;
@@ -17,7 +18,7 @@ class Reply {
       
       // SampleIdentity is made of Guid and sequenceNumber
       Guid guid;
-      long seqeunceNumber; // SequenceNumber
+      SequenceNumber seqeunceNumber; 
 
       int remoteExceptionCode;
    }
