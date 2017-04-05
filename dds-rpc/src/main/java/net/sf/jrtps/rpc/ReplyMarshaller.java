@@ -30,7 +30,7 @@ class ReplyMarshaller implements Marshaller<Reply> {
       CDREncapsulation cdrEnc = (CDREncapsulation) dEnc;
       RTPSByteBuffer bb = cdrEnc.getBuffer();
 
-      return null;
+      return new Reply(bb);
    }
 
    @Override
@@ -38,6 +38,8 @@ class ReplyMarshaller implements Marshaller<Reply> {
       CDREncapsulation cdrEnc = new CDREncapsulation(bufferSize);
       RTPSByteBuffer bb = cdrEnc.getBuffer();
 
-      return null;
+      data.writeTo(bb);
+      
+      return cdrEnc;
    }
 }
