@@ -32,11 +32,14 @@ public class ServiceManager {
     */
    public ServiceManager() {
       this.participant = new Participant();
+      this.participant.setMarshaller(Request.class, new RequestMarshaller());
+      this.participant.setMarshaller(Reply.class, new ReplyMarshaller());
+      
       // TODO: Check serviceQos
       serviceQos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, Duration.INFINITE));
       serviceQos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_ALL, 1));
       serviceQos.setPolicy(new QosDurability(QosDurability.Kind.VOLATILE));
-
+      
       initializeSerializers();
    }
 
@@ -86,15 +89,19 @@ public class ServiceManager {
    }
    
    private void createEndpoints(Service service) {      
-      logger.debug("Creating reader and writer for {}", service.getClass().getSimpleName());
+      String reqTopic = service.getClass().getSimpleName() + "_Service_Request";
+      String repTopic = service.getClass().getSimpleName() + "_Service_Reply";
+      
+      logger.debug("Creating reader({}) and writer({}) for service {}", 
+            reqTopic, repTopic, service.getClass().getSimpleName());
 
       DataReader<Request> dr = 
-            participant.createDataReader(service.getClass().getSimpleName() + "_Service_Request",
+            participant.createDataReader(reqTopic,
                   Request.class, Request.class.getName(), serviceQos);
       requestReaders.put(service, dr);
       
       DataWriter<Reply> dw = 
-            participant.createDataWriter(service.getClass().getSimpleName() + "_Service_Reply",
+            participant.createDataWriter(repTopic,
                   Reply.class, Reply.class.getName(), serviceQos);
       replyWriters.put(service, dw);
 
