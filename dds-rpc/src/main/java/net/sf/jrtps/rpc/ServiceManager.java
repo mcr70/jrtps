@@ -1,5 +1,6 @@
 package net.sf.jrtps.rpc;
 
+import java.lang.reflect.Proxy;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -20,10 +21,16 @@ import net.sf.jrtps.udds.Participant;
 public class ServiceManager {
    private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
-   private final Map<Class<?>, Serializer> serializers = new HashMap<>();
+   private final Map<Class<?>, Serializer> serializers = new HashMap<>();   
+   private final Set<Service> services = new HashSet<>();
+
+   // For services:
    private final Map<Service, DataReader<Request>> requestReaders = new HashMap<>();
    private final Map<Service, DataWriter<Reply>> replyWriters = new HashMap<>();
-   private final Set<Service> services = new HashSet<>();
+
+   // For clients:
+   private final Map<Class<?>, DataWriter<Request>> requestWriters = new HashMap<>();
+   private final Map<Class<?>, DataReader<Reply>> replyReaders = new HashMap<>();
    
    private final Participant participant;
    private final QualityOfService serviceQos = new QualityOfService();
@@ -59,6 +66,30 @@ public class ServiceManager {
       }
    }
 
+   public <T> T createClient(Class<T> service) throws Exception {
+      String reqTopic = service.getSimpleName() + "_Service_Request";
+      String repTopic = service.getSimpleName() + "_Service_Reply";
+      
+      logger.debug("Creating writer({}) and reader({}) for client {}", 
+            reqTopic, repTopic, service.getSimpleName());
+
+      DataWriter<Request> dw = 
+            participant.createDataWriter(reqTopic,
+                  Request.class, Request.class.getName(), serviceQos);
+      requestWriters.put(service, dw);
+      
+      DataReader<Reply> dr = 
+            participant.createDataReader(repTopic,
+                  Reply.class, Reply.class.getName(), serviceQos);
+      replyReaders.put(service, dr);
+
+      
+      Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {service}, 
+            new RPCInvocationHandler(dw, dr));
+      
+      return (T) proxy;
+   }
+   
    /**
     * Registers a new Service to this ServiceManager. A Succesfull registration of
     * a Service will create all the needed internal DDS Entities. Failure to 
