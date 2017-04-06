@@ -6,8 +6,10 @@ import java.lang.reflect.Parameter;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,18 +40,37 @@ class ServiceInvoker implements SampleListener<Request> {
 
    private Map<Class<?>, Serializer> serializers;
 
-   ServiceInvoker(Map<Class<?>, Serializer> serializers, DataReader<Request> requestReader, DataWriter<Reply> replyWriter, Service service) {
+   ServiceInvoker(Map<Class<?>, Serializer> serializers, DataReader<Request> requestReader, 
+         DataWriter<Reply> replyWriter, Service service) {
       this.serializers = serializers;
       this.requestReader = requestReader;
       this.replyWriter = replyWriter;
       this.service = service;
       
-      Method[] methods = service.getClass().getMethods();
-      for (Method m: methods) {
-         discriminatorMap.put(hash(m.getName()), m);
+      Class<?> srvClass = service.getClass();
+      Class<?>[] interfaces = srvClass.getInterfaces();
+      
+      // dds-rpc spec does not allow overloading of methods
+      Set<String> methodNames = new HashSet<>();
+      for (Class<?> i: interfaces) {
+         if (Service.class.isAssignableFrom(i)) {
+            logger.debug("Adding declared methods of {} to service {}", i.getName(), srvClass.getName());
+            for (Method m: i.getDeclaredMethods()) {
+               Method prev = discriminatorMap.put(hash(m.getName()), m);
+               if (prev != null) {
+                  logger.warn("DDS-RPC specification does not allow method overloading, discarding {}", prev);
+               }
+               
+               methodNames.add(m.getName());
+            }            
+         }
+         else {
+            logger.debug("Skipping methods of {}, as it is not derived from {}", 
+                  i.getName(), Service.class);
+         }
       }
-
-      logger.debug("Created discriminator map for methods: {}", discriminatorMap);
+      
+      logger.debug("{} is serving methods: {}", srvClass.getName(), methodNames);
    }
 
    private Integer hash(String methodName) {

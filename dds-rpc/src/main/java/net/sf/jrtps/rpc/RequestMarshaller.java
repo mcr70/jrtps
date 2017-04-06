@@ -9,11 +9,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 class RequestMarshaller implements Marshaller<Request> {
    private final int bufferSize = 1024; // TODO: configurable
-   private final Service service;
-
-   public RequestMarshaller(Service service) {
-      this.service = service;
-   }
    
    @Override
    public boolean hasKey() {
