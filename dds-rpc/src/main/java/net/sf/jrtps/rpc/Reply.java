@@ -1,5 +1,6 @@
 package net.sf.jrtps.rpc;
 
+import net.sf.jrtps.rpc.Request.RequestHeader;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.Guid;
 import net.sf.jrtps.types.SequenceNumber;
@@ -13,18 +14,23 @@ class Reply {
       this.reply = new Return(bb);
    }
    
+   Reply(ReplyHeader hdr, Return reply) {
+      this.header = hdr;
+      this.reply = reply;
+   }
+
    void writeTo(RTPSByteBuffer bb) {
       header.writeTo(bb);
       reply.writeTo(bb);
    }
 
    static class ReplyHeader {
-      public static final transient int REMOTE_EX_OK = 0;
-      public static final transient int REMOTE_EX_UNSUPPORTED = 1;
-      public static final transient int REMOTE_EX_INVALID_ARGUMENT = 2;
-      public static final transient int REMOTE_EX_OUT_OF_RESOURCES = 3;
-      public static final transient int REMOTE_EX_UNKNOWN_OPERATION = 4;
-      public static final transient int REMOTE_EX_UNKNOWN_EXCEPTION = 5;
+      static final transient int REMOTE_EX_OK = 0;
+      static final transient int REMOTE_EX_UNSUPPORTED = 1;
+      static final transient int REMOTE_EX_INVALID_ARGUMENT = 2;
+      static final transient int REMOTE_EX_OUT_OF_RESOURCES = 3;
+      static final transient int REMOTE_EX_UNKNOWN_OPERATION = 4;
+      static final transient int REMOTE_EX_UNKNOWN_EXCEPTION = 5;
       
       // SampleIdentity is made of Guid and sequenceNumber
       Guid guid;
@@ -38,7 +44,13 @@ class Reply {
          this.remoteExceptionCode = bb.read_long();
       }
 
-      public void writeTo(RTPSByteBuffer bb) {
+      ReplyHeader(RequestHeader reqHdr, int exceptionCode) {
+         this.guid = reqHdr.guid;
+         this.seqeunceNumber = reqHdr.seqeunceNumber;
+         this.remoteExceptionCode = exceptionCode;
+      }
+
+      void writeTo(RTPSByteBuffer bb) {
          guid.writeTo(bb);
          seqeunceNumber.writeTo(bb);
          bb.write_long(remoteExceptionCode);
@@ -49,7 +61,7 @@ class Reply {
       int discriminator; // Represents Method
       byte[] result; // Result marshalled
 
-      public Return(RTPSByteBuffer bb) {
+      Return(RTPSByteBuffer bb) {
          this.discriminator = bb.read_long();
          this.result = new byte[bb.read_long()];
          
@@ -58,7 +70,12 @@ class Reply {
          }
       }
 
-      public void writeTo(RTPSByteBuffer bb) {
+      Return(int discriminator, byte[] result) {
+         this.discriminator = discriminator;
+         this.result = result;
+      }
+
+      void writeTo(RTPSByteBuffer bb) {
          bb.write_long(discriminator);
          bb.write_long(result.length);
          

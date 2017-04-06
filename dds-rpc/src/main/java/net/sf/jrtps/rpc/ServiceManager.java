@@ -20,10 +20,11 @@ import net.sf.jrtps.udds.Participant;
 public class ServiceManager {
    private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
+   private final Map<Class<?>, Serializer> serializers = new HashMap<>();
    private final Map<Service, DataReader<Request>> requestReaders = new HashMap<>();
    private final Map<Service, DataWriter<Reply>> replyWriters = new HashMap<>();
    private final Set<Service> services = new HashSet<>();
-
+   
    private final Participant participant;
    private final QualityOfService serviceQos = new QualityOfService();
    /**
@@ -35,6 +36,24 @@ public class ServiceManager {
       serviceQos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, Duration.INFINITE));
       serviceQos.setPolicy(new QosHistory(QosHistory.Kind.KEEP_ALL, 1));
       serviceQos.setPolicy(new QosDurability(QosDurability.Kind.VOLATILE));
+
+      initializeSerializers();
+   }
+
+   /**
+    * Initialize serializers for the primitive Java types.
+    */
+   private void initializeSerializers() {      
+      Class<?>[] primitiveClasses = new Class[] {
+            int.class, Integer.class, short.class, Short.class, long.class, Long.class,
+            float.class, Float.class, double.class, Double.class, char.class, Character.class,
+            byte.class, Byte.class, boolean.class, Boolean.class, String.class
+            };
+      
+      JavaPrimitiveSerializer js = new JavaPrimitiveSerializer();
+      for (Class<?> c: primitiveClasses) {
+         serializers.put(c, js);
+      }
    }
 
    /**
@@ -51,7 +70,21 @@ public class ServiceManager {
       createEndpoints(service);
    }
 
-
+   /**
+    * Registers a Serializer for given type. Serializers are used to serialize
+    * Service call input parameters and return values to wire during remote
+    * invocation process. By default, only Serializers for primitive types
+    * (int.class, Integer.class, .... , String.class) is defined.<p>
+    * 
+    * If a Serializer is registered twice, first registration is overriden.
+    * 
+    * @param type Type 
+    * @param serializer Serializer for type
+    */
+   public void registerSerializer(Class<?> type, Serializer serializer) {
+      serializers.put(type, serializer);
+   }
+   
    private void createEndpoints(Service service) {      
       logger.debug("Creating reader and writer for {}", service.getClass().getSimpleName());
 
@@ -65,6 +98,6 @@ public class ServiceManager {
                   Reply.class, Reply.class.getName(), serviceQos);
       replyWriters.put(service, dw);
 
-      dr.addSampleListener(new ServiceInvoker(dr, dw, service));
+      dr.addSampleListener(new ServiceInvoker(serializers, dr, dw, service));
    }
 }
