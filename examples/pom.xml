@@ -12,13 +12,18 @@
     <properties>
         <slf4j-version>1.7.6</slf4j-version>
         <log4j-version>2.1</log4j-version>
-        <jrtps-version>1.4.0</jrtps-version>
+        <jrtps-version>1.4.1-SNAPSHOT</jrtps-version>
     </properties>
 
     <dependencies>
         <dependency>
             <groupId>net.sf.jrtps</groupId>
             <artifactId>jrtps</artifactId>
+            <version>${jrtps-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.jrtps</groupId>
+            <artifactId>dds-rpc</artifactId>
             <version>${jrtps-version}</version>
         </dependency>
         <dependency>
