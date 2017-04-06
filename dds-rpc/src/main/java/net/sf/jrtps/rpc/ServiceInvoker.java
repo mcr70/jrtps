@@ -80,12 +80,12 @@ class ServiceInvoker implements SampleListener<Request> {
 
       RequestHeader header = data.getHeader();
       Call call = data.getCall();
-      Method m = getMethod(call.discriminator);
+      Method m = discriminatorMap.get(call.discriminator);
 
       byte[] result;
       int status = ReplyHeader.REMOTE_EX_OK;
       if (m == null) {
-         logger.debug("Did not find a method for discriminator {}", call.discriminator);
+         logger.warn("Did not find a method for discriminator {}", call.discriminator);
          result = new byte[0];
          status = ReplyHeader.REMOTE_EX_UNKNOWN_OPERATION;
       }
@@ -133,7 +133,7 @@ class ServiceInvoker implements SampleListener<Request> {
       return bb.toArray();
    }
 
-   private Object[] getArguments(Method method, byte[] bytes) throws SerializationException {
+   private Object[] getArguments(Method method, byte[] bytes) throws SerializationException, NoSuchSerializer {
       Parameter[] params = method.getParameters();
       Object[] args = new Object[params.length];
       RTPSByteBuffer bb = new RTPSByteBuffer(bytes);
@@ -141,13 +141,12 @@ class ServiceInvoker implements SampleListener<Request> {
       for (int i = 0; i < args.length; i++) {
          Class<?> type = params[i].getType();
          Serializer serializer = serializers.get(type);
+         if (serializer == null) {
+            throw new NoSuchSerializer(type);
+         }
          args[i] = serializer.deSerialize(type, bb);
       }
       
       return args;
-   }
-
-   private Method getMethod(int discriminator) {
-      return discriminatorMap.get(discriminator);
    }
 }
