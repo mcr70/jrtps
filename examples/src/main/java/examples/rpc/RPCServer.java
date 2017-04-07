@@ -9,10 +9,15 @@ public class RPCServer implements SampleService {
       ServiceManager mgr = new ServiceManager();
       RPCServer service = new RPCServer(); 
       mgr.registerService(service);
+      
+      System.out.println("\n*** Press enter to close services ***\n");
+      System.in.read();
    }
    
    @Override
-   public void foo(int value) {
+   public int power2(int value) {
       System.out.println("foo(" + value + ") was called");
+      
+      return value * value;
    }
 }

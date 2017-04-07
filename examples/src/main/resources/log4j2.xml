@@ -11,24 +11,7 @@
             <AppenderRef ref="STDOUT" />
         </Root>
 
-        <Logger name="net.sf.jrtps.rtps.RTPSMessageReceiver" level="warn" additivity="false">
-            <AppenderRef ref="STDOUT" />
-        </Logger>
-        <Logger name="net.sf.jrtps.rtps.RTPSReader" level="warn" additivity="false">
-            <AppenderRef ref="STDOUT" />
-        </Logger>
-        <Logger name="net.sf.jrtps.rtps.RTPSWriter" level="warn" additivity="false">
-            <AppenderRef ref="STDOUT" />
-        </Logger>
-        
-        <Logger name="dds.sec.auth" level="warn" additivity="false">
-            <AppenderRef ref="STDOUT" />
-        </Logger>
-        <Logger name="dds.sec.crypto" level="WARN" additivity="false">
-            <AppenderRef ref="STDOUT" />
-        </Logger>
-
-        <Logger name="net.sf.jrtps.rpc" level="debug" additivity="false">
+        <Logger name="net.sf.jrtps.rpc" level="warn" additivity="false">
             <AppenderRef ref="STDOUT" />
         </Logger>
     </Loggers>
