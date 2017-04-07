@@ -4,10 +4,10 @@ import java.io.IOException;
 
 import net.sf.jrtps.rpc.ServiceManager;
 
-public class RPCServer implements SampleService {
+public class MyServer implements SampleService {
    public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
       ServiceManager mgr = new ServiceManager();
-      RPCServer service = new RPCServer(); 
+      SampleService service = new MyServer(); 
       mgr.registerService(service);
       
       System.out.println("\n*** Press enter to close services ***\n");

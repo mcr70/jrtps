@@ -5,15 +5,22 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.builtin.PublicationData;
+import net.sf.jrtps.builtin.SubscriptionData;
+import net.sf.jrtps.message.parameter.KeyHash;
 import net.sf.jrtps.message.parameter.QosDurability;
 import net.sf.jrtps.message.parameter.QosHistory;
 import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.Duration;
+import net.sf.jrtps.udds.CommunicationListener;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.Participant;
@@ -70,9 +77,17 @@ public class ServiceManager {
       }
    }
 
-   public <T extends Service> T createClient(Class<T> service) throws Exception {
-      String reqTopic = service.getSimpleName() + "_Service_Request";
-      String repTopic = service.getSimpleName() + "_Service_Reply";
+   /**
+    * Creates a new client for the given service.
+    * @param service
+    * @return An instance of service class
+    * @throws TimeoutException If there is a timeout connecting with service
+    */
+   public <T extends Service> T createClient(Class<T> service) throws TimeoutException {
+      final String reqTopic = service.getSimpleName() + "_Service_Request";
+      final String repTopic = service.getSimpleName() + "_Service_Reply";
+
+      final CountDownLatch cdl = new CountDownLatch(2);
       
       logger.debug("Creating writer({}) and reader({}) for client {}", 
             reqTopic, repTopic, service.getSimpleName());
@@ -82,14 +97,53 @@ public class ServiceManager {
                   Request.class, Request.class.getName(), serviceQos);
       requestWriters.put(service, dw);
       
+      dw.addCommunicationListener(new CommunicationListener<SubscriptionData>() {
+         @Override
+         public void inconsistentQoS(SubscriptionData ed) {
+            logger.warn("Got inconsistent QoS with {}", ed);
+         }
+         @Override
+         public void entityMatched(SubscriptionData ed) {
+            logger.debug("Found matched reader for {}", reqTopic);
+            cdl.countDown();
+         }
+         @Override
+         public void deadlineMissed(KeyHash instanceKey) {}
+      });
+      
       DataReader<Reply> dr = 
             participant.createDataReader(repTopic,
                   Reply.class, Reply.class.getName(), serviceQos);
       replyReaders.put(service, dr);
 
-      
+      dr.addCommunicationListener(new CommunicationListener<PublicationData>() {
+         @Override
+         public void deadlineMissed(KeyHash instanceKey) {}
+         @Override
+         public void entityMatched(PublicationData ed) {
+            logger.debug("Found matched writer for {}", repTopic);
+            cdl.countDown();
+         }
+
+         @Override
+         public void inconsistentQoS(PublicationData ed) {
+            logger.warn("Inconsistent QoS with {}", ed);
+         }
+      });
       Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {service}, 
-            new RPCInvocationHandler(dw, dr, serializers));
+            new RPCInvocationHandler(participant.getConfiguration(), dw, dr, serializers));
+      
+      boolean await = false;
+      try {
+         int timeout = participant.getConfiguration().getRPCConnectionTimeout();
+         await = cdl.await(timeout, TimeUnit.MILLISECONDS);
+      } catch (InterruptedException e) {
+         // TimeoutException will be thrown
+      }
+      
+      if (!await) {
+         throw new TimeoutException("Failed to connect with service");
+      }
       
       return (T) proxy;
    }
@@ -145,6 +199,7 @@ public class ServiceManager {
                   Reply.class, Reply.class.getName(), serviceQos);
       replyWriters.put(serviceClass, dw);
 
-      dr.addSampleListener(new ServiceInvoker(serializers, dr, dw, service));
+      dr.addSampleListener(new ServiceInvoker(participant.getConfiguration(), 
+            serializers, dr, dw, service));
    }
 }

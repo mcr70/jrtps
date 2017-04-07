@@ -9,26 +9,26 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import net.sf.jrtps.builtin.SubscriptionData;
-import net.sf.jrtps.message.parameter.KeyHash;
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.rpc.Reply.ReplyHeader;
 import net.sf.jrtps.rpc.Request.Call;
 import net.sf.jrtps.rpc.Request.RequestHeader;
 import net.sf.jrtps.rtps.Sample;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 import net.sf.jrtps.types.SequenceNumber;
-import net.sf.jrtps.udds.CommunicationListener;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.SampleListener;
 
-class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply>, CommunicationListener<SubscriptionData> {
+class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply> {
    private static final Logger logger = LoggerFactory.getLogger(RPCInvocationHandler.class);
 
    private final Map<Class<?>, Serializer> serializers;
@@ -36,16 +36,26 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply>, 
    private final DataWriter<Request> requestWriter;
    private final DataReader<Reply> responseReader;
 
-   long seqNum = 1;
+   private final Map<Long, Object> exchangeMap = new ConcurrentHashMap<>();
+   private final MessageDigest md5;
+   private final Configuration cfg;
    
-   RPCInvocationHandler(DataWriter<Request> requestWriter, DataReader<Reply> responseReader,
+   long seqNum = 1;
+
+   RPCInvocationHandler(Configuration cfg, DataWriter<Request> requestWriter, DataReader<Reply> responseReader,
          Map<Class<?>, Serializer> serializers) {
+      this.cfg = cfg;
       this.requestWriter = requestWriter;
       this.responseReader = responseReader;
       this.serializers = serializers;
       
       responseReader.addSampleListener(this);
-      requestWriter.addCommunicationListener(this);
+
+      try {
+         md5 = MessageDigest.getInstance("MD5");
+      } catch (NoSuchAlgorithmException e) {  
+         throw new RuntimeException(e); // Should not happen, every java has MD5
+      }
    }
 
    @Override
@@ -62,7 +72,9 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply>, 
          hashMap.put(mName, discriminator);
       }
       
-      RTPSByteBuffer bb = new RTPSByteBuffer(new byte[1024]); // TODO Hardcoded
+      byte[] buffer = new byte[cfg.getRPCBufferSize()];
+      RTPSByteBuffer bb = new RTPSByteBuffer(buffer); 
+      
       for (int i = 0; i < args.length; i++) {
          Serializer serializer = serializers.get(args[i].getClass());
          serializer.serialize(args[i], bb);
@@ -74,10 +86,15 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply>, 
       requestWriter.write(request);
    
       // TODO: Synchronization should be based on Request.header.sequenceNumber
-      // TODO: hardcoded
-      Reply reply = queue.poll(1000, TimeUnit.MILLISECONDS);
-      if (reply == null) {
-         throw new TimeoutException("Timeout invoking " + method.getName());
+      
+      CountDownLatch cdl = new CountDownLatch(1);      
+      int timeout = cfg.getRPCInvocationTimeout();
+      exchangeMap.put(header.seqeunceNumber.getAsLong(), cdl); // Store cb to exchange map
+
+      boolean await = cdl.await(timeout, TimeUnit.MILLISECONDS);
+      Reply reply = (Reply) exchangeMap.remove(header.seqeunceNumber.getAsLong());
+      if (!await) {
+         throw new TimeoutException("Timeout waiting for service response");
       }
 
       switch(reply.header.remoteExceptionCode) {
@@ -103,10 +120,12 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply>, 
    public void onSamples(List<Sample<Reply>> samples) {
       logger.debug("Got {} replies from service", samples.size());
       for (Sample<Reply> sample: samples) {
-         try {
-            queue.put(sample.getData());
-         } catch (InterruptedException e) {
-            logger.error("Got interrupted while putting reply to queue");
+         Reply reply = sample.getData();
+         long seqNum = reply.header.seqeunceNumber.getAsLong();
+         CountDownLatch cdl = (CountDownLatch) exchangeMap.remove(seqNum);
+         if (cdl != null) { // if cdl is null, client is no longer waiting for response
+            exchangeMap.put(seqNum, reply);
+            cdl.countDown();
          }
       }
       
@@ -114,31 +133,9 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply>, 
       responseReader.clear(samples);
    }
 
-   @Override
-   public void deadlineMissed(KeyHash instanceKey) {
-      // TODO Auto-generated method stub
-   }
-
-   @Override
-   public void entityMatched(SubscriptionData ed) {
-      logger.debug("Reader matched: {}", ed);
-   }
-
-   @Override
-   public void inconsistentQoS(SubscriptionData ed) {
-      // TODO Auto-generated method stub
-   }
-   
    private Integer hash(String methodName) {
-      try {
-         MessageDigest md = MessageDigest.getInstance("MD5");
-         byte[] digest = md.digest(methodName.getBytes());
+         byte[] digest = md5.digest(methodName.getBytes());
+         md5.reset();
          return digest[0] + (digest[1] << 8) + (digest[2] << 16) + (digest[3] << 24); 
-      } catch (NoSuchAlgorithmException e) {
-         // Ignore, every Java implementation has this algorithm
-      }
-      
-      throw new RuntimeException("Internal error; java did not have 'MD5' MessageDigest");
    }
-
 }

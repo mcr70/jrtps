@@ -1,0 +1,38 @@
+DDS RPC examples
+
+* Defining and registering a Service
+ 
+ Do define a Service that can be registered to jRTPS runtime, one needs
+ to create first an interface that extends net.sf.jrtps.rpc.Service.
+ This interface can then be registered to ServiceManager.
+ 
+ So, given SampleService as...
++---
+ public interface SampleService extends Service {
+    int power2(int i);
+ }
++---
+ 
+ ... one can register it ServiceManager like this (MyServer implements SampleService):
++---
+ ServiceManager mgr = new ServiceManager();
+ SampleService service = new MyServer(); 
+ mgr.registerService(service);
++---
+
+ And that's all there is to it. In the server side.
+ 
+* Creating a client for the service
+
+ Creating a client for the service is as simple as creating a service on the server side.
+ Again, one needs a ServiceManager, which can be asked to create a client for any Service.
+ After getting a client side implementation from ServiceManager, one can start calling
+ its methods as usual.
+ 
++---
+ ServiceManager mgr = new ServiceManager();
+ SampleService client = mgr.createClient(SampleService.class);
+ client.power2(5);
++---
+
+ 

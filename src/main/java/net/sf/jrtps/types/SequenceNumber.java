@@ -48,6 +48,7 @@ public class SequenceNumber {
         return low;
     }
     
+    @Override
     public String toString() {
         return "" + getAsLong();
     }

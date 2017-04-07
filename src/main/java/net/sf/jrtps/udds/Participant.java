@@ -24,6 +24,9 @@ import java.util.concurrent.TimeUnit;
 
 import javax.crypto.NoSuchPaddingException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.Configuration;
 import net.sf.jrtps.Marshaller;
 import net.sf.jrtps.QualityOfService;
@@ -62,9 +65,6 @@ import net.sf.jrtps.udds.security.NoOpAuthenticationPlugin;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessage;
 import net.sf.jrtps.udds.security.ParticipantStatelessMessageMarshaller;
 import net.sf.jrtps.util.Watchdog;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Participant acts as a communication endpoint of different data.
@@ -798,7 +798,11 @@ public class Participant {
 		return rtps_participant;
 	}
 
-	Configuration getConfiguration() {
+	/**
+	 * Gets the configuration associated with this Participant
+	 * @return Configuration
+	 */
+	public Configuration getConfiguration() {
 		return config;
 	}
 
