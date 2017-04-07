@@ -34,7 +34,7 @@ public class UDPReceiver implements Receiver {
 
     @Override
     public void run() {
-        log.debug("Listening on {}:{}", locator.getUri());
+        log.debug("Listening on {}:{}", locator.getUri(), socket.getLocalPort());
         
         byte[] buf = new byte[bufferSize];
 
