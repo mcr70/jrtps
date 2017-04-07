@@ -38,8 +38,9 @@ class JavaPrimitiveSerializer implements Serializer {
       else if (type.equals(String.class)) { // string
          bb.writeString((String)value);
       }
-      
-      throw new SerializationException("Failed to serialize " + type.getName());
+      else {
+         throw new SerializationException("Failed to serialize " + type.getName());
+      }
    }
    
    public Object deSerialize(Class<?> type, RTPSByteBuffer bb) throws SerializationException {

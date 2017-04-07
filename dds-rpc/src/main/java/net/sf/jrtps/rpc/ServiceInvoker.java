@@ -3,6 +3,7 @@ package net.sf.jrtps.rpc;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.nio.BufferUnderflowException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -88,6 +89,7 @@ class ServiceInvoker implements SampleListener<Request> {
    @Override
    public void onSamples(List<Sample<Request>> samples) {      
       for (Sample<Request> sample: samples) {
+         logger.debug("Got request {}", sample.getData());
          invoke(sample.getData());
       }
       
@@ -97,8 +99,6 @@ class ServiceInvoker implements SampleListener<Request> {
    }
 
    private void invoke(Request data) {
-      logger.debug("Invoking {}", data);
-
       RequestHeader header = data.getHeader();
       Call call = data.getCall();
       Method m = discriminatorMap.get(call.discriminator);
@@ -120,7 +120,7 @@ class ServiceInvoker implements SampleListener<Request> {
             logger.error("Failed to invoke {}", m.getName(), e);
             result = new byte[0];
             status = ReplyHeader.REMOTE_EX_UNKNOWN_EXCEPTION;
-         } catch (NoSuchSerializer | SerializationException e) {
+         } catch (NoSuchSerializer | SerializationException | BufferUnderflowException e) {
             logger.error("Failed to serialize arguments or return type for {}", m.getName(), e);
             result = new byte[0];
             status = ReplyHeader.REMOTE_EX_INVALID_ARGUMENT;
@@ -140,6 +140,10 @@ class ServiceInvoker implements SampleListener<Request> {
 
    private byte[] toBytes(Method m, Object result) throws NoSuchSerializer, SerializationException {
       Class<?> returnType = m.getReturnType();
+      
+      if (void.class.equals(returnType)) {
+         return new byte[0];
+      }
       
       Serializer serializer = serializers.get(returnType);
       if (serializer == null) {
