@@ -9,11 +9,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
-import net.sf.jrtps.transport.PortNumberParameters;
-import net.sf.jrtps.types.Duration;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import net.sf.jrtps.transport.PortNumberParameters;
+import net.sf.jrtps.types.Duration;
 
 /**
  * Configuration for jRTPS. All the protocol tuning parameters mentioned in
@@ -419,4 +419,28 @@ public class Configuration {
 	public boolean getEntityListenerHistory() {
 		return getBooleanProperty("udds.entity-listener-history", false);
 	}
+
+	/**
+	 * Gets the timeout used to wait for matching RPC service
+	 * @return timeout, default 5000
+	 */
+   public int getRPCConnectionTimeout() {
+      return getIntProperty("rpc.connection.timeout", 5000);
+   }
+
+   /**
+    * Gets the buffer size used for serializing arguments and return values
+    * @return biffer size, default 1024
+    */
+   public int getRPCBufferSize() {
+      return getIntProperty("rpc.buffer-size", 1024);
+   }
+
+   /**
+    * Gets the timeout used to wait for reply from server
+    * @return timeout, default 5000
+    */
+   public int getRPCInvocationTimeout() {
+      return getIntProperty("rpc.invocation.timeout", 5000);
+   }
 }

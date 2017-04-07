@@ -15,6 +15,7 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.rpc.Reply.ReplyHeader;
 import net.sf.jrtps.rpc.Reply.Return;
 import net.sf.jrtps.rpc.Request.Call;
@@ -41,8 +42,11 @@ class ServiceInvoker implements SampleListener<Request> {
 
    private Map<Class<?>, Serializer> serializers;
 
-   ServiceInvoker(Map<Class<?>, Serializer> serializers, DataReader<Request> requestReader, 
+   private final Configuration cfg;
+
+   ServiceInvoker(Configuration cfg, Map<Class<?>, Serializer> serializers, DataReader<Request> requestReader, 
          DataWriter<Reply> replyWriter, Service service) {
+      this.cfg = cfg;
       this.serializers = serializers;
       this.requestReader = requestReader;
       this.replyWriter = replyWriter;
@@ -151,7 +155,7 @@ class ServiceInvoker implements SampleListener<Request> {
          throw new NoSuchSerializer(returnType);
       }
       
-      byte[] buffer = new byte[1024];
+      byte[] buffer = new byte[cfg.getRPCBufferSize()];
       RTPSByteBuffer bb = new RTPSByteBuffer(buffer);
       serializer.serialize(result, bb);
       
