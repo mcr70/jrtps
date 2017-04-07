@@ -25,8 +25,8 @@ public class ServiceManager {
    private final Set<Service> services = new HashSet<>();
 
    // For services:
-   private final Map<Service, DataReader<Request>> requestReaders = new HashMap<>();
-   private final Map<Service, DataWriter<Reply>> replyWriters = new HashMap<>();
+   private final Map<Class<?>, DataReader<Request>> requestReaders = new HashMap<>();
+   private final Map<Class<?>, DataWriter<Reply>> replyWriters = new HashMap<>();
 
    // For clients:
    private final Map<Class<?>, DataWriter<Request>> requestWriters = new HashMap<>();
@@ -38,7 +38,11 @@ public class ServiceManager {
     * Creates a ServiceManager with default participant.
     */
    public ServiceManager() {
-      this.participant = new Participant();
+      this(0, -1);
+   }
+
+   public ServiceManager(int domainId, int participantId) {
+      this.participant = new Participant(domainId, participantId);
       this.participant.setMarshaller(Request.class, new RequestMarshaller());
       this.participant.setMarshaller(Reply.class, new ReplyMarshaller());
       
@@ -66,7 +70,7 @@ public class ServiceManager {
       }
    }
 
-   public <T> T createClient(Class<T> service) throws Exception {
+   public <T extends Service> T createClient(Class<T> service) throws Exception {
       String reqTopic = service.getSimpleName() + "_Service_Request";
       String repTopic = service.getSimpleName() + "_Service_Reply";
       
@@ -85,7 +89,7 @@ public class ServiceManager {
 
       
       Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {service}, 
-            new RPCInvocationHandler(dw, dr));
+            new RPCInvocationHandler(dw, dr, serializers));
       
       return (T) proxy;
    }
@@ -99,9 +103,14 @@ public class ServiceManager {
     */
    public void registerService(Service service) {
       logger.debug("Registering service: {}", service);
-
-      services.add(service);
-      createEndpoints(service);
+      Class<?>[] interfaces = service.getClass().getInterfaces();
+      
+      for (Class<?> i: interfaces) {
+         if (Service.class.isAssignableFrom(i)) {
+            //services.add();
+            createEndpoints(i, service);
+         }
+      }
    }
 
    /**
@@ -119,22 +128,22 @@ public class ServiceManager {
       serializers.put(type, serializer);
    }
    
-   private void createEndpoints(Service service) {      
-      String reqTopic = service.getClass().getSimpleName() + "_Service_Request";
-      String repTopic = service.getClass().getSimpleName() + "_Service_Reply";
+   private void createEndpoints(Class<?> serviceClass, Service service) {      
+      String reqTopic = serviceClass.getSimpleName() + "_Service_Request";
+      String repTopic = serviceClass.getSimpleName() + "_Service_Reply";
       
       logger.debug("Creating reader({}) and writer({}) for service {}", 
-            reqTopic, repTopic, service.getClass().getSimpleName());
+            reqTopic, repTopic, serviceClass.getSimpleName());
 
       DataReader<Request> dr = 
             participant.createDataReader(reqTopic,
                   Request.class, Request.class.getName(), serviceQos);
-      requestReaders.put(service, dr);
+      requestReaders.put(serviceClass, dr);
       
       DataWriter<Reply> dw = 
             participant.createDataWriter(repTopic,
                   Reply.class, Reply.class.getName(), serviceQos);
-      replyWriters.put(service, dw);
+      replyWriters.put(serviceClass, dw);
 
       dr.addSampleListener(new ServiceInvoker(serializers, dr, dw, service));
    }
