@@ -10,10 +10,10 @@ import java.net.DatagramSocket;
  */
 class ReceiverConfig {
     final DatagramSocket ds;
-    final int participantId;
+    //final int participantId;
 
     public ReceiverConfig(int participantId, DatagramSocket ds) {
-        this.participantId = participantId;
+        //this.participantId = participantId;
         this.ds = ds;
     }
 }
