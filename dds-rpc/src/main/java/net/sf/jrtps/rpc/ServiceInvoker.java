@@ -124,7 +124,7 @@ class ServiceInvoker implements SampleListener<Request> {
             logger.error("Failed to invoke {}", m.getName(), e);
             result = new byte[0];
             status = ReplyHeader.REMOTE_EX_UNKNOWN_EXCEPTION;
-         } catch (NoSuchSerializer | SerializationException | BufferUnderflowException e) {
+         } catch (SerializationException | BufferUnderflowException e) {
             logger.error("Failed to serialize arguments or return type for {}", m.getName(), e);
             result = new byte[0];
             status = ReplyHeader.REMOTE_EX_INVALID_ARGUMENT;
@@ -142,7 +142,7 @@ class ServiceInvoker implements SampleListener<Request> {
       replyWriter.write(sample);
    }
 
-   private byte[] toBytes(Method m, Object result) throws NoSuchSerializer, SerializationException {
+   private byte[] toBytes(Method m, Object result) throws SerializationException {
       Class<?> returnType = m.getReturnType();
       
       if (void.class.equals(returnType)) {
@@ -152,7 +152,7 @@ class ServiceInvoker implements SampleListener<Request> {
       Serializer serializer = serializers.get(returnType);
       if (serializer == null) {
          logger.error("No Serializer found for {}", returnType.getName());
-         throw new NoSuchSerializer(returnType);
+         throw new SerializationException("No Serializer found for type " + returnType);
       }
       
       byte[] buffer = new byte[cfg.getRPCBufferSize()];
@@ -162,7 +162,7 @@ class ServiceInvoker implements SampleListener<Request> {
       return bb.toArray();
    }
 
-   private Object[] getArguments(Method method, byte[] bytes) throws SerializationException, NoSuchSerializer {
+   private Object[] getArguments(Method method, byte[] bytes) throws SerializationException {
       Parameter[] params = method.getParameters();
       Object[] args = new Object[params.length];
       RTPSByteBuffer bb = new RTPSByteBuffer(bytes);
@@ -171,7 +171,7 @@ class ServiceInvoker implements SampleListener<Request> {
          Class<?> type = params[i].getType();
          Serializer serializer = serializers.get(type);
          if (serializer == null) {
-            throw new NoSuchSerializer(type);
+            throw new SerializationException("No Serializer found for type " + type);
          }
          args[i] = serializer.deSerialize(type, bb);
       }

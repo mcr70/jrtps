@@ -1,12 +1,8 @@
 package net.sf.jrtps.rpc;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 class JavaPrimitiveSerializer implements Serializer {
-   private static final Logger logger = LoggerFactory.getLogger(JavaPrimitiveSerializer.class);
    
    public void serialize(Object value, RTPSByteBuffer bb) throws SerializationException {
       Class<?> type = value.getClass();
@@ -43,7 +39,7 @@ class JavaPrimitiveSerializer implements Serializer {
       }
    }
    
-   public Object deSerialize(Class<?> type, RTPSByteBuffer bb) throws SerializationException {
+   public Object deSerialize(Class type, RTPSByteBuffer bb) throws SerializationException {
       if (type.equals(int.class) || type.equals(Integer.class)) { // Int32
          return bb.readInt();
       }
