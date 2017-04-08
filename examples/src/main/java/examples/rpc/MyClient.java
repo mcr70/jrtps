@@ -8,11 +8,9 @@ public class MyClient {
       SampleService client = mgr.createClient(SampleService.class);
       
       for(int i = 0; i < 10; i++) {
-         long l1 = System.currentTimeMillis();
          int result = client.power2(i);
-         long l2 = System.currentTimeMillis();
 
-         System.out.println(i + "^2 == " + result + ", in " + (l2-l1) + " ms");
+         System.out.println(i + "^2 == " + result);
          Thread.sleep(1000);
       }
    }
