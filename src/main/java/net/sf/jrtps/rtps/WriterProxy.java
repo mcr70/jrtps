@@ -2,16 +2,17 @@ package net.sf.jrtps.rtps;
 
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.message.Gap;
 import net.sf.jrtps.message.Heartbeat;
+import net.sf.jrtps.message.parameter.QosReliability;
 import net.sf.jrtps.types.EntityId;
 import net.sf.jrtps.types.Locator;
 import net.sf.jrtps.types.SequenceNumberSet;
 import net.sf.jrtps.util.Watchdog.Task;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * WriterProxy represents a remote writer.
@@ -25,6 +26,8 @@ public class WriterProxy extends RemoteProxy {
     private final RTPSReader<?> reader;
     private final int hbSuppressionDuration;
     private final EntityId entityId;
+    private final boolean isReliable;
+    
     private Heartbeat latestHeartbeat;
     private long latestHBReceiveTime;
 
@@ -42,6 +45,8 @@ public class WriterProxy extends RemoteProxy {
         this.entityId = reader.getGuid().getEntityId();
         this.strength = wd.getQualityOfService().getOwnershipStrength().getStrength();		
         this.hbSuppressionDuration = heartbeatSuppressionDuration;
+        
+        this.isReliable = reader.getQualityOfService().getReliability().getKind().equals(QosReliability.Kind.RELIABLE);
     }
 
     
@@ -91,7 +96,7 @@ public class WriterProxy extends RemoteProxy {
         // Manage out-of-order data with HeartBeat & AckNack & Gap messages
 
         if (sequenceNumber > seqNumMax) {
-            if (sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
+            if (isReliable && sequenceNumber > seqNumMax + 1 && seqNumMax != 0) {
                 log.warn("[{}] Accepting data even though some data has been missed: offered seq-num {}, my received seq-num {}",
                         entityId, sequenceNumber, seqNumMax);
             }
