@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import net.sf.jrtps.QualityOfService;
+import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
 import net.sf.jrtps.builtin.SubscriptionData;
 import net.sf.jrtps.message.parameter.KeyHash;
@@ -23,6 +24,7 @@ import net.sf.jrtps.types.Duration;
 import net.sf.jrtps.udds.CommunicationListener;
 import net.sf.jrtps.udds.DataReader;
 import net.sf.jrtps.udds.DataWriter;
+import net.sf.jrtps.udds.EntityListener;
 import net.sf.jrtps.udds.Participant;
 
 public class ServiceManager {
@@ -41,6 +43,7 @@ public class ServiceManager {
    
    private final Participant participant;
    private final QualityOfService serviceQos = new QualityOfService();
+   private final Set<String> discoveredRemoteTopics = new HashSet<>();
    /**
     * Creates a ServiceManager with default participant.
     */
@@ -52,6 +55,23 @@ public class ServiceManager {
       this.participant = new Participant(domainId, participantId);
       this.participant.setMarshaller(Request.class, new RequestMarshaller());
       this.participant.setMarshaller(Reply.class, new ReplyMarshaller());
+      
+      participant.addEntityListener(new EntityListener() {
+         @Override
+         public void writerDetected(PublicationData wd) {
+            discoveredRemoteTopics.add(wd.getTopicName());
+         }
+         @Override
+         public void readerDetected(SubscriptionData rd) {
+            discoveredRemoteTopics.add(rd.getTopicName());
+         }
+         @Override
+         public void participantLost(ParticipantData pd) {
+         }
+         @Override
+         public void participantDetected(ParticipantData pd) {
+         }
+      });
       
       // TODO: Check serviceQos
       serviceQos.setPolicy(new QosReliability(QosReliability.Kind.RELIABLE, Duration.INFINITE));
@@ -79,7 +99,8 @@ public class ServiceManager {
 
    /**
     * Creates a new client for the given service.
-    * @param service
+    * @param service An interface extending net.sf.jrtps.rpc.Service
+    * @param <T> Generic type for Service
     * @return An instance of service class
     * @throws TimeoutException If there is a timeout connecting with service
     */
@@ -104,7 +125,6 @@ public class ServiceManager {
          }
          @Override
          public void entityMatched(SubscriptionData ed) {
-            logger.debug("Found matched reader for {}", reqTopic);
             cdl.countDown();
          }
          @Override
@@ -121,17 +141,21 @@ public class ServiceManager {
          public void deadlineMissed(KeyHash instanceKey) {}
          @Override
          public void entityMatched(PublicationData ed) {
-            logger.debug("Found matched writer for {}", repTopic);
             cdl.countDown();
          }
-
          @Override
          public void inconsistentQoS(PublicationData ed) {
             logger.warn("Inconsistent QoS with {}", ed);
          }
       });
+      
       Object proxy = Proxy.newProxyInstance(getClass().getClassLoader(), new Class[] {service}, 
             new RPCInvocationHandler(participant.getConfiguration(), dw, dr, serializers));
+      
+      if (discoveredRemoteTopics.contains(dr.getTopicName()) && 
+            discoveredRemoteTopics.contains(dw.getTopicName())) {
+         return (T) proxy;
+      }
       
       boolean await = false;
       try {

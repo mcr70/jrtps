@@ -1,5 +1,11 @@
 DDS RPC examples
 
+ jRTPS implementation of DDS-RPC specification is implemented so, that there is
+ no need to do any preparations like creation of "stubs" and "skeletons".
+ Also, using rpc involves only working with ServiceManager and the actual
+ implementation of the service.
+
+
 * Defining and registering a Service
  
  Do define a Service that can be registered to jRTPS runtime, one needs
@@ -7,6 +13,7 @@ DDS RPC examples
  This interface can then be registered to ServiceManager.
  
  So, given SampleService as...
+
 +---
  public interface SampleService extends Service {
     int power2(int i);
@@ -14,6 +21,7 @@ DDS RPC examples
 +---
  
  ... one can register it ServiceManager like this (MyServer implements SampleService):
+
 +---
  ServiceManager mgr = new ServiceManager();
  SampleService service = new MyServer(); 
@@ -27,7 +35,7 @@ DDS RPC examples
  Creating a client for the service is as simple as creating a service on the server side.
  Again, one needs a ServiceManager, which can be asked to create a client for any Service.
  After getting a client side implementation from ServiceManager, one can start calling
- its methods as usual.
+ its methods.
  
 +---
  ServiceManager mgr = new ServiceManager();
@@ -35,4 +43,7 @@ DDS RPC examples
  client.power2(5);
 +---
 
+* Using a custom Serializer
  
+ By default, only primitive Java types can be used with jRTPS RPC calls. To support other 
+ types as well, a Serializer can be registered to ServiceManager. 

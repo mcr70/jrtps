@@ -75,6 +75,9 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply> {
 
       for (int i = 0; i < args.length; i++) {
          Serializer serializer = serializers.get(args[i].getClass());
+         if (serializer == null) {
+            throw new SerializationException("No Serializer found for " + args[i].getClass());
+         }
          serializer.serialize(args[i], bb);
       }
       byte[] requestParameters = bb.toArray();
@@ -107,6 +110,10 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply> {
       }
 
       Serializer serializer = serializers.get(method.getReturnType());
+      if (serializer == null) {
+         throw new SerializationException("No Serializer found for " + method.getReturnType());
+      }
+
       return serializer.deSerialize(method.getReturnType(), new RTPSByteBuffer(reply.reply.result));
    }
 

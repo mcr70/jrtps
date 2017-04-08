@@ -4,9 +4,11 @@ import java.io.IOException;
 
 import net.sf.jrtps.rpc.ServiceManager;
 
-public class MyServer implements SampleService {
+public class MyServer implements SampleService, ComplexService {
    public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
       ServiceManager mgr = new ServiceManager();
+      mgr.registerSerializer(Person.class, new PersonSerializer());
+      
       SampleService service = new MyServer(); 
       mgr.registerService(service);
       
@@ -19,5 +21,10 @@ public class MyServer implements SampleService {
       System.out.println("power2(" + value + ") was called");
       
       return value * value;
+   }
+
+   @Override
+   public void checkPerson(Person p) {
+      System.out.println("Checking person: " + p.name + ", " + p.address);
    }
 }

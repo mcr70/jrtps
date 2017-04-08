@@ -7,12 +7,21 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
  * 
  * @author mcr70
  */
-public interface Serializer {
+public interface Serializer<T> {
    /**
     * Serialize an Object into RTPSByteBuffer.
     * @param value Object to serialize
     * @param bb RTPSByteBuffer where Object is serialized
+    * @throws SerializationException When value cannot be serialized
     */
-   void serialize(Object value, RTPSByteBuffer bb) throws SerializationException;
-   Object deSerialize(Class<?> type, RTPSByteBuffer bb) throws SerializationException;
+   void serialize(T value, RTPSByteBuffer bb) throws SerializationException;
+   
+   /**
+    * DeSerializes an Object of given type from RTPSByteBuffer.
+    * @param type Type of the Object expected to be found from byte buffer
+    * @param bb byte buffer
+    * @return a deserialized Object
+    * @throws SerializationException If type cannot be deserialized to Object
+    */
+   T deSerialize(Class<T> type, RTPSByteBuffer bb) throws SerializationException;
 }
