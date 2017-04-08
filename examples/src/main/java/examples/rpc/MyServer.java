@@ -16,7 +16,7 @@ public class MyServer implements SampleService {
    
    @Override
    public int power2(int value) {
-      System.out.println("foo(" + value + ") was called");
+      System.out.println("power2(" + value + ") was called");
       
       return value * value;
    }
