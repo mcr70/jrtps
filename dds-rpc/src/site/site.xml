@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="DDS-RPC">
+	<body>		
+		<menu name="Development">
+            <item name="Examples" href="example.html" />
+			<item name="Javadocs" href="apidocs/index.html" />
+		</menu>
+	</body>
+</project>

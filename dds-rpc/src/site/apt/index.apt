@@ -1,0 +1,4 @@
+DDS RPC
+
+ DDS RPC module adds an implementation of DDS-RPC specification by Object Management Group
+ to jRTPS.
