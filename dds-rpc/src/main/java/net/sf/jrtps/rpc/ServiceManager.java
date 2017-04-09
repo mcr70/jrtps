@@ -86,9 +86,15 @@ public class ServiceManager {
     */
    private void initializeSerializers() {      
       Class<?>[] primitiveClasses = new Class[] {
-            int.class, Integer.class, short.class, Short.class, long.class, Long.class,
-            float.class, Float.class, double.class, Double.class, char.class, Character.class,
-            byte.class, Byte.class, boolean.class, Boolean.class, String.class
+            int.class, Integer.class, int[].class, Integer[].class,
+            short.class, Short.class, short[].class, Short[].class,
+            long.class, Long.class, long[].class, Long[].class,
+            float.class, Float.class, float[].class, Float[].class,
+            double.class, Double.class, double[].class, Double[].class,
+            char.class, Character.class, char[].class, Character[].class,
+            byte.class, Byte.class, byte[].class, Byte[].class,
+            boolean.class, Boolean.class, boolean[].class, Boolean[].class, 
+            String.class, String[].class
             };
       
       JavaPrimitiveSerializer js = new JavaPrimitiveSerializer();
