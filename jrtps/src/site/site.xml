@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="jRTPS">
+	<version position="none"/>
+	<body>		
+		<menu name="Development">
+            <item name="Quality of Service" href="qos.html" />
+            <item name="Compliance" href="compliance.html" />
+            <item name="Configuration" href="configuration.html" />
+            <item name="Extending jRTPS" href="extending.html" />
+            <item name="Security" href="security.html" />
+            <item name="Examples" href="examples.html" />
+			<item name="Javadocs" href="apidocs/index.html" />
+		</menu>
+	</body>
+</project>
