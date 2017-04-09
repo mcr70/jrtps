@@ -1,0 +1,5 @@
+jRTPS
+ 
+ This is the main package of jRTPS. It provides an implementation of RTPS protocol
+ and a simple DDS alike programming interface.
+ 
