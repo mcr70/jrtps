@@ -9,11 +9,11 @@
 	</parent>
 
 	<groupId>net.sf.jrtps</groupId>
-	<artifactId>jrtps</artifactId>
-	<version>1.4.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<artifactId>jrtps-parent</artifactId>
+	<version>1.5.0-SNAPSHOT</version>
+	<packaging>pom</packaging>
 
-	<name>jRTPS</name>
+	<name>jRTPS Parent</name>
 	<description>jRTPS - An implementation of RTPS protocol by OMG</description>
 
 	<properties>
@@ -21,6 +21,11 @@
 		<log4j-version>2.1</log4j-version>
 		<org.omg.dds.security.version>1.0-Beta1</org.omg.dds.security.version>
 	</properties>
+
+	<modules>
+		<module>jrtps</module>
+		<module>dds-rpc</module>
+	</modules>
 
 	<dependencies>
 		<dependency>
