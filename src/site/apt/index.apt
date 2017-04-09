@@ -26,6 +26,18 @@ Overview
  * {{{http://www.omg.org/spec/dds4ccm/}DDS4CCM}}. While jRTPS does not try
    to address most of this document, XML QoS definition looks interesting. 
 
+ * {{{http://www.omg.org/spec/DDS-RPC/}DDS-RPC}}. This document specifies remote
+   procedure calls using DDS and RTPS 
+
+
+* Getting started 
+ 
+ To get started, add jrtps as a dependency to your projects pom.xml.
+ {{{http://search.maven.org/#search|ga|1|g:net.sf.jrtps}maven.org}}
+ 
+ For publish and subscribe type of work, you need jrtps package and for 
+ Remote Procedure Calls(RPC), you need dds-rpc package.
+
 * ChangeLog
 
  Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}

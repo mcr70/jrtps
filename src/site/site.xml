@@ -1,29 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="jRTPS">
+	<version position="none"/>
 	<body>
         <head>
-            <meta name="keywords" content="dds, rtps, omg, Object Management Group" />
+            <meta name="keywords" content="dds, rtps, omg, Object Management Group, rpc" />
         </head>
 		
-        <links>
-			<item name="jRTPS@sf" href="https://sourceforge.net/projects/jrtps/files/" />
-		</links>
-
-		<menu name="Overview">
+		<menu name="Overview" inherit="top">
             <item name="Overview" href="index.html" />
-            <item name="Quality of Service" href="qos.html" />
-            <item name="Compliance" href="compliance.html" />
 		</menu>
 
-		<!-- <menu ref="reports"/> -->
-
-		<menu name="Development">
-            <item name="Getting started" href="usage.html" />
-            <item name="Examples" href="examples.html" />
-            <item name="Configuration" href="configuration.html" />
-            <item name="Extending jRTPS" href="extending.html" />
-            <item name="Security" href="security.html" />
-			<item name="javadoc" href="apidocs/index.html" />
+		<menu name="Modules" inherit="top">
+            <item name="jRTPS" href="jrtps/index.html" />
+            <item name="DDS-RPC" href="dds-rpc/index.html" />
 		</menu>
 	</body>
 </project>
