@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import net.sf.jrtps.rpc.ServiceManager;
 
-public class MyServer implements SampleService, ComplexService {
+public class MyServer implements SampleService, PersonService {
    public static void main(String[] args) throws InstantiationException, IllegalAccessException, IOException {
       ServiceManager mgr = new ServiceManager();
       mgr.registerSerializer(Person.class, new PersonSerializer());

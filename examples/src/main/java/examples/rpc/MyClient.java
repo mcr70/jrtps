@@ -19,7 +19,7 @@ public class MyClient {
       p.address = "Finland";
       
       mgr.registerSerializer(Person.class, new PersonSerializer());
-      ComplexService client2 = mgr.createClient(ComplexService.class);
+      PersonService client2 = mgr.createClient(PersonService.class);
       client2.checkPerson(p);
    }
 }

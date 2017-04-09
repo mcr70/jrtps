@@ -39,8 +39,29 @@ DDS RPC examples
 
 * Using a custom Serializer
  
- By default, only primitive Java types are handled by ServiceManager. To support other 
- types as well, a Serializer needs to be be registered to ServiceManager. 
+ By default, only primitive Java types and one-dimensional arrays of primitive types are 
+ handled by ServiceManager. To support other types as well, a Serializer needs to be be 
+ registered to ServiceManager. 
+
++---
+ mgr.registerSerializer(Person.class, new PersonSerializer());
++--- 
  
+ Following code snippet is an example of Serializer
  
- 
++---
+ public class PersonSerializer implements Serializer<Person> {
+   public void serialize(Person value, RTPSByteBuffer bb) throws SerializationException {
+      bb.write_string(value.name);
+      bb.write_string(value.address);
+   }
+
+   public Person deSerialize(Class<Person> type, RTPSByteBuffer bb) throws SerializationException {
+      Person p = new Person();
+      p.name = bb.read_string();
+      p.address = bb.read_string();
+      
+      return p;
+   }
+ }
++--- 
