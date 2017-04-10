@@ -117,7 +117,7 @@ public class ServiceManager {
    }
 
    /**
-    * Creates a new client for the given service.
+    * Creates a new client proxy for the given service.
     * @param service An interface extending net.sf.jrtps.rpc.Service
     * @param <T> Generic type for Service
     * @return A client proxy for service
