@@ -34,7 +34,6 @@ Overview
  
  To get started, add jrtps as a dependency to your projects pom.xml.
  {{{http://search.maven.org/#search|ga|1|g:net.sf.jrtps}maven.org}}
- 
  For publish and subscribe type of work, you need jrtps package and for 
  Remote Procedure Calls(RPC), you need dds-rpc package.
 
@@ -42,8 +41,8 @@ Overview
 
  Full ChangeLog can be seen in {{{http://sourceforge.net/p/jrtps/code/ci/default/tree/ChangeLog}here}}
 
- 1.4.0
- 
-    * Changed TransportProvider interfaces
+ 1.5.0
+   
+    * Added implementation of dds-rpc specification
     
-    * Minor fixes
+    * Turned into multimodule build

@@ -8,8 +8,12 @@ import net.sf.jrtps.message.DataEncapsulation;
 import net.sf.jrtps.transport.RTPSByteBuffer;
 
 class RequestMarshaller implements Marshaller<Request> {
-   private final int bufferSize = 1024; // TODO: configurable
+   private final int bufferSize;
    
+   public RequestMarshaller(int bufferSize) {
+      this.bufferSize = bufferSize;
+   }
+
    @Override
    public boolean hasKey() {
       return false;

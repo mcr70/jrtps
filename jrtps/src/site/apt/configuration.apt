@@ -42,11 +42,6 @@ udds.security.jks.ca = <NO_DEFAULT>
 udds.security.jks.principal = <NO_DEFAULT>
 udds.security.jks.principal.password = <NO_DEFAULT>
 
-# ---  RPC configuration  ------------------------------
-rpc.connection.timeout = 5000
-rpc.invocation.timeout = 5000
-rpc.buffer-size = 1024
-
 +---
  
 * RTPS specific configuration
@@ -173,13 +168,3 @@ rpc.buffer-size = 1024
   * <<{udds.security.jks.principal.password}>>
   Password of the private key of local principal. This is used to encrypt shared
   secret that is exchanged with remote participant during authentication.
-  
-  * <<{rpc.connection.timeout}>>
-  Timeout how long client waits for get matched with remote service
-  
-  * <<{rpc.invocation.timeout}>>
-  Timeout of method invocations used on client side.
-
-  * <<{rpc.buffer-size}>>
-  Buffer size of the service method's arguments and return value serialization
-  
