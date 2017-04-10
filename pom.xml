@@ -10,7 +10,7 @@
 
 	<groupId>net.sf.jrtps</groupId>
 	<artifactId>jrtps-parent</artifactId>
-	<version>1.5.0-SNAPSHOT</version>
+	<version>1.5.0</version>
 	<packaging>pom</packaging>
 
 	<name>jRTPS Parent</name>
@@ -227,7 +227,7 @@
 		<connection>scm:hg:http://hg.code.sf.net/p/jrtps/code</connection>
 		<developerConnection>scm:hg:https://hg.code.sf.net/p/jrtps/code</developerConnection>
 		<url>https://sourceforge.net/p/jrtps/code/ci/default/tree/</url>
-		<tag>jrtps-1.5.0</tag>
+		<tag>jrtps-1.5.0-1</tag>
 	</scm>
 
 	<developers>
