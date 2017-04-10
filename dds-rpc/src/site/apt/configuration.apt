@@ -1,0 +1,24 @@
+Configuration
+
+ dds-rpc module adds following configurations to jrtps.properties
+ 
++---
+
+# ---  RPC configuration  ------------------------------
+rpc.connection.timeout = 5000
+rpc.invocation.timeout = 5000
+rpc.buffer-size = 1024
+
++---
+   
+* rpc-dds configuration
+    
+  * <<{rpc.connection.timeout}>>
+  Timeout how long client waits for get matched with remote service
+  
+  * <<{rpc.invocation.timeout}>>
+  Timeout of method invocations used on client side.
+
+  * <<{rpc.buffer-size}>>
+  Buffer size of the service method's arguments and return value serialization
+  
