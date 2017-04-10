@@ -120,7 +120,7 @@ public class ServiceManager {
     * Creates a new client for the given service.
     * @param service An interface extending net.sf.jrtps.rpc.Service
     * @param <T> Generic type for Service
-    * @return A client side instance of service class
+    * @return A client proxy for service
     * @throws TimeoutException If there is a timeout connecting with service
     */
    public <T extends Service> T createClient(Class<T> service) throws TimeoutException {
