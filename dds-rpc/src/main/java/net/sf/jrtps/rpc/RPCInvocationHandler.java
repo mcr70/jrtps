@@ -91,11 +91,12 @@ class RPCInvocationHandler implements InvocationHandler, SampleListener<Reply> {
       exchangeMap.put(header.seqeunceNumber.getAsLong(), cdl); // Store cdl to exchange map
 
       boolean await = cdl.await(timeout, TimeUnit.MILLISECONDS);
-      Reply reply = (Reply) exchangeMap.remove(header.seqeunceNumber.getAsLong());
+      Object o = exchangeMap.remove(header.seqeunceNumber.getAsLong());
       if (!await) {
          throw new TimeoutException("Timeout waiting for service response");
       }
 
+      Reply reply = (Reply) o;
       switch(reply.header.remoteExceptionCode) {
       case ReplyHeader.REMOTE_EX_INVALID_ARGUMENT: throw new RemoteException("Invalid argument");
       case ReplyHeader.REMOTE_EX_OUT_OF_RESOURCES: throw new RemoteException("Out of resources");

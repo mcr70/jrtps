@@ -2,6 +2,7 @@
 <project name="DDS-RPC">
 	<body>		
 		<menu name="Development">
+            <item name="Configuration" href="configuration.html" />
             <item name="Examples" href="example.html" />
 			<item name="Javadocs" href="apidocs/index.html" />
 		</menu>

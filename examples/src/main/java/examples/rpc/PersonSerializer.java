@@ -6,9 +6,9 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 public class PersonSerializer implements Serializer<Person> {
    @Override
-   public void serialize(Person value, RTPSByteBuffer bb) throws SerializationException {
-      bb.write_string(value.name);
-      bb.write_string(value.address);
+   public void serialize(Person person, RTPSByteBuffer bb) throws SerializationException {
+      bb.write_string(person.name);
+      bb.write_string(person.address);
    }
 
    @Override

@@ -12,6 +12,7 @@ import java.util.concurrent.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import net.sf.jrtps.Configuration;
 import net.sf.jrtps.QualityOfService;
 import net.sf.jrtps.builtin.ParticipantData;
 import net.sf.jrtps.builtin.PublicationData;
@@ -27,6 +28,12 @@ import net.sf.jrtps.udds.DataWriter;
 import net.sf.jrtps.udds.EntityListener;
 import net.sf.jrtps.udds.Participant;
 
+/**
+ * ServiceManager is a starting point for RPC related work.
+ * It can be used to register services and create clients.
+ * 
+ * @author mcr70
+ */
 public class ServiceManager {
    private static final Logger logger = LoggerFactory.getLogger(ServiceManager.class);
 
@@ -44,17 +51,23 @@ public class ServiceManager {
    private final Participant participant;
    private final QualityOfService serviceQos = new QualityOfService();
    private final Set<String> discoveredRemoteTopics = new HashSet<>();
+
    /**
     * Creates a ServiceManager with default participant.
     */
    public ServiceManager() {
-      this(0, -1);
+      this(new Participant());
    }
 
-   public ServiceManager(int domainId, int participantId) {
-      this.participant = new Participant(domainId, participantId);
-      this.participant.setMarshaller(Request.class, new RequestMarshaller());
-      this.participant.setMarshaller(Reply.class, new ReplyMarshaller());
+   /**
+    * Create a ServiceManager with given Participant.
+    * @param participant a Participant
+    */
+   public ServiceManager(Participant participant) {
+      this.participant = participant;
+      Configuration cfg = participant.getConfiguration();
+      this.participant.setMarshaller(Request.class, new RequestMarshaller(cfg.getBufferSize()));
+      this.participant.setMarshaller(Reply.class, new ReplyMarshaller(cfg.getBufferSize()));
       
       participant.addEntityListener(new EntityListener() {
          @Override

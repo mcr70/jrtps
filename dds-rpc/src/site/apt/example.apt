@@ -51,9 +51,9 @@ DDS RPC examples
  
 +---
  public class PersonSerializer implements Serializer<Person> {
-   public void serialize(Person value, RTPSByteBuffer bb) throws SerializationException {
-      bb.write_string(value.name);
-      bb.write_string(value.address);
+   public void serialize(Person person, RTPSByteBuffer bb) throws SerializationException {
+      bb.write_string(person.name);
+      bb.write_string(person.address);
    }
 
    public Person deSerialize(Class<Person> type, RTPSByteBuffer bb) throws SerializationException {
