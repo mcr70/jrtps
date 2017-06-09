@@ -25,6 +25,7 @@
 	<modules>
 		<module>jrtps</module>
 		<module>dds-rpc</module>
+		<module>webdds</module>
 	</modules>
 
 	<dependencies>
