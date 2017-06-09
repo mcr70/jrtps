@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration strict="true">
+    <Appenders>
+        <Appender type="Console" name="STDOUT">
+            <Layout type="PatternLayout" pattern="%d{HH:mm:ss.SSS} %-5p %20.20c{10} %13.13t - %m%n" />
+        </Appender>
+    </Appenders>
+
+    <Loggers>
+        <Root level="warn">
+            <AppenderRef ref="STDOUT" />
+        </Root>
+
+        <Logger name="net.sf.jrtps.rpc" level="warn" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
+        <Logger name="com.sun.jersey" level="debug" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
+        <Logger name="org.glassfish.jersey" level="debug" additivity="false">
+            <AppenderRef ref="STDOUT" />
+        </Logger>
+    </Loggers>
+
+</Configuration>

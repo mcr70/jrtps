@@ -1,0 +1,10 @@
+The initial settings is adapted from https://www.mkyong.com/webservices/jax-rs/jersey-hello-world-example/
+
+To run, type
+  mvn tomcat7:run
+
+And then in browser type
+  http://localhost:8080/webdds/rest/hello/mika
+  http://localhost:8080/webdds/rest/dds/foo
+
+

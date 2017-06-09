@@ -15,11 +15,13 @@
 	<description>An implementation of WebDDS</description>
 
 	<dependencies>
+		
 		<dependency>
-			<groupId>javax.ws.rs</groupId>
-			<artifactId>javax.ws.rs-api</artifactId>
-			<version>2.0</version>
-		</dependency>
+			<groupId>com.sun.jersey</groupId>
+			<artifactId>jersey-server</artifactId>
+			<version>1.8</version>
+		</dependency>	
+
 	</dependencies>
 
 	<build>
@@ -28,22 +30,7 @@
 				<groupId>org.apache.tomcat.maven</groupId>
 				<artifactId>tomcat7-maven-plugin</artifactId>
 				<version>2.2</version>
-<!-- 
-				<configuration>
-					<path>/dds/rest1/</path>
-				</configuration>
- -->
-			</plugin>
-			
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-war-plugin</artifactId>
-				<version>2.4</version>
-				<configuration> <!-- src/main/webapp -->
-					<warSourceDirectory>src/main/java</warSourceDirectory>
-					<warName>helloworld</warName>
-					<failOnMissingWebXml>false</failOnMissingWebXml>
-				</configuration>
+				<!--  <configuration> <path>/dds/rest1/</path> </configuration> -->
 			</plugin>
 		</plugins>
 	</build>
