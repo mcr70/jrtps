@@ -1,5 +1,4 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<parent>
@@ -11,7 +10,7 @@
 
 	<groupId>net.sf.jrtps</groupId>
 	<artifactId>jrtps-parent</artifactId>
-	<version>1.5.1-SNAPSHOT</version>
+	<version>1.5.1</version>
 	<packaging>pom</packaging>
 
 	<name>jRTPS Parent</name>
@@ -231,7 +230,7 @@
 		<connection>scm:hg:http://hg.code.sf.net/p/jrtps/code</connection>
 		<developerConnection>scm:hg:https://hg.code.sf.net/p/jrtps/code</developerConnection>
 		<url>https://sourceforge.net/p/jrtps/code/ci/default/tree/</url>
-		<tag>jrtps-1.5.0</tag>
+		<tag>jrtps-1.5.1</tag>
 	</scm>
 
 	<developers>
