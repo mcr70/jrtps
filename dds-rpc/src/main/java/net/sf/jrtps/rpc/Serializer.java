@@ -4,9 +4,6 @@ import net.sf.jrtps.transport.RTPSByteBuffer;
 
 /**
  * Serializer is used to serialize argument and return types to/from RTPSByteBuffer.
- * By default only Java primitive types
- *  
- * @author mcr70
  */
 public interface Serializer<T> {
    /**
