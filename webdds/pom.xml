@@ -1,0 +1,51 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>net.sf.jrtps</groupId>
+		<artifactId>jrtps-parent</artifactId>
+		<version>1.5.2-SNAPSHOT</version>
+	</parent>
+
+	<artifactId>webdds</artifactId>
+	<packaging>war</packaging>
+
+	<name>WebDDS</name>
+	<description>An implementation of WebDDS</description>
+
+	<dependencies>
+		<dependency>
+			<groupId>javax.ws.rs</groupId>
+			<artifactId>javax.ws.rs-api</artifactId>
+			<version>2.0</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+<!-- 
+				<configuration>
+					<path>/dds/rest1/</path>
+				</configuration>
+ -->
+			</plugin>
+			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.4</version>
+				<configuration> <!-- src/main/webapp -->
+					<warSourceDirectory>src/main/java</warSourceDirectory>
+					<warName>helloworld</warName>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>
