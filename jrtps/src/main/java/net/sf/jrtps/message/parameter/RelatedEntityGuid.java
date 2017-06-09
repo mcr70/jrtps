@@ -17,6 +17,7 @@ public class RelatedEntityGuid extends Parameter {
 
     /**
      * Gets the guid of related entity
+     * @return Guid
      */
     public Guid getGuid() {
 	return guid;
