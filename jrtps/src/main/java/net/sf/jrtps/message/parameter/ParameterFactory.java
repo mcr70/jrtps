@@ -222,8 +222,18 @@ public class ParameterFactory {
         case 0x0076:
             param = new BaseTypeName();
             break;
+// From DDS-RPC
+        case 0x0080:
+            param = new ServiceInstanceName();
+            break;
+        case 0x0081:
+            param = new RelatedEntityGuid();
+            break;
+        case 0x0082:
+            param = new TopicAliases();
+            break;
             
-            // Table 9.17: deprecated ids
+// Table 9.17: deprecated ids
         case 0x0003:
             param = new DeprecatedParameter.Persistence();
             break;
